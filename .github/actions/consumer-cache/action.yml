@@ -1,0 +1,29 @@
+name: Cache consumer dependencies
+description: Cache dependencies without caching application or packaged library source
+inputs:
+  platform:
+    description: Runner image label
+    required: true
+  elixir:
+    description: Exact Elixir version
+    required: true
+  otp:
+    description: Exact OTP version
+    required: true
+  profile:
+    description: order-desk or the isolated backend name
+    required: true
+  mode:
+    description: full, ci, or smoke
+    default: full
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: echo "PARLORA_CONSUMER_CACHE=$RUNNER_TEMP/consumer-cache" >> "$GITHUB_ENV"
+    - uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/consumer-cache
+        key: consumer-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ inputs.profile }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-${{ inputs.mode }}-${{ hashFiles('mix.lock', 'examples/order_desk/mix.lock', 'validation/optional-backends/consumer/mix.exs', 'examples/order_desk/mix.exs', 'scripts/support/consumer_cache.sh') }}
+        restore-keys: |
+          consumer-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ inputs.profile }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-${{ inputs.mode }}-

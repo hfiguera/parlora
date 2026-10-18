@@ -2,6 +2,7 @@
 # Verify a packaged consumer with no framework, or exactly one selected framework.
 set -eu
 cd "$(dirname "$0")/.."
+. scripts/support/consumer_cache.sh
 if [ "$#" -gt 2 ]; then
   printf 'Usage: %s [new-directory] [none|jido|sagents|legion]\n' "$0" >&2
   exit 1
@@ -40,13 +41,21 @@ case "$PARLORA_OPTIONAL_BACKEND" in
     ;;
 esac
 MIX_ENV=dev mix hex.build --unpack --output "$parlora_consumer/vendor/parlora"
+parlora_restore_consumer_cache
 cd "$parlora_consumer"
-for parlora_environment in dev test prod; do
+case "${PARLORA_CONSUMER_MODE:-full}" in
+  full) parlora_environments='dev test prod' ;;
+  ci) parlora_environments='test prod' ;;
+  smoke) parlora_environments=prod ;;
+esac
+parlora_formatted=0
+for parlora_environment in $parlora_environments; do
   export MIX_ENV="$parlora_environment"
   mix deps.get --check-locked
   mix compile --warnings-as-errors
-  if [ "${PARLORA_CHECK_FORMAT:-1}" = 1 ]; then
+  if [ "${PARLORA_CHECK_FORMAT:-1}" = 1 ] && [ "$parlora_formatted" = 0 ]; then
     mix format --check-formatted
+    parlora_formatted=1
   fi
   if [ "$parlora_environment" = test ]; then
     mix test --warnings-as-errors
@@ -59,4 +68,5 @@ bin/optional_backend_consumer eval '
   false = Code.ensure_loaded?(Mix)
   OptionalBackendConsumer.smoke()
 '
+parlora_save_consumer_cache
 printf '\nOptional backend consumer (%s) ready: %s\n' "$PARLORA_OPTIONAL_BACKEND" "$parlora_consumer"

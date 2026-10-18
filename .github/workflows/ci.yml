@@ -1,52 +1,58 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the full compatibility and release checks
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  MIX_ENV: test
+  PARLORA_FULL_CI: ${{ github.event_name == 'schedule' || inputs.full == true || startsWith(github.ref, 'refs/tags/') }}
 jobs:
   checks:
     name: ${{ matrix.os }} / Elixir ${{ matrix.beam.elixir }} / OTP ${{ matrix.beam.otp }}
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-24.04
             beam: {elixir: '1.18.5-otp-27', otp: '27.3.4.15', quality: false}
-            integration: true
           - os: ubuntu-24.04
             beam: {elixir: '1.19.5-otp-28', otp: '28.5', quality: false}
-            integration: true
           - os: ubuntu-24.04
             beam: {elixir: '1.20.4-otp-29', otp: '29.1.2', quality: true}
-            integration: true
           - os: macos-15
             beam: {elixir: '1.20.4-otp-29', otp: '29.1.2', quality: false}
-            integration: false
     runs-on: ${{ matrix.os }}
     env:
-      MIX_ENV: test
       PARLORA_CHECK_FORMAT: ${{ matrix.beam.quality && '1' || '0' }}
+      PARLORA_INTEGRATION: ${{ matrix.os == 'ubuntu-24.04' && (matrix.beam.quality || github.event_name == 'schedule' || inputs.full == true || startsWith(github.ref, 'refs/tags/')) }}
     steps:
       - uses: actions/checkout@v4
-      - uses: erlef/setup-beam@v1
+      - uses: ./.github/actions/setup
         with:
-          otp-version: ${{ matrix.beam.otp }}
-          elixir-version: ${{ matrix.beam.elixir }}
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: '1.92.0'
-          components: rustfmt, clippy
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libpulse-dev libssl-dev pkg-config
-      - if: runner.os == 'macOS'
+          platform: ${{ matrix.os }}
+          elixir: ${{ matrix.beam.elixir }}
+          otp: ${{ matrix.beam.otp }}
+          quality: ${{ matrix.beam.quality }}
+      - name: Test development scripts
+        if: matrix.beam.quality
         run: |
-          brew install pkgconf srtp
-          echo 'ERL_FLAGS=+sbwt none +sbwtdcpu none +sbwtdio none' >> "$GITHUB_ENV"
-      - run: |
-          scripts/install_opus.sh "$RUNNER_TEMP/parlora-opus"
-          echo "PKG_CONFIG_PATH=$RUNNER_TEMP/parlora-opus/lib/pkgconfig" >> "$GITHUB_ENV"
-          echo "OPUS_LIB_DIR=$RUNNER_TEMP/parlora-opus/lib" >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/parlora-opus/lib" >> "$GITHUB_ENV"
-      - run: mix deps.get --check-locked
-      - run: python3 -m unittest discover -s examples/order_desk/test -p '*_test.py'
-      # The pinned compiler owns formatting and static-analysis results.
+          python3 -m unittest discover -s scripts/tests -p '*_test.py'
+          python3 -m unittest discover -s examples/order_desk/test -p '*_test.py'
       - name: Compile, test, and run static analysis
         if: matrix.beam.quality
         run: mix ci
@@ -62,75 +68,59 @@ jobs:
       - name: Run tests
         if: ${{ !matrix.beam.quality }}
         run: mix test --warnings-as-errors --raise
-      - name: Check native bindings
-        if: ${{ !matrix.beam.quality }}
+      # Rust checks run once on Linux, through mix ci, and once for macOS.
+      - name: Check macOS native bindings
+        if: runner.os == 'macOS'
         run: mix parlora.native
-      - if: matrix.integration
+      - name: Run stability checks
+        if: env.PARLORA_INTEGRATION == 'true'
         run: mix test test/stability_test.exs --include stability --seed 42
-      - if: matrix.integration
-        run: |
-          for backend in none jido sagents legion; do
-            scripts/optional_backend_consumer.sh "$RUNNER_TEMP/optional-backend-$backend" "$backend"
-          done
-      - run: scripts/consumer.sh "$RUNNER_TEMP/order_desk"
+      - uses: ./.github/actions/consumer-cache
+        if: env.PARLORA_INTEGRATION == 'true' || runner.os == 'macOS'
+        with:
+          platform: ${{ matrix.os }}
+          elixir: ${{ matrix.beam.elixir }}
+          otp: ${{ matrix.beam.otp }}
+          profile: order-desk
+          mode: ${{ runner.os == 'macOS' && env.PARLORA_FULL_CI != 'true' && 'smoke' || 'full' }}
+      - name: Check packaged OrderDesk
+        if: env.PARLORA_INTEGRATION == 'true' || runner.os == 'macOS'
+        run: scripts/consumer.sh "$RUNNER_TEMP/order_desk"
+        env:
+          PARLORA_CONSUMER_MODE: ${{ runner.os == 'macOS' && env.PARLORA_FULL_CI != 'true' && 'smoke' || 'full' }}
       - uses: actions/setup-node@v4
-        if: matrix.integration
+        if: env.PARLORA_INTEGRATION == 'true'
         with:
           node-version: '22'
+          cache: npm
+          cache-dependency-path: validation/browser/package-lock.json
       - run: npm ci
-        if: matrix.integration
+        if: env.PARLORA_INTEGRATION == 'true'
         working-directory: validation/browser
-      - run: node --test validation/browser/*_test.cjs
-        if: matrix.integration
+      - name: Test JavaScript helpers and evaluators
+        if: matrix.beam.quality
+        run: node --test validation/browser/*_test.cjs validation/task-pilot/*_test.cjs validation/release/*_test.cjs validation/acceptance/*_test.cjs
       - run: npx playwright install --with-deps chromium
-        if: matrix.integration
+        if: env.PARLORA_INTEGRATION == 'true'
         working-directory: validation/browser
-      - run: node validation/browser/caption_layout.cjs "$RUNNER_TEMP/caption-layout"
-        if: matrix.integration
+      - name: Check caption rendering
+        run: node validation/browser/caption_layout.cjs "$RUNNER_TEMP/caption-layout"
+        if: env.PARLORA_INTEGRATION == 'true'
         env:
           BROWSER_CHANNEL: chromium
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() && matrix.integration }}
-        with:
-          name: caption-layout-${{ runner.os }}-${{ matrix.beam.elixir }}
-          path: ${{ runner.temp }}/caption-layout
-          if-no-files-found: ignore
-      - run: scripts/audio_benchmark.sh "$RUNNER_TEMP/audio-gates"
-        if: matrix.integration
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() && matrix.integration }}
-        with:
-          name: audio-gates-${{ runner.os }}-${{ matrix.beam.elixir }}
-          path: ${{ runner.temp }}/audio-gates
-      - run: scripts/release_check.sh "$RUNNER_TEMP/order_desk" --output "$RUNNER_TEMP/release-check"
-        if: matrix.integration
+      - name: Check audio playback
+        run: scripts/audio_benchmark.sh "$RUNNER_TEMP/audio-gates"
+        if: env.PARLORA_INTEGRATION == 'true'
+      - name: Run full offline release checks
+        run: scripts/release_check.sh "$RUNNER_TEMP/order_desk" --output "$RUNNER_TEMP/release-check"
+        if: env.PARLORA_INTEGRATION == 'true' && env.PARLORA_FULL_CI == 'true'
         env:
           BROWSER_CHANNEL: chromium
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() && matrix.integration }}
-        with:
-          name: release-check-${{ runner.os }}-${{ matrix.beam.elixir }}
-          path: |
-            ${{ runner.temp }}/release-check/report.json
-            ${{ runner.temp }}/release-check/report.md
-            ${{ runner.temp }}/release-check/plan.json
-            ${{ runner.temp }}/release-check/*.log
-            ${{ runner.temp }}/release-check/acceptance/*.json
-            ${{ runner.temp }}/release-check/acceptance/*.log
-            ${{ runner.temp }}/release-check/recovery/report.json
-            ${{ runner.temp }}/release-check/recovery/*.png
-            ${{ runner.temp }}/release-check/recovery/server.log
-      - run: scripts/concurrency_check.sh "$RUNNER_TEMP/order_desk" "$RUNNER_TEMP/concurrency"
-        if: matrix.integration
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() && matrix.integration }}
-        with:
-          name: concurrency-${{ runner.os }}-${{ matrix.beam.elixir }}
-          path: |
-            ${{ runner.temp }}/concurrency/report.json
-            ${{ runner.temp }}/concurrency/*-analysis.json
-            ${{ runner.temp }}/concurrency/server.log
-      - if: matrix.integration
+      - name: Check concurrent calls
+        run: scripts/concurrency_check.sh "$RUNNER_TEMP/order_desk" "$RUNNER_TEMP/concurrency"
+        if: env.PARLORA_INTEGRATION == 'true'
+      - name: Check browser client and OrderDesk UI
+        if: env.PARLORA_INTEGRATION == 'true'
         run: |
           (cd "$RUNNER_TEMP/order_desk" && PARLORA_BROWSER_OFFLINE=1 scripts/browser.sh) > "$RUNNER_TEMP/browser-server.log" 2>&1 &
           parlora_browser_server=$!
@@ -138,3 +128,66 @@ jobs:
           node validation/browser/smoke.cjs
           PARLORA_BROWSER_OFFLINE=1 node validation/browser/guide_client.cjs
           node validation/browser/order_ui.cjs
+      - name: Save reports
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && env.PARLORA_INTEGRATION == 'true' }}
+        with:
+          name: reports-${{ runner.os }}-${{ matrix.beam.elixir }}
+          retention-days: 7
+          if-no-files-found: ignore
+          path: |
+            ${{ runner.temp }}/caption-layout
+            ${{ runner.temp }}/audio-gates/*.json
+            ${{ runner.temp }}/audio-gates/*.log
+            ${{ runner.temp }}/audio-gates/*/analysis.json
+            ${{ runner.temp }}/audio-gates/*/analysis.log
+            ${{ runner.temp }}/audio-gates/*/browser.json
+            ${{ runner.temp }}/concurrency/*.json
+            ${{ runner.temp }}/concurrency/*.log
+            ${{ runner.temp }}/browser-server.log
+            ${{ runner.temp }}/release-check/*.json
+            ${{ runner.temp }}/release-check/*.md
+            ${{ runner.temp }}/release-check/*.log
+            ${{ runner.temp }}/release-check/acceptance/*.json
+            ${{ runner.temp }}/release-check/acceptance/*.log
+            ${{ runner.temp }}/release-check/recovery/*.json
+            ${{ runner.temp }}/release-check/recovery/*.png
+            ${{ runner.temp }}/release-check/recovery/*.log
+      - name: Save failed audio recordings
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() && env.PARLORA_INTEGRATION == 'true' }}
+        with:
+          name: failed-audio-${{ matrix.beam.elixir }}
+          retention-days: 7
+          if-no-files-found: ignore
+          path: ${{ runner.temp }}/audio-gates
+  optional-backends:
+    name: Isolated ${{ matrix.backend }} / Elixir ${{ matrix.beam.elixir }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        backend: [none, jido, sagents, legion]
+        beam: ${{ fromJSON((github.event_name == 'schedule' || inputs.full == true || startsWith(github.ref, 'refs/tags/')) && '[{"elixir":"1.20.4-otp-29","otp":"29.1.2"},{"elixir":"1.18.5-otp-27","otp":"27.3.4.15"},{"elixir":"1.19.5-otp-28","otp":"28.5"}]' || '[{"elixir":"1.20.4-otp-29","otp":"29.1.2"}]') }}
+    env:
+      PARLORA_CHECK_FORMAT: '0'
+      PARLORA_CONSUMER_MODE: ${{ (github.event_name == 'schedule' || inputs.full == true || startsWith(github.ref, 'refs/tags/')) && 'full' || 'ci' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          platform: ubuntu-24.04
+          elixir: ${{ matrix.beam.elixir }}
+          otp: ${{ matrix.beam.otp }}
+          library: 'false'
+      - uses: ./.github/actions/consumer-cache
+        with:
+          platform: ubuntu-24.04
+          elixir: ${{ matrix.beam.elixir }}
+          otp: ${{ matrix.beam.otp }}
+          profile: optional-${{ matrix.backend }}
+          mode: ${{ env.PARLORA_CONSUMER_MODE }}
+      - name: Check isolated backend package
+        run: scripts/optional_backend_consumer.sh "$RUNNER_TEMP/optional-backend-${{ matrix.backend }}" '${{ matrix.backend }}'

@@ -2,6 +2,7 @@
 # Materialize and validate a standalone app against the built source package.
 set -eu
 cd "$(dirname "$0")/.."
+. scripts/support/consumer_cache.sh
 if [ "$(uname -s)" = Darwin ]; then
   export ERL_FLAGS="${ERL_FLAGS:-+sbwt none +sbwtdcpu none +sbwtdio none}"
   if [ "$(uname -m)" = arm64 ]; then
@@ -29,15 +30,18 @@ rm -f "$parlora_sources"
 trap - EXIT HUP INT TERM
 mkdir -p "$parlora_consumer/vendor"
 MIX_ENV=dev mix hex.build --unpack --output "$parlora_consumer/vendor/parlora"
+parlora_restore_consumer_cache
 cd "$parlora_consumer"
-export MIX_ENV=test
-mix deps.get --check-locked
-mix compile --warnings-as-errors
-# Formatting is canonical on the pinned development Elixir, not older compilers.
-if [ "${PARLORA_CHECK_FORMAT:-1}" = 1 ]; then
-  mix format --check-formatted
+if [ "${PARLORA_CONSUMER_MODE:-full}" != smoke ]; then
+  export MIX_ENV=test
+  mix deps.get --check-locked
+  mix compile --warnings-as-errors
+  # Formatting is canonical on the pinned development Elixir, not older compilers.
+  if [ "${PARLORA_CHECK_FORMAT:-1}" = 1 ]; then
+    mix format --check-formatted
+  fi
+  mix test --warnings-as-errors
 fi
-mix test --warnings-as-errors
 export MIX_ENV=prod
 mix deps.get --check-locked
 mix compile --warnings-as-errors
@@ -57,4 +61,5 @@ OPENAI_API_KEY=consumer-config-check bin/order_desk eval '
   Application.put_env(:order_desk, :backend, :jido)
   OrderDesk.Smoke.run()
 '
+parlora_save_consumer_cache
 printf '\nStandalone consumer ready: %s\n' "$parlora_consumer"

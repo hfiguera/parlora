@@ -1,0 +1,108 @@
+name: Set up Parlora
+description: Install the pinned toolchains and restore dependency caches
+inputs:
+  platform:
+    description: Runner image label
+    required: true
+  elixir:
+    description: Exact Elixir version
+    required: true
+  otp:
+    description: Exact OTP version
+    required: true
+  library:
+    description: Restore the library dependency build
+    default: 'true'
+  quality:
+    description: Restore Dialyzer PLTs
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{ inputs.otp }}
+        elixir-version: ${{ inputs.elixir }}
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: '1.92.0'
+        components: rustfmt, clippy
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y libasound2-dev libpulse-dev libssl-dev pkg-config rsync
+    - if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install pkgconf srtp
+        echo 'ERL_FLAGS=+sbwt none +sbwtdcpu none +sbwtdio none' >> "$GITHUB_ENV"
+    - id: paths
+      shell: bash
+      run: |
+        echo "mix-home=$(elixir -e 'IO.puts(Mix.Utils.mix_home())')" >> "$GITHUB_OUTPUT"
+        echo "hex-home=${HEX_HOME:-$HOME/.hex}" >> "$GITHUB_OUTPUT"
+        echo "CARGO_TARGET_DIR=$RUNNER_TEMP/parlora-cargo-target" >> "$GITHUB_ENV"
+        python3 - <<'PY'
+        import hashlib, os, subprocess
+        commands = [['cc', '--version'], ['pkg-config', '--modversion', 'libsrtp2'],
+                    ['pkg-config', '--modversion', 'openssl']]
+        if os.uname().sysname == 'Darwin':
+            commands.append(['xcrun', '--show-sdk-version'])
+        versions = [subprocess.run(c, capture_output=True).stdout for c in commands]
+        fingerprint = hashlib.sha256(b'\n'.join(versions)).hexdigest()
+        with open(os.environ['GITHUB_ENV'], 'a') as env:
+            env.write('PARLORA_NATIVE_ABI=' + fingerprint + '\n')
+        PY
+    - uses: actions/cache@v4
+      id: opus
+      with:
+        path: ${{ runner.temp }}/parlora-opus
+        key: opus-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('scripts/install_opus.sh') }}
+    - if: steps.opus.outputs.cache-hit != 'true'
+      shell: bash
+      run: scripts/install_opus.sh "$RUNNER_TEMP/parlora-opus"
+    - shell: bash
+      run: |
+        export PKG_CONFIG_PATH="$RUNNER_TEMP/parlora-opus/lib/pkgconfig"
+        test "$(pkg-config --modversion opus)" = 1.6.1
+        echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+        echo "OPUS_LIB_DIR=$RUNNER_TEMP/parlora-opus/lib" >> "$GITHUB_ENV"
+        echo "LD_LIBRARY_PATH=$RUNNER_TEMP/parlora-opus/lib" >> "$GITHUB_ENV"
+    - name: Cache downloads and Cargo builds
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.paths.outputs.hex-home }}/packages
+          ~/.cache/rebar3
+          ~/.cargo/registry/index
+          ~/.cargo/registry/cache
+          ~/.cargo/git/db
+          ${{ runner.temp }}/parlora-cargo-target
+        key: native-v1-${{ inputs.library }}-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'scripts/install_opus.sh', 'native/**/Cargo.lock', 'native/**/Cargo.toml') }}-${{ hashFiles('mix.lock', 'examples/order_desk/mix.lock') }}
+        restore-keys: |
+          native-v1-${{ inputs.library }}-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'scripts/install_opus.sh', 'native/**/Cargo.lock', 'native/**/Cargo.toml') }}-
+    - name: Cache library dependencies
+      if: inputs.library == 'true'
+      uses: actions/cache@v4
+      with:
+        path: |
+          deps
+          _build/*/lib
+        key: beam-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-${{ hashFiles('mix.lock', 'mix.exs') }}
+        restore-keys: |
+          beam-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-
+    - name: Compile the current library source on every run
+      if: inputs.library == 'true'
+      shell: bash
+      run: rm -rf _build/*/lib/parlora
+    - name: Cache Dialyzer PLTs
+      if: inputs.quality == 'true'
+      uses: actions/cache@v4
+      with:
+        path: |
+          _build/test/*.plt*
+          ${{ steps.paths.outputs.mix-home }}/dialyxir_*.plt*
+        key: plt-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ hashFiles('mix.lock', 'mix.exs') }}
+        restore-keys: |
+          plt-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-
+    - shell: bash
+      run: mix deps.get --check-locked

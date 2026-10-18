@@ -1,11 +1,15 @@
 # Optional backend dependency isolation
 
 `scripts/optional_backend_consumer.sh /new/directory` builds the source package
-and validates a fresh host with no Jido, Sagents or Legion dependency. CI runs
-all four profiles on macOS and Linux for the **1.18/27, 1.19/28 and 1.20/29**
-[compatibility pairs](../../docs/beam-compatibility.md).
+and validates a fresh host with no Jido, Sagents or Legion dependency. Routine CI
+runs all four profiles in parallel on Linux with **1.20/29**, checking `test` and
+`prod`. Full CI runs also check `dev` and cover all three Linux
+[compatibility pairs](../../docs/beam-compatibility.md): **1.18/27, 1.19/28 and
+1.20/29**. See [the CI and caching policy](../../CONTRIBUTING.md#compatibility-and-packaged-consumers)
+for nightly, tagged and manual runs. macOS separately checks native bindings and
+the packaged OrderDesk release.
 
-The fixture compiles with warnings as errors in dev, test and prod; runs the
+By default, the fixture compiles with warnings as errors in dev, test and prod; runs the
 framework-independent provider/session contract tests; checks that unavailable
 built-in adapters return `:unsupported`; builds a release; and runs a custom
 backend session from that release without Mix. Package selection is checked
