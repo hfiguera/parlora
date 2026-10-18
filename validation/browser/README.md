@@ -7,7 +7,10 @@ network access. See the [diagnostic investigation](../../docs/browser-audio-diag
 
 Run `npm ci` here. For automated CI, `npx playwright install --with-deps chromium`
 installs the test browser; on the development Mac use `BROWSER_CHANNEL=chrome`
-to exercise installed Chrome. Playwright is validation tooling, not a Parlora or
+to exercise installed Chrome. Microphone checks default to full Chromium's
+headless mode (`channel: 'chromium'`). On Linux, the pinned default headless shell
+returns `NotSupportedError` for microphone capture, including when permission is
+denied. Playwright is validation tooling, not a Parlora or
 consumer runtime dependency.
 
 For caption grouping regressions, run from the repository root:

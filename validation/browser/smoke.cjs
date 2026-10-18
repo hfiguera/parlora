@@ -12,7 +12,7 @@ async function until(check, timeout = 10000) {
 async function sessions() { return (await (await fetch(`${url}/health`)).json()).active_sessions; }
 (async () => {
   await until(async () => { try { await sessions(); return true; } catch (_) { return false; } }, 60000);
-  const browser = await chromium.launch({channel: process.env.BROWSER_CHANNEL || undefined,
+  const browser = await chromium.launch({channel: process.env.BROWSER_CHANNEL || 'chromium',
     args: ['--use-fake-device-for-media-stream'], headless: true});
   const result = {cycles: [], permission_denial: false, origin_rejection: false};
   try {
@@ -22,7 +22,8 @@ async function sessions() { return (await (await fetch(`${url}/health`)).json())
     const cdp = await denied.newCDPSession(deniedPage);
     await cdp.send('Browser.setPermission', {permission: {name: 'microphone'}, setting: 'denied', origin: url, browserContextId: (await cdp.send('Target.getTargetInfo')).targetInfo.browserContextId});
     await deniedPage.goto(url); await deniedPage.click('#connect');
-    await deniedPage.waitForFunction(() => document.querySelector('#connection').textContent.includes('permission denied'));
+    await deniedPage.waitForFunction(() => !document.querySelector('#connect').disabled);
+    assert.match(await deniedPage.locator('#connection').textContent(), /permission denied/);
     assert.equal(await sessions(), 0); result.permission_denial = true; await denied.close();
     const response = await fetch(`${url}/voice`, {headers: {Origin: 'http://untrusted.invalid'}});
     assert.equal(response.status, 403); result.origin_rejection = true;

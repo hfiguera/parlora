@@ -8,7 +8,7 @@ const url = process.env.BROWSER_URL || 'http://localhost:4002';
 const host = process.env.TURN_SSH_HOST || 'linux';
 const control = action => execFile('ssh', [host, `systemctl --user ${action} parlora-turn.service`], {timeout: 10000});
 (async () => {
-  const browser = await chromium.launch({channel: process.env.BROWSER_CHANNEL || undefined,
+  const browser = await chromium.launch({channel: process.env.BROWSER_CHANNEL || 'chromium',
     args: ['--use-fake-device-for-media-stream'], headless: true});
   try {
     const context = await browser.newContext({permissions: ['microphone']});

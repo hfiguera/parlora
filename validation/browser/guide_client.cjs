@@ -20,7 +20,7 @@ async function until(check, timeout = 10000) {
 async function sessions() { return (await (await fetch(`${url}/health`)).json()).active_sessions; }
 (async () => {
   await until(async () => { try { return await sessions() === 0; } catch (_) { return false; } }, 60000);
-  const browser = await chromium.launch({channel: process.env.BROWSER_CHANNEL || undefined,
+  const browser = await chromium.launch({channel: process.env.BROWSER_CHANNEL || 'chromium',
     headless: true, args: ['--use-fake-device-for-media-stream']});
   const report = {client: 'exact docs/browser-channel.md HTML', cycles: []};
   try {

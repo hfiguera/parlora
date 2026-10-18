@@ -15,9 +15,16 @@ defmodule Parlora.LocalAudioTest do
       limits: %Limits{}
     }
 
-    {:ok, pid} = LocalAudio.start_link(init, device: :synthetic)
+    # ExUnit waits for supervised children before running on_exit callbacks.
+    # Direct links instead shut down asynchronously with the test process.
+    pid =
+      start_supervised!(%{
+        id: {LocalAudio, make_ref()},
+        start: {LocalAudio, :start_link, [init, [device: :synthetic]]},
+        restart: :temporary
+      })
+
     assert_receive {:parlora_event, %Event{type: :ready}}, init.limits.startup_timeout_ms
-    on_exit(fn -> if Process.alive?(pid), do: GenServer.stop(pid) end)
     await(fn -> :sys.get_state(pid).stats.rendered > 0 end)
     pid
   end
