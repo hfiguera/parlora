@@ -1,6 +1,6 @@
 defmodule Parlora.ClarificationCoordinationTest do
   use ExUnit.Case, async: true
-  alias Parlora.{ContextDecision, ContextSnapshot, Limits}
+  alias Parlora.{ContextDecision, ContextSnapshot, Event, Limits}
   alias Parlora.Session.{Commands, ContextWait, Decisions, State}
   alias Parlora.TestSupport.CommandOwner
 
@@ -42,16 +42,34 @@ defmodule Parlora.ClarificationCoordinationTest do
 
   test "speaking defers without submission or a fictitious clarification boundary" do
     {:ok, state} = Decisions.apply_batch(%{state() | provider_speech: :speaking}, [question()])
-    refute_receive {:update, _}, 20
+    assert state.startup.commands == Commands.new()
+    refute_received {:update, _}
     refute Map.has_key?(state.context.pending_delegations["call"], :clarification)
     assert MapSet.size(state.clarifications) == 0
-    assert_receive {:context_wait, key, token}, 750
+
+    key = {:delegation, "call"}
+
+    assert_received {:parlora_event,
+                     %Event{
+                       type: :context_wait_started,
+                       payload: %{target: ^key, recheck_after_ms: 500}
+                     }}
+
+    assert %{^key => {token, timer}} = state.context_waits
+    refute state.context.pending_delegations["call"].context_wait.expired?
+
+    # Exercise expiry with the scheduled token, independent of timer delivery
+    # latency on a busy runner. Expiry must also cancel the real timer.
     {state, trigger} = ContextWait.expire(state, key, token)
     assert trigger.kind == :context_wait_expired
+    assert trigger.delegation_id == "call"
+    assert state.context.pending_delegations["call"].context_wait.expired?
+    assert Process.read_timer(timer) == false
 
     # Re-evaluation can discard an obsolete question; no command was queued.
     {:ok, state} = Decisions.apply_batch(%{state | provider_speech: :idle}, [])
-    refute_receive {:update, _}, 20
+    assert state.startup.commands == Commands.new()
+    refute_received {:update, _}
     assert state.context_waits == %{}
   end
 
