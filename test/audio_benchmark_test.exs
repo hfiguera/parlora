@@ -1,5 +1,6 @@
 defmodule Parlora.AudioBenchmarkTest do
-  use ExUnit.Case, async: true
+  # Replay hundreds of seconds of audio outside tests with real-time deadlines.
+  use ExUnit.Case, async: false
   alias Parlora.TestSupport.AudioBenchmark.{Replay, Scenarios}
 
   test "declared arrival envelope preserves PCM without adding gaps" do

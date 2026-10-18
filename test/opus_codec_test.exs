@@ -1,5 +1,7 @@
 defmodule Parlora.OpusCodecTest do
-  use ExUnit.Case, async: true
+  # Codec matrices, fuzzing, and resource churn share the dirty CPU schedulers.
+  # Keep that load out of unrelated startup, mark, and teardown deadlines.
+  use ExUnit.Case, async: false
   alias Parlora.Native.Opus, as: OpusProbe
 
   defp codec(kind, rate \\ 24_000, channels \\ 1) do

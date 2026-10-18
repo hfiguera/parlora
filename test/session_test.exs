@@ -21,7 +21,16 @@ defmodule Parlora.SessionTest do
       event_sink: self()
     ]
 
-    {:ok, pid} = Parlora.start_session(Keyword.merge(defaults, options))
+    # Most cases observe close within one second. Keep the fixture's deadline
+    # inside that window while retaining explicit per-case shutdown limits.
+    options =
+      defaults
+      |> Keyword.merge(options)
+      |> Keyword.update(:limits, [shutdown_timeout_ms: 100], fn limits ->
+        Keyword.put_new(limits, :shutdown_timeout_ms, 100)
+      end)
+
+    {:ok, pid} = Parlora.start_session(options)
     on_exit(fn -> if Process.alive?(pid), do: Parlora.close(pid) end)
     pid
   end
@@ -1301,7 +1310,7 @@ defmodule Parlora.SessionTest do
 
     fresh = %{old | stream_id: "fresh", data: :binary.copy(<<2, 0>>, 240)}
     :ok = MemoryAudio.audio(channel, fresh)
-    Process.sleep(30)
+    eventually(fn -> :sys.get_state(provider).outbound.bytes == byte_size(fresh.data) end, 200)
     assert [^fresh] = MemoryAudio.drain(provider)
     assert Process.alive?(pid)
   end

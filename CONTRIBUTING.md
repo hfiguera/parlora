@@ -18,8 +18,10 @@ code, strict Credo/ExSlop, duplicate code, Credence, and Dialyzer. Hardware and 
 provider checks are separate. macOS launchers set scheduler flags for the local
 runtime; do not copy those flags into Linux configuration.
 
-Codec throughput tests and tests that measure shutdown deadlines run outside the
-async suite. Keep their timing assertions separate from unrelated CPU load.
+Audio replays, codec stress tests and tests that measure shutdown deadlines run
+outside the async suite. Keep timing assertions separate from unrelated CPU load.
+Wait for native callbacks and adapter polls before measuring their progress;
+resource readiness alone does not establish that a callback has already run.
 Session process exit and adapter cleanup are separate observations; tests that
 need complete teardown must monitor the owned adapter processes too.
 

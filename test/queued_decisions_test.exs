@@ -1,5 +1,6 @@
 defmodule Parlora.QueuedDecisionsTest do
   use ExUnit.Case, async: true
+  @startup_timeout 2_000
   alias Parlora.{ContextDecision, Event}
   alias Parlora.Session.Uncertainty
   alias Parlora.TestSupport.{ControlledPolicy, FakeBackend, MemoryAudio, MemoryChannel}
@@ -343,11 +344,11 @@ defmodule Parlora.QueuedDecisionsTest do
         backend: {FakeBackend, observer: self()},
         context_policy: {ControlledPolicy, observer: self()},
         event_sink: self(),
-        limits: [startup_timeout_ms: 2_000, shutdown_timeout_ms: 100]
+        limits: [startup_timeout_ms: @startup_timeout, shutdown_timeout_ms: 100]
       )
 
     on_exit(fn -> if Process.alive?(session), do: Process.exit(session, :kill) end)
-    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, @startup_timeout
     state = :sys.get_state(session)
     {session, elem(state.adapters.provider, 1), elem(state.adapters.backend, 1)}
   end

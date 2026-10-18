@@ -42,6 +42,9 @@ defmodule Parlora.TwilioSocketTest do
                       capabilities: Parlora.Providers.OpenAI.Protocol.capabilities()},
                    backend: {FakeBackend, observer: observer},
                    context_policy: {OrderPolicy, []},
+                   # These cases observe teardown within two seconds. Give the
+                   # fixture a shutdown deadline inside that observation window.
+                   limits: [shutdown_timeout_ms: 100],
                    event_sink: self()
                  )
 

@@ -1,5 +1,6 @@
 defmodule Parlora.LocalAudioTest do
-  use ExUnit.Case, async: true
+  # These cases observe native callbacks and their real-time acknowledgments.
+  use ExUnit.Case, async: false
   alias Parlora.{AdapterInit, AudioFormat, AudioFrame, Event, ID, Limits}
   alias Parlora.Channels.LocalAudio
   alias Parlora.Native.{Device, Resampler}
@@ -17,6 +18,7 @@ defmodule Parlora.LocalAudioTest do
     {:ok, pid} = LocalAudio.start_link(init, device: :synthetic)
     assert_receive {:parlora_event, %Event{type: :ready}}, init.limits.startup_timeout_ms
     on_exit(fn -> if Process.alive?(pid), do: GenServer.stop(pid) end)
+    await(fn -> :sys.get_state(pid).stats.rendered > 0 end)
     pid
   end
 
@@ -25,7 +27,7 @@ defmodule Parlora.LocalAudioTest do
     assert {:ok, caps} = LocalAudio.capabilities(pid)
     assert caps.playback_evidence == [:queue, :handoff]
     assert {:error, %{code: :invalid_argument}} = LocalAudio.read_audio(pid, 1)
-    Process.sleep(30)
+    await(fn -> :sys.get_state(pid).inbound.bytes > 0 end)
     assert {:ok, [frame | _rest]} = LocalAudio.read_audio(pid, 960)
     assert frame.format == %AudioFormat{}
     assert frame.duration_us == 10_000
@@ -52,7 +54,7 @@ defmodule Parlora.LocalAudioTest do
     assert {:error, %{code: :invalid_argument}} = LocalAudio.write_audio(pid, frame)
     assert :ok = LocalAudio.control(pid, "clear", {:clear_output, 1})
     assert :ok = LocalAudio.control(pid, "suppress", {:suppress_output, true})
-    Process.sleep(30)
+    await(fn -> :sys.get_state(pid).inbound.bytes > 0 end)
     assert {:ok, [_frame | _rest]} = LocalAudio.read_audio(pid, 960)
     assert :ok = LocalAudio.control(pid, "resume", {:suppress_output, false})
     assert :ok = LocalAudio.write_audio(pid, %{frame | playback_epoch: 1})
@@ -117,9 +119,10 @@ defmodule Parlora.LocalAudioTest do
       end)
 
     assert_receive {:resource, resource}
+    monitor = Process.monitor(owner)
     send(owner, :stop)
-    Process.sleep(40)
-    assert Device.stats(resource).stopped
+    assert_receive {:DOWN, ^monitor, :process, ^owner, :normal}
+    await(fn -> Device.stats(resource).stopped end)
     before = Device.stats(resource).captured
     Process.sleep(20)
     assert Device.stats(resource).captured == before
@@ -165,16 +168,27 @@ defmodule Parlora.LocalAudioTest do
     handler = make_ref()
     :ok = :telemetry.attach(handler, [:parlora, :audio, :poll], &__MODULE__.poll/4, {self(), pid})
     on_exit(fn -> :telemetry.detach(handler) end)
+    await(fn -> :sys.get_state(pid).stats.rendered > 0 end)
+    device = :sys.get_state(pid).device
     :ok = :sys.suspend(pid)
-    Process.sleep(150)
-    :ok = :sys.resume(pid)
+
+    resumed_at =
+      try do
+        before = Device.stats(device).underrun
+        Process.sleep(150)
+        await(fn -> Device.stats(device).underrun > before end)
+        System.monotonic_time(:microsecond)
+      after
+        :ok = :sys.resume(pid)
+      end
 
     assert_receive {:parlora_event,
                     %Event{
                       type: :audio_discontinuity,
+                      observed_at_us: observed,
                       payload: %{cause: :device_output_underrun, poll_gap_us: gap} = payload
                     }}
-                   when gap >= 150_000,
+                   when gap >= 150_000 and observed >= resumed_at,
                    1_000
 
     assert payload.frames > 0
@@ -185,5 +199,21 @@ defmodule Parlora.LocalAudioTest do
     assert timing.capture_us >= timing.last_capture_us
     assert timing.playback_us >= timing.last_playback_us
     assert timing.observe_us >= timing.last_observe_us
+  end
+
+  # Native callbacks and the adapter poll have independent clocks. Wait for the
+  # observed condition rather than assuming either ran during a short sleep.
+  defp await(condition),
+    do: await(condition, System.monotonic_time(:millisecond) + 1_000)
+
+  defp await(condition, deadline) do
+    if System.monotonic_time(:millisecond) >= deadline do
+      assert condition.()
+    else
+      unless condition.() do
+        Process.sleep(5)
+        await(condition, deadline)
+      end
+    end
   end
 end

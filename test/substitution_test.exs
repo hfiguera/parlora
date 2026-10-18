@@ -80,6 +80,7 @@ defmodule Parlora.SubstitutionTest do
           provider: {ContractProvider, observer: self()},
           backend: {@backend, backend_options},
           context_policy: {OrderPolicy, []},
+          limits: [shutdown_timeout_ms: 100],
           event_sink: self()
         )
 
@@ -176,11 +177,21 @@ defmodule Parlora.SubstitutionTest do
       assert_receive {:context, %{content: "Order 124 arrives tomorrow", task_revision: 2}}
       assert_receive {:parlora_event, %Event{type: :stale_result}}
       refute_receive {:context, %{task_revision: 1}}, 30
-      Process.sleep(40)
-      assert MemoryAudio.drain(provider) != []
+      assert await_audio(provider, System.monotonic_time(:millisecond) + 1_000) != []
       assert :ok = Parlora.control(pid, {:clear_output, :next})
       assert :ok = Parlora.close(pid, :finish)
       assert_receive {:parlora_event, %Event{source: :session, type: :closed}}
+    end
+  end
+
+  defp await_audio(provider, deadline) do
+    frames = MemoryAudio.drain(provider)
+
+    if frames == [] and System.monotonic_time(:millisecond) < deadline do
+      Process.sleep(5)
+      await_audio(provider, deadline)
+    else
+      frames
     end
   end
 

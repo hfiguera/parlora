@@ -25,14 +25,14 @@ const expected = ['AssistantPlease confirm the draft for order 124.', "Assistant
     for (const [name, width] of [['desktop', 1280], ['mobile', 375]]) {
       await page.setViewportSize({width, height: 900});
       await page.setContent(html);
-      await page.addScriptTag({content: `(() => { let captions = []; const el = id => document.getElementById(id); ${callback}
+      await page.addScriptTag({content: `(() => { let captions = [], captionEpoch = 0; const el = id => document.getElementById(id); ${callback}
         caption({speaker:'assistant', delta:'Please confirm the draft for order 1', start_ms:1000, end_ms:2500});
         caption({speaker:'assistant', delta:'24.', start_ms:2500, end_ms:3000});
         caption({speaker:'assistant', delta:'Saying yes won’t save it. Just to note, order 124 has saved the instruction: left in my front door.', start_ms:4800, end_ms:8000}); })();`});
+      assert.deepEqual(errors, [], 'Caption callback raised a browser error');
       const rows = await page.locator('#transcript p').allTextContents();
       assert.deepEqual(rows, expected);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), width);
-      assert.deepEqual(errors, []);
       const screenshot = `${name}.png`;
       await page.locator('.conversation-panel').screenshot({path: path.join(output, screenshot)});
       report.viewports.push({name, width, rows, screenshot, status:'passed'});

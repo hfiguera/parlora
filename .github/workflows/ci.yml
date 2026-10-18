@@ -47,16 +47,24 @@ jobs:
       - run: mix deps.get --check-locked
       - run: python3 -m unittest discover -s examples/order_desk/test -p '*_test.py'
       # The pinned compiler owns formatting and static-analysis results.
-      - if: matrix.beam.quality
+      - name: Compile, test, and run static analysis
+        if: matrix.beam.quality
         run: mix ci
-      - if: matrix.beam.quality
+      - name: Build documentation
+        if: matrix.beam.quality
         run: MIX_ENV=dev mix docs --warnings-as-errors
-      - if: ${{ !matrix.beam.quality }}
-        run: |
-          mix compile --warnings-as-errors
-          mix xref graph --format cycles --label compile-connected --fail-above 0
-          mix test --warnings-as-errors --raise
-          mix parlora.native
+      - name: Compile
+        if: ${{ !matrix.beam.quality }}
+        run: mix compile --warnings-as-errors
+      - name: Check compile cycles
+        if: ${{ !matrix.beam.quality }}
+        run: mix xref graph --format cycles --label compile-connected --fail-above 0
+      - name: Run tests
+        if: ${{ !matrix.beam.quality }}
+        run: mix test --warnings-as-errors --raise
+      - name: Check native bindings
+        if: ${{ !matrix.beam.quality }}
+        run: mix parlora.native
       - if: matrix.integration
         run: mix test test/stability_test.exs --include stability --seed 42
       - if: matrix.integration
@@ -81,6 +89,12 @@ jobs:
         if: matrix.integration
         env:
           BROWSER_CHANNEL: chromium
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && matrix.integration }}
+        with:
+          name: caption-layout-${{ runner.os }}-${{ matrix.beam.elixir }}
+          path: ${{ runner.temp }}/caption-layout
+          if-no-files-found: ignore
       - run: scripts/audio_benchmark.sh "$RUNNER_TEMP/audio-gates"
         if: matrix.integration
       - uses: actions/upload-artifact@v4
