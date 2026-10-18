@@ -1,6 +1,7 @@
 defmodule Parlora.GrokAdapterTest do
   use ExUnit.Case, async: true
   alias Parlora.{AdapterInit, AudioFormat, AudioFrame, ContextUpdate, Event, Limits}
+  alias Parlora.Provider.WebSocketConnection
   alias Parlora.Providers.Grok
   alias Parlora.Providers.Grok.Protocol
   alias Parlora.TestSupport.TwilioPeer
@@ -326,9 +327,9 @@ defmodule Parlora.GrokAdapterTest do
     assert state.status == :ready
   end
 
-  test "generated audio overflow, stale reads, and startup failures close explicitly", context do
+  test "fragmented generated audio overflow and startup failures close explicitly", context do
     state = ready(context)
-    overflow = deliver(context, state, audio("r", :binary.copy(<<0>>, 33_602)))
+    overflow = deliver(context, state, audio("r", :binary.copy(<<0>>, 33_602)), 1)
     assert overflow.status == :closed
     assert_receive {:parlora_event, %Event{type: :failed}}
     assert_receive {:parlora_event, %Event{type: :closed, payload: %{finalized?: false}}}
@@ -450,11 +451,22 @@ defmodule Parlora.GrokAdapterTest do
       provider_generation: 0
     }
 
-  defp deliver(context, state, event) do
+  defp deliver(context, state, event, first_read_bytes \\ 0) do
     send(context.server, {:grok_event, event})
+    receive_event(state, System.monotonic_time(:millisecond) + 2_000, first_read_bytes)
+  end
+
+  # TCP reads can split a WebSocket message. Observe the complete frame before
+  # checking its effects, while passing every chunk through the real adapter.
+  defp receive_event(state, deadline, read_bytes) do
     socket = Mint.HTTP.get_socket(state.socket.conn)
-    {:ok, bytes} = :gen_tcp.recv(socket, 0, 2_000)
-    {:noreply, next} = Grok.handle_info({:tcp, socket, bytes}, state)
-    next
+    remaining = deadline - System.monotonic_time(:millisecond)
+    assert remaining > 0, "Grok fixture did not receive a complete WebSocket frame"
+    assert {:ok, bytes} = :gen_tcp.recv(socket, read_bytes, remaining)
+    message = {:tcp, socket, bytes}
+    {:ok, _socket, frames} = WebSocketConnection.receive(state.socket, message)
+    {:noreply, next} = Grok.handle_info(message, state)
+
+    if frames == [], do: receive_event(next, deadline, 0), else: next
   end
 end

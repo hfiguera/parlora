@@ -52,9 +52,14 @@ def analyze(directory):
     silent = [i for i in range(first, last + 1) if levels[i] < 100]
     unit = reference_rate // 1000
     millisecond_levels = [rms(received[i:i + unit]) for i in range(0, len(received), unit)]
-    active_ms = [i for i, value in enumerate(millisecond_levels) if value >= 100]
-    # Apply the same 10 ms edge guard at millisecond precision, independently
-    # of where the first/last active sample lands in a coarse 10 ms block.
+    # This fixture has a continuous, constant-amplitude chirp. Locate its edges
+    # at -20 dB relative to the reference RMS so faint Opus ringing cannot extend
+    # the signal into the codec tail. Keep the 100 RMS gap threshold and the
+    # 10 ms edge guard; full-level audio on either side still exposes 1 ms gaps.
+    edge_threshold = max(100, rms(reference) * .1)
+    active_ms = [i for i, value in enumerate(millisecond_levels) if value >= edge_threshold]
+    if not active_ms:
+        raise ValueError('No decoded signal at reference level')
     interior = range(active_ms[0] + 10, active_ms[-1] - 9)
     silent_ms = [i for i in interior if millisecond_levels[i] < 100]
     longest = current = 0

@@ -38,6 +38,22 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result['checks']['no_internal_silence'])
         self.assertTrue(result['checks']['duration_accounting_40ms'])
 
+    def test_quiet_interval_in_decaying_codec_tail_is_not_an_internal_gap(self):
+        tail = [round(1200 * math.exp(-n / (24 * 7)) * math.sin(2 * math.pi * 900 * n / 24000))
+                for n in range(24 * 35)]
+        tail[24 * 4:24 * 5] = [0] * 24
+        result = self.fixture(lambda x:x + tail)
+        self.assertTrue(result['checks']['no_internal_silence'])
+        self.assertTrue(result['checks']['duration_accounting_40ms'])
+
+    def test_one_ms_gap_between_full_level_audio_still_fails(self):
+        result = self.fixture(lambda x:x[:24000] + [0]*24 + x[24024:])
+        self.assertFalse(result['checks']['no_internal_silence'])
+
+    def test_one_ms_gap_near_end_of_full_level_audio_still_fails(self):
+        result = self.fixture(lambda x:x[:-720] + [0]*24 + x[-696:])
+        self.assertFalse(result['checks']['no_internal_silence'])
+
     def test_internal_gap_fails(self):
         result = self.fixture(lambda x:x[:24000] + [0]*960 + x[24960:])
         self.assertFalse(result['checks']['no_internal_silence'])
