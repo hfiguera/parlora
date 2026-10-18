@@ -1,5 +1,9 @@
 defmodule Parlora.SessionShutdownTest do
-  use ExUnit.Case, async: true
+  # These tests measure real shutdown deadlines. Keep their short bounds, but
+  # do not race unrelated codec load and replay work in the async suite.
+  use ExUnit.Case, async: false
+
+  @lifecycle_timeout 5_000
   alias Parlora.{Event, SessionSupervisor}
   alias Parlora.TestSupport.{FakeBackend, MemoryAudio, OrderPolicy}
 
@@ -210,6 +214,34 @@ defmodule Parlora.SessionShutdownTest do
     assert_down(refs)
   end
 
+  test "session exit is independent of an adapter whose cleanup has not been scheduled" do
+    {pid, state} = boot([])
+    refs = owned_monitors(pid, state)
+    session_ref = Process.monitor(pid)
+    provider = elem(state.adapters.provider, 1)
+    owner = state.startup.owners.provider.owner
+    watcher = state.startup.owners.provider.watcher
+
+    for process <- [owner, watcher], do: :erlang.suspend_process(process)
+
+    try do
+      assert :ok = Parlora.close(pid)
+      assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 700
+      assert_receive {:DOWN, ^session_ref, :process, ^pid, _reason}
+      assert Process.alive?(provider)
+    after
+      for process <- [owner, watcher] do
+        try do
+          :erlang.resume_process(process)
+        rescue
+          ArgumentError -> :ok
+        end
+      end
+    end
+
+    assert_down(refs)
+  end
+
   test "close exceptions remain private and cannot prevent other adapters from closing" do
     for mode <- [:raise, :throw, :exit] do
       {pid, state} = boot(backend: mode)
@@ -299,7 +331,7 @@ defmodule Parlora.SessionShutdownTest do
       )
 
     on_exit(fn -> if Process.alive?(pid), do: Process.exit(pid, :kill) end)
-    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 1_000
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, @lifecycle_timeout
     {pid, :sys.get_state(pid)}
   end
 
@@ -315,6 +347,8 @@ defmodule Parlora.SessionShutdownTest do
   end
 
   defp assert_down(refs) do
-    Enum.each(refs, fn ref -> assert_receive {:DOWN, ^ref, :process, _pid, _reason}, 1_000 end)
+    Enum.each(refs, fn ref ->
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}, @lifecycle_timeout
+    end)
   end
 end

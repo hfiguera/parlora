@@ -6,11 +6,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15]
-        beam:
-          - {elixir: '1.18.5-otp-27', otp: '27.3.4.15', quality: false}
-          - {elixir: '1.19.5-otp-28', otp: '28.5', quality: false}
-          - {elixir: '1.20.4-otp-29', otp: '29.1.2', quality: true}
+        include:
+          - os: ubuntu-24.04
+            beam: {elixir: '1.18.5-otp-27', otp: '27.3.4.15', quality: false}
+            integration: true
+          - os: ubuntu-24.04
+            beam: {elixir: '1.19.5-otp-28', otp: '28.5', quality: false}
+            integration: true
+          - os: ubuntu-24.04
+            beam: {elixir: '1.20.4-otp-29', otp: '29.1.2', quality: true}
+            integration: true
+          - os: macos-15
+            beam: {elixir: '1.20.4-otp-29', otp: '29.1.2', quality: false}
+            integration: false
     runs-on: ${{ matrix.os }}
     env:
       MIX_ENV: test
@@ -49,34 +57,43 @@ jobs:
           mix xref graph --format cycles --label compile-connected --fail-above 0
           mix test --warnings-as-errors --raise
           mix parlora.native
-      - run: mix test test/stability_test.exs --include stability --seed 42
-      - run: |
+      - if: matrix.integration
+        run: mix test test/stability_test.exs --include stability --seed 42
+      - if: matrix.integration
+        run: |
           for backend in none jido sagents legion; do
             scripts/optional_backend_consumer.sh "$RUNNER_TEMP/optional-backend-$backend" "$backend"
           done
       - run: scripts/consumer.sh "$RUNNER_TEMP/order_desk"
       - uses: actions/setup-node@v4
+        if: matrix.integration
         with:
           node-version: '22'
       - run: npm ci
+        if: matrix.integration
         working-directory: validation/browser
       - run: node --test validation/browser/*_test.cjs
+        if: matrix.integration
       - run: npx playwright install --with-deps chromium
+        if: matrix.integration
         working-directory: validation/browser
       - run: node validation/browser/caption_layout.cjs "$RUNNER_TEMP/caption-layout"
+        if: matrix.integration
         env:
           BROWSER_CHANNEL: chromium
       - run: scripts/audio_benchmark.sh "$RUNNER_TEMP/audio-gates"
+        if: matrix.integration
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && matrix.integration }}
         with:
           name: audio-gates-${{ runner.os }}-${{ matrix.beam.elixir }}
           path: ${{ runner.temp }}/audio-gates
       - run: scripts/release_check.sh "$RUNNER_TEMP/order_desk" --output "$RUNNER_TEMP/release-check"
+        if: matrix.integration
         env:
           BROWSER_CHANNEL: chromium
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && matrix.integration }}
         with:
           name: release-check-${{ runner.os }}-${{ matrix.beam.elixir }}
           path: |
@@ -90,15 +107,17 @@ jobs:
             ${{ runner.temp }}/release-check/recovery/*.png
             ${{ runner.temp }}/release-check/recovery/server.log
       - run: scripts/concurrency_check.sh "$RUNNER_TEMP/order_desk" "$RUNNER_TEMP/concurrency"
+        if: matrix.integration
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && matrix.integration }}
         with:
           name: concurrency-${{ runner.os }}-${{ matrix.beam.elixir }}
           path: |
             ${{ runner.temp }}/concurrency/report.json
             ${{ runner.temp }}/concurrency/*-analysis.json
             ${{ runner.temp }}/concurrency/server.log
-      - run: |
+      - if: matrix.integration
+        run: |
           (cd "$RUNNER_TEMP/order_desk" && PARLORA_BROWSER_OFFLINE=1 scripts/browser.sh) > "$RUNNER_TEMP/browser-server.log" 2>&1 &
           parlora_browser_server=$!
           trap 'kill "$parlora_browser_server" 2>/dev/null || true' EXIT

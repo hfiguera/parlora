@@ -18,13 +18,19 @@ code, strict Credo/ExSlop, duplicate code, Credence, and Dialyzer. Hardware and 
 provider checks are separate. macOS launchers set scheduler flags for the local
 runtime; do not copy those flags into Linux configuration.
 
+Codec throughput tests and tests that measure shutdown deadlines run outside the
+async suite. Keep their timing assertions separate from unrelated CPU load.
+Session process exit and adapter cleanup are separate observations; tests that
+need complete teardown must monitor the owned adapter processes too.
+
 ## Compatibility and packaged consumers
 
 The workflow in `.github/workflows/ci.yml` runs Elixir/OTP 1.18/27, 1.19/28 and
-1.20/29 on Linux and macOS. Formatting and static analysis use the development
-pair. Older consumer lanes set `PARLORA_CHECK_FORMAT=0` to skip their formatter,
-while retaining compilation, tests and release checks. Keep artifacts and PLTs
-separate between runtimes.
+1.20/29 on Linux, including the browser, audio, release and concurrency checks.
+One macOS job uses 1.20/29 to check compilation, unit tests, native bindings and
+the packaged OrderDesk consumer. Formatting, documentation and static analysis
+run on the Linux development pair. Other jobs set `PARLORA_CHECK_FORMAT=0` to
+skip their consumer formatter. Keep artifacts and PLTs separate between runtimes.
 
 ```sh
 scripts/consumer.sh /absolute/path/to/new/order_desk

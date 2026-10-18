@@ -38,9 +38,7 @@ defmodule Parlora.FirstSessionGuideTest do
 
         :ok = Parlora.close(session, :finish)
         assert :ok = Task.await(runner, 2_000)
-        refute Process.alive?(session)
-        refute Process.alive?(channel)
-        refute Process.alive?(provider)
+        await_stopped([session, channel, provider])
         refute Process.whereis(FirstVoice.Jido)
       end)
 
@@ -50,11 +48,11 @@ defmodule Parlora.FirstSessionGuideTest do
 
   test "the demo duration closes the session and releases its Jido supervisor" do
     capture_io(fn ->
-      {runner, session, _channel, _provider} = boot()
+      {runner, session, channel, provider} = boot()
       assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
       send(runner.pid, {:stop_demo, session})
       assert :ok = Task.await(runner, 2_000)
-      refute Process.alive?(session)
+      await_stopped([session, channel, provider])
       refute Process.whereis(FirstVoice.Jido)
     end)
   end
@@ -65,9 +63,7 @@ defmodule Parlora.FirstSessionGuideTest do
         capabilities = %{ContractProvider.profile(%Parlora.AudioFormat{}) | full_duplex?: false}
         {runner, session, channel, provider} = boot(capabilities: capabilities)
         assert :ok = Task.await(runner, 2_000)
-        refute Process.alive?(session)
-        refute Process.alive?(channel)
-        refute Process.alive?(provider)
+        await_stopped([session, channel, provider])
         refute Process.whereis(FirstVoice.Jido)
       end)
 
@@ -100,6 +96,13 @@ defmodule Parlora.FirstSessionGuideTest do
     send(channel, :ready)
     send(provider, :ready)
     {runner, session, channel, provider}
+  end
+
+  # The session exits before its supervisor and independent adapter watchers
+  # finish teardown. Observe each owned adapter instead of racing its cleanup.
+  defp await_stopped(pids) do
+    refs = Enum.map(pids, &Process.monitor/1)
+    for ref <- refs, do: assert_receive({:DOWN, ^ref, :process, _pid, _reason}, 5_000)
   end
 
   defp request(provider, id) do

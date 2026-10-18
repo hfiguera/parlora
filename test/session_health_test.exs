@@ -1,5 +1,9 @@
 defmodule Parlora.SessionHealthTest do
   use ExUnit.Case, async: true
+
+  # Observe asynchronous startup/teardown with CI scheduling headroom. The actual
+  # session deadlines below stay short and are checked independently.
+  @lifecycle_timeout 5_000
   alias Parlora.{AudioFrame, ContextUpdate, Error, Event}
   alias Parlora.TestSupport.{FakeBackend, MemoryAudio, MemoryChannel, MemoryProvider, OrderPolicy}
 
@@ -19,10 +23,10 @@ defmodule Parlora.SessionHealthTest do
       )
 
     on_exit(fn -> if Process.alive?(pid), do: Parlora.close(pid) end)
-    assert_receive {:adapter, :channel, channel}
-    assert_receive {:adapter, :provider, provider}
-    assert_receive {:adapter, :backend, backend}
-    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 1_000
+    assert_receive {:adapter, :channel, channel}, @lifecycle_timeout
+    assert_receive {:adapter, :provider, provider}, @lifecycle_timeout
+    assert_receive {:adapter, :backend, backend}, @lifecycle_timeout
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, @lifecycle_timeout
     {pid, channel, provider, backend}
   end
 

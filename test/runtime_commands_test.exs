@@ -1,5 +1,9 @@
 defmodule Parlora.RuntimeCommandsTest do
   use ExUnit.Case, async: true
+
+  # Observe asynchronous startup/teardown with CI scheduling headroom. The actual
+  # session deadlines below stay short and are checked independently.
+  @lifecycle_timeout 5_000
   alias Parlora.{ContextUpdate, Event}
   alias Parlora.Session.Uncertainty
   alias Parlora.TestSupport.{FakeBackend, MemoryAudio, MemoryChannel, OrderPolicy}
@@ -476,7 +480,7 @@ defmodule Parlora.RuntimeCommandsTest do
       )
 
     on_exit(fn -> if Process.alive?(pid), do: Process.exit(pid, :kill) end)
-    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 1_000
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, @lifecycle_timeout
     {pid, :sys.get_state(pid)}
   end
 
@@ -488,7 +492,7 @@ defmodule Parlora.RuntimeCommandsTest do
 
     for pid <- pids do
       ref = Process.monitor(pid)
-      assert_receive {:DOWN, ^ref, :process, ^pid, _reason}, 1_000
+      assert_receive {:DOWN, ^ref, :process, ^pid, _reason}, @lifecycle_timeout
     end
   end
 
