@@ -1,0 +1,283 @@
+{
+  "evidence_kind": "real_telnyx_network_with_synthetic_twilio_sdk_caller",
+  "human_handset_verified": false,
+  "subjective_audio_quality_verified": false,
+  "runs": {
+    "smoke-observer-failure": {
+      "report": "smoke-observer-failure/caller.json",
+      "sessions_observed": 0,
+      "sessions_closed": 0,
+      "calls_terminal": true,
+      "workers": 0,
+      "queued": 0,
+      "unconfirmed_calls": 0,
+      "audio_peaks": {},
+      "discontinuities": [],
+      "failures": [],
+      "cleanup": {
+        "caller_legs": [
+          {
+            "status": "completed",
+            "duration": "24"
+          },
+          {
+            "status": "completed",
+            "duration": "24"
+          }
+        ],
+        "routing": "restored_and_verified",
+        "temporary_caller_application": "deleted"
+      }
+    },
+    "smoke-pass": {
+      "report": "smoke-pass/caller.json",
+      "sessions_observed": 1,
+      "sessions_closed": 1,
+      "calls_terminal": true,
+      "workers": 0,
+      "queued": 0,
+      "unconfirmed_calls": 0,
+      "audio_peaks": {
+        "queued_bytes": 240,
+        "inflight_bytes": 1920,
+        "ack_latency_us": 232081,
+        "queue_age_us": 32816
+      },
+      "discontinuities": [
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        }
+      ],
+      "failures": [],
+      "cleanup": {
+        "caller_legs": [
+          {
+            "status": "completed",
+            "duration": "24"
+          },
+          {
+            "status": "completed",
+            "duration": "23"
+          }
+        ],
+        "routing": "restored_and_verified",
+        "temporary_caller_application": "deleted"
+      }
+    },
+    "suite-readiness-failure": {
+      "report": "suite-readiness-failure/suite.json",
+      "sessions_observed": 1,
+      "sessions_closed": 0,
+      "calls_terminal": true,
+      "workers": 1,
+      "queued": 0,
+      "unconfirmed_calls": 1,
+      "audio_peaks": {},
+      "discontinuities": [],
+      "failures": [],
+      "cleanup": {
+        "caller_legs": [
+          {
+            "status": "completed",
+            "duration": "2"
+          },
+          {
+            "status": "completed",
+            "duration": "1"
+          }
+        ],
+        "routing": "restored_and_verified",
+        "temporary_caller_application": "deleted"
+      }
+    },
+    "suite-pass": {
+      "report": "suite-pass/suite.json",
+      "sessions_observed": 7,
+      "sessions_closed": 7,
+      "calls_terminal": true,
+      "workers": 0,
+      "queued": 0,
+      "unconfirmed_calls": 0,
+      "audio_peaks": {
+        "queued_bytes": 240,
+        "inflight_bytes": 2080,
+        "ack_latency_us": 259323,
+        "queue_age_us": 28227
+      },
+      "discontinuities": [
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        }
+      ],
+      "failures": [],
+      "cleanup": {
+        "caller_legs": [
+          {
+            "status": "completed",
+            "duration": "17"
+          },
+          {
+            "status": "completed",
+            "duration": "12"
+          },
+          {
+            "status": "completed",
+            "duration": "24"
+          },
+          {
+            "status": "completed",
+            "duration": "26"
+          },
+          {
+            "status": "completed",
+            "duration": "24"
+          },
+          {
+            "status": "completed",
+            "duration": "20"
+          },
+          {
+            "status": "completed",
+            "duration": "29"
+          },
+          {
+            "status": "completed",
+            "duration": "16"
+          },
+          {
+            "status": "completed",
+            "duration": "12"
+          },
+          {
+            "status": "completed",
+            "duration": "24"
+          },
+          {
+            "status": "completed",
+            "duration": "25"
+          },
+          {
+            "status": "completed",
+            "duration": "23"
+          },
+          {
+            "status": "completed",
+            "duration": "20"
+          },
+          {
+            "status": "completed",
+            "duration": "28"
+          }
+        ],
+        "routing": "restored_and_verified",
+        "temporary_caller_application": "deleted"
+      }
+    },
+    "controls-pass": {
+      "report": "controls-pass/suite.json",
+      "sessions_observed": 1,
+      "sessions_closed": 1,
+      "calls_terminal": true,
+      "workers": 0,
+      "queued": 0,
+      "unconfirmed_calls": 0,
+      "audio_peaks": {
+        "queued_bytes": 240,
+        "inflight_bytes": 1760,
+        "ack_latency_us": 204300,
+        "queue_age_us": 25411
+      },
+      "discontinuities": [
+        {
+          "cause": "input_overflow",
+          "before_ready": true
+        },
+        {
+          "cause": "startup_buffer_discard",
+          "before_ready": true
+        }
+      ],
+      "failures": [],
+      "cleanup": {
+        "caller_legs": [
+          {
+            "status": "completed",
+            "duration": "17"
+          },
+          {
+            "status": "completed",
+            "duration": "16"
+          }
+        ],
+        "routing": "restored_and_verified",
+        "temporary_caller_application": "deleted"
+      }
+    }
+  }
+}

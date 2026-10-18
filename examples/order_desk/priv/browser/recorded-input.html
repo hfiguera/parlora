@@ -1,0 +1,20 @@
+<details id="recorded-input" class="diagnostics">
+  <summary>Recorded audio test · development only</summary>
+  <p class="note">Send synthetic speech through this browser’s WebRTC connection and the real voice service. Your microphone stays off. Live calls use the configured API credits.</p>
+  <button id="recorded-connect">Connect recorded audio</button>
+  <p class="note">Wait for the greeting, play the draft request, then wait for the draft to appear before playing the refusal.</p>
+  <div class="controls" aria-label="Recorded speech clips">
+    <button id="recorded-draft" disabled>Play draft request</button>
+    <button id="recorded-refuse" disabled>Play refusal</button>
+    <button id="recorded-items" disabled>Play items request</button>
+    <button id="recorded-package" disabled>Play reception request</button>
+    <button id="recorded-correct" disabled>Play neighbor correction</button>
+    <button id="recorded-interrupt" disabled>Play interruption</button>
+    <button id="recorded-stop" disabled>Stop clip</button>
+  </div>
+  <p id="recorded-state" class="note" role="status">Recorded input is off.</p>
+  <p class="note">Draft: “For order 124, change the delivery instructions to leave it at reception.” Refusal: “No, don’t save that. Keep the original instructions.” Items: “What items are in order 123?”</p>
+  <p class="note">Reception: “For order 124, leave the package at reception.” Correction: “Actually, leave it with the neighbor.” Interruption: “Wait—what items are in order 124?”</p>
+  <p class="note">Use the call’s Disconnect button to finish. Clip completion confirms input playback only, not transcription or a backend result.</p>
+</details>
+<script src="/dev/recorded-input.js" defer></script>

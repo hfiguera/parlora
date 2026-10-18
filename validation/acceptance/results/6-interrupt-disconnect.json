@@ -1,0 +1,913 @@
+{
+  "name": "6-interrupt-disconnect",
+  "events": [
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "event": "audio_discontinuity",
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 1
+      }
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "event": "audio_discontinuity",
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 27
+      }
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "event": "audio_discontinuity",
+      "payload": {
+        "cause": "startup_buffer_discard"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " What",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " items",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " are in",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "event": "audio_discontinuity",
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 1
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " order",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " ",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": "123",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "event": "delegation_pending",
+      "payload": {}
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " Hi.",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "event",
+      "source": "backend",
+      "request_id": "r59t3quTnHEWIraedVAT7KCb",
+      "event": "request_started",
+      "payload": {}
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "event": "audio_discontinuity",
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 2
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " I",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "event",
+      "source": "provider",
+      "request_id": null,
+      "event": "audio_discontinuity",
+      "payload": {
+        "cause": "output_overflow",
+        "max_age_ms": 750,
+        "audio_trace": {
+          "events": [
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4913185,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4923193,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4933153,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4944047,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4954104,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4964126,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4974129,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4984017,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 4994043,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5004020,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5014110,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5024028,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5033956,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5044273,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5053274,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5063120,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5074112,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5084092,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5094104,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5104016,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5114116,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5124063,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5133962,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5144048,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5154048,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5164006,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5174132,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5184041,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5194077,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5204120,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5214129,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5223990,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5234164,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5243684,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5253436,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5263154,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5274113,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5284193,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5293103,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5304017,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5314138,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5324038,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5334145,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5344136,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5354046,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5364106,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5374065,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5384043,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5394160,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5404048,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5414127,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5424042,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5434171,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 0,
+              "kind": "read",
+              "at_us": 5442981,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 4800,
+              "kind": "received",
+              "at_us": 5451027,
+              "queue_bytes": 0
+            },
+            {
+              "bytes": 4800,
+              "kind": "received",
+              "at_us": 5451947,
+              "queue_bytes": 4800
+            },
+            {
+              "bytes": 960,
+              "kind": "read",
+              "at_us": 5454068,
+              "queue_bytes": 8640
+            },
+            {
+              "bytes": 960,
+              "kind": "read",
+              "at_us": 5473970,
+              "queue_bytes": 7680
+            },
+            {
+              "bytes": 4800,
+              "kind": "received",
+              "at_us": 5489835,
+              "queue_bytes": 7680
+            },
+            {
+              "bytes": 4800,
+              "kind": "received",
+              "at_us": 5490817,
+              "queue_bytes": 12480
+            },
+            {
+              "bytes": 960,
+              "kind": "read",
+              "at_us": 5494051,
+              "queue_bytes": 16320
+            },
+            {
+              "bytes": 960,
+              "kind": "read",
+              "at_us": 5513039,
+              "queue_bytes": 15360
+            },
+            {
+              "bytes": 4800,
+              "kind": "received",
+              "at_us": 5527183,
+              "queue_bytes": 15360
+            },
+            {
+              "bytes": 4800,
+              "kind": "received",
+              "at_us": 5530228,
+              "queue_bytes": 20160
+            }
+          ],
+          "truncated": true,
+          "elapsed_us": 5530231,
+          "events_seen": 362
+        },
+        "dropped_bytes": 24960,
+        "capacity_bytes": 24000,
+        "queue_bytes": 20160,
+        "incoming_bytes": 4800,
+        "oldest_age_us": 79203
+      }
+    },
+    {
+      "type": "event",
+      "source": "provider",
+      "request_id": null,
+      "event": "failed",
+      "payload": {}
+    },
+    {
+      "type": "closed"
+    }
+  ],
+  "checkpoints": [
+    {
+      "kind": "connected",
+      "session_id": "WmaoMIxErYDoG_MFe0SqQEEh",
+      "state": {
+        "closed": false,
+        "status": {
+          "status": "ready",
+          "session_id": "WmaoMIxErYDoG_MFe0SqQEEh",
+          "jobs": {},
+          "observed_at_us": -576460650564361,
+          "interpretation": "settled",
+          "playback": {
+            "handed_off": {
+              "observed_at_us": -576460650569780,
+              "stage": "handed_off",
+              "sequence": 14338,
+              "epoch": 0,
+              "evidence": "handoff"
+            }
+          },
+          "delegations": {}
+        },
+        "started": -576460650613560,
+        "events": [],
+        "jobs": {},
+        "tasks": {}
+      }
+    },
+    {
+      "kind": "interruption-start",
+      "session_id": "WmaoMIxErYDoG_MFe0SqQEEh",
+      "state": {
+        "closed": false,
+        "status": {
+          "status": "ready",
+          "session_id": "WmaoMIxErYDoG_MFe0SqQEEh",
+          "jobs": {},
+          "observed_at_us": -576460646925507,
+          "interpretation": "running",
+          "playback": {
+            "queued": {
+              "observed_at_us": -576460646931855,
+              "stage": "queued",
+              "sequence": 284,
+              "epoch": 0,
+              "evidence": "queue"
+            },
+            "handed_off": {
+              "observed_at_us": -576460646929812,
+              "stage": "handed_off",
+              "sequence": 14702,
+              "epoch": 0,
+              "evidence": "handoff"
+            }
+          },
+          "delegations": {
+            "item_EPL5kdd8tNTVt4cfo3qWk": {
+              "status": "pending",
+              "received_at_us": -576460647110068
+            }
+          }
+        },
+        "started": -576460650613560,
+        "events": [
+          {
+            "type": "delegation_pending",
+            "source": "session",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460647110062
+          }
+        ],
+        "jobs": {},
+        "tasks": {}
+      },
+      "dashboard": {
+        "changes": [
+          {
+            "id": "47c316a9-7f87-4e28-841d-9cf8f9d637ce",
+            "version": 3,
+            "instructions": "Saved before reconnect",
+            "at": 1789707980,
+            "order": "124"
+          },
+          {
+            "id": "5fi3LezbcFP5DEu-2Qw8xgsu",
+            "version": 2,
+            "instructions": "leave it with the neighbor",
+            "at": 1789707978,
+            "order": "124"
+          }
+        ],
+        "orders": [
+          {
+            "id": "123",
+            "status": "shipped; expected Friday",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Travel mug",
+                "quantity": 1
+              },
+              {
+                "name": "Coffee beans",
+                "quantity": 2
+              }
+            ],
+            "tracking": "DEMO-123"
+          },
+          {
+            "id": "124",
+            "status": "out for delivery",
+            "version": 3,
+            "instructions": "Saved before reconnect",
+            "items": [
+              {
+                "name": "Desk lamp",
+                "quantity": 1
+              }
+            ],
+            "tracking": "DEMO-124"
+          },
+          {
+            "id": "825",
+            "status": "processing",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Notebook",
+                "quantity": 3
+              }
+            ],
+            "tracking": "Not assigned"
+          }
+        ],
+        "proposals": [
+          {
+            "id": "d096af15-7e33-4bab-8b07-2f807790f5d2",
+            "status": "pending",
+            "version": 1,
+            "instructions": "Pending across reconnect",
+            "order": "123"
+          },
+          {
+            "id": "47c316a9-7f87-4e28-841d-9cf8f9d637ce",
+            "status": "applied",
+            "version": 2,
+            "instructions": "Saved before reconnect",
+            "order": "124"
+          }
+        ]
+      },
+      "captions": "You\nWhat items are in order 123\n\nAssistant\nHi."
+    },
+    {
+      "kind": "final",
+      "session_id": "WmaoMIxErYDoG_MFe0SqQEEh",
+      "state": {
+        "closed": true,
+        "status": {
+          "status": "closing",
+          "session_id": "WmaoMIxErYDoG_MFe0SqQEEh",
+          "jobs": {
+            "r59t3quTnHEWIraedVAT7KCb": {
+              "status": "submitted",
+              "delegation_id": "item_EPL5kdd8tNTVt4cfo3qWk",
+              "task_id": "0o1Dtq97BaSL3CSRf3Qr-LQn",
+              "task_revision": 1,
+              "deadline_at_us": -576460616789890,
+              "started_at_us": -576460646789538,
+              "current?": true
+            }
+          },
+          "observed_at_us": -576460640708325,
+          "interpretation": "settled",
+          "playback": {
+            "queued": {
+              "observed_at_us": -576460645621848,
+              "stage": "queued",
+              "sequence": 357,
+              "epoch": 0,
+              "evidence": "queue"
+            },
+            "handed_off": {
+              "observed_at_us": -576460645609756,
+              "stage": "handed_off",
+              "sequence": 14834,
+              "epoch": 0,
+              "evidence": "handoff"
+            }
+          },
+          "delegations": {
+            "item_EPL5kdd8tNTVt4cfo3qWk": {
+              "status": "claimed",
+              "received_at_us": -576460647110068
+            }
+          }
+        },
+        "started": -576460650613560,
+        "events": [
+          {
+            "type": "delegation_pending",
+            "source": "session",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460647110062
+          },
+          {
+            "type": "task_submitted",
+            "source": "session",
+            "request_id": "r59t3quTnHEWIraedVAT7KCb",
+            "payload": {},
+            "observed_at_us": -576460646789829
+          },
+          {
+            "type": "request_started",
+            "source": "backend",
+            "request_id": "r59t3quTnHEWIraedVAT7KCb",
+            "payload": {},
+            "observed_at_us": -576460646789538
+          },
+          {
+            "type": "failed",
+            "source": "provider",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460645615658
+          },
+          {
+            "type": "closed",
+            "source": "provider",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460645600433
+          },
+          {
+            "type": "closed",
+            "source": "channel",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460645600194
+          },
+          {
+            "type": "closed",
+            "source": "backend",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460640649641
+          },
+          {
+            "type": "closed",
+            "source": "session",
+            "request_id": null,
+            "payload": {},
+            "observed_at_us": -576460640649560
+          }
+        ],
+        "jobs": {
+          "r59t3quTnHEWIraedVAT7KCb": {
+            "id": "r59t3quTnHEWIraedVAT7KCb",
+            "input": {
+              "instructions": null,
+              "operation": "items",
+              "order": "123"
+            },
+            "revision": 1,
+            "task_id": "0o1Dtq97BaSL3CSRf3Qr-LQn"
+          }
+        },
+        "tasks": {
+          "0o1Dtq97BaSL3CSRf3Qr-LQn": {
+            "input": {
+              "instructions": null,
+              "operation": "items",
+              "order": "123",
+              "actor": "u_QDRo0cqx2ZGkUE25m40l8d",
+              "additional?": false,
+              "user_revision": 5
+            },
+            "status": "submitted",
+            "revision": 1
+          }
+        }
+      },
+      "dashboard": {
+        "changes": [
+          {
+            "id": "47c316a9-7f87-4e28-841d-9cf8f9d637ce",
+            "version": 3,
+            "instructions": "Saved before reconnect",
+            "at": 1789707980,
+            "order": "124"
+          },
+          {
+            "id": "5fi3LezbcFP5DEu-2Qw8xgsu",
+            "version": 2,
+            "instructions": "leave it with the neighbor",
+            "at": 1789707978,
+            "order": "124"
+          }
+        ],
+        "orders": [
+          {
+            "id": "123",
+            "status": "shipped; expected Friday",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Travel mug",
+                "quantity": 1
+              },
+              {
+                "name": "Coffee beans",
+                "quantity": 2
+              }
+            ],
+            "tracking": "DEMO-123"
+          },
+          {
+            "id": "124",
+            "status": "out for delivery",
+            "version": 3,
+            "instructions": "Saved before reconnect",
+            "items": [
+              {
+                "name": "Desk lamp",
+                "quantity": 1
+              }
+            ],
+            "tracking": "DEMO-124"
+          },
+          {
+            "id": "825",
+            "status": "processing",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Notebook",
+                "quantity": 3
+              }
+            ],
+            "tracking": "Not assigned"
+          }
+        ],
+        "proposals": [
+          {
+            "id": "d096af15-7e33-4bab-8b07-2f807790f5d2",
+            "status": "pending",
+            "version": 1,
+            "instructions": "Pending across reconnect",
+            "order": "123"
+          },
+          {
+            "id": "47c316a9-7f87-4e28-841d-9cf8f9d637ce",
+            "status": "applied",
+            "version": 2,
+            "instructions": "Saved before reconnect",
+            "order": "124"
+          }
+        ]
+      },
+      "captions": "You\nWhat items are in order 123\n\nAssistant\nHi. I"
+    }
+  ]
+}

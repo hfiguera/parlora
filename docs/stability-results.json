@@ -1,0 +1,1208 @@
+{
+  "date": "2026-09-16",
+  "toolchain": {
+    "elixir": "1.20.4-otp-29",
+    "erlang": "29.0.6",
+    "rust": "1.92.0"
+  },
+  "runs": {
+    "simulated_macos": [
+      {
+        "measurements": {
+          "seed": [
+            42,
+            17,
+            91
+          ],
+          "final": {
+            "processes": 172,
+            "beam_bytes": 138801010,
+            "code_bytes": 52664073,
+            "binary_bytes": 996056,
+            "ets_bytes": 4942952,
+            "rss_bytes": 193560576
+          },
+          "cycles": 100,
+          "warmup_cycles": 28,
+          "baseline": {
+            "processes": 172,
+            "beam_bytes": 138748362,
+            "code_bytes": 52664073,
+            "binary_bytes": 994208,
+            "ets_bytes": 4918952,
+            "rss_bytes": 252592128
+          },
+          "peaks": {
+            "cleanup_us": 7169,
+            "four_request_us": 6757,
+            "queue_bytes": 480,
+            "retained_jobs": 4,
+            "process_bytes": 145664,
+            "mailbox": 0
+          },
+          "beam_growth_limit_bytes": 16000000
+        },
+        "validation": "simulated_summary"
+      },
+      {
+        "measurements": {
+          "initial": {
+            "process_bytes": 59528,
+            "mailbox": 0
+          },
+          "final": {
+            "process_bytes": 4125000,
+            "mailbox": 0
+          },
+          "revisions": 500,
+          "max_request_us": 4393,
+          "first_request_us": 97,
+          "last_request_us": 500
+        },
+        "validation": "retained_history_summary"
+      }
+    ],
+    "simulated_linux": [
+      {
+        "measurements": {
+          "seed": [
+            42,
+            17,
+            91
+          ],
+          "final": {
+            "processes": 172,
+            "beam_bytes": 126018168,
+            "code_bytes": 58251871,
+            "binary_bytes": 865464,
+            "ets_bytes": 4639352,
+            "rss_bytes": 227385344
+          },
+          "cycles": 100,
+          "warmup_cycles": 40,
+          "baseline": {
+            "processes": 172,
+            "beam_bytes": 125977176,
+            "code_bytes": 58251871,
+            "binary_bytes": 865168,
+            "ets_bytes": 4615264,
+            "rss_bytes": 278097920
+          },
+          "peaks": {
+            "cleanup_us": 7038,
+            "four_request_us": 3336,
+            "queue_bytes": 480,
+            "retained_jobs": 4,
+            "process_bytes": 143544,
+            "mailbox": 0
+          },
+          "beam_growth_limit_bytes": 16000000
+        },
+        "validation": "simulated_summary"
+      },
+      {
+        "measurements": {
+          "initial": {
+            "process_bytes": 79568,
+            "mailbox": 0
+          },
+          "final": {
+            "process_bytes": 4822304,
+            "mailbox": 0
+          },
+          "revisions": 500,
+          "max_request_us": 17191,
+          "first_request_us": 591,
+          "last_request_us": 838
+        },
+        "validation": "retained_history_summary"
+      }
+    ],
+    "audio_macos": [
+      {
+        "validation": "audio_summary",
+        "measurements": {
+          "after": {
+            "processes": 163,
+            "beam_bytes": 140615766,
+            "rss_bytes": 188760064
+          },
+          "cycles": [
+            {
+              "seconds": 60,
+              "cycle": 1,
+              "peaks": {
+                "input_queued": 480,
+                "output_queued": 2399,
+                "process_bytes": 178072,
+                "mailbox": 0
+              },
+              "close_us": 63858,
+              "clear_us": [
+                2684,
+                9272,
+                3920,
+                4947
+              ],
+              "dropped_after_warmup": 0,
+              "underrun_after_warmup": 1924,
+              "device_errors": 0,
+              "handed_off": 2878076,
+              "max_poll_gap_us": 16286,
+              "input_ppm": 11,
+              "output_ppm": -24
+            },
+            {
+              "seconds": 60,
+              "cycle": 2,
+              "peaks": {
+                "input_queued": 0,
+                "output_queued": 2388,
+                "process_bytes": 152488,
+                "mailbox": 0
+              },
+              "close_us": 57086,
+              "clear_us": [
+                6408,
+                5448,
+                6748,
+                5047
+              ],
+              "dropped_after_warmup": 0,
+              "underrun_after_warmup": 1920,
+              "device_errors": 0,
+              "handed_off": 2878080,
+              "max_poll_gap_us": 17143,
+              "input_ppm": 9,
+              "output_ppm": 7
+            },
+            {
+              "seconds": 60,
+              "cycle": 3,
+              "peaks": {
+                "input_queued": 0,
+                "output_queued": 1922,
+                "process_bytes": 178072,
+                "mailbox": 0
+              },
+              "close_us": 56885,
+              "clear_us": [
+                6035,
+                6557,
+                6333,
+                6541
+              ],
+              "dropped_after_warmup": 0,
+              "underrun_after_warmup": 1920,
+              "device_errors": 0,
+              "handed_off": 2878080,
+              "max_poll_gap_us": 13195,
+              "input_ppm": -59,
+              "output_ppm": -35
+            }
+          ],
+          "before": {
+            "processes": 164,
+            "beam_bytes": 96614340,
+            "rss_bytes": 216842240
+          }
+        }
+      }
+    ],
+    "audio_linux": [
+      {
+        "validation": "audio_summary",
+        "measurements": {
+          "after": {
+            "processes": 163,
+            "beam_bytes": 124392624,
+            "code_bytes": 58213487,
+            "binary_bytes": 847856,
+            "ets_bytes": 4834376,
+            "rss_bytes": 224866304
+          },
+          "cycles": [
+            {
+              "seconds": 60,
+              "cycle": 1,
+              "peaks": {
+                "input_queued": 480,
+                "output_queued": 2218,
+                "process_bytes": 136696,
+                "mailbox": 0
+              },
+              "close_us": 13113,
+              "clear_us": [
+                3669,
+                10277,
+                2590,
+                4671
+              ],
+              "dropped_after_warmup": 0,
+              "underrun_after_warmup": 2048,
+              "device_errors": 0,
+              "handed_off": 2877952,
+              "max_poll_gap_us": 12086,
+              "input_ppm": 94,
+              "output_ppm": 14
+            },
+            {
+              "seconds": 60,
+              "cycle": 2,
+              "peaks": {
+                "input_queued": 480,
+                "output_queued": 2212,
+                "process_bytes": 136696,
+                "mailbox": 0
+              },
+              "close_us": 12814,
+              "clear_us": [
+                10179,
+                1334,
+                4693,
+                10158
+              ],
+              "dropped_after_warmup": 0,
+              "underrun_after_warmup": 2048,
+              "device_errors": 0,
+              "handed_off": 2878464,
+              "max_poll_gap_us": 14230,
+              "input_ppm": 45,
+              "output_ppm": 69
+            },
+            {
+              "seconds": 60,
+              "cycle": 3,
+              "peaks": {
+                "input_queued": 480,
+                "output_queued": 2203,
+                "process_bytes": 211576,
+                "mailbox": 0
+              },
+              "close_us": 10777,
+              "clear_us": [
+                11457,
+                2546,
+                5778,
+                7670
+              ],
+              "dropped_after_warmup": 0,
+              "underrun_after_warmup": 2048,
+              "device_errors": 0,
+              "handed_off": 2878464,
+              "max_poll_gap_us": 13529,
+              "input_ppm": -35,
+              "output_ppm": -30
+            }
+          ],
+          "before": {
+            "processes": 164,
+            "beam_bytes": 71578544,
+            "code_bytes": 21746239,
+            "binary_bytes": 148568,
+            "ets_bytes": 1820864,
+            "rss_bytes": 190709760
+          }
+        }
+      }
+    ],
+    "live_initial": [
+      {
+        "validation": "live_summary",
+        "measurements": {
+          "events": {
+            "extension": 60,
+            "ready": 3,
+            "result_delivery": 19,
+            "control_completed": 66,
+            "playback_observed": 55535,
+            "audio_discontinuity": 188,
+            "usage_updated": 20,
+            "delegation_requested": 7,
+            "request_started": 7,
+            "request_completed": 6,
+            "request_failed": 1,
+            "transcript_delta": 139,
+            "delegation_pending": 7,
+            "context_acknowledged": 7,
+            "request_uncertain": 1,
+            "stale_result": 2,
+            "context_wait_started": 6,
+            "delegation_associated": 6,
+            "clarification_requested": 1,
+            "task_submitted": 7
+          },
+          "usage": {
+            "seconds": 300.0,
+            "final?": true
+          },
+          "queue_peaks": {
+            "input_bytes": 9600,
+            "output_bytes": 960
+          },
+          "process_peaks": {
+            "process_bytes": 729040,
+            "mailbox": 1
+          },
+          "max_sample_gap_ms": 2972,
+          "duration_seconds": 300,
+          "backend_requests": 7,
+          "backend_completion_ms": [
+            3001,
+            3001,
+            35001,
+            3001,
+            3001,
+            18001,
+            3001
+          ],
+          "completion_to_accept_ms": [
+            702,
+            701,
+            719,
+            730,
+            690
+          ],
+          "vm_samples": [
+            {
+              "at_ms": 10987,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143867251,
+                "code_bytes": 52655250,
+                "binary_bytes": 1615176,
+                "ets_bytes": 5165728,
+                "rss_bytes": 194789376
+              }
+            },
+            {
+              "at_ms": 20002,
+              "vm": {
+                "processes": 178,
+                "beam_bytes": 143823019,
+                "code_bytes": 52655250,
+                "binary_bytes": 1499832,
+                "ets_bytes": 5165728,
+                "rss_bytes": 195248128
+              }
+            },
+            {
+              "at_ms": 30029,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144073923,
+                "code_bytes": 52655250,
+                "binary_bytes": 1709040,
+                "ets_bytes": 5165728,
+                "rss_bytes": 195231744
+              }
+            },
+            {
+              "at_ms": 40053,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143905611,
+                "code_bytes": 52655250,
+                "binary_bytes": 1557392,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196001792
+              }
+            },
+            {
+              "at_ms": 50077,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144148059,
+                "code_bytes": 52655250,
+                "binary_bytes": 1778672,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196280320
+              }
+            },
+            {
+              "at_ms": 60099,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144101283,
+                "code_bytes": 52655250,
+                "binary_bytes": 1703680,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196214784
+              }
+            },
+            {
+              "at_ms": 70116,
+              "vm": {
+                "processes": 178,
+                "beam_bytes": 144000107,
+                "code_bytes": 52655250,
+                "binary_bytes": 1637176,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196362240
+              }
+            },
+            {
+              "at_ms": 80138,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143991595,
+                "code_bytes": 52655250,
+                "binary_bytes": 1606480,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196165632
+              }
+            },
+            {
+              "at_ms": 90157,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143882195,
+                "code_bytes": 52655250,
+                "binary_bytes": 1549656,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196034560
+              }
+            },
+            {
+              "at_ms": 100172,
+              "vm": {
+                "processes": 178,
+                "beam_bytes": 143938707,
+                "code_bytes": 52655250,
+                "binary_bytes": 1579496,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196149248
+              }
+            },
+            {
+              "at_ms": 110190,
+              "vm": {
+                "processes": 178,
+                "beam_bytes": 144299067,
+                "code_bytes": 52655250,
+                "binary_bytes": 1741024,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196460544
+              }
+            },
+            {
+              "at_ms": 120212,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144209843,
+                "code_bytes": 52655250,
+                "binary_bytes": 1715944,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196476928
+              }
+            },
+            {
+              "at_ms": 130227,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144106803,
+                "code_bytes": 52655250,
+                "binary_bytes": 1624024,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196411392
+              }
+            },
+            {
+              "at_ms": 140243,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144375867,
+                "code_bytes": 52655250,
+                "binary_bytes": 1825224,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196493312
+              }
+            },
+            {
+              "at_ms": 150259,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144162755,
+                "code_bytes": 52655250,
+                "binary_bytes": 1641624,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196640768
+              }
+            },
+            {
+              "at_ms": 160278,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144377667,
+                "code_bytes": 52655250,
+                "binary_bytes": 1810704,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196575232
+              }
+            },
+            {
+              "at_ms": 170300,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144177307,
+                "code_bytes": 52655250,
+                "binary_bytes": 1647232,
+                "ets_bytes": 5165728,
+                "rss_bytes": 196542464
+              }
+            },
+            {
+              "at_ms": 180315,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144250715,
+                "code_bytes": 52655250,
+                "binary_bytes": 1699944,
+                "ets_bytes": 5165816,
+                "rss_bytes": 196837376
+              }
+            },
+            {
+              "at_ms": 190338,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144305643,
+                "code_bytes": 52655250,
+                "binary_bytes": 1687056,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197132288
+              }
+            },
+            {
+              "at_ms": 200354,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144345611,
+                "code_bytes": 52655250,
+                "binary_bytes": 1645424,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197410816
+              }
+            },
+            {
+              "at_ms": 210374,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144437403,
+                "code_bytes": 52655250,
+                "binary_bytes": 1736816,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197804032
+              }
+            },
+            {
+              "at_ms": 220403,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144376411,
+                "code_bytes": 52655250,
+                "binary_bytes": 1710968,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197722112
+              }
+            },
+            {
+              "at_ms": 230423,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144436155,
+                "code_bytes": 52655250,
+                "binary_bytes": 1691344,
+                "ets_bytes": 5165816,
+                "rss_bytes": 198017024
+              }
+            },
+            {
+              "at_ms": 240439,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144498571,
+                "code_bytes": 52655250,
+                "binary_bytes": 1756896,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197984256
+              }
+            },
+            {
+              "at_ms": 250458,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144404427,
+                "code_bytes": 52655250,
+                "binary_bytes": 1739504,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197935104
+              }
+            },
+            {
+              "at_ms": 260474,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144506939,
+                "code_bytes": 52655250,
+                "binary_bytes": 1713720,
+                "ets_bytes": 5165816,
+                "rss_bytes": 198066176
+              }
+            },
+            {
+              "at_ms": 270493,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144210203,
+                "code_bytes": 52655250,
+                "binary_bytes": 1520936,
+                "ets_bytes": 5165816,
+                "rss_bytes": 198000640
+              }
+            },
+            {
+              "at_ms": 280510,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144361995,
+                "code_bytes": 52655250,
+                "binary_bytes": 1629360,
+                "ets_bytes": 5165816,
+                "rss_bytes": 198197248
+              }
+            },
+            {
+              "at_ms": 290526,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144459147,
+                "code_bytes": 52655250,
+                "binary_bytes": 1712608,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197902336
+              }
+            },
+            {
+              "at_ms": 300544,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 144590059,
+                "code_bytes": 52655250,
+                "binary_bytes": 1803984,
+                "ets_bytes": 5165816,
+                "rss_bytes": 197967872
+              }
+            }
+          ],
+          "finalized": true
+        }
+      }
+    ],
+    "live_diagnostic": [
+      {
+        "validation": "live_summary",
+        "measurements": {
+          "events": {
+            "extension": 9,
+            "ready": 3,
+            "audio_discontinuity": 60,
+            "result_delivery": 5,
+            "control_completed": 16,
+            "playback_observed": 8014,
+            "usage_updated": 3,
+            "delegation_requested": 2,
+            "request_started": 2,
+            "request_completed": 2,
+            "transcript_delta": 34,
+            "delegation_pending": 2,
+            "context_acknowledged": 2,
+            "stale_result": 1,
+            "context_wait_started": 1,
+            "delegation_associated": 1,
+            "task_submitted": 2
+          },
+          "usage": {
+            "seconds": 44.0,
+            "final?": true
+          },
+          "discontinuities": {
+            "channel/capture_overflow": 56,
+            "channel/device_output_underrun": 4
+          },
+          "queue_peaks": {
+            "capture_bytes": 9120,
+            "playback_bytes": 960,
+            "generated_bytes": 4800,
+            "uplink_bytes": 480
+          },
+          "process_peaks": {
+            "process_bytes": 334608,
+            "mailbox": 0
+          },
+          "max_sample_gap_ms": 1850,
+          "duration_seconds": 45,
+          "backend_requests": 2,
+          "backend_completion_ms": [
+            18001,
+            3001
+          ],
+          "completion_to_accept_ms": [
+            716
+          ],
+          "vm_samples": [
+            {
+              "at_ms": 10865,
+              "vm": {
+                "processes": 178,
+                "beam_bytes": 142248148,
+                "code_bytes": 52658299,
+                "binary_bytes": 1916112,
+                "ets_bytes": 5165904,
+                "rss_bytes": 193445888
+              }
+            },
+            {
+              "at_ms": 20883,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142225732,
+                "code_bytes": 52658299,
+                "binary_bytes": 1814096,
+                "ets_bytes": 5165904,
+                "rss_bytes": 194330624
+              }
+            },
+            {
+              "at_ms": 30897,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142224452,
+                "code_bytes": 52658299,
+                "binary_bytes": 1859512,
+                "ets_bytes": 5165904,
+                "rss_bytes": 194527232
+              }
+            },
+            {
+              "at_ms": 40918,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142299316,
+                "code_bytes": 52658299,
+                "binary_bytes": 1864952,
+                "ets_bytes": 5165904,
+                "rss_bytes": 194445312
+              }
+            }
+          ],
+          "finalized": true
+        }
+      }
+    ],
+    "live_final": [
+      {
+        "validation": "live_summary",
+        "measurements": {
+          "events": {
+            "extension": 60,
+            "ready": 3,
+            "audio_discontinuity": 148,
+            "result_delivery": 22,
+            "control_completed": 66,
+            "playback_observed": 54839,
+            "usage_updated": 20,
+            "delegation_requested": 8,
+            "request_started": 8,
+            "request_completed": 7,
+            "request_failed": 1,
+            "transcript_delta": 180,
+            "delegation_pending": 8,
+            "context_acknowledged": 8,
+            "request_uncertain": 1,
+            "stale_result": 2,
+            "context_wait_started": 7,
+            "delegation_associated": 7,
+            "clarification_requested": 1,
+            "task_submitted": 8
+          },
+          "usage": {
+            "seconds": 299.0,
+            "final?": true
+          },
+          "discontinuities": {
+            "running/channel/device_output_underrun": 14,
+            "running/provider/output_overflow": 3,
+            "startup/channel/capture_overflow": 129,
+            "startup/channel/device_output_underrun": 1,
+            "startup/session/startup_buffer_discard": 1
+          },
+          "queue_peaks": {
+            "capture_bytes": 2400,
+            "playback_bytes": 960,
+            "generated_bytes": 8640,
+            "uplink_bytes": 960
+          },
+          "process_peaks": {
+            "process_bytes": 714312,
+            "mailbox": 1
+          },
+          "max_sample_gap_ms": 2610,
+          "duration_seconds": 300,
+          "backend_requests": 8,
+          "backend_completion_ms": [
+            3001,
+            3001,
+            3001,
+            35001,
+            3001,
+            3001,
+            18001,
+            3001
+          ],
+          "completion_to_accept_ms": [
+            706,
+            680,
+            615,
+            1087,
+            1184,
+            663
+          ],
+          "vm_samples": [
+            {
+              "at_ms": 10618,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 141962984,
+                "code_bytes": 52660487,
+                "binary_bytes": 1552352,
+                "ets_bytes": 5165912,
+                "rss_bytes": 193806336
+              }
+            },
+            {
+              "at_ms": 20640,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142386392,
+                "code_bytes": 52660487,
+                "binary_bytes": 1838776,
+                "ets_bytes": 5165912,
+                "rss_bytes": 194609152
+              }
+            },
+            {
+              "at_ms": 30659,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142159808,
+                "code_bytes": 52660487,
+                "binary_bytes": 1634776,
+                "ets_bytes": 5165912,
+                "rss_bytes": 195444736
+              }
+            },
+            {
+              "at_ms": 40678,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142328552,
+                "code_bytes": 52660487,
+                "binary_bytes": 1780160,
+                "ets_bytes": 5165912,
+                "rss_bytes": 195575808
+              }
+            },
+            {
+              "at_ms": 50693,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142370312,
+                "code_bytes": 52660487,
+                "binary_bytes": 1820176,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196263936
+              }
+            },
+            {
+              "at_ms": 60708,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142540424,
+                "code_bytes": 52660487,
+                "binary_bytes": 2012672,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196411392
+              }
+            },
+            {
+              "at_ms": 70726,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142543144,
+                "code_bytes": 52660487,
+                "binary_bytes": 1962288,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196050944
+              }
+            },
+            {
+              "at_ms": 80741,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142825600,
+                "code_bytes": 52660487,
+                "binary_bytes": 2206280,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196214784
+              }
+            },
+            {
+              "at_ms": 90757,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142532104,
+                "code_bytes": 52660487,
+                "binary_bytes": 1883664,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196263936
+              }
+            },
+            {
+              "at_ms": 100774,
+              "vm": {
+                "processes": 178,
+                "beam_bytes": 142603456,
+                "code_bytes": 52660487,
+                "binary_bytes": 1864168,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196198400
+              }
+            },
+            {
+              "at_ms": 110789,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142718016,
+                "code_bytes": 52660487,
+                "binary_bytes": 1958800,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196149248
+              }
+            },
+            {
+              "at_ms": 120810,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142693688,
+                "code_bytes": 52660487,
+                "binary_bytes": 1928504,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196083712
+              }
+            },
+            {
+              "at_ms": 130826,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142614856,
+                "code_bytes": 52660487,
+                "binary_bytes": 1876216,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196132864
+              }
+            },
+            {
+              "at_ms": 140845,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142722600,
+                "code_bytes": 52660487,
+                "binary_bytes": 1963968,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196182016
+              }
+            },
+            {
+              "at_ms": 150864,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142750360,
+                "code_bytes": 52660487,
+                "binary_bytes": 2011480,
+                "ets_bytes": 5165912,
+                "rss_bytes": 196313088
+              }
+            },
+            {
+              "at_ms": 160880,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142514920,
+                "code_bytes": 52660487,
+                "binary_bytes": 1849952,
+                "ets_bytes": 5165912,
+                "rss_bytes": 195674112
+              }
+            },
+            {
+              "at_ms": 170898,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142633656,
+                "code_bytes": 52660487,
+                "binary_bytes": 1906792,
+                "ets_bytes": 5165912,
+                "rss_bytes": 195985408
+              }
+            },
+            {
+              "at_ms": 180915,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142667208,
+                "code_bytes": 52660487,
+                "binary_bytes": 1899032,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196198400
+              }
+            },
+            {
+              "at_ms": 190932,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142660280,
+                "code_bytes": 52660487,
+                "binary_bytes": 2014256,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196100096
+              }
+            },
+            {
+              "at_ms": 200947,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142761192,
+                "code_bytes": 52660487,
+                "binary_bytes": 2085120,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196231168
+              }
+            },
+            {
+              "at_ms": 210968,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 142503976,
+                "code_bytes": 52660487,
+                "binary_bytes": 1848904,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196296704
+              }
+            },
+            {
+              "at_ms": 220985,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143846248,
+                "code_bytes": 52660487,
+                "binary_bytes": 2022056,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196919296
+              }
+            },
+            {
+              "at_ms": 230004,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143995480,
+                "code_bytes": 52660487,
+                "binary_bytes": 1869176,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196722688
+              }
+            },
+            {
+              "at_ms": 240019,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143940232,
+                "code_bytes": 52660487,
+                "binary_bytes": 2208800,
+                "ets_bytes": 5166000,
+                "rss_bytes": 197066752
+              }
+            },
+            {
+              "at_ms": 250038,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143990144,
+                "code_bytes": 52660487,
+                "binary_bytes": 1831576,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196820992
+              }
+            },
+            {
+              "at_ms": 260054,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143586968,
+                "code_bytes": 52660487,
+                "binary_bytes": 1873016,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196509696
+              }
+            },
+            {
+              "at_ms": 270075,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143668240,
+                "code_bytes": 52660487,
+                "binary_bytes": 2006592,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196509696
+              }
+            },
+            {
+              "at_ms": 280093,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143864960,
+                "code_bytes": 52660487,
+                "binary_bytes": 2084040,
+                "ets_bytes": 5166000,
+                "rss_bytes": 197410816
+              }
+            },
+            {
+              "at_ms": 290112,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143711184,
+                "code_bytes": 52660487,
+                "binary_bytes": 1984552,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196575232
+              }
+            },
+            {
+              "at_ms": 300136,
+              "vm": {
+                "processes": 177,
+                "beam_bytes": 143598216,
+                "code_bytes": 52660487,
+                "binary_bytes": 1884056,
+                "ets_bytes": 5166000,
+                "rss_bytes": 196575232
+              }
+            }
+          ],
+          "finalized": true
+        }
+      }
+    ]
+  }
+}

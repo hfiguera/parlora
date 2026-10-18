@@ -1,0 +1,2414 @@
+{
+  "date": "2026-09-16",
+  "base_commit": "00cfdcc",
+  "platform": "macOS physical audio",
+  "duration_seconds": 300,
+  "queue_capacity_bytes": 9600,
+  "pcm_bytes_per_second": 48000,
+  "chunk_sizes": {
+    "4800": 2913
+  },
+  "output_ticks": 29993,
+  "blocked_output_ticks": 0,
+  "dropped_bytes": 5760,
+  "overflow_count": 3,
+  "windows": [
+    {
+      "overflow_at_us": 92695123,
+      "events": [
+        {
+          "elapsed_us": 92376905,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 141,
+            "late_us": 880,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92386774,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92386803,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 40,
+            "late_us": 893,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92389569,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 4800,
+            "queue_before_bytes": 0,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92397845,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 49,
+            "late_us": 1916,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92407767,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "elapsed_us": 92407873,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 132,
+            "late_us": 1870,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92416844,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 60,
+            "late_us": 912,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92427784,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "elapsed_us": 92427830,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 63,
+            "late_us": 1896,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92437835,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 63,
+            "late_us": 1901,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92447839,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "elapsed_us": 92447897,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 125,
+            "late_us": 1897,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92457463,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 664,
+            "late_us": 919,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92466861,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "elapsed_us": 92467006,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 200,
+            "late_us": 935,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92476854,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 62,
+            "late_us": 920,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92487786,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92487844,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 74,
+            "late_us": 1900,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92497853,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 69,
+            "late_us": 1913,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92507776,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92507791,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 37,
+            "late_us": 1884,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92517826,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92517856,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 65,
+            "late_us": 1920,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92527812,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92527831,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 46,
+            "late_us": 1914,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92537782,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92537796,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 41,
+            "late_us": 1885,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92547810,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92547823,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 32,
+            "late_us": 1921,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92557818,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92557837,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 50,
+            "late_us": 1916,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92567778,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92567791,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 32,
+            "late_us": 1889,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92577765,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92577784,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 41,
+            "late_us": 1872,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92587786,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92587800,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 32,
+            "late_us": 1897,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92597775,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92597789,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 35,
+            "late_us": 1884,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92607766,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92607779,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 29,
+            "late_us": 1880,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92617858,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92617890,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 85,
+            "late_us": 1933,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92626865,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92626896,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 97,
+            "late_us": 928,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92636901,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92636921,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 46,
+            "late_us": 1004,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92646784,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92646799,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 42,
+            "late_us": 887,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92657836,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92657847,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 19,
+            "late_us": 1958,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92667878,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92667948,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 125,
+            "late_us": 1953,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92676848,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92676866,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 35,
+            "late_us": 961,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92681199,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 4800,
+            "queue_before_bytes": 0,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92681263,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 4800,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 92687764,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 92687778,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 21,
+            "late_us": 1888,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92695123,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 8640,
+            "dropped_bytes": 3840
+          }
+        },
+        {
+          "elapsed_us": 92697933,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 184,
+            "late_us": 1879,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92706750,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 92706784,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 39,
+            "late_us": 875,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 92717777,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 18,
+            "late_us": 1889,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        }
+      ]
+    },
+    {
+      "overflow_at_us": 95608333,
+      "events": [
+        {
+          "elapsed_us": 95296744,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95296752,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 13,
+            "late_us": 870,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95307767,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 8,
+            "late_us": 1888,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95308224,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 4800,
+            "queue_before_bytes": 0,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95317765,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "elapsed_us": 95317931,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 181,
+            "late_us": 1881,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95326757,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 14,
+            "late_us": 872,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95337768,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "elapsed_us": 95337784,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 26,
+            "late_us": 1888,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95347980,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 232,
+            "late_us": 1878,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95356752,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "elapsed_us": 95356763,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 20,
+            "late_us": 874,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95367776,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 15,
+            "late_us": 1891,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95377758,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "elapsed_us": 95377920,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 175,
+            "late_us": 1876,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95386751,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 10,
+            "late_us": 871,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95397768,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95397782,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 23,
+            "late_us": 1889,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95407920,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 177,
+            "late_us": 1873,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95416754,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95416762,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 20,
+            "late_us": 872,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95427762,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95427771,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 13,
+            "late_us": 1887,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95437759,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95437768,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 22,
+            "late_us": 1877,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95447729,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95447736,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 12,
+            "late_us": 1854,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95457761,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95457767,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 9,
+            "late_us": 1888,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95467752,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95467757,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 12,
+            "late_us": 1875,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95477731,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95477736,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 8,
+            "late_us": 1858,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95487756,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95487759,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 4,
+            "late_us": 1885,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95497749,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95497754,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 10,
+            "late_us": 1874,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95507782,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95507789,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 19,
+            "late_us": 1900,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95517746,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95517751,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 11,
+            "late_us": 1871,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95527756,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95527762,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 15,
+            "late_us": 1877,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95537731,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95537736,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 12,
+            "late_us": 1855,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95546020,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 4800,
+            "queue_before_bytes": 0,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95547773,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "elapsed_us": 95547780,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 21,
+            "late_us": 1890,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95549514,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 8640,
+            "queue_before_bytes": 3840,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95557939,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 165,
+            "late_us": 1904,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95566823,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 7680
+          }
+        },
+        {
+          "elapsed_us": 95566829,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 9,
+            "late_us": 951,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95578091,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 376,
+            "late_us": 1846,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95587034,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 6720
+          }
+        },
+        {
+          "elapsed_us": 95587040,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 10,
+            "late_us": 1161,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95596885,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 145,
+            "late_us": 870,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95607099,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 5760
+          }
+        },
+        {
+          "elapsed_us": 95607114,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 30,
+            "late_us": 1215,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95608333,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 5760,
+            "dropped_bytes": 960
+          }
+        },
+        {
+          "elapsed_us": 95616776,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 13,
+            "late_us": 892,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95627821,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 95627837,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 23,
+            "late_us": 1945,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        }
+      ]
+    },
+    {
+      "overflow_at_us": 96006852,
+      "events": [
+        {
+          "elapsed_us": 95687848,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 5760
+          }
+        },
+        {
+          "elapsed_us": 95687868,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 32,
+            "late_us": 1966,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95696730,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 3,
+            "late_us": 853,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95707751,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 4800
+          }
+        },
+        {
+          "elapsed_us": 95707760,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 13,
+            "late_us": 1877,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95708153,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 4800,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95717832,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 6,
+            "late_us": 1956,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95727764,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 95727783,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 29,
+            "late_us": 1885,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95737747,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 5,
+            "late_us": 1872,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95747818,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 7680
+          }
+        },
+        {
+          "elapsed_us": 95747823,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 11,
+            "late_us": 1943,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95757779,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 5,
+            "late_us": 1904,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95767745,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 6720
+          }
+        },
+        {
+          "elapsed_us": 95767752,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 11,
+            "late_us": 1872,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95777817,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 4,
+            "late_us": 1944,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95787774,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 5760
+          }
+        },
+        {
+          "elapsed_us": 95787778,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 6,
+            "late_us": 1902,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95797748,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 4,
+            "late_us": 1875,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95807821,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 4800
+          }
+        },
+        {
+          "elapsed_us": 95807827,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 10,
+            "late_us": 1948,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95810172,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 4800,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95817816,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 6,
+            "late_us": 1940,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95827734,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 95827748,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 20,
+            "late_us": 1856,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95837829,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 7,
+            "late_us": 1952,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95847772,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 7680
+          }
+        },
+        {
+          "elapsed_us": 95847781,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 15,
+            "late_us": 1897,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95857763,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 3,
+            "late_us": 1891,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95867834,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 6720
+          }
+        },
+        {
+          "elapsed_us": 95867853,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 29,
+            "late_us": 1955,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95877773,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 3,
+            "late_us": 1901,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95887743,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 5760
+          }
+        },
+        {
+          "elapsed_us": 95887747,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 7,
+            "late_us": 1871,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95897769,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 10,
+            "late_us": 1890,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95907828,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 4800
+          }
+        },
+        {
+          "elapsed_us": 95907855,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 54,
+            "late_us": 1928,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95908362,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 4800,
+            "dropped_bytes": 0
+          }
+        },
+        {
+          "elapsed_us": 95917755,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 8,
+            "late_us": 1878,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95927814,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 95927819,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 9,
+            "late_us": 1941,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95937805,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 12,
+            "late_us": 1921,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95947821,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 7680
+          }
+        },
+        {
+          "elapsed_us": 95947851,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 48,
+            "late_us": 1933,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95957385,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 586,
+            "late_us": 925,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95966805,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 6720
+          }
+        },
+        {
+          "elapsed_us": 95966888,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 119,
+            "late_us": 898,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95976855,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 59,
+            "late_us": 921,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95986991,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 5760
+          }
+        },
+        {
+          "elapsed_us": 95987419,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 541,
+            "late_us": 1006,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 95996761,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 20,
+            "late_us": 870,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 96006852,
+          "event": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "queue_bytes": 9600,
+            "queue_before_bytes": 5760,
+            "dropped_bytes": 960
+          }
+        },
+        {
+          "elapsed_us": 96007872,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 8640
+          }
+        },
+        {
+          "elapsed_us": 96008277,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 440,
+            "late_us": 1966,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 96017510,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 739,
+            "late_us": 900,
+            "pending_frames": 0,
+            "delay_ms": 10
+          }
+        },
+        {
+          "elapsed_us": 96026784,
+          "event": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "queue_bytes": 7680
+          }
+        },
+        {
+          "elapsed_us": 96026826,
+          "event": "tick",
+          "measurements": {
+            "blocked": 0,
+            "work_us": 68,
+            "late_us": 887,
+            "pending_frames": 1,
+            "delay_ms": 10
+          }
+        }
+      ]
+    }
+  ],
+  "fixed_run": {
+    "limits": {
+      "audio_queue_bytes": 9600,
+      "provider_audio_queue_bytes": 24000,
+      "provider_audio_max_age_ms": 750
+    },
+    "measurements": {
+      "events": {
+        "extension": 60,
+        "ready": 3,
+        "audio_discontinuity": 192,
+        "result_delivery": 22,
+        "control_completed": 66,
+        "playback_observed": 55227,
+        "usage_updated": 20,
+        "delegation_requested": 8,
+        "request_started": 8,
+        "request_completed": 7,
+        "request_failed": 1,
+        "transcript_delta": 176,
+        "delegation_pending": 8,
+        "context_acknowledged": 8,
+        "request_uncertain": 1,
+        "stale_result": 2,
+        "context_wait_started": 7,
+        "delegation_associated": 7,
+        "clarification_requested": 1,
+        "task_submitted": 8
+      },
+      "usage": {
+        "seconds": 299.0,
+        "final?": true
+      },
+      "discontinuities": {
+        "running/channel/device_output_underrun": 13,
+        "startup/channel/capture_overflow": 177,
+        "startup/channel/device_output_underrun": 1,
+        "startup/session/startup_buffer_discard": 1
+      },
+      "queue_peaks": {
+        "capture_bytes": 1440,
+        "playback_bytes": 1440,
+        "generated_bytes": 10560,
+        "uplink_bytes": 480
+      },
+      "process_peaks": {
+        "process_bytes": 777136,
+        "mailbox": 0
+      },
+      "max_sample_gap_ms": 3085,
+      "duration_seconds": 300,
+      "backend_requests": 8,
+      "backend_completion_ms": [
+        3001,
+        3001,
+        3001,
+        35001,
+        3001,
+        3001,
+        18001,
+        3001
+      ],
+      "completion_to_accept_ms": [
+        710,
+        225,
+        649,
+        687,
+        856,
+        685
+      ],
+      "vm_samples": [
+        {
+          "at_ms": 10097,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 143154498,
+            "code_bytes": 52685777,
+            "binary_bytes": 1853592,
+            "ets_bytes": 5776128,
+            "rss_bytes": 207044608
+          }
+        },
+        {
+          "at_ms": 20113,
+          "vm": {
+            "processes": 182,
+            "beam_bytes": 143331122,
+            "code_bytes": 52685777,
+            "binary_bytes": 1590136,
+            "ets_bytes": 6238808,
+            "rss_bytes": 202702848
+          }
+        },
+        {
+          "at_ms": 30133,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 144011154,
+            "code_bytes": 52685777,
+            "binary_bytes": 1800504,
+            "ets_bytes": 6645608,
+            "rss_bytes": 202964992
+          }
+        },
+        {
+          "at_ms": 40153,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 144274770,
+            "code_bytes": 52685777,
+            "binary_bytes": 1721856,
+            "ets_bytes": 7043368,
+            "rss_bytes": 203636736
+          }
+        },
+        {
+          "at_ms": 50171,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 144851762,
+            "code_bytes": 52685777,
+            "binary_bytes": 1746560,
+            "ets_bytes": 7480440,
+            "rss_bytes": 204734464
+          }
+        },
+        {
+          "at_ms": 60194,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 145373618,
+            "code_bytes": 52685777,
+            "binary_bytes": 1901024,
+            "ets_bytes": 7880728,
+            "rss_bytes": 205012992
+          }
+        },
+        {
+          "at_ms": 70215,
+          "vm": {
+            "processes": 182,
+            "beam_bytes": 145708666,
+            "code_bytes": 52685777,
+            "binary_bytes": 1807688,
+            "ets_bytes": 8314480,
+            "rss_bytes": 204881920
+          }
+        },
+        {
+          "at_ms": 80230,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 146013482,
+            "code_bytes": 52685777,
+            "binary_bytes": 1646984,
+            "ets_bytes": 8715448,
+            "rss_bytes": 205471744
+          }
+        },
+        {
+          "at_ms": 90248,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 146583114,
+            "code_bytes": 52685777,
+            "binary_bytes": 1812688,
+            "ets_bytes": 9116856,
+            "rss_bytes": 205750272
+          }
+        },
+        {
+          "at_ms": 100264,
+          "vm": {
+            "processes": 182,
+            "beam_bytes": 147160186,
+            "code_bytes": 52685777,
+            "binary_bytes": 1898832,
+            "ets_bytes": 9549392,
+            "rss_bytes": 206569472
+          }
+        },
+        {
+          "at_ms": 110282,
+          "vm": {
+            "processes": 182,
+            "beam_bytes": 147553466,
+            "code_bytes": 52685777,
+            "binary_bytes": 1924120,
+            "ets_bytes": 9998168,
+            "rss_bytes": 206798848
+          }
+        },
+        {
+          "at_ms": 120301,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 148138538,
+            "code_bytes": 52685777,
+            "binary_bytes": 2034360,
+            "ets_bytes": 10400216,
+            "rss_bytes": 207110144
+          }
+        },
+        {
+          "at_ms": 130317,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 148358258,
+            "code_bytes": 52685777,
+            "binary_bytes": 1852152,
+            "ets_bytes": 10799776,
+            "rss_bytes": 207585280
+          }
+        },
+        {
+          "at_ms": 140333,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 148922586,
+            "code_bytes": 52685777,
+            "binary_bytes": 2044792,
+            "ets_bytes": 11198984,
+            "rss_bytes": 207978496
+          }
+        },
+        {
+          "at_ms": 150348,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 149245410,
+            "code_bytes": 52685777,
+            "binary_bytes": 1938704,
+            "ets_bytes": 11629512,
+            "rss_bytes": 208535552
+          }
+        },
+        {
+          "at_ms": 160366,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 149620650,
+            "code_bytes": 52685777,
+            "binary_bytes": 1900784,
+            "ets_bytes": 12029784,
+            "rss_bytes": 208879616
+          }
+        },
+        {
+          "at_ms": 170383,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 150213026,
+            "code_bytes": 52685777,
+            "binary_bytes": 2109688,
+            "ets_bytes": 12429976,
+            "rss_bytes": 209289216
+          }
+        },
+        {
+          "at_ms": 180397,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 150504250,
+            "code_bytes": 52685777,
+            "binary_bytes": 1886976,
+            "ets_bytes": 12854744,
+            "rss_bytes": 209813504
+          }
+        },
+        {
+          "at_ms": 190413,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 151276426,
+            "code_bytes": 52685777,
+            "binary_bytes": 2215992,
+            "ets_bytes": 13253120,
+            "rss_bytes": 210108416
+          }
+        },
+        {
+          "at_ms": 200432,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 151267714,
+            "code_bytes": 52685777,
+            "binary_bytes": 1834544,
+            "ets_bytes": 13683552,
+            "rss_bytes": 210649088
+          }
+        },
+        {
+          "at_ms": 210450,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 151973658,
+            "code_bytes": 52685777,
+            "binary_bytes": 2096328,
+            "ets_bytes": 14081096,
+            "rss_bytes": 211402752
+          }
+        },
+        {
+          "at_ms": 220468,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 152263962,
+            "code_bytes": 52685777,
+            "binary_bytes": 1958424,
+            "ets_bytes": 14479704,
+            "rss_bytes": 211877888
+          }
+        },
+        {
+          "at_ms": 230488,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 152781762,
+            "code_bytes": 52685777,
+            "binary_bytes": 2067240,
+            "ets_bytes": 14923000,
+            "rss_bytes": 212156416
+          }
+        },
+        {
+          "at_ms": 240510,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 153067018,
+            "code_bytes": 52685777,
+            "binary_bytes": 1909392,
+            "ets_bytes": 15322208,
+            "rss_bytes": 212926464
+          }
+        },
+        {
+          "at_ms": 250531,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 153687714,
+            "code_bytes": 52685777,
+            "binary_bytes": 2110800,
+            "ets_bytes": 15721232,
+            "rss_bytes": 212779008
+          }
+        },
+        {
+          "at_ms": 260550,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 154015258,
+            "code_bytes": 52685777,
+            "binary_bytes": 1967144,
+            "ets_bytes": 16157376,
+            "rss_bytes": 213319680
+          }
+        },
+        {
+          "at_ms": 270572,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 154506602,
+            "code_bytes": 52685777,
+            "binary_bytes": 2063928,
+            "ets_bytes": 16559512,
+            "rss_bytes": 213729280
+          }
+        },
+        {
+          "at_ms": 280591,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 154779914,
+            "code_bytes": 52685777,
+            "binary_bytes": 1891808,
+            "ets_bytes": 16989080,
+            "rss_bytes": 214056960
+          }
+        },
+        {
+          "at_ms": 290615,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 155454426,
+            "code_bytes": 52685777,
+            "binary_bytes": 2128360,
+            "ets_bytes": 17391000,
+            "rss_bytes": 214433792
+          }
+        },
+        {
+          "at_ms": 300634,
+          "vm": {
+            "processes": 181,
+            "beam_bytes": 155900082,
+            "code_bytes": 52685777,
+            "binary_bytes": 2060920,
+            "ets_bytes": 17790872,
+            "rss_bytes": 216203264
+          }
+        }
+      ],
+      "finalized": true
+    },
+    "trace": {
+      "events_seen": 50451,
+      "truncated": false,
+      "received_chunks": 2913,
+      "output_ticks": 30000,
+      "blocked_output_ticks": 0,
+      "dropped_bytes": 0,
+      "peak_receive_bytes": 11520
+    },
+    "peak_window": [
+      {
+        "event": "audio_read",
+        "measurements": {
+          "bytes": 0,
+          "queue_bytes": 0
+        },
+        "elapsed_us": 158144278
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 1859,
+          "pending_frames": 0,
+          "work_us": 216
+        },
+        "elapsed_us": 158144299
+      },
+      {
+        "event": "audio_received",
+        "measurements": {
+          "bytes": 4800,
+          "dropped_bytes": 0,
+          "queue_bytes": 4800,
+          "queue_before_bytes": 0
+        },
+        "elapsed_us": 158146863
+      },
+      {
+        "event": "audio_received",
+        "measurements": {
+          "bytes": 4800,
+          "dropped_bytes": 0,
+          "queue_bytes": 9600,
+          "queue_before_bytes": 4800
+        },
+        "elapsed_us": 158146990
+      },
+      {
+        "event": "audio_read",
+        "measurements": {
+          "bytes": 960,
+          "queue_bytes": 8640
+        },
+        "elapsed_us": 158153163
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 847,
+          "pending_frames": 1,
+          "work_us": 171
+        },
+        "elapsed_us": 158153241
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 711,
+          "pending_frames": 0,
+          "work_us": 58
+        },
+        "elapsed_us": 158162998
+      },
+      {
+        "event": "audio_read",
+        "measurements": {
+          "bytes": 960,
+          "queue_bytes": 7680
+        },
+        "elapsed_us": 158173944
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 1686,
+          "pending_frames": 1,
+          "work_us": 112
+        },
+        "elapsed_us": 158174020
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 1754,
+          "pending_frames": 0,
+          "work_us": 92
+        },
+        "elapsed_us": 158184082
+      },
+      {
+        "event": "audio_read",
+        "measurements": {
+          "bytes": 960,
+          "queue_bytes": 6720
+        },
+        "elapsed_us": 158194015
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 1751,
+          "pending_frames": 1,
+          "work_us": 184
+        },
+        "elapsed_us": 158194158
+      },
+      {
+        "event": "audio_received",
+        "measurements": {
+          "bytes": 4800,
+          "dropped_bytes": 0,
+          "queue_bytes": 11520,
+          "queue_before_bytes": 6720
+        },
+        "elapsed_us": 158198648
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 1870,
+          "pending_frames": 0,
+          "work_us": 187
+        },
+        "elapsed_us": 158204284
+      },
+      {
+        "event": "audio_read",
+        "measurements": {
+          "bytes": 960,
+          "queue_bytes": 10560
+        },
+        "elapsed_us": 158213225
+      },
+      {
+        "event": "tick",
+        "measurements": {
+          "blocked": 0,
+          "delay_ms": 10,
+          "late_us": 732,
+          "pending_frames": 1,
+          "work_us": 332
+        },
+        "elapsed_us": 158213288
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+[package]
+name = "parlora_rubato"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.92"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rustler = "=0.38.0"
+rubato = { version = "=5.0.0", default-features = false }
+audioadapter-buffers = "=5.2.0"
+
+[profile.release]
+panic = "unwind"

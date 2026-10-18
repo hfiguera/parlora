@@ -1,0 +1,94 @@
+{
+  "purpose": "Interrupted evaluator qualification run; not a release baseline or success-rate sample.",
+  "run": "runs/baseline-20260922",
+  "original_report_sha256": "11a7283ce67596e8fb743c47a265e02c3edaba1163d21b22b2ac450390079d28",
+  "original_progress_sha256": "e992ad491d1356d4ee13bf79d7e75ae491a58801836e72ede3b6dee41b8d9a89",
+  "scheduled": 21,
+  "retained_attempts": 9,
+  "stop_reason": "Manual review found a false-positive saved-destination assertion. Stopped remaining scheduled work before starting a fresh fixed-scorer batch.",
+  "findings": [
+    {
+      "trial": "19-spoken-approval-r1",
+      "finding": "Actual missing confirmation instruction. Draft remained pending and saved orders unchanged; assistant only said it would check."
+    },
+    {
+      "trial": "20-browser-confirmation-r1",
+      "automated_status": "passed",
+      "review": "Evaluator false positive: reception came from an earlier draft sentence; the later save statement ended at a colon without repeating the destination. Original outcome retained; not counted as verified customer success."
+    },
+    {
+      "trial": "05-items-124-r2",
+      "finding": "Session-closing failure observed during the deliberate runner interruption. Do not attribute this to provider availability."
+    },
+    {
+      "finding": "First runner interruption left the per-case incremental evidence but no terminal live-worker report. Fixed terminal retention and summary fallback; covered by a regression test."
+    }
+  ],
+  "attempts": [
+    {
+      "name": "01-cardinal-124-r1",
+      "status": "passed",
+      "duration_ms": 19871,
+      "evidence": "01-cardinal-124-r1.json",
+      "evidence_sha256": "fc32fc879c400b807ff5a52860a80e91d52084adeb1bd5bbd6fcf1c19bf95bb6"
+    },
+    {
+      "name": "05-items-124-r1",
+      "status": "passed",
+      "duration_ms": 16103,
+      "evidence": "05-items-124-r1.json",
+      "evidence_sha256": "e8d1dc383ba59a210625b4d190b5c58c1649e49d7cc25e005eb50b5a5a5db86a"
+    },
+    {
+      "name": "12-correction-r1",
+      "status": "passed",
+      "duration_ms": 27707,
+      "evidence": "12-correction-r1.json",
+      "evidence_sha256": "7a95b3374b2a5dbca2b2a9d71c778cb66d6f12a6874d36e18c802cb3fa30b672"
+    },
+    {
+      "name": "14-followup-items-r1",
+      "status": "passed",
+      "duration_ms": 25103,
+      "evidence": "14-followup-items-r1.json",
+      "evidence_sha256": "4ed754c532ce1bf430cd452644e35444e92df1215ef9ef26e7738dd0eb224e3d"
+    },
+    {
+      "name": "19-spoken-approval-r1",
+      "status": "failed",
+      "duration_ms": 76130,
+      "error": "Timed out: [missing-answer] explain how to confirm in the browser",
+      "evidence": "19-spoken-approval-r1.json",
+      "evidence_sha256": "06b3b7baa79d731e51dd85b50e66a5502fe1141c9e7e639668cc186fc40acb4e"
+    },
+    {
+      "name": "20-browser-confirmation-r1",
+      "status": "passed",
+      "duration_ms": 26349,
+      "evidence": "20-browser-confirmation-r1.json",
+      "evidence_sha256": "979b8b14774a446a6532fd25d4805a843a8e9626c99e13cec398902eb3aab61f"
+    },
+    {
+      "name": "21-reconnect-r1",
+      "status": "passed",
+      "duration_ms": 31028,
+      "evidence": "21-reconnect-r1.json",
+      "evidence_sha256": "3638e05f598ca2e4119ebfe2ac77f7c5aaa01ff536afc17a05d2a1bf5b11ff05"
+    },
+    {
+      "name": "01-cardinal-124-r2",
+      "status": "passed",
+      "duration_ms": 15117,
+      "evidence": "01-cardinal-124-r2.json",
+      "evidence_sha256": "e3330db180b6d5b66996ddc6a2d70e5ba10dea365ade420b043e045b2c44f5d2"
+    },
+    {
+      "name": "05-items-124-r2",
+      "status": "failed",
+      "duration_ms": 7811,
+      "error": "Call ended before the acceptance condition: session closing",
+      "evidence": "05-items-124-r2.json",
+      "evidence_sha256": "6c8d39d1ec5d4e1fa13fa471b4daa497d904324be569266f0c66e9e899b540f2"
+    }
+  ]
+}

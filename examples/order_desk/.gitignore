@@ -1,0 +1,7 @@
+/_build/
+/deps/
+/vendor/
+/erl_crash.dump
+/data/
+/priv/browser/test-audio/
+__pycache__/

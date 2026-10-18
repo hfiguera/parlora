@@ -1,0 +1,1 @@
+{"private":true,"description":"Controlled Twilio caller validation only","dependencies":{"@twilio/voice-sdk":"2.18.3"}}

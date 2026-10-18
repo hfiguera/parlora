@@ -1,0 +1,1447 @@
+{
+  "description": "Ordinary-shortage adaptive wait ceilings only; severe stalls and fixed buffering retain the reference rule. Production AudioPipeline, synthetic PCM, 1 ms virtual transfers, ten render phases. Whole-stream gaps include quiet source boundaries; they are not audible-defect counts.",
+  "summary": [
+    {
+      "passed": true,
+      "scenario": "audible-call",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        28,
+        36
+      ],
+      "large_gaps_range": [
+        12,
+        14
+      ],
+      "max_gap_us": 290000,
+      "max_wait_us": 110000,
+      "total_silence_range_us": [
+        2930000,
+        2940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "audible-call",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        27,
+        31
+      ],
+      "large_gaps_range": [
+        12,
+        13
+      ],
+      "max_gap_us": 270000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2930000,
+        2940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "audible-call",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        24,
+        28
+      ],
+      "large_gaps_range": [
+        13,
+        14
+      ],
+      "max_gap_us": 280000,
+      "max_wait_us": 110000,
+      "total_silence_range_us": [
+        2930000,
+        2940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "audible-call",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        23,
+        28
+      ],
+      "large_gaps_range": [
+        13,
+        15
+      ],
+      "max_gap_us": 280000,
+      "max_wait_us": 110000,
+      "total_silence_range_us": [
+        2930000,
+        2940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "audible-call",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        21,
+        24
+      ],
+      "large_gaps_range": [
+        13,
+        15
+      ],
+      "max_gap_us": 290000,
+      "max_wait_us": 110000,
+      "total_silence_range_us": [
+        2930000,
+        2940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "audible-call",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        18,
+        24
+      ],
+      "large_gaps_range": [
+        12,
+        14
+      ],
+      "max_gap_us": 290000,
+      "max_wait_us": 110000,
+      "total_silence_range_us": [
+        2930000,
+        2940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "first-call",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        45,
+        47
+      ],
+      "large_gaps_range": [
+        11,
+        13
+      ],
+      "max_gap_us": 400000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3790000,
+        3800000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "first-call",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        38,
+        39
+      ],
+      "large_gaps_range": [
+        15,
+        16
+      ],
+      "max_gap_us": 380000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3810000,
+        3820000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "first-call",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        38,
+        38
+      ],
+      "large_gaps_range": [
+        16,
+        18
+      ],
+      "max_gap_us": 380000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3810000,
+        3830000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "first-call",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        38,
+        40
+      ],
+      "large_gaps_range": [
+        18,
+        19
+      ],
+      "max_gap_us": 390000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3800000,
+        3820000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "first-call",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        32,
+        37
+      ],
+      "large_gaps_range": [
+        16,
+        19
+      ],
+      "max_gap_us": 420000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3780000,
+        3820000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "first-call",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        31,
+        34
+      ],
+      "large_gaps_range": [
+        14,
+        17
+      ],
+      "max_gap_us": 410000,
+      "max_wait_us": 110000,
+      "total_silence_range_us": [
+        3780000,
+        3820000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gemini-reference",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 20000,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        29958,
+        29958
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gemini-reference",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 20000,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        29958,
+        29958
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gemini-reference",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 20000,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        29958,
+        29958
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gemini-reference",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 20000,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        29958,
+        29958
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gemini-reference",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 20000,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        29958,
+        29958
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gemini-reference",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 20000,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        29958,
+        29958
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gpt-reference",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        9,
+        10
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 70000,
+      "max_wait_us": 20000,
+      "total_silence_range_us": [
+        420000,
+        430000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gpt-reference",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        7,
+        8
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 110000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        420000,
+        430000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gpt-reference",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        7,
+        8
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 110000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        420000,
+        430000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gpt-reference",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        7,
+        8
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 110000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        420000,
+        430000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gpt-reference",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        7,
+        8
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 110000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        420000,
+        430000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "gpt-reference",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        7,
+        8
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 110000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        420000,
+        430000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "grok-reference",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "grok-reference",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "grok-reference",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "grok-reference",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "grok-reference",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "grok-reference",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "jitter",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "jitter",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "jitter",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "jitter",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "jitter",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "jitter",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "late_bursts",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        16,
+        16
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 40000,
+      "max_wait_us": 20000,
+      "total_silence_range_us": [
+        490000,
+        490000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "late_bursts",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        8,
+        8
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 60000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        480000,
+        480000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "late_bursts",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        8,
+        8
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 60000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        480000,
+        480000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "late_bursts",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        8,
+        8
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 60000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        480000,
+        480000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "late_bursts",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        8,
+        8
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 60000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        480000,
+        480000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "late_bursts",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        8,
+        8
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 60000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        480000,
+        480000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "repeated_shortages",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        35,
+        36
+      ],
+      "large_gaps_range": [
+        10,
+        10
+      ],
+      "max_gap_us": 230000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3890000,
+        3940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "repeated_shortages",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        39,
+        39
+      ],
+      "large_gaps_range": [
+        19,
+        19
+      ],
+      "max_gap_us": 150000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        3880000,
+        3880000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "repeated_shortages",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        39,
+        39
+      ],
+      "large_gaps_range": [
+        28,
+        28
+      ],
+      "max_gap_us": 150000,
+      "max_wait_us": 50000,
+      "total_silence_range_us": [
+        3890000,
+        3890000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "repeated_shortages",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        30,
+        30
+      ],
+      "large_gaps_range": [
+        29,
+        29
+      ],
+      "max_gap_us": 150000,
+      "max_wait_us": 60000,
+      "total_silence_range_us": [
+        3900000,
+        3900000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "repeated_shortages",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        39,
+        39
+      ],
+      "large_gaps_range": [
+        20,
+        20
+      ],
+      "max_gap_us": 170000,
+      "max_wait_us": 80000,
+      "total_silence_range_us": [
+        3920000,
+        3920000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "repeated_shortages",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        30,
+        30
+      ],
+      "large_gaps_range": [
+        20,
+        20
+      ],
+      "max_gap_us": 220000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        3940000,
+        3940000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "second-call",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        31,
+        32
+      ],
+      "large_gaps_range": [
+        6,
+        7
+      ],
+      "max_gap_us": 260000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2140000,
+        2150000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "second-call",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        25,
+        26
+      ],
+      "large_gaps_range": [
+        7,
+        8
+      ],
+      "max_gap_us": 270000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2150000,
+        2160000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "second-call",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        22,
+        25
+      ],
+      "large_gaps_range": [
+        8,
+        10
+      ],
+      "max_gap_us": 270000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2150000,
+        2160000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "second-call",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        21,
+        24
+      ],
+      "large_gaps_range": [
+        9,
+        11
+      ],
+      "max_gap_us": 270000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2150000,
+        2160000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "second-call",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        22,
+        24
+      ],
+      "large_gaps_range": [
+        10,
+        10
+      ],
+      "max_gap_us": 260000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2150000,
+        2160000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "second-call",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        20,
+        22
+      ],
+      "large_gaps_range": [
+        9,
+        11
+      ],
+      "max_gap_us": 270000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        2150000,
+        2160000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "shortage",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 250000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        250000,
+        250000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "shortage",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 250000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        250000,
+        250000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "shortage",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 250000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        250000,
+        250000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "shortage",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 250000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        250000,
+        250000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "shortage",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 250000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        250000,
+        250000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "shortage",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        1,
+        1
+      ],
+      "large_gaps_range": [
+        1,
+        1
+      ],
+      "max_gap_us": 250000,
+      "max_wait_us": 100000,
+      "total_silence_range_us": [
+        250000,
+        250000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "steady",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "steady",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "steady",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "steady",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "steady",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "steady",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        0,
+        0
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 0,
+      "max_wait_us": 0,
+      "total_silence_range_us": [
+        0,
+        0
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "underproduction",
+      "ceiling_ms": 20,
+      "cases": 10,
+      "gaps_range": [
+        196,
+        196
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 60000,
+      "max_wait_us": 20000,
+      "total_silence_range_us": [
+        7860000,
+        7860000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "underproduction",
+      "ceiling_ms": 40,
+      "cases": 10,
+      "gaps_range": [
+        98,
+        98
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 80000,
+      "max_wait_us": 40000,
+      "total_silence_range_us": [
+        7840000,
+        7840000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "underproduction",
+      "ceiling_ms": 50,
+      "cases": 10,
+      "gaps_range": [
+        98,
+        98
+      ],
+      "large_gaps_range": [
+        0,
+        0
+      ],
+      "max_gap_us": 90000,
+      "max_wait_us": 50000,
+      "total_silence_range_us": [
+        7850000,
+        7850000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "underproduction",
+      "ceiling_ms": 60,
+      "cases": 10,
+      "gaps_range": [
+        98,
+        98
+      ],
+      "large_gaps_range": [
+        49,
+        49
+      ],
+      "max_gap_us": 100000,
+      "max_wait_us": 60000,
+      "total_silence_range_us": [
+        7840000,
+        7840000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "underproduction",
+      "ceiling_ms": 80,
+      "cases": 10,
+      "gaps_range": [
+        98,
+        98
+      ],
+      "large_gaps_range": [
+        49,
+        49
+      ],
+      "max_gap_us": 100000,
+      "max_wait_us": 60000,
+      "total_silence_range_us": [
+        7840000,
+        7840000
+      ]
+    },
+    {
+      "passed": true,
+      "scenario": "underproduction",
+      "ceiling_ms": 120,
+      "cases": 10,
+      "gaps_range": [
+        98,
+        98
+      ],
+      "large_gaps_range": [
+        49,
+        49
+      ],
+      "max_gap_us": 100000,
+      "max_wait_us": 60000,
+      "total_silence_range_us": [
+        7840000,
+        7840000
+      ]
+    }
+  ],
+  "passed": true,
+  "cases": 720
+}

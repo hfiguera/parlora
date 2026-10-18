@@ -1,0 +1,65 @@
+{
+  "source": "first 250 packets of ../arrivals.json; 25 s generated assistant PCM",
+  "human_listening_verdict": null,
+  "policies": {
+    "current": {
+      "completed_gaps": 4,
+      "inserted_internal_silence_us": 140000,
+      "gap_durations_us": [
+        30164,
+        19964,
+        19695,
+        69734
+      ],
+      "source_bytes": 1200000,
+      "cleanup": true,
+      "packets_lost": 0,
+      "concealed_samples": 0,
+      "track_capture_discontinuities": 0,
+      "capture_files": {
+        "reference.wav": {
+          "path": "/tmp/parlora-policy-speech-macos/current/reference.wav",
+          "sha256": "2ab8cb2c3db28986a25a55d0d3c98a3b53f5c8ffac329d8fcbe191c584453fdf"
+        },
+        "received.wav": {
+          "path": "/tmp/parlora-policy-speech-macos/current/received.wav",
+          "sha256": "91175e41348281f6d1912fad82f61b3d45eaec9c3c0d6369348f0162fabfeedf"
+        },
+        "worklet.wav": {
+          "path": "/tmp/parlora-policy-speech-macos/current/worklet.wav",
+          "sha256": "bdd8c13a55615d0225a11edf57e3ce6632ced665fc3fbf9890e8d6bdae71ffbc"
+        }
+      }
+    },
+    "immediate": {
+      "completed_gaps": 5,
+      "inserted_internal_silence_us": 140000,
+      "gap_durations_us": [
+        30897,
+        9670,
+        10043,
+        19120,
+        69898
+      ],
+      "source_bytes": 1200000,
+      "cleanup": true,
+      "packets_lost": 0,
+      "concealed_samples": 0,
+      "track_capture_discontinuities": 0,
+      "capture_files": {
+        "reference.wav": {
+          "path": "/tmp/parlora-policy-speech-macos/immediate/reference.wav",
+          "sha256": "2ab8cb2c3db28986a25a55d0d3c98a3b53f5c8ffac329d8fcbe191c584453fdf"
+        },
+        "received.wav": {
+          "path": "/tmp/parlora-policy-speech-macos/immediate/received.wav",
+          "sha256": "6fe69fc814341a11c1e737316b42c00b2e9af81c24c6ebc52fe1f04bd7d0b462"
+        },
+        "worklet.wav": {
+          "path": "/tmp/parlora-policy-speech-macos/immediate/worklet.wav",
+          "sha256": "35d2c1e5f2b7fa5f01370afb8c4afe4663818fa62a64813212498940f5fb9f61"
+        }
+      }
+    }
+  }
+}

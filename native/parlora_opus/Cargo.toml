@@ -1,0 +1,21 @@
+[package]
+name = "parlora_opus"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.92"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rustler = "=0.38.0"
+opus = { package = "opusic-c", version = "=1.6.1", default-features = false }
+
+[build-dependencies]
+pkg-config = "=0.3.34"
+
+[profile.release]
+panic = "unwind"
+
+[lints.clippy]
+undocumented_unsafe_blocks = "deny"

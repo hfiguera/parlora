@@ -1,0 +1,6648 @@
+{
+  "description": "Fresh PCM synthetic retest; numeric samples only, no recorded audio. First 3.5 seconds of output timeline retained for replay.",
+  "windows": [
+    {
+      "event_ms": 1955,
+      "at_us": 373659,
+      "source_peak_before": 252,
+      "source_peak_after": 1712,
+      "inserted_silence_ms": 70.0,
+      "source_resume_after_ms": 67.256,
+      "arrival_gap_ms": 128.574,
+      "forward_gap_ms": 39.967,
+      "first_forward_after_ms": 5.247,
+      "max_poll_gap_us": 6992,
+      "native_underrun_increase": 0
+    },
+    {
+      "event_ms": 2922,
+      "at_us": 1340404,
+      "source_peak_before": 0,
+      "source_peak_after": 1,
+      "inserted_silence_ms": 120.0,
+      "source_resume_after_ms": 121.375,
+      "arrival_gap_ms": 238.64,
+      "forward_gap_ms": 139.793,
+      "first_forward_after_ms": 68.549,
+      "max_poll_gap_us": 7043,
+      "native_underrun_increase": 0
+    },
+    {
+      "event_ms": 4043,
+      "at_us": 2461575,
+      "source_peak_before": 3536,
+      "source_peak_after": 1456,
+      "inserted_silence_ms": 110.0,
+      "source_resume_after_ms": 109.116,
+      "arrival_gap_ms": 198.659,
+      "forward_gap_ms": 109.967,
+      "first_forward_after_ms": 57.294,
+      "max_poll_gap_us": 8110,
+      "native_underrun_increase": 0
+    }
+  ],
+  "events": [
+    {
+      "kind": "playout",
+      "at_us": -1573401,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1545410,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1538828,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1531098,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1525128,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1519170,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1513154,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1507424,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1501120,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1489402,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1477421,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1465398,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1459411,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1447153,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1441438,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1429353,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1417411,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1411392,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1399248,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1387311,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1381095,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1369419,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1356929,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1345298,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1339295,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1327343,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1321317,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1309413,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1297329,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1285251,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1279249,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1267333,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1261226,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1249397,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1237214,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1225391,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1219352,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1207192,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1201418,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1189251,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1177204,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1171391,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1159212,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1147418,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1141252,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1128979,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1116315,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1110427,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1098260,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1092237,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1080233,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1068392,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1062369,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1050293,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1038409,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1026250,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1020182,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1008040,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -1002172,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -988374,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -982272,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -970054,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -955851,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -947381,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -941342,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -929440,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -917183,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -905125,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -899350,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -887438,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -880175,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -868364,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -856298,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -850218,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -838435,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -832395,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -820377,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -808242,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -802409,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -790416,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -778369,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -766398,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -762652,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -760199,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -752393,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -748428,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -741328,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -736364,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -731030,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -730145,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -721361,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -718273,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -711379,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -706371,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -701253,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -700344,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -691367,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -688402,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -681493,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -676187,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -671364,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -670343,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -660592,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -658293,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -651992,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -651942,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -641134,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -638171,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -630638,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -626319,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -622394,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -620396,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -611277,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -608332,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -602222,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -601313,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -591087,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -590121,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -581418,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -578454,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -571421,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -566201,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -560905,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -560349,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -551345,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -548305,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -542450,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -541181,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -530902,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -530141,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -521298,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -518369,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -511155,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -505836,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -500976,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -500327,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -491369,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -488334,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -481173,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -476041,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -471283,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -470204,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -461309,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -458341,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -451138,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -446373,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -441290,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -440221,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -431353,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -428267,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -421138,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -416373,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -410968,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -410302,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -401335,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -398366,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -391188,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -385859,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -380993,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -380272,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -371290,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -368174,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -361206,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -355905,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -350976,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -350349,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -341297,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -338215,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -331055,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -325979,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -321215,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -319311,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -311094,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -307049,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -301283,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -295367,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -291086,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -289388,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -281369,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -276682,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -270834,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -270371,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -261347,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -258266,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -250704,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -246085,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -241413,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -240123,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -231182,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -228349,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -221246,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -215760,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -210957,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -209351,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -200671,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -197084,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -192078,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -184673,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -180732,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -177071,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -171413,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -165237,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -160837,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -159226,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -149545,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -147252,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -141288,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -134976,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -130202,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -128248,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -121109,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -116307,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -110099,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -109831,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -101258,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -98123,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -90722,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -86235,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -81373,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -80284,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -71063,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -68114,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -61322,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -61197,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -50592,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -49101,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -42063,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -36120,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -30972,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -30230,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -21054,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -17836,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -11278,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": -5216,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": -640,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 0,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 841,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 8226,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 8347,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 12785,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 18263,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 19232,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 29400,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 29488,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 34742,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 38618,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 40681,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 48739,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 48800,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 52895,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "playout",
+      "at_us": 58837,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 59056,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 69073,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 69111,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 70650,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 32,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 78883,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 88776,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 88895,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 36,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 89264,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 98020,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 98629,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 108615,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 108648,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 112833,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 42,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 118596,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 128524,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 128564,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 130700,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 39,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 138746,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 149515,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "playout",
+      "at_us": 149812,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 30,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 150208,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 158639,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 168542,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 168656,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 173709,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 92,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 178892,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 188574,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 188628,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 191733,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 440,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 198570,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 208722,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 209672,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2720,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 218700,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 228823,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 233697,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3136,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 238761,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 240707,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 248810,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 248922,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 251738,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3392,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 258640,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 268695,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 268745,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 269873,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4768,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 278627,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 288858,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 288924,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 294258,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4928,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 299283,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 308653,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 308717,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 312849,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3104,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 318969,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 329065,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 329144,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 331866,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 252,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 338939,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 349255,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 349748,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 252,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 358719,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 369063,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 369281,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 373685,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 378862,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 378906,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 379820,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 388749,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 391710,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "playout",
+      "at_us": 397731,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 398809,
+      "bytes": 4800,
+      "queue_bytes": 8640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 3840
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 399241,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 399312,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 408886,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 409783,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 418622,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 418766,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 422024,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "playout",
+      "at_us": 428789,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 429184,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 439326,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 440523,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 440915,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1712,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 448773,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 459530,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "playout",
+      "at_us": 459850,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2400,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 460646,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 468663,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 478907,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 6080,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 478907,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 479396,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 487615,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 498185,
+      "bytes": 4800,
+      "queue_bytes": 8640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 3840
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 498759,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 498899,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 502819,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 6144,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 509222,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 518977,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 519051,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 520761,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3856,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 528800,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 538764,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2224,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 538881,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 539337,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 549314,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 558657,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 558771,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 563469,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1208,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 568671,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 578864,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 578950,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 582996,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 446,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 588952,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 597947,
+      "bytes": 4800,
+      "queue_bytes": 8640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 3840
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 598595,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 598648,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 600679,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 111,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 608643,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 619040,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "playout",
+      "at_us": 619047,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 91,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 619504,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 628737,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 638721,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 638777,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 643828,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 54,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 649143,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 658918,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 659037,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 661778,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 37,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 669296,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 678684,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 678735,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 679912,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 31,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 690896,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 697812,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 36,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 699398,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 699475,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 699939,
+      "bytes": 4800,
+      "queue_bytes": 7680,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 708756,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 719024,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 719142,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 721775,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 42,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 729250,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 738649,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 738705,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 740684,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 33,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 748688,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 758616,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 758644,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 764761,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 15,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 768636,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 778761,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 778804,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 782626,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 7,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 788685,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 796752,
+      "bytes": 4800,
+      "queue_bytes": 8640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 3840
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 799761,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 799912,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 800884,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 8,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 808823,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 818772,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "playout",
+      "at_us": 818864,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 819263,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 829581,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 838752,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 838802,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 843032,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 850302,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 859169,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 859246,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 861787,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 868953,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 878890,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 878977,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 879717,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 888903,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 896110,
+      "bytes": 4800,
+      "queue_bytes": 8640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 3840
+    },
+    {
+      "kind": "playout",
+      "at_us": 898256,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 898818,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 898853,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 908944,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 918598,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 918717,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 923080,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 928650,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 938545,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 938613,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 941893,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 948781,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 958951,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 959080,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 959770,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 968715,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 978949,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 979025,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 983855,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 988642,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 998811,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 998876,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1001715,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1008687,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1018897,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1018981,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1019769,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1028665,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1038967,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1039031,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1044011,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1049545,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1058907,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1059003,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1061737,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1068871,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1069670,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1079318,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1079417,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1079664,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1088076,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1099832,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1099902,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1103731,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1109036,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1118764,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1118801,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1121788,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1128997,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1139099,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1139244,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1139716,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1148716,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1157614,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1158737,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1158753,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1166914,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1168635,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1178593,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1178622,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1181639,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1188756,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1198612,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1198627,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1199659,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1208624,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1218759,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1218796,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1223906,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1228545,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1238846,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1238900,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1241627,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1249208,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1258858,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1258918,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1259913,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 1269160,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1278880,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1283857,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1290221,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1298035,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1302725,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1308586,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1318987,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1320782,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1328881,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1340186,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1340432,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1349003,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1352732,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1358936,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1358981,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1369046,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1370827,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1378601,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1382776,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1388920,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1388951,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1398948,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1401721,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1405554,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1408886,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1408953,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1413693,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 1418923,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1419787,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1429111,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1429303,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1431755,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1438846,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1443767,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1449719,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "playout",
+      "at_us": 1449990,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1450282,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1459065,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1461779,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1468998,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1469072,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1478890,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1479751,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1488844,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1488906,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1497798,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1498938,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1504790,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1509107,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1509176,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1518654,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1523167,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1534086,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1534128,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1538763,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1539916,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1549073,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1549130,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1559742,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1560425,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1567629,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1567742,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1578597,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1583711,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1589513,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1589753,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1598907,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1601746,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1607032,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1608783,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1608825,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1618644,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1619735,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1628521,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1628547,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1638584,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1644876,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1649428,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1649498,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1658636,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1662601,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1668899,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1669002,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1678844,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1680829,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1688852,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1688896,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1699511,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 7,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1699969,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1703855,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1708791,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1708828,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1717695,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 108,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1718582,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1729283,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1729320,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1738778,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1741704,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 132,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1749014,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1749133,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1758643,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1759867,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 166,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1768616,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1768644,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1779322,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1784030,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 330,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1788686,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1788729,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1798712,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1801666,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 249,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1802809,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1808764,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1808806,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1818736,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1819908,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 258,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1829021,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1829114,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1838745,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 221,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1839349,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1848011,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1848139,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1858629,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1864009,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 212,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1868711,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1868770,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1879198,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 151,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1879676,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1891556,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1891952,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1898930,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1903653,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 1903720,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 117,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1908808,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 1908876,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1918636,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1921696,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 86,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1928628,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 1928818,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1938701,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1940846,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 63,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1949199,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 1949295,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1958890,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 44,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 1959880,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1968845,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 1968929,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 1978685,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 1984008,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 22,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 1988835,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 1988902,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2000007,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2002757,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 15,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2004365,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2008630,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 2008929,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2018628,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2020735,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2028964,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 2029048,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2039949,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 5984,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2040506,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2049085,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 2049150,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2058635,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2063701,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 5760,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2068507,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 2068573,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2078561,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2081621,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2528,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2088632,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 2088706,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2098910,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2099780,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1012,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2105404,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2108765,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 2108809,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2118760,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2124105,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 374,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2128551,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 2128588,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2138545,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2141733,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 112,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2149155,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 2149300,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2158637,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2159874,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 892,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2168639,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 2168681,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2178656,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2184237,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1264,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2189112,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 2189175,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2199682,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2202717,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4736,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2208657,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2209430,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2219107,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 2219155,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2221477,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4384,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2228880,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2239334,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 2239399,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2239694,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4416,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2247700,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2257901,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4128,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2258732,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "frame",
+      "at_us": 2258775,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2269089,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2278795,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 2278852,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2281928,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3408,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2289026,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2300348,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 2300445,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2300817,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2448,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2307943,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2311949,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2318820,
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "kind": "frame",
+      "at_us": 2318890,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2320768,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2464,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2332246,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2338651,
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "kind": "frame",
+      "at_us": 2338714,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2339950,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2768,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2349195,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2358890,
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "playout",
+      "at_us": 2358955,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3824,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 2359601,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2368872,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2377703,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4416,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2378873,
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "frame",
+      "at_us": 2378931,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2389040,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2398754,
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "frame",
+      "at_us": 2398807,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2401692,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3088,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2408902,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2418804,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2419758,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3440,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2428780,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2438727,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2443600,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3536,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2448730,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2458648,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2461584,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2468804,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2473667,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2479137,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2479648,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2488793,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2491735,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2498877,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2503932,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2508698,
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "playout",
+      "at_us": 2509819,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2510608,
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2510695,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2518812,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 2518869,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2521688,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 480
+    },
+    {
+      "kind": "frame",
+      "at_us": 2528957,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2534136,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 960
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2538823,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 2538876,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2539986,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2548907,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2551756,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2558698,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 2558740,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2564759,
+      "source_bytes": 0,
+      "silence_bytes": 480,
+      "peak_sample": 0,
+      "queue_bytes": 2400
+    },
+    {
+      "kind": "frame",
+      "at_us": 2568748,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2570691,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1456,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2578752,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 2578861,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2588868,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2992,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2590092,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2599034,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2599154,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2605169,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2608685,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2613614,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3088,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2618600,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 2618626,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2628607,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2631585,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3264,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2638688,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 2638713,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2648586,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2649664,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3008,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2658614,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 2658635,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2668775,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2673590,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2480,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2678776,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 2678797,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2688678,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2691638,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2656,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2698826,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2698850,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2704984,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2708572,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2709600,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1640,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2718731,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 2718764,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2728636,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2733764,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2040,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2738668,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 2738724,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2748637,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2751718,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2992,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2758847,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 2758887,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2769070,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2769923,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3056,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2778557,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 2778655,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2788736,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2794215,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3072,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2799071,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2799151,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2804940,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2808673,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2812667,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2496,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2818737,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 2818855,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2828698,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2830678,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3936,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2838717,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 2838766,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2848974,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 5984,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2849397,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2857565,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 2857665,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2868615,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2872729,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 6912,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2878700,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 2878741,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2888753,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2890726,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4608,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2898770,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2898870,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2903361,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "playout",
+      "at_us": 2908766,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4864,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2909166,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2918716,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 2918807,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2928733,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2932654,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 5152,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2938728,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 2938869,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2948869,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2950712,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4736,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2958729,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 2958771,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2968759,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4256,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 2969207,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2978822,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 2978866,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 2988780,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 2992645,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4672,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 2998664,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 2998824,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3006762,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3008690,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3010766,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 2336,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3019025,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 3019102,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3029255,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3034822,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 4288,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3038655,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 3038720,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3049845,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3168,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 3050499,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3058990,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 3059100,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3068813,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3073636,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3600,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3078783,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 3078830,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3088666,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3091644,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3632,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3098728,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3098752,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3102966,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3108664,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3109678,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3392,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3118606,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 3118632,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3128790,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3133697,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3504,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3138777,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 3138927,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3149512,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3151639,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3488,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3158962,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 3159056,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3168770,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3169716,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3776,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3178768,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 3178840,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3189073,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3193669,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3216,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3198768,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3198824,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3203310,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3208734,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3211749,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3040,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3218797,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 3218835,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3228642,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3230674,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1004,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3238878,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 3238973,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3248806,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 454,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 3249238,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3258974,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 3259063,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3269030,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3272739,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1032,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3279087,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 3279324,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3289015,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3290786,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 318,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3298971,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3299059,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3302450,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "playout",
+      "at_us": 3309119,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 133,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 3309695,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3318784,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 3318836,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3329096,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3333794,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1720,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3338782,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 3338843,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3349157,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3351850,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 1336,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3359115,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 3359315,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3369033,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3370781,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 440,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3378829,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 3379001,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3389130,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 312,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 3391363,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3397648,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3397733,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3403375,
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3408777,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3414884,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 418,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3418731,
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "kind": "frame",
+      "at_us": 3418783,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3429032,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3433330,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 292,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3438769,
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "kind": "frame",
+      "at_us": 3438857,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3449255,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3451830,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 6528,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3458562,
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "kind": "frame",
+      "at_us": 3458633,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "frame",
+      "at_us": 3468717,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3469908,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 7584,
+      "queue_bytes": 1920
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3479291,
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "kind": "frame",
+      "at_us": 3480199,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "playout",
+      "at_us": 3488886,
+      "source_bytes": 960,
+      "silence_bytes": 0,
+      "peak_sample": 3376,
+      "queue_bytes": 1440
+    },
+    {
+      "kind": "frame",
+      "at_us": 3490257,
+      "bytes": 480,
+      "duration_us": 10000
+    },
+    {
+      "kind": "audio_read",
+      "at_us": 3498820,
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "kind": "frame",
+      "at_us": 3498892,
+      "bytes": 480,
+      "duration_us": 10000
+    }
+  ]
+}

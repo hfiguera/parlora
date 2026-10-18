@@ -1,0 +1,677 @@
+[
+  {
+    "capture": "first-level-call",
+    "pairs": [
+      {
+        "phase": 0,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 334150,
+          "startup_us": 110000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 334150,
+          "startup_us": 110000
+        }
+      },
+      {
+        "phase": 1000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1960000,
+          "max_playout_age_us": 335150,
+          "startup_us": 111000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1960000,
+          "max_playout_age_us": 335150,
+          "startup_us": 111000
+        }
+      },
+      {
+        "phase": 2000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1970000,
+          "max_playout_age_us": 336150,
+          "startup_us": 102000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1970000,
+          "max_playout_age_us": 336150,
+          "startup_us": 102000
+        }
+      },
+      {
+        "phase": 3000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 337150,
+          "startup_us": 103000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 337150,
+          "startup_us": 103000
+        }
+      },
+      {
+        "phase": 4000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 338150,
+          "startup_us": 104000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 338150,
+          "startup_us": 104000
+        }
+      },
+      {
+        "phase": 5000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 339150,
+          "startup_us": 105000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 339150,
+          "startup_us": 105000
+        }
+      },
+      {
+        "phase": 6000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 340150,
+          "startup_us": 106000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1990000,
+          "max_playout_age_us": 340150,
+          "startup_us": 106000
+        }
+      },
+      {
+        "phase": 7000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 331150,
+          "startup_us": 107000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 331150,
+          "startup_us": 107000
+        }
+      },
+      {
+        "phase": 8000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 332150,
+          "startup_us": 108000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 332150,
+          "startup_us": 108000
+        }
+      },
+      {
+        "phase": 9000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 333150,
+          "startup_us": 109000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 0,
+          "nonquiet_us": 0,
+          "max_nonquiet_us": 0,
+          "inserted_silence_us": 1980000,
+          "max_playout_age_us": 333150,
+          "startup_us": 109000
+        }
+      }
+    ]
+  },
+  {
+    "capture": "heard-middle-call",
+    "pairs": [
+      {
+        "phase": 0,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3260000,
+          "max_playout_age_us": 274982,
+          "startup_us": 100000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3260000,
+          "max_playout_age_us": 274982,
+          "startup_us": 100000
+        }
+      },
+      {
+        "phase": 1000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3260000,
+          "max_playout_age_us": 275982,
+          "startup_us": 101000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3260000,
+          "max_playout_age_us": 275982,
+          "startup_us": 101000
+        }
+      },
+      {
+        "phase": 2000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 1,
+          "nonquiet_us": 30000,
+          "max_nonquiet_us": 30000,
+          "inserted_silence_us": 3280000,
+          "max_playout_age_us": 286982,
+          "startup_us": 102000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 1,
+          "nonquiet_us": 30000,
+          "max_nonquiet_us": 30000,
+          "inserted_silence_us": 3280000,
+          "max_playout_age_us": 286982,
+          "startup_us": 102000
+        }
+      },
+      {
+        "phase": 3000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 130000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 3270000,
+          "max_playout_age_us": 287982,
+          "startup_us": 103000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 130000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 3270000,
+          "max_playout_age_us": 287982,
+          "startup_us": 103000
+        }
+      },
+      {
+        "phase": 4000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 130000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 3270000,
+          "max_playout_age_us": 288982,
+          "startup_us": 104000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 130000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 3270000,
+          "max_playout_age_us": 288982,
+          "startup_us": 104000
+        }
+      },
+      {
+        "phase": 5000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 130000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 3270000,
+          "max_playout_age_us": 289982,
+          "startup_us": 105000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 130000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 3270000,
+          "max_playout_age_us": 289982,
+          "startup_us": 105000
+        }
+      },
+      {
+        "phase": 6000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 120000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 257880,
+          "startup_us": 106000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 120000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 257880,
+          "startup_us": 106000
+        }
+      },
+      {
+        "phase": 7000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 271982,
+          "startup_us": 107000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 271982,
+          "startup_us": 107000
+        }
+      },
+      {
+        "phase": 8000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 272982,
+          "startup_us": 108000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 272982,
+          "startup_us": 108000
+        }
+      },
+      {
+        "phase": 9000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 273982,
+          "startup_us": 109000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 2,
+          "nonquiet_us": 110000,
+          "max_nonquiet_us": 80000,
+          "inserted_silence_us": 3250000,
+          "max_playout_age_us": 273982,
+          "startup_us": 109000
+        }
+      }
+    ]
+  },
+  {
+    "capture": "gpt-live-call",
+    "pairs": [
+      {
+        "phase": 0,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 5,
+          "nonquiet_us": 480000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 288091,
+          "startup_us": 100000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 5,
+          "nonquiet_us": 340000,
+          "max_nonquiet_us": 130000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 288091,
+          "startup_us": 100000
+        }
+      },
+      {
+        "phase": 1000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 4,
+          "nonquiet_us": 440000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 289091,
+          "startup_us": 101000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 4,
+          "nonquiet_us": 240000,
+          "max_nonquiet_us": 130000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 289091,
+          "startup_us": 101000
+        }
+      },
+      {
+        "phase": 2000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 5,
+          "nonquiet_us": 460000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 290091,
+          "startup_us": 102000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 4,
+          "nonquiet_us": 250000,
+          "max_nonquiet_us": 120000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 290091,
+          "startup_us": 102000
+        }
+      },
+      {
+        "phase": 3000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 6,
+          "nonquiet_us": 450000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 291091,
+          "startup_us": 103000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 4,
+          "nonquiet_us": 250000,
+          "max_nonquiet_us": 120000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 291091,
+          "startup_us": 103000
+        }
+      },
+      {
+        "phase": 4000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 7,
+          "nonquiet_us": 530000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 292091,
+          "startup_us": 104000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 6,
+          "nonquiet_us": 300000,
+          "max_nonquiet_us": 100000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 292091,
+          "startup_us": 104000
+        }
+      },
+      {
+        "phase": 5000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 7,
+          "nonquiet_us": 550000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 293091,
+          "startup_us": 105000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 6,
+          "nonquiet_us": 360000,
+          "max_nonquiet_us": 120000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 293091,
+          "startup_us": 105000
+        }
+      },
+      {
+        "phase": 6000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 9,
+          "nonquiet_us": 470000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 284091,
+          "startup_us": 106000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 8,
+          "nonquiet_us": 330000,
+          "max_nonquiet_us": 120000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 284091,
+          "startup_us": 106000
+        }
+      },
+      {
+        "phase": 7000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 8,
+          "nonquiet_us": 530000,
+          "max_nonquiet_us": 210000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 285091,
+          "startup_us": 107000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 7,
+          "nonquiet_us": 390000,
+          "max_nonquiet_us": 130000,
+          "inserted_silence_us": 2800000,
+          "max_playout_age_us": 285091,
+          "startup_us": 107000
+        }
+      },
+      {
+        "phase": 8000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 8,
+          "nonquiet_us": 510000,
+          "max_nonquiet_us": 220000,
+          "inserted_silence_us": 2760000,
+          "max_playout_age_us": 286091,
+          "startup_us": 108000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 7,
+          "nonquiet_us": 370000,
+          "max_nonquiet_us": 140000,
+          "inserted_silence_us": 2760000,
+          "max_playout_age_us": 286091,
+          "startup_us": 108000
+        }
+      },
+      {
+        "phase": 9000,
+        "passed": true,
+        "baseline": {
+          "passed": true,
+          "nonquiet_count": 5,
+          "nonquiet_us": 480000,
+          "max_nonquiet_us": 200000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 287091,
+          "startup_us": 99000
+        },
+        "candidate": {
+          "passed": true,
+          "nonquiet_count": 5,
+          "nonquiet_us": 340000,
+          "max_nonquiet_us": 130000,
+          "inserted_silence_us": 2770000,
+          "max_playout_age_us": 287091,
+          "startup_us": 99000
+        }
+      }
+    ]
+  }
+]

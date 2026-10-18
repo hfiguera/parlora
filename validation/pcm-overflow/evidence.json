@@ -1,0 +1,2695 @@
+{
+  "capacity_bytes": 33600,
+  "frame_bytes": 960,
+  "bytes_per_ms": 48,
+  "failure": {
+    "cause": "output_overflow",
+    "queue_bytes": 29760,
+    "audio_trace": {
+      "events": [
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 5578225,
+          "queue_bytes": 21120
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5580166,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5610142,
+          "queue_bytes": 24000
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5630113,
+          "queue_bytes": 23040
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5650220,
+          "queue_bytes": 22080
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5670991,
+          "queue_bytes": 21120
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 5678974,
+          "queue_bytes": 21120
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5690242,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5720189,
+          "queue_bytes": 24000
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5740218,
+          "queue_bytes": 23040
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5770168,
+          "queue_bytes": 22080
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 5777688,
+          "queue_bytes": 22080
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5790114,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5810204,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5840211,
+          "queue_bytes": 24000
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5860112,
+          "queue_bytes": 23040
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 5878870,
+          "queue_bytes": 23040
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5880413,
+          "queue_bytes": 26880
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5910133,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5930105,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5950200,
+          "queue_bytes": 24000
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 5976036,
+          "queue_bytes": 24000
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 5980166,
+          "queue_bytes": 27840
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6000294,
+          "queue_bytes": 26880
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6030081,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6050212,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6075933,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6080191,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6100172,
+          "queue_bytes": 27840
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6130187,
+          "queue_bytes": 26880
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6150141,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6170247,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6175856,
+          "queue_bytes": 24960
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6200266,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6220185,
+          "queue_bytes": 27840
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6240286,
+          "queue_bytes": 26880
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6270164,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6278612,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6290134,
+          "queue_bytes": 29760
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6310259,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6340308,
+          "queue_bytes": 27840
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6360055,
+          "queue_bytes": 26880
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6380221,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6383647,
+          "queue_bytes": 25920
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6410205,
+          "queue_bytes": 29760
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6440185,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6460196,
+          "queue_bytes": 27840
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6477776,
+          "queue_bytes": 27840
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6492037,
+          "queue_bytes": 31680
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6510048,
+          "queue_bytes": 30720
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6530112,
+          "queue_bytes": 29760
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6550181,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6575732,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6580173,
+          "queue_bytes": 32640
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6610268,
+          "queue_bytes": 31680
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6630276,
+          "queue_bytes": 30720
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6650264,
+          "queue_bytes": 29760
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6669148,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6676932,
+          "queue_bytes": 28800
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6700256,
+          "queue_bytes": 32640
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6730195,
+          "queue_bytes": 31680
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6750165,
+          "queue_bytes": 30720
+        },
+        {
+          "bytes": 960,
+          "kind": "read",
+          "at_us": 6770142,
+          "queue_bytes": 29760
+        },
+        {
+          "bytes": 4800,
+          "kind": "received",
+          "at_us": 6777688,
+          "queue_bytes": 29760
+        }
+      ],
+      "truncated": true,
+      "elapsed_us": 6777691,
+      "events_seen": 352
+    },
+    "capacity_bytes": 33600,
+    "dropped_bytes": 34560,
+    "incoming_bytes": 4800,
+    "max_age_ms": 750,
+    "oldest_age_us": 701756
+  },
+  "last_second": {
+    "tick_count": 99,
+    "blocked_ticks": 16,
+    "max_tick_late_us": 4792,
+    "max_tick_work_us": 1279,
+    "forwarded_audio_ms": 830.0
+  },
+  "device_clock": {
+    "after": {
+      "stopped": false,
+      "dropped": 13440,
+      "errors": 0,
+      "epoch": 0,
+      "handed_off": 105116,
+      "rendered": 124320,
+      "output_rate": 48000,
+      "input_rate": 48000,
+      "output_channels": 2,
+      "max_poll_gap_us": 185979,
+      "input_ppm": 0,
+      "output_ppm": 0,
+      "playback_starvations": 0,
+      "playback_silence_bytes": 106560,
+      "playback_source_bytes": 0,
+      "underrun": 19204,
+      "observed_epoch": 0,
+      "input_channels": 1,
+      "output_queued": 1440,
+      "capture_us": 779,
+      "playback_us": 1594,
+      "input_queued": 0,
+      "observe_us": 748,
+      "captured": 124320,
+      "input_callbacks": 259,
+      "output_callbacks": 259
+    },
+    "elapsed_us": 3001089,
+    "before": {
+      "stopped": false,
+      "dropped": 0,
+      "errors": 0,
+      "epoch": 0,
+      "handed_off": 476,
+      "rendered": 960,
+      "output_rate": 48000,
+      "input_rate": 48000,
+      "output_channels": 2,
+      "max_poll_gap_us": 956,
+      "input_ppm": 0,
+      "output_ppm": 0,
+      "playback_starvations": 0,
+      "playback_silence_bytes": 480,
+      "playback_source_bytes": 0,
+      "underrun": 484,
+      "observed_epoch": 0,
+      "input_channels": 1,
+      "output_queued": 0,
+      "capture_us": 48,
+      "playback_us": 1594,
+      "input_queued": 480,
+      "observe_us": 748,
+      "captured": 960,
+      "input_callbacks": 2,
+      "output_callbacks": 2
+    },
+    "rendered_audio_ms": 2570.0,
+    "rendered_ratio": 0.8563558095078153
+  },
+  "pcm_sink": {
+    "chunks": 133,
+    "peak_queue_bytes": 5760,
+    "dropped_bytes": 0,
+    "blocked_ticks": 0
+  },
+  "events": [
+    {
+      "at_us": 0,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 10548,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 21606,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 31532,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 42219,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 50499,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 61518,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 71651,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 81538,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 91773,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 101538,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 111800,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 121896,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 133402,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 146037,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 151110,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 160590,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 171640,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 181988,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 190857,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 201439,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 211687,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 221548,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 231827,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 243495,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 251368,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 261372,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 271467,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 281937,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 290892,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 301674,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 311544,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 322270,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 331559,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 342994,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 351057,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 361198,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 371022,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 381222,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 390911,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 400735,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 412082,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 421250,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 430487,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 441480,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 451466,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 461464,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 471502,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 481511,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 491694,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 501697,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 511411,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 521598,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 532175,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 540800,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 551836,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 561715,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 572319,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 580524,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 591626,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 602039,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 610479,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 621707,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 632030,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 640468,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 651708,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 661475,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 671466,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 681609,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 692037,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 700508,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 711600,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 722065,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 730646,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 741577,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 751559,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 761861,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 771595,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 781533,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 791602,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 801514,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 810151,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 811519,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 831520,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 851707,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 871411,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 891477,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 909482,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 911456,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 931424,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 951903,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 970695,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 991569,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1011670,
+      "kind": "audio_read",
+      "bytes": 0,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1013054,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1021965,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1041624,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1060442,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1081679,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1101517,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1112758,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1121705,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1141638,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1161470,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1181511,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1201495,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1210812,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1221401,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1241428,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1261450,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1281410,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1301594,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1313449,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1321519,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1341508,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1361413,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1381448,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1401463,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1410536,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1421408,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1441431,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1461477,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1481487,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1501512,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1507580,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1521511,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1541455,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1561444,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1581428,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1601464,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1607999,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1621871,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1641497,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1661608,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1681477,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1701549,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1714403,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1721505,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1741641,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1761529,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1781462,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1801689,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 0
+    },
+    {
+      "at_us": 1817916,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 4800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 0
+    },
+    {
+      "at_us": 1820924,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1841474,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1861477,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 1891406,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 960
+    },
+    {
+      "at_us": 1907941,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 5760,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 960
+    },
+    {
+      "at_us": 1911451,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "at_us": 1941436,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 1961465,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 1981638,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 1920
+    },
+    {
+      "at_us": 2009475,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 6720,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 1920
+    },
+    {
+      "at_us": 2011472,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "at_us": 2041450,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "at_us": 2061471,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 2081454,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 2110197,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 7680,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 2880
+    },
+    {
+      "at_us": 2111444,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "at_us": 2133421,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "at_us": 2151534,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "at_us": 2181502,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 2201477,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 2880
+    },
+    {
+      "at_us": 2214957,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 7680,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 2880
+    },
+    {
+      "at_us": 2231494,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "at_us": 2251430,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "at_us": 2281435,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "at_us": 2301437,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 3840
+    },
+    {
+      "at_us": 2315226,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 8640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 3840
+    },
+    {
+      "at_us": 2321728,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "at_us": 2351506,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "at_us": 2371496,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "at_us": 2401437,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 4800
+    },
+    {
+      "at_us": 2410045,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 9600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 4800
+    },
+    {
+      "at_us": 2421438,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "at_us": 2441525,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "at_us": 2472940,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "at_us": 2491754,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 5760
+    },
+    {
+      "at_us": 2512372,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 10560,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 5760
+    },
+    {
+      "at_us": 2521521,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 9600
+    },
+    {
+      "at_us": 2541460,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "at_us": 2571484,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "at_us": 2591534,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 6720
+    },
+    {
+      "at_us": 2608274,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 11520,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 6720
+    },
+    {
+      "at_us": 2611448,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 10560
+    },
+    {
+      "at_us": 2631500,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 9600
+    },
+    {
+      "at_us": 2661616,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "at_us": 2681758,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "at_us": 2709052,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 12480,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 7680
+    },
+    {
+      "at_us": 2711500,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 11520
+    },
+    {
+      "at_us": 2731491,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 10560
+    },
+    {
+      "at_us": 2761458,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 9600
+    },
+    {
+      "at_us": 2781450,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "at_us": 2801462,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 7680
+    },
+    {
+      "at_us": 2813027,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 12480,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 7680
+    },
+    {
+      "at_us": 2821494,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 11520
+    },
+    {
+      "at_us": 2851620,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 10560
+    },
+    {
+      "at_us": 2871531,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 9600
+    },
+    {
+      "at_us": 2901414,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 8640
+    },
+    {
+      "at_us": 2910317,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 13440,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 8640
+    },
+    {
+      "at_us": 2921610,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 12480
+    },
+    {
+      "at_us": 2941433,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 11520
+    },
+    {
+      "at_us": 2961489,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 10560
+    },
+    {
+      "at_us": 2991661,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 9600
+    },
+    {
+      "at_us": 3010220,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 14400,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 9600
+    },
+    {
+      "at_us": 3011526,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 13440
+    },
+    {
+      "at_us": 3031565,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 12480
+    },
+    {
+      "at_us": 3061525,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 11520
+    },
+    {
+      "at_us": 3081557,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 10560
+    },
+    {
+      "at_us": 3109853,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 15360,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 10560
+    },
+    {
+      "at_us": 3111508,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 14400
+    },
+    {
+      "at_us": 3131489,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 13440
+    },
+    {
+      "at_us": 3151529,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 12480
+    },
+    {
+      "at_us": 3181607,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 11520
+    },
+    {
+      "at_us": 3201555,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 10560
+    },
+    {
+      "at_us": 3210623,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 15360,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 10560
+    },
+    {
+      "at_us": 3231501,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 14400
+    },
+    {
+      "at_us": 3251578,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 13440
+    },
+    {
+      "at_us": 3271586,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 12480
+    },
+    {
+      "at_us": 3301576,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 11520
+    },
+    {
+      "at_us": 3308702,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 16320,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 11520
+    },
+    {
+      "at_us": 3331590,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 15360
+    },
+    {
+      "at_us": 3351654,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 14400
+    },
+    {
+      "at_us": 3371589,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 13440
+    },
+    {
+      "at_us": 3401550,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 12480
+    },
+    {
+      "at_us": 3413058,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 17280,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 12480
+    },
+    {
+      "at_us": 3421533,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 16320
+    },
+    {
+      "at_us": 3441541,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 15360
+    },
+    {
+      "at_us": 3471668,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 14400
+    },
+    {
+      "at_us": 3491583,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 13440
+    },
+    {
+      "at_us": 3510571,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 18240,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 13440
+    },
+    {
+      "at_us": 3511668,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 3541473,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 16320
+    },
+    {
+      "at_us": 3571565,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 15360
+    },
+    {
+      "at_us": 3591494,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 14400
+    },
+    {
+      "at_us": 3609216,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 19200,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 14400
+    },
+    {
+      "at_us": 3611518,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 3641507,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 3661730,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 16320
+    },
+    {
+      "at_us": 3691613,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 15360
+    },
+    {
+      "at_us": 3709648,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 20160,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 15360
+    },
+    {
+      "at_us": 3711489,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 3731560,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 3751546,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 3781556,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 16320
+    },
+    {
+      "at_us": 3801486,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 15360
+    },
+    {
+      "at_us": 3807617,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 20160,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 15360
+    },
+    {
+      "at_us": 3821633,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 3851595,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 3871612,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 3901679,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 16320
+    },
+    {
+      "at_us": 3909513,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 21120,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 16320
+    },
+    {
+      "at_us": 3921481,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 20160
+    },
+    {
+      "at_us": 3941564,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 3961556,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 3991539,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 4011662,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 16320
+    },
+    {
+      "at_us": 4012640,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 21120,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 16320
+    },
+    {
+      "at_us": 4031548,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 20160
+    },
+    {
+      "at_us": 4051554,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 4081665,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 4101659,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 4111538,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 22080,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 17280
+    },
+    {
+      "at_us": 4121592,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 21120
+    },
+    {
+      "at_us": 4141560,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 20160
+    },
+    {
+      "at_us": 4161579,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 4181797,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 4201488,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 17280
+    },
+    {
+      "at_us": 4210033,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 22080,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 17280
+    },
+    {
+      "at_us": 4231442,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 21120
+    },
+    {
+      "at_us": 4251569,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 20160
+    },
+    {
+      "at_us": 4281529,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 4301521,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 18240
+    },
+    {
+      "at_us": 4310057,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 23040,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 18240
+    },
+    {
+      "at_us": 4331537,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 22080
+    },
+    {
+      "at_us": 4351619,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 21120
+    },
+    {
+      "at_us": 4371627,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 20160
+    },
+    {
+      "at_us": 4401590,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 19200
+    },
+    {
+      "at_us": 4409302,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 24000,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 19200
+    },
+    {
+      "at_us": 4431581,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 23040
+    },
+    {
+      "at_us": 4451523,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 22080
+    },
+    {
+      "at_us": 4471546,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 21120
+    },
+    {
+      "at_us": 4491538,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 20160
+    },
+    {
+      "at_us": 4509535,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 24960,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 20160
+    },
+    {
+      "at_us": 4521533,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24000
+    },
+    {
+      "at_us": 4541742,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 23040
+    },
+    {
+      "at_us": 4561388,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 22080
+    },
+    {
+      "at_us": 4581570,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 21120
+    },
+    {
+      "at_us": 4609583,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 25920,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 21120
+    },
+    {
+      "at_us": 4611515,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24960
+    },
+    {
+      "at_us": 4641491,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24000
+    },
+    {
+      "at_us": 4661462,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 23040
+    },
+    {
+      "at_us": 4681569,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 22080
+    },
+    {
+      "at_us": 4702339,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 21120
+    },
+    {
+      "at_us": 4710340,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 25920,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 21120
+    },
+    {
+      "at_us": 4721591,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24960
+    },
+    {
+      "at_us": 4751538,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24000
+    },
+    {
+      "at_us": 4771567,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 23040
+    },
+    {
+      "at_us": 4801518,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 22080
+    },
+    {
+      "at_us": 4809044,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 26880,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 22080
+    },
+    {
+      "at_us": 4821463,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 25920
+    },
+    {
+      "at_us": 4841553,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24960
+    },
+    {
+      "at_us": 4871560,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24000
+    },
+    {
+      "at_us": 4891460,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 23040
+    },
+    {
+      "at_us": 4910238,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 27840,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 23040
+    },
+    {
+      "at_us": 4911762,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 26880
+    },
+    {
+      "at_us": 4941482,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 25920
+    },
+    {
+      "at_us": 4961455,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24960
+    },
+    {
+      "at_us": 4981549,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24000
+    },
+    {
+      "at_us": 5007395,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 28800,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 24000
+    },
+    {
+      "at_us": 5011516,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 27840
+    },
+    {
+      "at_us": 5031642,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 26880
+    },
+    {
+      "at_us": 5061429,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 25920
+    },
+    {
+      "at_us": 5081561,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24960
+    },
+    {
+      "at_us": 5107293,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 29760,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 24960
+    },
+    {
+      "at_us": 5111541,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 28800
+    },
+    {
+      "at_us": 5131521,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 27840
+    },
+    {
+      "at_us": 5161536,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 26880
+    },
+    {
+      "at_us": 5181491,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 25920
+    },
+    {
+      "at_us": 5201596,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 24960
+    },
+    {
+      "at_us": 5207224,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 29760,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 24960
+    },
+    {
+      "at_us": 5231614,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 28800
+    },
+    {
+      "at_us": 5251534,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 27840
+    },
+    {
+      "at_us": 5271635,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 26880
+    },
+    {
+      "at_us": 5301514,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 25920
+    },
+    {
+      "at_us": 5309973,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 30720,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 25920
+    },
+    {
+      "at_us": 5321484,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 29760
+    },
+    {
+      "at_us": 5341608,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 28800
+    },
+    {
+      "at_us": 5371656,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 27840
+    },
+    {
+      "at_us": 5391404,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 26880
+    },
+    {
+      "at_us": 5411569,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 25920
+    },
+    {
+      "at_us": 5415011,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 30720,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 25920
+    },
+    {
+      "at_us": 5441555,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 29760
+    },
+    {
+      "at_us": 5471535,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 28800
+    },
+    {
+      "at_us": 5491545,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 27840
+    },
+    {
+      "at_us": 5509137,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 32640,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 27840
+    },
+    {
+      "at_us": 5523387,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 31680
+    },
+    {
+      "at_us": 5541397,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 30720
+    },
+    {
+      "at_us": 5561461,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 29760
+    },
+    {
+      "at_us": 5581531,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 28800
+    },
+    {
+      "at_us": 5607101,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 33600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 28800
+    },
+    {
+      "at_us": 5611523,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 32640
+    },
+    {
+      "at_us": 5641618,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 31680
+    },
+    {
+      "at_us": 5661625,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 30720
+    },
+    {
+      "at_us": 5681614,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 29760
+    },
+    {
+      "at_us": 5700497,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 28800
+    },
+    {
+      "at_us": 5708298,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 33600,
+      "dropped_bytes": 0,
+      "queue_before_bytes": 28800
+    },
+    {
+      "at_us": 5731604,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 32640
+    },
+    {
+      "at_us": 5761544,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 31680
+    },
+    {
+      "at_us": 5781515,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 30720
+    },
+    {
+      "at_us": 5801491,
+      "kind": "audio_read",
+      "bytes": 960,
+      "queue_bytes": 29760
+    },
+    {
+      "at_us": 5815041,
+      "kind": "audio_received",
+      "bytes": 4800,
+      "queue_bytes": 0,
+      "dropped_bytes": 34560,
+      "queue_before_bytes": 29760
+    }
+  ]
+}

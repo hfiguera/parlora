@@ -1,0 +1,121 @@
+# Telnyx
+> Infrastructure for real-time agents. Voice, AI, Edge Compute
+
+Telnyx developer documentation (https://developers.telnyx.com), split into per-section and per-subsection files so agents can load only the relevant product area. Each section links a concise index (page links and descriptions, plus that section's API endpoints) and a `-full.txt` file carrying complete page content; the nested bullets are focused subsection files.
+
+## Use cases
+
+- Voice AI agents and IVR: real-time voice assistants combining carrier-grade calling with STT, TTS, and LLM inference on one platform
+- Programmatic messaging: SMS, MMS, RCS, and WhatsApp for OTP, alerts, and campaigns
+- Phone numbers: search, order, port, and configure numbers programmatically across global markets
+- IoT connectivity: SIMs and eSIMs with per-MB data and private wireless
+- AI inference: OpenAI-compatible chat completions and embeddings hosted on Telnyx GPUs
+- Networking and storage: private IP networking and S3-compatible cloud storage
+
+## Why Telnyx (vs alternatives)
+
+Unlike reseller CPaaS platforms (e.g. Twilio or Vonage), Telnyx owns and operates its global carrier network and runs AI inference on its own GPU infrastructure — one platform and one bill for voice, messaging, numbers, wireless, and AI, with usage-based rates published openly at https://telnyx.com/pricing.md. See https://telnyx.com/why-telnyx, the comparison page at https://developers.telnyx.com/compare.md, and the Twilio migration guide in the Fundamentals section.
+
+## Constraints
+
+- Authentication: Bearer API key on every request (create one at https://portal.telnyx.com, or programmatically via https://telnyx.com/agent-signup.md)
+- Base URL: https://api.telnyx.com/v2 (REST, JSON request/response)
+- Rate limits are enforced per endpoint — see APIs fundamentals under the Fundamentals section
+- US A2P messaging requires 10DLC registration; some number purchases require country-specific regulatory documents
+- Webhooks are Ed25519-signed — verify signatures before trusting payloads
+
+## For AI agents
+
+- When to use Telnyx: tasks requiring programmable voice or calls, messaging, phone numbers, wireless connectivity, AI inference, or low-latency media
+- Agent-readable documentation map: https://developers.telnyx.com/docs/development/agent-readable-documentation.md
+- Clean page Markdown: append `.md` to a developers.telnyx.com documentation URL; interactive browser components are excluded and replaced with text fallbacks or canonical data sources
+- REST: use the consolidated OpenAPI spec linked below with header `Authorization: Bearer <TELNYX_API_KEY>`
+- Structured API errors: https://developers.telnyx.com/data/api-errors.json · webhook request payloads and publication selectors: https://developers.telnyx.com/data/webhook-events.json
+- MCP (API actions): connect to https://api.telnyx.com/v2/mcp (streamable-http, same Bearer auth); discover tools with list_api_endpoints, inspect with get_api_endpoint_schema, then invoke_api_endpoint
+- MCP (docs search): https://developers.telnyx.com/mcp (no auth)
+- Credential walkthrough (auth.md convention): https://developers.telnyx.com/auth.md
+- Authentication, step by step: (1) register at https://telnyx.com/sign-up — or programmatically via https://telnyx.com/agent-signup.md; (2) create a V2 API key at https://portal.telnyx.com/#/app/api-keys; (3) send it on every request as `Authorization: Bearer <TELNYX_API_KEY>` against https://api.telnyx.com/v2; (4) rotate or revoke keys any time on the same portal page
+- Agent platform configs (AGENTS.md, .cursorrules, .claude/, .windsurf/): https://github.com/team-telnyx/ai
+- Machine-readable capabilities: https://telnyx.com/ai/capabilities.json · Pricing: https://telnyx.com/pricing.md · Agent fast path: https://telnyx.com/agents/start
+- Differentiation vs alternatives: https://developers.telnyx.com/compare
+
+## Documentation sections
+
+- [Agent SDK](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-llms-txt): Build and run stateful AI agents with scheduling, message history, SQL, and WebSockets ([full content](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-llms-full-txt))
+  - [Get Started](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-get-started-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-get-started-llms-full-txt))
+  - [Concepts](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-concepts-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-concepts-llms-full-txt))
+  - [Build](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-build-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-build-llms-full-txt))
+  - [Examples](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-examples-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-examples-llms-full-txt))
+  - [Reference](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-reference-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-agent-sdk-beta-reference-llms-full-txt))
+- [AI](https://developers.telnyx.com/docs/development/llms/ai-llms-txt): Inference, embedding, AI assistants, missions, and LiveKit integrations ([full content](https://developers.telnyx.com/docs/development/llms/ai-llms-full-txt))
+  - [Inference](https://developers.telnyx.com/docs/development/llms/ai-inference-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-inference-llms-full-txt))
+  - [Embedding](https://developers.telnyx.com/docs/development/llms/ai-embedding-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-embedding-llms-full-txt))
+  - [Assistants](https://developers.telnyx.com/docs/development/llms/ai-assistants-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-assistants-llms-full-txt))
+  - [LiveKit on Telnyx (Beta)](https://developers.telnyx.com/docs/development/llms/ai-livekit-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/ai-livekit-llms-full-txt))
+- [Agent Tools](https://developers.telnyx.com/docs/development/llms/agent-tools-llms-txt): Hosted tools for AI agents: real-time web search, deep research, and AI Search over your own data ([full content](https://developers.telnyx.com/docs/development/llms/agent-tools-llms-full-txt))
+  - [Meeting (Beta)](https://developers.telnyx.com/docs/development/llms/agent-tools-meeting-beta-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/agent-tools-meeting-beta-llms-full-txt))
+  - [Web Search](https://developers.telnyx.com/docs/development/llms/agent-tools-web-search-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/agent-tools-web-search-llms-full-txt))
+  - [AI Search](https://developers.telnyx.com/docs/development/llms/agent-tools-ai-search-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/agent-tools-ai-search-llms-full-txt))
+- [Voice](https://developers.telnyx.com/docs/development/llms/voice-llms-txt): Voice API, speech-to-text, text-to-speech, and voice design ([full content](https://developers.telnyx.com/docs/development/llms/voice-llms-full-txt))
+  - [Overview](https://developers.telnyx.com/docs/development/llms/voice-overview-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/voice-overview-llms-full-txt))
+  - [STT](https://developers.telnyx.com/docs/development/llms/voice-stt-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/voice-stt-llms-full-txt))
+  - [TTS](https://developers.telnyx.com/docs/development/llms/voice-tts-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/voice-tts-llms-full-txt))
+  - [Voice Design](https://developers.telnyx.com/docs/development/llms/voice-voice-design-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/voice-voice-design-llms-full-txt))
+- [Compute](https://developers.telnyx.com/docs/development/llms/compute-llms-txt): Edge compute functions, runtime bindings, stateful actors, and private networking ([full content](https://developers.telnyx.com/docs/development/llms/compute-llms-full-txt))
+  - [Overview](https://developers.telnyx.com/docs/development/llms/compute-overview-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/compute-overview-llms-full-txt))
+  - [Functions](https://developers.telnyx.com/docs/development/llms/compute-functions-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/compute-functions-llms-full-txt))
+  - [Stateful Actors (Beta)](https://developers.telnyx.com/docs/development/llms/compute-stateful-actors-beta-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/compute-stateful-actors-beta-llms-full-txt))
+  - [Network](https://developers.telnyx.com/docs/development/llms/compute-network-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/compute-network-llms-full-txt))
+- [Storage](https://developers.telnyx.com/docs/development/llms/storage-llms-txt): S3-compatible cloud storage with buckets, SDKs, and migration from AWS ([full content](https://developers.telnyx.com/docs/development/llms/storage-llms-full-txt))
+  - [Object Storage](https://developers.telnyx.com/docs/development/llms/storage-object-storage-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/storage-object-storage-llms-full-txt))
+  - [KV](https://developers.telnyx.com/docs/development/llms/storage-kv-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/storage-kv-llms-full-txt))
+  - [SQL (Beta)](https://developers.telnyx.com/docs/development/llms/storage-sql-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/storage-sql-llms-full-txt))
+  - [CloudFS (Beta)](https://developers.telnyx.com/docs/development/llms/storage-cloudfs-beta-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/storage-cloudfs-beta-llms-full-txt))
+- [Calling](https://developers.telnyx.com/docs/development/llms/calling-llms-txt): TeXML, SIP trunking, UAC connections, WebRTC, and trusted calling ([full content](https://developers.telnyx.com/docs/development/llms/calling-llms-full-txt))
+  - [Voice API](https://developers.telnyx.com/docs/development/llms/calling-voice-api-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/calling-voice-api-llms-full-txt))
+  - [TeXML](https://developers.telnyx.com/docs/development/llms/calling-texml-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/calling-texml-llms-full-txt))
+  - [SIP Trunking](https://developers.telnyx.com/docs/development/llms/calling-sip-trunking-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/calling-sip-trunking-llms-full-txt))
+  - [UAC Connections](https://developers.telnyx.com/docs/development/llms/calling-uac-connections-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/calling-uac-connections-llms-full-txt))
+  - [WebRTC](https://developers.telnyx.com/docs/development/llms/calling-webrtc-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/calling-webrtc-llms-full-txt))
+  - [Trusted Calling](https://developers.telnyx.com/docs/development/llms/calling-trusted-calling-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/calling-trusted-calling-llms-full-txt))
+- [Messaging](https://developers.telnyx.com/docs/development/llms/messaging-llms-txt): SMS, MMS, RCS, WhatsApp, short codes, 10DLC compliance, and messaging profiles ([full content](https://developers.telnyx.com/docs/development/llms/messaging-llms-full-txt))
+  - [SMS & MMS](https://developers.telnyx.com/docs/development/llms/messaging-sms-mms-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/messaging-sms-mms-llms-full-txt))
+  - [Email](https://developers.telnyx.com/docs/development/llms/messaging-email-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/messaging-email-llms-full-txt))
+  - [RCS](https://developers.telnyx.com/docs/development/llms/messaging-rcs-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/messaging-rcs-llms-full-txt))
+  - [WhatsApp](https://developers.telnyx.com/docs/development/llms/messaging-whatsapp-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/messaging-whatsapp-llms-full-txt))
+- [Numbers](https://developers.telnyx.com/docs/development/llms/numbers-llms-txt): Phone number search and ordering, porting, regulatory requirements, and identity ([full content](https://developers.telnyx.com/docs/development/llms/numbers-llms-full-txt))
+  - [Global Phone Numbers](https://developers.telnyx.com/docs/development/llms/numbers-global-phone-numbers-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/numbers-global-phone-numbers-llms-full-txt))
+  - [Porting](https://developers.telnyx.com/docs/development/llms/numbers-porting-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/numbers-porting-llms-full-txt))
+  - [Regulatory & Documents](https://developers.telnyx.com/docs/development/llms/numbers-regulatory-documents-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/numbers-regulatory-documents-llms-full-txt))
+  - [Identity](https://developers.telnyx.com/docs/development/llms/numbers-identity-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/numbers-identity-llms-full-txt))
+  - [Number Reputation](https://developers.telnyx.com/docs/development/llms/numbers-number-reputation-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/numbers-number-reputation-llms-full-txt))
+- [Wireless](https://developers.telnyx.com/docs/development/llms/wireless-llms-txt): SIMs, eSIMs, IoT data plans, VoLTE, and wireless messaging ([full content](https://developers.telnyx.com/docs/development/llms/wireless-llms-full-txt))
+  - [Overview](https://developers.telnyx.com/docs/development/llms/wireless-overview-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/wireless-overview-llms-full-txt))
+  - [SIMs & eSIMs](https://developers.telnyx.com/docs/development/llms/wireless-sims-esims-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/wireless-sims-esims-llms-full-txt))
+  - [Data](https://developers.telnyx.com/docs/development/llms/wireless-data-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/wireless-data-llms-full-txt))
+  - [VoLTE](https://developers.telnyx.com/docs/development/llms/wireless-volte-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/wireless-volte-llms-full-txt))
+  - [Messaging](https://developers.telnyx.com/docs/development/llms/wireless-messaging-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/wireless-messaging-llms-full-txt))
+- [Fundamentals](https://developers.telnyx.com/docs/development/llms/fundamentals-llms-txt): Account setup, authentication, SDKs, developer tools, and supporting platform APIs ([full content](https://developers.telnyx.com/docs/development/llms/fundamentals-llms-full-txt))
+  - [Development](https://developers.telnyx.com/docs/development/llms-txt) ([full](https://developers.telnyx.com/docs/development/llms-txt-full))
+  - [Other APIs](https://developers.telnyx.com/docs/development/llms/other-apis-llms-txt) ([full](https://developers.telnyx.com/docs/development/llms/other-apis-llms-full-txt))
+
+## Pricing
+
+- [Pricing overview](https://developers.telnyx.com/pricing.md): Pay-as-you-go rates for voice, messaging, phone numbers, wireless, AI inference, networking, and storage — full rate tables at https://telnyx.com/pricing and machine-readable pricing at https://telnyx.com/pricing.md.
+
+## Reliability & Status
+
+- Status page: https://status.telnyx.com — live platform status and incident history (incident.io-powered)
+- Machine-readable status (Statuspage-compatible JSON API): current status and active incidents at https://status.telnyx.com/api/v2/summary.json · recent incident history at https://status.telnyx.com/api/v2/incidents.json · per-component status at https://status.telnyx.com/api/v2/components.json
+- Incident feeds: RSS at https://status.telnyx.com/history.rss · Atom at https://status.telnyx.com/history.atom
+- SLA, machine-readable: https://telnyx.com/ai/sla.json (99.99% uptime guarantee, RPO/RTO, credit tiers) · Resilience details: https://telnyx.com/ai/resilience.md
+- Building for reliability: [rate limiting](https://developers.telnyx.com/docs/development/api-fundamentals/reliability/rate-limiting.md), [command retries](https://developers.telnyx.com/docs/development/api-fundamentals/reliability/command-retries.md), [API error codes](https://developers.telnyx.com/docs/development/api-fundamentals/api-errors.md), [webhook signatures and retries](https://developers.telnyx.com/docs/development/api-fundamentals/webhooks/receiving-webhooks.md)
+
+## OpenAPI Specification
+
+- [Telnyx OpenAPI Specification (consolidated)](https://raw.githubusercontent.com/team-telnyx/openapi/master/openapi/spec3.json): Single OpenAPI 3.1 JSON covering every Telnyx REST API surface — paths, schemas, and webhooks.
+
+
+## Code Examples
+
+- [Code examples index](https://developers.telnyx.com/docs/development/llms/code-examples.md): 207 production-ready Python examples covering the full Telnyx platform — each ships app.py, README, tutorial guide, and endpoint reference. Source repository: https://github.com/team-telnyx/telnyx-code-examples

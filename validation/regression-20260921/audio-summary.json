@@ -1,0 +1,31 @@
+{
+  "capture": "generated output before CPAL conversion; no microphone recording",
+  "frames": 981,
+  "source_ms": 15480.0,
+  "playout_ms": 17550.0,
+  "starvations": 1,
+  "interior_gaps": [
+    {
+      "at_ms": 12801.069,
+      "inserted_ms": 240.0,
+      "source_position_ms": 11000.0,
+      "render_position_ms": 12830.0,
+      "before": {
+        "peak": 0,
+        "rms": 0.0
+      },
+      "after": {
+        "peak": 1,
+        "rms": 0.45
+      },
+      "signal_on_both_sides": false
+    }
+  ],
+  "signal_bounded_gaps": 0,
+  "limits": [
+    "first callback may be omitted",
+    "signal levels do not establish a clipped syllable or subjective audibility",
+    "pre-device output is not physical speaker or browser receiver evidence",
+    "return tracing adds diagnostic overhead"
+  ]
+}

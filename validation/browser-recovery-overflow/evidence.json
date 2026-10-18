@@ -1,0 +1,399 @@
+{
+  "failure": {
+    "cause": "output_overflow",
+    "capacity_bytes": 33600,
+    "queue_bytes": 31680,
+    "max_age_ms": 750,
+    "dropped_bytes": 36480,
+    "incoming_bytes": 4800,
+    "oldest_age_us": 219224
+  },
+  "events": [
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -304045
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -295029
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -284874
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -275015
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -265137
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -254113
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -243975
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -235055
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -224104
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -214128
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -204044
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -195023
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -185032
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -175125
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -164091
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -154041
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -145049
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -135036
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -124921
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -115052
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -104121
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -94132
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -84125
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -74109
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -64118
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -54087
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -44077
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -34100
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -24111
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -14163
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": -4128
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 0,
+      "at_us": 0
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 3840,
+      "at_us": 5907
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 2880,
+      "at_us": 9869
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 1920,
+      "at_us": 13889
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 960,
+      "at_us": 17938
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 21841
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 25854
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 35853
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 45897
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 0,
+      "at_us": 52884
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 3840,
+      "at_us": 54921
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 2880,
+      "at_us": 58893
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 1920,
+      "at_us": 63035
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 960,
+      "at_us": 66915
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 70894
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 74905
+    },
+    {
+      "bytes": 0,
+      "kind": "read",
+      "queue_bytes": 0,
+      "at_us": 84980
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 0,
+      "at_us": 91756
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 3840,
+      "at_us": 94946
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 3840,
+      "at_us": 121037
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 8640,
+      "at_us": 208319
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 13440,
+      "at_us": 208572
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 17280,
+      "at_us": 228912
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 17280,
+      "at_us": 234486
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 21120,
+      "at_us": 253008
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 21120,
+      "at_us": 263427
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 24960,
+      "at_us": 276938
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 24960,
+      "at_us": 288904
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 28800,
+      "at_us": 290883
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 28800,
+      "at_us": 310236
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 32640,
+      "at_us": 314907
+    },
+    {
+      "bytes": 960,
+      "kind": "read",
+      "queue_bytes": 31680,
+      "at_us": 328920
+    },
+    {
+      "bytes": 4800,
+      "kind": "received",
+      "queue_bytes": 31680,
+      "at_us": 340258
+    }
+  ],
+  "source": "Browser UI retained provider audio trace; 2026-09-20 19:05:27 local",
+  "truncated": true
+}

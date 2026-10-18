@@ -1,0 +1,17 @@
+/_build/
+/deps/
+/cover/
+/doc/
+/priv/native/
+*.beam
+*.ez
+erl_crash.dump
+/native/**/target/
+.elixir_ls/
+.ruff_cache/
+/tmp/
+/.DS_Store
+
+
+/parlora-*.tar
+__pycache__/

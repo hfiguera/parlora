@@ -1,0 +1,343 @@
+{
+  "date": "2026-09-16",
+  "browser": "Google Chrome 152.0.7977.83",
+  "macos": "26.6.2",
+  "browser_smoke_macos": {
+    "cycles": [
+      {
+        "packets_received": 425,
+        "packets_sent": 212,
+        "packets_lost": 0,
+        "concealed_samples": 513,
+        "warmup_concealed_samples": 513,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 12808,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 25
+      },
+      {
+        "packets_received": 425,
+        "packets_sent": 212,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11978,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 7
+      },
+      {
+        "packets_received": 424,
+        "packets_sent": 212,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11127,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 7
+      }
+    ],
+    "permission_denial": true,
+    "origin_rejection": true
+  },
+  "live_macos": {
+    "jobs": 2,
+    "current_accepted": 1,
+    "old_stale": 1,
+    "provider_acceptance_from_page_start_ms": 22575,
+    "observation_ms": 27403,
+    "packets_received": 2715,
+    "packets_sent": 1358,
+    "packets_lost": 0,
+    "concealed_samples": 0,
+    "decoded_audio_energy": 0.3862449429857965,
+    "mean_browser_jitter_buffer_ms": 33.0213706705969,
+    "discontinuity_events": {
+      "capture_overflow": 67,
+      "startup_buffer_discard": 1,
+      "playback_starved": 5
+    },
+    "speech_caption_contains_current_result": true,
+    "method": "Physical Mac microphone/speakers, macOS say as acoustic caller; output suppressed during scripted caller utterances.",
+    "limitations": [
+      "Browser decoded energy and captions do not prove human hearing.",
+      "Startup capture drops and source starvation include intentional silence/control transitions."
+    ]
+  },
+  "live_linux_server": {
+    "jobs": 2,
+    "current_accepted": 1,
+    "old_stale": 1,
+    "provider_acceptance_from_page_start_ms": 23401,
+    "observation_ms": 28769,
+    "packets_received": 2823,
+    "packets_sent": 1411,
+    "packets_lost": 0,
+    "concealed_samples": 0,
+    "decoded_audio_energy": 0.3293406565300455,
+    "mean_browser_jitter_buffer_ms": 30.44326241134752,
+    "discontinuity_events": {
+      "capture_overflow": 145,
+      "startup_buffer_discard": 1,
+      "playback_starved": 7
+    },
+    "speech_caption_contains_current_result": true,
+    "method": "Physical Mac microphone/speakers, macOS say as acoustic caller; output suppressed during scripted caller utterances.",
+    "limitations": [
+      "Browser decoded energy and captions do not prove human hearing.",
+      "Startup capture drops and source starvation include intentional silence/control transitions."
+    ]
+  },
+  "browser_smoke_linux_server": {
+    "cycles": [
+      {
+        "packets_received": 428,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 11831,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 27
+      },
+      {
+        "packets_received": 426,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 12919,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 13
+      },
+      {
+        "packets_received": 426,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 1999,
+        "warmup_concealed_samples": 1999,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11407,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 8
+      }
+    ],
+    "permission_denial": true,
+    "origin_rejection": true
+  },
+  "network_smoke_macos": {
+    "cycles": [
+      {
+        "packets_received": 427,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 13070,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 25
+      },
+      {
+        "packets_received": 425,
+        "packets_sent": 212,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 10948,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 6
+      },
+      {
+        "packets_received": 427,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 10984,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 6
+      }
+    ],
+    "permission_denial": true,
+    "origin_rejection": true,
+    "signaling_loss_cleanup_ms": 29934
+  },
+  "network_smoke_linux_server": {
+    "cycles": [
+      {
+        "packets_received": 429,
+        "packets_sent": 214,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11466,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 26
+      },
+      {
+        "packets_received": 425,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 12111,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 12
+      },
+      {
+        "packets_received": 429,
+        "packets_sent": 214,
+        "packets_lost": 0,
+        "concealed_samples": 436,
+        "warmup_concealed_samples": 436,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11570,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 11
+      }
+    ],
+    "permission_denial": true,
+    "origin_rejection": true,
+    "signaling_loss_cleanup_ms": 29955
+  },
+  "final_package_smoke_macos": {
+    "cycles": [
+      {
+        "packets_received": 426,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 12781,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 21
+      },
+      {
+        "packets_received": 426,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11651,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 12
+      },
+      {
+        "packets_received": 426,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 11703,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 13
+      }
+    ],
+    "permission_denial": true,
+    "origin_rejection": true,
+    "signaling_loss_cleanup_ms": 30001
+  },
+  "final_package_smoke_linux_server": {
+    "cycles": [
+      {
+        "packets_received": 429,
+        "packets_sent": 214,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0.001,
+        "max_server_tick_gap_us": 12062,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 39
+      },
+      {
+        "packets_received": 426,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 11812,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 7
+      },
+      {
+        "packets_received": 427,
+        "packets_sent": 213,
+        "packets_lost": 0,
+        "concealed_samples": 0,
+        "warmup_concealed_samples": 0,
+        "steady_concealed_samples": 0,
+        "jitter_seconds": 0,
+        "max_server_tick_gap_us": 12606,
+        "steady_playback_silence_bytes": 0,
+        "steady_playback_starvations": 0,
+        "cleanup_ms": 13
+      }
+    ],
+    "permission_denial": true,
+    "origin_rejection": true,
+    "signaling_loss_cleanup_ms": 30003
+  },
+  "final_checks": {
+    "macos": {
+      "mix_ci": "passed",
+      "exunit_passed": 104,
+      "stability_passed": 3,
+      "consumer_tests_passed": 3,
+      "production_release_smoke": "passed"
+    },
+    "linux": {
+      "mix_ci": "passed",
+      "exunit_passed": 104,
+      "stability_passed": 3,
+      "consumer_tests_passed": 3,
+      "production_release_smoke": "passed"
+    }
+  }
+}

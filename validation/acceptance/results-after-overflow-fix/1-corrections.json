@@ -1,0 +1,706 @@
+{
+  "name": "1-corrections",
+  "events": [
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 1
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 27
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 53
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 79
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "capture_overflow",
+        "epoch": 0,
+        "total_count": 105
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "payload": {
+        "cause": "startup_buffer_discard"
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " Check",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " order",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 1
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " one-tw",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": "enty",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " three",
+        "speaker": "user"
+      }
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "payload": {},
+      "event": "delegation_pending"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 2
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " Hi!",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " Sure,",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "payload": {},
+      "event": "context_wait_started"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 3
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " I",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " can",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " check",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " on",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " that",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " for",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "payload": {},
+      "event": "context_wait_started"
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " you—",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": "order",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " one-t",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": "wenty",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " three.",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "event",
+      "source": "session",
+      "request_id": null,
+      "payload": {},
+      "event": "clarification_requested"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 4
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " Could",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " you",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " say",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " the",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " three-digit",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " order",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " number",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " again?",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " I",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " wanna",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " make",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " sure",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " I’ve",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " got",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " it.",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " No",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " changes",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " were",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "transcript",
+      "payload": {
+        "delta": " made.",
+        "speaker": "assistant"
+      }
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 5
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 6
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 7
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 8
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 9
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 10
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 11
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 12
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 13
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 14
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 15
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 16
+      },
+      "event": "audio_discontinuity"
+    },
+    {
+      "type": "event",
+      "source": "channel",
+      "request_id": null,
+      "payload": {
+        "cause": "playback_starved",
+        "epoch": 0,
+        "total_count": 17
+      },
+      "event": "audio_discontinuity"
+    }
+  ],
+  "checkpoints": [
+    {
+      "kind": "connected",
+      "session_id": "hihoiMq2nK5qNNMcEoaOUXvb",
+      "clips": {
+        "items": "status123",
+        "interrupt": "correction124",
+        "correct": "back123"
+      },
+      "state": {
+        "closed": false,
+        "status": {
+          "status": "ready",
+          "session_id": "hihoiMq2nK5qNNMcEoaOUXvb",
+          "jobs": {},
+          "observed_at_us": -576460748773206,
+          "interpretation": "settled",
+          "delegations": {},
+          "playback": {
+            "handed_off": {
+              "observed_at_us": -576460748782364,
+              "stage": "handed_off",
+              "epoch": 0,
+              "sequence": 54308,
+              "evidence": "handoff"
+            }
+          }
+        },
+        "started": -576460748782677,
+        "events": [],
+        "jobs": {},
+        "tasks": {}
+      }
+    },
+    {
+      "kind": "final",
+      "session_id": "hihoiMq2nK5qNNMcEoaOUXvb",
+      "state": {
+        "closed": false,
+        "status": {
+          "status": "ready",
+          "session_id": "hihoiMq2nK5qNNMcEoaOUXvb",
+          "jobs": {},
+          "observed_at_us": -576460600733570,
+          "interpretation": "unresolved",
+          "delegations": {
+            "item_EPLQ0GrfvtvliWM12Q07w": {
+              "status": "pending",
+              "context_wait": {
+                "recheck_key": "4:verify",
+                "expired?": true,
+                "due_at_us": -576460742857190
+              },
+              "received_at_us": -576460745648313,
+              "clarification": {
+                "command_id": "595j9vTgPCBOHBofhws97vqT",
+                "context_revision": 23
+              }
+            }
+          },
+          "playback": {
+            "handed_off": {
+              "observed_at_us": -576460600739766,
+              "stage": "handed_off",
+              "epoch": 0,
+              "sequence": 3575,
+              "evidence": "handoff"
+            },
+            "queued": {
+              "observed_at_us": -576460600739760,
+              "stage": "queued",
+              "epoch": 0,
+              "sequence": 14598,
+              "evidence": "queue"
+            }
+          }
+        },
+        "started": -576460748782677,
+        "events": [
+          {
+            "type": "delegation_pending",
+            "source": "session",
+            "request_id": null,
+            "observed_at_us": -576460745648308,
+            "payload": {}
+          },
+          {
+            "type": "context_wait_started",
+            "source": "session",
+            "request_id": null,
+            "observed_at_us": -576460744958667,
+            "payload": {}
+          },
+          {
+            "type": "context_wait_started",
+            "source": "session",
+            "request_id": null,
+            "observed_at_us": -576460743457186,
+            "payload": {}
+          },
+          {
+            "type": "clarification_requested",
+            "source": "session",
+            "request_id": null,
+            "observed_at_us": -576460741489455,
+            "payload": {}
+          }
+        ],
+        "jobs": {},
+        "tasks": {}
+      },
+      "dashboard": {
+        "proposals": [],
+        "orders": [
+          {
+            "id": "123",
+            "status": "shipped; expected Friday",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Travel mug",
+                "quantity": 1
+              },
+              {
+                "name": "Coffee beans",
+                "quantity": 2
+              }
+            ],
+            "tracking": "DEMO-123"
+          },
+          {
+            "id": "124",
+            "status": "out for delivery",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Desk lamp",
+                "quantity": 1
+              }
+            ],
+            "tracking": "DEMO-124"
+          },
+          {
+            "id": "825",
+            "status": "processing",
+            "version": 1,
+            "instructions": "",
+            "items": [
+              {
+                "name": "Notebook",
+                "quantity": 3
+              }
+            ],
+            "tracking": "Not assigned"
+          }
+        ],
+        "changes": []
+      },
+      "captions": "You\nCheck order one-twenty three\n\nAssistant\nHi! Sure, I can check on that for you—order one-twenty three. Could you say the three-digit order number again? I wanna make sure I’ve got it. No changes were made."
+    }
+  ]
+}

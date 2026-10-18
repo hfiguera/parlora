@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-22",
+  "scope": "Offline supplemental scoring of the existing 1000-clip recovered corpus; no new provider calls.",
+  "dataset": "pipecat-ai/stt-benchmark-data",
+  "revision": "3fe50170d520c951957b86996ef082a6ab87b394",
+  "source_report_sha256": "e2241190f80a2d115f24630f1dc94cc0f4245250dd0eaefcd654515aa7c86b85",
+  "numeric_report_sha256": "5d31a446ab5a231699b06156e4ce5cc1d46a7b0b82e2ab2db31688df068f6475",
+  "scorer_sha256": "41bedb0bc17777741dca9034ba7ed0e36e03566a050731d26bdd0dd97d94a4a4",
+  "strict_wer_unchanged": true,
+  "original_missing_captions": 1,
+  "numeric_meaning": {
+    "version": 1,
+    "implementation_sha256": "bbce44f303975ad3b634b2521c4b0f9ca1a97f050b0df206b7d898806288181b",
+    "deadline_ms_after_clip_end": 3000,
+    "clips_with_detected_entities": 217,
+    "clips_requiring_review": 11,
+    "review_required_clips_with_detected_entities": 6,
+    "automatically_scored_clips": 211,
+    "reference_entities_in_automatic_score": 256,
+    "entity_edits_in_automatic_score": 5,
+    "automatic_entity_error_rate": 0.01953125,
+    "automatic_exact_match_clips": 206,
+    "limitations": [
+      "Conservative English formatting rules, not general semantic understanding.",
+      "Review-required clips are excluded from the automatic metric and retained in the report.",
+      "Entities are compared in order, including units and identifier digits; surrounding intent is not scored.",
+      "No unit conversion or inferred date order. No effect on strict WER or the pilot gate."
+    ]
+  },
+  "automatic_mismatch_sample_ids": [
+    "8397e582-b3f8-1c0e-a9ee-a6fc294d0b0c",
+    "a934808b-1458-4655-5c9c-26655716a079",
+    "b2ef4c65-5620-75f7-286c-96d323135960",
+    "7a836f75-b381-71e0-572a-0452aabf4560",
+    "3a7a85ed-a140-20ac-59f1-f3e45fe68837"
+  ],
+  "review_sample_ids": [
+    "d7d00b2a-599a-aced-2a79-430a05e63a24",
+    "ccd031a0-b2a7-8693-c226-00105fbb37d2",
+    "82855049-2871-b512-c456-d1366f23b97f",
+    "2c99c6a8-f29e-25eb-4618-ece1a168fc4c",
+    "7a6e8eb1-36a5-954b-f5b5-a780268d9410",
+    "ba533222-b724-104f-7532-b1e6a031361c",
+    "9507c4b2-d195-2902-5fe4-2c661aee6c3a",
+    "a37ac974-96a0-070e-4600-79ced35bb1af",
+    "4f1a5533-3ec6-2b95-2d6a-ef2342d22471",
+    "15a19712-e296-a87c-56c1-8792fe37d1d2",
+    "4fa725a8-8815-0796-348a-241753bd19df"
+  ]
+}

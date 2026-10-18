@@ -1,0 +1,41 @@
+{
+  "v1": {
+    "total": 34,
+    "exact_labels": 22,
+    "confident_false_suppression": [
+      "progress",
+      "quoted"
+    ],
+    "abstentions": 11,
+    "errors": 0,
+    "median_ms": 99.256,
+    "p95_ms": 182.517,
+    "max_ms": 436.911,
+    "baseline_decision_correct": 20,
+    "jev_with_fallback_decision_correct": 27,
+    "fallback_false_suppression": [
+      "progress",
+      "quoted"
+    ],
+    "gate_passed": false
+  },
+  "v2": {
+    "total": 42,
+    "exact_labels": 20,
+    "confident_false_suppression": [
+      "quoted"
+    ],
+    "abstentions": 22,
+    "errors": 0,
+    "median_ms": 117.788,
+    "p95_ms": 266.502,
+    "max_ms": 428.261,
+    "baseline_decision_correct": 22,
+    "jev_with_fallback_decision_correct": 33,
+    "fallback_false_suppression": [
+      "quoted",
+      "fresh_multiple_fields"
+    ],
+    "gate_passed": false
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "chunks": 115,
+  "peak_receive_bytes": 9600,
+  "dropped_bytes": 0,
+  "interior_gaps": [
+    {
+      "before_peak": 1,
+      "silence_ms": 300.0,
+      "next_peak": 1
+    }
+  ],
+  "source_bytes_consumed": 538560,
+  "received_bytes": 552000,
+  "scope": "Synthetic CPAL live PCM probe; not physical listening or browser validation. Probe closes after save transcript observation; final audio may still be queued."
+}

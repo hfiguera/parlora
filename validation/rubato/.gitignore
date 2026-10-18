@@ -1,0 +1,7 @@
+/_build/
+/deps/
+/priv/
+/native/rubato_probe/target/
+/erl_crash.dump
+/core
+/core.*

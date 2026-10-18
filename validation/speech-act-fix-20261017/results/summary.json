@@ -1,0 +1,50 @@
+{
+  "source_revision": "7e0c4098a4f29fda940b6e6916f797696686982e",
+  "working_tree_changes": true,
+  "model": "jev-1.13.0",
+  "selected_probability_threshold": 0.8,
+  "offline_tests": 230,
+  "packaged_release_smoke": "passed",
+  "frozen": {
+    "initial": {
+      "attempts": 246,
+      "passed": 243,
+      "newly_failed": 0,
+      "repaired": 8
+    },
+    "expanded": {
+      "attempts": 258,
+      "passed": 247,
+      "newly_failed": 0,
+      "repaired": 0
+    }
+  },
+  "live": {
+    "cases": 46,
+    "repeats": 3,
+    "attempts": 138,
+    "passed": 136,
+    "failures": [
+      {
+        "case": "completed_numeric_prefix_correction",
+        "pass": 1,
+        "judgment": "{:error, {:uncertain, %{intent: \"status\", order: \"123\", uncertain_fields: [\"relationship\"]}}}"
+      },
+      {
+        "case": "completed_numeric_prefix_correction",
+        "pass": 2,
+        "judgment": "{:error, {:uncertain, %{intent: \"status\", order: \"123\", uncertain_fields: [\"relationship\"]}}}"
+      }
+    ]
+  },
+  "sha256": {
+    "examples/order_desk/lib/order_desk/interpretation.ex": "d747a8d13bec8fbb42a898906c6e87710f30ab7ba8ed484154c609c8478fd81e",
+    "examples/order_desk/lib/order_desk/app_policy.ex": "ae6eb79f42ff5f9ba1c01bf0344990fcc394e342d121bb420f40c2fa6c654a72",
+    "examples/order_desk/lib/order_desk/application.ex": "c78e48fca7b1d43bbd9328b252d1c98e8e32bc0eb6f4d71bd27c067229785bc4",
+    "examples/order_desk/scripts/semantic_judgment_report.exs": "effa0db256b69604a2b51cba780f59d962b537806151973ca936fec9ce889952",
+    "examples/order_desk/test/semantic_judgments_test.exs": "19bca95121049d6f633c188a35b1f801d0e5bc0460bf8ce5fda1312e4d28a69b",
+    "examples/order_desk/test/request_continuation_test.exs": "6daa66ca64e3bf3102567761d3c0dbd0312e9193b4ad05d5476585352020bd62",
+    "examples/order_desk/test/task_pilot_regression_test.exs": "fb1108455988822d4499f60ce342e91f8155c04c62184fefaaf65ce8567aca5a"
+  },
+  "question_generation_unchanged": true
+}

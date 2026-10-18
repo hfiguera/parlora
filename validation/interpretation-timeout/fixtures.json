@@ -1,0 +1,234 @@
+[
+  {
+    "id": "01-cardinal-124-r1-judgment-1",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty-four.",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty-four.",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty-four.",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty-four.",
+          "speaker": "user"
+        }
+      ]
+    }
+  },
+  {
+    "id": "01-cardinal-124-r1-judgment-2",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty-four.",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty-four.",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty-four.",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty-four.",
+          "speaker": "user"
+        },
+        {
+          "text": " Sure, checking that order...",
+          "speaker": "assistant"
+        }
+      ]
+    }
+  },
+  {
+    "id": "01-cardinal-124-r1-judgment-3",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty-four.",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty-four.",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty-four.",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty-four.",
+          "speaker": "user"
+        },
+        {
+          "text": " Sure, checking that order...",
+          "speaker": "assistant"
+        }
+      ]
+    }
+  },
+  {
+    "id": "01-cardinal-124-r1-judgment-4",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty-four.",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty-four.",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty-four.",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty-four.",
+          "speaker": "user"
+        },
+        {
+          "text": " Sure, checking that order...",
+          "speaker": "assistant"
+        }
+      ]
+    }
+  },
+  {
+    "id": "14-followup-items-r3-judgment-1",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty four",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty four",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty four",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty four",
+          "speaker": "user"
+        }
+      ]
+    }
+  },
+  {
+    "id": "14-followup-items-r3-judgment-2",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty four",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty four",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty four",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty four",
+          "speaker": "user"
+        },
+        {
+          "text": " Sure. Checking on that.",
+          "speaker": "assistant"
+        }
+      ]
+    }
+  },
+  {
+    "id": "14-followup-items-r3-judgment-3",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty four",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty four",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty four",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty four",
+          "speaker": "user"
+        },
+        {
+          "text": " Sure. Checking on that.",
+          "speaker": "assistant"
+        }
+      ]
+    }
+  },
+  {
+    "id": "14-followup-items-r3-judgment-4",
+    "input": {
+      "active_task": null,
+      "new_caller_text": " Check order one hundred twenty four",
+      "clarification_reply": null,
+      "recent_work": [],
+      "order_candidates": [
+        "124"
+      ],
+      "caller_history": " Check order one hundred twenty four",
+      "delivery_drafts": [],
+      "handled_caller_input": null,
+      "latest_caller_segment": " Check order one hundred twenty four",
+      "recent_dialogue": [
+        {
+          "text": " Hi, I can help check an order.",
+          "speaker": "assistant"
+        },
+        {
+          "text": " Check order one hundred twenty four",
+          "speaker": "user"
+        },
+        {
+          "text": " Sure. Checking on that.",
+          "speaker": "assistant"
+        }
+      ]
+    }
+  }
+]

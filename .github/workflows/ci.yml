@@ -1,0 +1,107 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  checks:
+    name: ${{ matrix.os }} / Elixir ${{ matrix.beam.elixir }} / OTP ${{ matrix.beam.otp }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+        beam:
+          - {elixir: '1.18.5-otp-27', otp: '27.3.4.15', quality: false}
+          - {elixir: '1.19.5-otp-28', otp: '28.5', quality: false}
+          - {elixir: '1.20.4-otp-29', otp: '29.1.2', quality: true}
+    runs-on: ${{ matrix.os }}
+    env:
+      MIX_ENV: test
+      PARLORA_CHECK_FORMAT: ${{ matrix.beam.quality && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.beam.otp }}
+          elixir-version: ${{ matrix.beam.elixir }}
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.92.0'
+          components: rustfmt, clippy
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libpulse-dev libssl-dev pkg-config
+      - if: runner.os == 'macOS'
+        run: |
+          brew install pkgconf srtp
+          echo 'ERL_FLAGS=+sbwt none +sbwtdcpu none +sbwtdio none' >> "$GITHUB_ENV"
+      - run: |
+          scripts/install_opus.sh "$RUNNER_TEMP/parlora-opus"
+          echo "PKG_CONFIG_PATH=$RUNNER_TEMP/parlora-opus/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "OPUS_LIB_DIR=$RUNNER_TEMP/parlora-opus/lib" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/parlora-opus/lib" >> "$GITHUB_ENV"
+      - run: mix deps.get --check-locked
+      - run: python3 -m unittest discover -s examples/order_desk/test -p '*_test.py'
+      # The pinned compiler owns formatting and static-analysis results.
+      - if: matrix.beam.quality
+        run: mix ci
+      - if: matrix.beam.quality
+        run: MIX_ENV=dev mix docs --warnings-as-errors
+      - if: ${{ !matrix.beam.quality }}
+        run: |
+          mix compile --warnings-as-errors
+          mix xref graph --format cycles --label compile-connected --fail-above 0
+          mix test --warnings-as-errors --raise
+          mix parlora.native
+      - run: mix test test/stability_test.exs --include stability --seed 42
+      - run: |
+          for backend in none jido sagents legion; do
+            scripts/optional_backend_consumer.sh "$RUNNER_TEMP/optional-backend-$backend" "$backend"
+          done
+      - run: scripts/consumer.sh "$RUNNER_TEMP/order_desk"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+        working-directory: validation/browser
+      - run: node --test validation/browser/*_test.cjs
+      - run: npx playwright install --with-deps chromium
+        working-directory: validation/browser
+      - run: node validation/browser/caption_layout.cjs "$RUNNER_TEMP/caption-layout"
+        env:
+          BROWSER_CHANNEL: chromium
+      - run: scripts/audio_benchmark.sh "$RUNNER_TEMP/audio-gates"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audio-gates-${{ runner.os }}-${{ matrix.beam.elixir }}
+          path: ${{ runner.temp }}/audio-gates
+      - run: scripts/release_check.sh "$RUNNER_TEMP/order_desk" --output "$RUNNER_TEMP/release-check"
+        env:
+          BROWSER_CHANNEL: chromium
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-check-${{ runner.os }}-${{ matrix.beam.elixir }}
+          path: |
+            ${{ runner.temp }}/release-check/report.json
+            ${{ runner.temp }}/release-check/report.md
+            ${{ runner.temp }}/release-check/plan.json
+            ${{ runner.temp }}/release-check/*.log
+            ${{ runner.temp }}/release-check/acceptance/*.json
+            ${{ runner.temp }}/release-check/acceptance/*.log
+            ${{ runner.temp }}/release-check/recovery/report.json
+            ${{ runner.temp }}/release-check/recovery/*.png
+            ${{ runner.temp }}/release-check/recovery/server.log
+      - run: scripts/concurrency_check.sh "$RUNNER_TEMP/order_desk" "$RUNNER_TEMP/concurrency"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: concurrency-${{ runner.os }}-${{ matrix.beam.elixir }}
+          path: |
+            ${{ runner.temp }}/concurrency/report.json
+            ${{ runner.temp }}/concurrency/*-analysis.json
+            ${{ runner.temp }}/concurrency/server.log
+      - run: |
+          (cd "$RUNNER_TEMP/order_desk" && PARLORA_BROWSER_OFFLINE=1 scripts/browser.sh) > "$RUNNER_TEMP/browser-server.log" 2>&1 &
+          parlora_browser_server=$!
+          trap 'kill "$parlora_browser_server" 2>/dev/null || true' EXIT
+          node validation/browser/smoke.cjs
+          PARLORA_BROWSER_OFFLINE=1 node validation/browser/guide_client.cjs
+          node validation/browser/order_ui.cjs

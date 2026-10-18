@@ -1,0 +1,16 @@
+{
+  "chunks": 62,
+  "peak_provider_queue_bytes": 4800,
+  "dropped_bytes": 0,
+  "blocked_ticks": 207,
+  "starvations": [
+    {
+      "at_ms": 3013,
+      "before_peak": 0,
+      "after_peak": 1,
+      "silence_ms": 290.0
+    }
+  ],
+  "max_arrival_interval_ms": 213.154,
+  "finalized": true
+}

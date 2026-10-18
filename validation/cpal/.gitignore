@@ -1,0 +1,7 @@
+/_build/
+/deps/
+/priv/
+/native/cpal_probe/target/
+/erl_crash.dump
+/core
+/core.*

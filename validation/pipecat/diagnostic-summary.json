@@ -1,0 +1,560 @@
+{
+  "date": "2026-09-22",
+  "base_commit": "8a5c5bf",
+  "dataset_revision": "3fe50170d520c951957b86996ef082a6ab87b394",
+  "model_requested": "gpt-live-1",
+  "live_sessions": 20,
+  "independent_file_transcription_calls": 8,
+  "trials": [
+    {
+      "trial": "parlora-1a9823e0-1",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 12000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 953.914,
+      "last_caption_ms": 3971.593,
+      "max_injection_lateness_ms": 5.04,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 20.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "parlora-1a9823e0-2",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 12000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1147.225,
+      "last_caption_ms": 4051.37,
+      "max_injection_lateness_ms": 2.771,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 70.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "parlora-1a9823e0-3",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 12000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 8,
+      "first_caption_ms": 1213.006,
+      "last_caption_ms": 4003.733,
+      "max_injection_lateness_ms": 4.033,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 100.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "parlora-3a7a85ed-1",
+      "path": "Parlora",
+      "sample_id": "3a7a85ed-a140-20ac-59f1-f3e45fe68837",
+      "tail_ms": 12000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 30,
+      "first_caption_ms": 2995.344,
+      "last_caption_ms": 16112.696,
+      "max_injection_lateness_ms": 4.855,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 180.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": "70",
+      "number_outcome": "70"
+    },
+    {
+      "trial": "parlora-3a7a85ed-2",
+      "path": "Parlora",
+      "sample_id": "3a7a85ed-a140-20ac-59f1-f3e45fe68837",
+      "tail_ms": 12000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 28,
+      "first_caption_ms": 2938.626,
+      "last_caption_ms": 16337.471,
+      "max_injection_lateness_ms": 8.974,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 60.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": "seventy",
+      "number_outcome": "seventy"
+    },
+    {
+      "trial": "parlora-3a7a85ed-3",
+      "path": "Parlora",
+      "sample_id": "3a7a85ed-a140-20ac-59f1-f3e45fe68837",
+      "tail_ms": 12000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 27,
+      "first_caption_ms": 2936.579,
+      "last_caption_ms": 16356.293,
+      "max_injection_lateness_ms": 4.209,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 220.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": "70",
+      "number_outcome": "70"
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-1",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1889.663,
+      "last_caption_ms": 4116.704,
+      "max_injection_lateness_ms": 8.048,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 20.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-2",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 8,
+      "first_caption_ms": 1120.25,
+      "last_caption_ms": 4077.239,
+      "max_injection_lateness_ms": 5.92,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 60.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-3",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1115.213,
+      "last_caption_ms": 3912.638,
+      "max_injection_lateness_ms": 6.638,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 100.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-4",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1806.951,
+      "last_caption_ms": 4148.501,
+      "max_injection_lateness_ms": 5.997,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 20.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-5",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1778.266,
+      "last_caption_ms": 3938.456,
+      "max_injection_lateness_ms": 6.261,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 70.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-6",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1156.748,
+      "last_caption_ms": 4082.401,
+      "max_injection_lateness_ms": 6.412,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 70.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-7",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 7,
+      "first_caption_ms": 1792.842,
+      "last_caption_ms": 4135.549,
+      "max_injection_lateness_ms": 7.418,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 100.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "three-second/parlora-1a9823e0-8",
+      "path": "Parlora",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 3000,
+      "status": "ok",
+      "close": {
+        "finalized": true,
+        "cleaned_up": true
+      },
+      "caption_count": 6,
+      "first_caption_ms": 1811.472,
+      "last_caption_ms": 4095.571,
+      "max_injection_lateness_ms": 6.74,
+      "all_source_chunks_present_in_order": true,
+      "wire_insertions": [
+        {
+          "source_ms": 0.0,
+          "gap_ms": 60.0,
+          "all_zero": true
+        },
+        {
+          "source_ms": 20.0,
+          "gap_ms": 10.0,
+          "all_zero": true
+        }
+      ],
+      "raw_caption_matches_application": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "direct-1a9823e0-1",
+      "path": "direct provider",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 12000,
+      "caption_count": 6,
+      "first_caption_ms": 1815.351583994925,
+      "last_caption_ms": 3868.2467499747872,
+      "max_injection_lateness_ms": 2.763708820566535,
+      "closed": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "direct-1a9823e0-2",
+      "path": "direct provider",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 12000,
+      "caption_count": 5,
+      "first_caption_ms": 1781.019332818687,
+      "last_caption_ms": 3789.3052499275655,
+      "max_injection_lateness_ms": 5.700999870896339,
+      "closed": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "direct-1a9823e0-3",
+      "path": "direct provider",
+      "sample_id": "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52",
+      "tail_ms": 12000,
+      "caption_count": 7,
+      "first_caption_ms": 1898.9841248840094,
+      "last_caption_ms": 3924.8322499915957,
+      "max_injection_lateness_ms": 8.096334058791399,
+      "closed": true,
+      "numeric_caption": null
+    },
+    {
+      "trial": "direct-3a7a85ed-1",
+      "path": "direct provider",
+      "sample_id": "3a7a85ed-a140-20ac-59f1-f3e45fe68837",
+      "tail_ms": 12000,
+      "caption_count": 27,
+      "first_caption_ms": 2942.183957900852,
+      "last_caption_ms": 16136.525540845469,
+      "max_injection_lateness_ms": 3.046582918614149,
+      "closed": true,
+      "numeric_caption": "seventy",
+      "number_outcome": "seventy"
+    },
+    {
+      "trial": "direct-3a7a85ed-2",
+      "path": "direct provider",
+      "sample_id": "3a7a85ed-a140-20ac-59f1-f3e45fe68837",
+      "tail_ms": 12000,
+      "caption_count": 27,
+      "first_caption_ms": 3082.6515001244843,
+      "last_caption_ms": 16240.774333011359,
+      "max_injection_lateness_ms": 5.629250081256032,
+      "closed": true,
+      "numeric_caption": "70",
+      "number_outcome": "70"
+    },
+    {
+      "trial": "direct-3a7a85ed-3",
+      "path": "direct provider",
+      "sample_id": "3a7a85ed-a140-20ac-59f1-f3e45fe68837",
+      "tail_ms": 12000,
+      "caption_count": 26,
+      "first_caption_ms": 3459.590208949521,
+      "last_caption_ms": 16311.758624855429,
+      "max_injection_lateness_ms": 7.417334243655205,
+      "closed": true,
+      "numeric_caption": null,
+      "number_outcome": "7-day"
+    }
+  ],
+  "local_artifact_directory": "runs/root-cause-20260922",
+  "artifact_sha256": {
+    "asr-1a9823e0-resampled-gpt-4o-transcribe.json": "cc55d91d86ddb0636170ca6901e86ccc203bacab691b4d525d49d7d79712f8f2",
+    "asr-1a9823e0-resampled-whisper-1.json": "81d1e37c7d323be58655ebe829df560eccb167945fbc147050e9acc906a24925",
+    "asr-1a9823e0-source-gpt-4o-transcribe.json": "ffe33bf5ed61016c17156d7a973db8efb8b2c7fd8bdf6495523bf0892f66a1e8",
+    "asr-1a9823e0-source-whisper-1.json": "6a6373dfdec3d50d3882efc12caa2fcf29b5d40125c4418e4a343a0ff764bcfa",
+    "asr-3a7a85ed-resampled-gpt-4o-transcribe.json": "bd54bc33b5c47273f60699eee5ab02a9e2455af7e36d107e2e9ab938d683d7e4",
+    "asr-3a7a85ed-resampled-whisper-1.json": "41abe66887c81596a8d6203024fd72f23ce3dc9c2be5cf21c70ffa4c413ad509",
+    "asr-3a7a85ed-source-gpt-4o-transcribe.json": "ca9aebecf95d13c1cd36c7ef85de3cf890e5846961a491d37b50717ffc3c137c",
+    "asr-3a7a85ed-source-whisper-1.json": "fd44cf7c2f5922a79580207a38938d02dd304ceffa46975c793b60c77f15a0ba",
+    "asr.py": "4887348602ae1e5e5941f624cdd1432da5394673623b0f54c1b80fcba00e540a",
+    "direct-1a9823e0-1/result.json": "e59b666a49ceeff7358ede763a0d3b26ae228e7a7c7bf50ba66710199ef3eaa1",
+    "direct-1a9823e0-2/result.json": "7ee7c8153a36024e9982892b5e6e82bb218398068f8a2ee13cca8d5a88d68502",
+    "direct-1a9823e0-3/result.json": "a7a93ab55fc93f77c55c82d42f782f92c114c91f487f09cd48a3eae78711ce95",
+    "direct-3a7a85ed-1/result.json": "65e730bc0b220197add6c36db7fc4d807514329c02046f0730f3ce2c998cd50d",
+    "direct-3a7a85ed-2/result.json": "617bc50f9d2b71660c504d7cd319fa71e90b9f929bbc122ce9941d388a77b29a",
+    "direct-3a7a85ed-3/result.json": "edb335cfeeb3e6c30d73b25fd16739c0616c9081188a220de21edf9d55e217be",
+    "direct.py": "09da299ee4b6f28db7d82f982616d6e47840bac8cd9dccc59ca1393e2071d8f5",
+    "parlora-1a9823e0-1/result.json": "401e2287b0b8422d592b9de337bb9ed5db3ce5b558be21e1ca5d2cc0b67cd962",
+    "parlora-1a9823e0-1/wire.jsonl": "1f22b0efea956fd0471eacb67028cf8c9441434e1b5867a1373d40e59fdc63cb",
+    "parlora-1a9823e0-1/wire.pcm": "b3ef6c0e731ad7cabaf1f8552f07d8cb21f60ff89689e4e6f0f6a23e9fc18b2c",
+    "parlora-1a9823e0-2/result.json": "4373bf3f934bffc679a95d21192a3c77121e2f1812c9aba0c6ea3a45076b4c4f",
+    "parlora-1a9823e0-2/wire.jsonl": "8447af09db066ae342bdf4eca87fb1f7d15c3c34b9fab9152ffbfcb0c7dbb792",
+    "parlora-1a9823e0-2/wire.pcm": "ba43fa9b84f395b02e7144bcef20d7a9b9cf054052816a098acafb344b142c9f",
+    "parlora-1a9823e0-3/result.json": "d8fff9661d5835fd8b75da747e4914f6b591d3899bb415906009d49be308fc28",
+    "parlora-1a9823e0-3/wire.jsonl": "f05bad19345ab8babd9eba6c13786f469cb8dddb2a9687ccaa3d01ef80e7cdc8",
+    "parlora-1a9823e0-3/wire.pcm": "1466f99b05a16e264d2e02025d14f32747528dd8f926cc37132018481eb17483",
+    "parlora-3a7a85ed-1/result.json": "bcce5fe0bd01c5e1a1a283e208ad86c8a497043eb36923318fa80bafbb661cfb",
+    "parlora-3a7a85ed-1/wire.jsonl": "804e0cd01b77b40c104680653281b03a5d0411a37efb3f32b43988c0923ad9f3",
+    "parlora-3a7a85ed-1/wire.pcm": "7bb701a683d315d634d463b8fc05744eb4fe9036ad2dcab5bb10704fccff4110",
+    "parlora-3a7a85ed-2/result.json": "fd5e98629bc62b519b549c9c0c5f367ca8ade1424ae7259072c228fe6d1243bd",
+    "parlora-3a7a85ed-2/wire.jsonl": "3529c973d591e42dd82bccaaf6608262635aeb22ebf2e287351b342fb0d2f685",
+    "parlora-3a7a85ed-2/wire.pcm": "e6bb3e36f5c4d282520f8a576cd7dfe30a5f13b7c395f4eb96def959bd3aac84",
+    "parlora-3a7a85ed-3/result.json": "b11a29f3f4b7f8e2f14cc5004bce79565dd89a2977b18e4fc0c2b371b79de7f4",
+    "parlora-3a7a85ed-3/wire.jsonl": "aab9d050d0b446d0962d20cfb9f8d2a3d764c00aca88892a5ac84818eef16966",
+    "parlora-3a7a85ed-3/wire.pcm": "932969d6be0b2913e91eeee439da63a94a685f99d266eda1b721634a02f58b7b",
+    "probe-3s.exs": "2b6b2fb93a9538ff05c815238b1c305797d4f92b842c508b65c03a9b9771604e",
+    "probe.exs": "46137a31d91ffdf9922ccbecce7c8f1751826d426bed90f53419bd28a590b758",
+    "provider.ex": "06b9ce35afa0d8493ed4330dfd2cf95e9f619b65df57cb40dd02546fe658fbed",
+    "runner.ex": "871abd90d89b9e791614621ec3371911ed8cb768c1681adb079493c9cb31ccc7",
+    "three-second/parlora-1a9823e0-1/result.json": "9d87dc4c227ec0bd9e0025e1e2f3e71cb69800d1ea7b369bd6224a559feaea58",
+    "three-second/parlora-1a9823e0-1/wire.jsonl": "d024ebb348bec53166bc931965f981a19310b8733be5dea53b5089d0e5185791",
+    "three-second/parlora-1a9823e0-1/wire.pcm": "4da4c6c90bbe9dbabc445b1d2789d2c62350da7d0d777820aa22ca68fdcdb7a6",
+    "three-second/parlora-1a9823e0-2/result.json": "67399eb19a3158c72ba3c5ff75c09aeb2a8f2c78bf370b197a95e3e21fdcff38",
+    "three-second/parlora-1a9823e0-2/wire.jsonl": "3cfa5bb4c6aef823480eda5499857e363df59cdcdf6c6cdea17d8f3f618cc527",
+    "three-second/parlora-1a9823e0-2/wire.pcm": "76c8d269acbebf70da0d3e23a5237186bc3499cde422617cdf8d377b4e09a5d4",
+    "three-second/parlora-1a9823e0-3/result.json": "95e091827ee2e4f709b61b25fb9144206d891b7e7d070abdbb8ab2333919af6a",
+    "three-second/parlora-1a9823e0-3/wire.jsonl": "efda53ee04f94da71d4e197851fc00e5305f6f55e9f7e4d9b26d7014c2780e3b",
+    "three-second/parlora-1a9823e0-3/wire.pcm": "e6c2d6a867c8bca8e8a1b9cc954744e48ea9aa12aede124f0f2304d58a4fe171",
+    "three-second/parlora-1a9823e0-4/result.json": "fb873f41b6cef0d42d97e429a669a3776fdb8c4fbc2f57efc1355109d7f18a05",
+    "three-second/parlora-1a9823e0-4/wire.jsonl": "840d69056444464787de61f816a82cbd74c5d5ce35e61992bb853d10962859f0",
+    "three-second/parlora-1a9823e0-4/wire.pcm": "4da4c6c90bbe9dbabc445b1d2789d2c62350da7d0d777820aa22ca68fdcdb7a6",
+    "three-second/parlora-1a9823e0-5/result.json": "5e53ec9dfba3a26cb89fb92b97ccd74d51f527a6e233789f01618bf1881db5f6",
+    "three-second/parlora-1a9823e0-5/wire.jsonl": "0e8381dea475a88adf2a337baa147f31a96b266d359f1e5f95d985f62d1bf737",
+    "three-second/parlora-1a9823e0-5/wire.pcm": "60883fe72d6478e00de04e06fabb5cb8300e2e6e6043471827fc8df5e5a98b99",
+    "three-second/parlora-1a9823e0-6/result.json": "8a7f80189afc84f0a4b05de444db1e644ef9e97539f085fdddb86c911239ff47",
+    "three-second/parlora-1a9823e0-6/wire.jsonl": "5ecce0d6ef67a2c4c72706e698313c37bf7809fa31c5c80071be08cef602af46",
+    "three-second/parlora-1a9823e0-6/wire.pcm": "60883fe72d6478e00de04e06fabb5cb8300e2e6e6043471827fc8df5e5a98b99",
+    "three-second/parlora-1a9823e0-7/result.json": "db36d0dd7d0e494df3f57fac674604d0e9f83e770ce2d7657843b54904eb674f",
+    "three-second/parlora-1a9823e0-7/wire.jsonl": "3e17e4f9dd84b4f2089ad9de35d64c89c300c979087f3fd8715f81e30064786b",
+    "three-second/parlora-1a9823e0-7/wire.pcm": "5e07b848f2eb955b6f7529da126efce973b9e6ba4661d97eebe5ef6d812efd34",
+    "three-second/parlora-1a9823e0-8/result.json": "f812f786780c02ffe6642ad18632e729e5c4f4b9a8046ca75beeb9622f0fdbba",
+    "three-second/parlora-1a9823e0-8/wire.jsonl": "c18696731b61ecad4f29a4b6d742d02d688b1eaadfd9b63d9708f39671bf0e37",
+    "three-second/parlora-1a9823e0-8/wire.pcm": "4da4c6c90bbe9dbabc445b1d2789d2c62350da7d0d777820aa22ca68fdcdb7a6",
+    "three-second/provider.ex": "06b9ce35afa0d8493ed4330dfd2cf95e9f619b65df57cb40dd02546fe658fbed",
+    "three-second/runner.ex": "df15b9c8c583d23af64001c926441bba23556b35da8c16629379e5c23e7c6eef"
+  }
+}

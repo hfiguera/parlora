@@ -1,0 +1,5766 @@
+{
+  "revision": "7816663",
+  "boundary": "server PCM before Opus and browser playback",
+  "reports": [
+    {
+      "gap": {
+        "index": 12213,
+        "metadata": {
+          "session_id": "AIszepAMzmDzAndidDz-bJu6",
+          "channel": "browser"
+        },
+        "kind": "playout_gap",
+        "measurements": {
+          "cause": "source_resumed",
+          "at_us": -576460558620740,
+          "started_at_us": -576460558650774,
+          "boundary": "browser_pcm",
+          "duration_us": 30034,
+          "epoch": 0,
+          "silence_bytes": 1440,
+          "recovery_wait_us": 10083,
+          "gap_id": 11,
+          "peak_before": 4448,
+          "recovery_release_reason": "queue_ready",
+          "recovery_target_us": 120000,
+          "resume_queue_bytes": 3840,
+          "source_return_queue_bytes": 1440,
+          "source_returned_at_us": -576460558630823,
+          "inserted_silence_us": 30000,
+          "peak_after": 4608,
+          "source_unavailable_us": 19951
+        },
+        "report_index": 11
+      },
+      "events": [
+        {
+          "index": 12108,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558828943,
+            "late_us": 1341,
+            "pending_frames": 0,
+            "work_us": 26
+          }
+        },
+        {
+          "index": 12107,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558828934,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12109,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558820824,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12111,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558818794,
+            "late_us": 1490,
+            "pending_frames": 0,
+            "work_us": 46
+          }
+        },
+        {
+          "index": 12110,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558818777,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12112,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558810791,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12114,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558808881,
+            "late_us": 1403,
+            "pending_frames": 0,
+            "work_us": 31
+          }
+        },
+        {
+          "index": 12113,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558808869,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12115,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558800860,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12117,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558798869,
+            "late_us": 1415,
+            "pending_frames": 0,
+            "work_us": 23
+          }
+        },
+        {
+          "index": 12116,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558798860,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12118,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558790878,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12120,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558788871,
+            "late_us": 1413,
+            "pending_frames": 0,
+            "work_us": 14
+          }
+        },
+        {
+          "index": 12119,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558788867,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12121,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558780898,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12123,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558778927,
+            "late_us": 1357,
+            "pending_frames": 0,
+            "work_us": 73
+          }
+        },
+        {
+          "index": 12122,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558778910,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12124,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558770718,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12126,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558768506,
+            "late_us": 1778,
+            "pending_frames": 0,
+            "work_us": 781
+          }
+        },
+        {
+          "index": 12125,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558768451,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12127,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "at_us": -576460558766183,
+            "queue_bytes": 4800,
+            "dropped_bytes": 0,
+            "queue_before_bytes": 0
+          }
+        },
+        {
+          "index": 12130,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558766166,
+            "late_us": 3,
+            "pending_frames": 1,
+            "work_us": 112
+          }
+        },
+        {
+          "index": 12128,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558766137,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12129,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558766081,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12132,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558764918,
+            "late_us": 251,
+            "pending_frames": 0,
+            "work_us": 182
+          }
+        },
+        {
+          "index": 12131,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558764748,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12135,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558762936,
+            "late_us": 1233,
+            "pending_frames": 1,
+            "work_us": 98
+          }
+        },
+        {
+          "index": 12133,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558762918,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12134,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558762841,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12136,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558760791,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1440
+          }
+        },
+        {
+          "index": 12138,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558760659,
+            "late_us": 2177,
+            "pending_frames": 0,
+            "work_us": 356
+          }
+        },
+        {
+          "index": 12137,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558760308,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12141,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558758930,
+            "late_us": 1370,
+            "pending_frames": 1,
+            "work_us": 67
+          }
+        },
+        {
+          "index": 12139,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558758916,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12140,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558758867,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12143,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558756949,
+            "late_us": 1893,
+            "pending_frames": 0,
+            "work_us": 35
+          }
+        },
+        {
+          "index": 12142,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558756918,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12146,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558754921,
+            "late_us": 1991,
+            "pending_frames": 1,
+            "work_us": 181
+          }
+        },
+        {
+          "index": 12144,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558754888,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12145,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558754755,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12148,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558752931,
+            "late_us": 1805,
+            "pending_frames": 0,
+            "work_us": 183
+          }
+        },
+        {
+          "index": 12147,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558752757,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12150,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558750837,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12152,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558750810,
+            "late_us": 1932,
+            "pending_frames": 1,
+            "work_us": 461
+          }
+        },
+        {
+          "index": 12149,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558750699,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12151,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558750354,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12154,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558748953,
+            "late_us": 1394,
+            "pending_frames": 0,
+            "work_us": 36
+          }
+        },
+        {
+          "index": 12153,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558748929,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12156,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558746954,
+            "late_us": 1960,
+            "pending_frames": 0,
+            "work_us": 15
+          }
+        },
+        {
+          "index": 12155,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558746950,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12157,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558740834,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12159,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558736938,
+            "late_us": 1976,
+            "pending_frames": 0,
+            "work_us": 42
+          }
+        },
+        {
+          "index": 12158,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558736919,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12160,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558730820,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12162,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558727933,
+            "late_us": 981,
+            "pending_frames": 0,
+            "work_us": 43
+          }
+        },
+        {
+          "index": 12161,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558727914,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12163,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558720806,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12165,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558717905,
+            "late_us": 1009,
+            "pending_frames": 0,
+            "work_us": 71
+          }
+        },
+        {
+          "index": 12164,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558717882,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12166,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558710813,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12168,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558707927,
+            "late_us": 987,
+            "pending_frames": 0,
+            "work_us": 43
+          }
+        },
+        {
+          "index": 12167,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558707908,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12169,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558700814,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12171,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558697928,
+            "late_us": 986,
+            "pending_frames": 0,
+            "work_us": 45
+          }
+        },
+        {
+          "index": 12170,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558697912,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12172,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558690852,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12174,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558687940,
+            "late_us": 974,
+            "pending_frames": 0,
+            "work_us": 57
+          }
+        },
+        {
+          "index": 12173,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558687929,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12175,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558680600,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12177,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558677747,
+            "late_us": 1167,
+            "pending_frames": 0,
+            "work_us": 47
+          }
+        },
+        {
+          "index": 12176,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558677727,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12178,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558669916,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12180,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558667902,
+            "late_us": 1012,
+            "pending_frames": 0,
+            "work_us": 47
+          }
+        },
+        {
+          "index": 12179,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558667881,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12181,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558660661,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12183,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558657931,
+            "late_us": 983,
+            "pending_frames": 0,
+            "work_us": 73
+          }
+        },
+        {
+          "index": 12182,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558657912,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12184,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser"
+          },
+          "kind": "playout_gap",
+          "measurements": {
+            "cause": "source_queue_empty",
+            "at_us": -576460558650774,
+            "started_at_us": -576460558650774,
+            "boundary": "browser_pcm",
+            "duration_us": 0,
+            "epoch": 0,
+            "silence_bytes": 480,
+            "recovery_wait_us": 0,
+            "gap_id": 11,
+            "peak_before": 4448,
+            "recovery_release_reason": null,
+            "recovery_target_us": null,
+            "resume_queue_bytes": null,
+            "source_return_queue_bytes": null,
+            "source_returned_at_us": null,
+            "inserted_silence_us": 10000,
+            "peak_after": null,
+            "source_unavailable_us": 0
+          }
+        },
+        {
+          "index": 12185,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558650774,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12187,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558647935,
+            "late_us": 979,
+            "pending_frames": 0,
+            "work_us": 46
+          }
+        },
+        {
+          "index": 12186,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558647917,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12188,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558640835,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12190,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558637924,
+            "late_us": 990,
+            "pending_frames": 0,
+            "work_us": 45
+          }
+        },
+        {
+          "index": 12189,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558637905,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12191,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "at_us": -576460558636054,
+            "queue_bytes": 4800,
+            "dropped_bytes": 0,
+            "queue_before_bytes": 0
+          }
+        },
+        {
+          "index": 12194,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558636034,
+            "late_us": 4,
+            "pending_frames": 1,
+            "work_us": 98
+          }
+        },
+        {
+          "index": 12192,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558636003,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12193,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558635939,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12196,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558633911,
+            "late_us": 1127,
+            "pending_frames": 0,
+            "work_us": 94
+          }
+        },
+        {
+          "index": 12195,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558633825,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12199,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558631926,
+            "late_us": 1888,
+            "pending_frames": 1,
+            "work_us": 112
+          }
+        },
+        {
+          "index": 12197,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558631906,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12198,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558631820,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12200,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558630823,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 1440
+          }
+        },
+        {
+          "index": 12202,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558629956,
+            "late_us": 1854,
+            "pending_frames": 0,
+            "work_us": 49
+          }
+        },
+        {
+          "index": 12201,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558629912,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12205,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558627933,
+            "late_us": 1972,
+            "pending_frames": 1,
+            "work_us": 70
+          }
+        },
+        {
+          "index": 12203,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558627920,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12204,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558627867,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12207,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558625871,
+            "late_us": 1990,
+            "pending_frames": 0,
+            "work_us": 58
+          }
+        },
+        {
+          "index": 12206,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558625820,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12210,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558623942,
+            "late_us": 1868,
+            "pending_frames": 1,
+            "work_us": 96
+          }
+        },
+        {
+          "index": 12208,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558623926,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12209,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558623849,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12212,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558621923,
+            "late_us": 1920,
+            "pending_frames": 0,
+            "work_us": 125
+          }
+        },
+        {
+          "index": 12211,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558621858,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12213,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser"
+          },
+          "kind": "playout_gap",
+          "measurements": {
+            "cause": "source_resumed",
+            "at_us": -576460558620740,
+            "started_at_us": -576460558650774,
+            "boundary": "browser_pcm",
+            "duration_us": 30034,
+            "epoch": 0,
+            "silence_bytes": 1440,
+            "recovery_wait_us": 10083,
+            "gap_id": 11,
+            "peak_before": 4448,
+            "recovery_release_reason": "queue_ready",
+            "recovery_target_us": 120000,
+            "resume_queue_bytes": 3840,
+            "source_return_queue_bytes": 1440,
+            "source_returned_at_us": -576460558630823,
+            "inserted_silence_us": 30000,
+            "peak_after": 4608,
+            "source_unavailable_us": 19951
+          }
+        },
+        {
+          "index": 12214,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558620740,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12217,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558619964,
+            "late_us": 1829,
+            "pending_frames": 1,
+            "work_us": 95
+          }
+        },
+        {
+          "index": 12215,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460558619949,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12216,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558619872,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12219,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460558617923,
+            "late_us": 1943,
+            "pending_frames": 0,
+            "work_us": 109
+          }
+        },
+        {
+          "index": 12218,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460558617824,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12221,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558615933,
+            "late_us": 1878,
+            "pending_frames": 0,
+            "work_us": 43
+          }
+        },
+        {
+          "index": 12220,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558615916,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12222,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558610835,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12224,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558605964,
+            "late_us": 1847,
+            "pending_frames": 0,
+            "work_us": 41
+          }
+        },
+        {
+          "index": 12223,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558605948,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12225,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558600698,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12227,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558595909,
+            "late_us": 1902,
+            "pending_frames": 0,
+            "work_us": 27
+          }
+        },
+        {
+          "index": 12226,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558595899,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12228,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558590837,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12230,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558585975,
+            "late_us": 1836,
+            "pending_frames": 0,
+            "work_us": 30
+          }
+        },
+        {
+          "index": 12229,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558585962,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12231,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558580849,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12233,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460558575968,
+            "late_us": 1843,
+            "pending_frames": 0,
+            "work_us": 40
+          }
+        },
+        {
+          "index": 12232,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460558575953,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12234,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460558570820,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        }
+      ]
+    },
+    {
+      "gap": {
+        "index": 12854,
+        "metadata": {
+          "session_id": "AIszepAMzmDzAndidDz-bJu6",
+          "channel": "browser"
+        },
+        "kind": "playout_gap",
+        "measurements": {
+          "cause": "source_resumed",
+          "at_us": -576460557400910,
+          "started_at_us": -576460557420761,
+          "boundary": "browser_pcm",
+          "duration_us": 19851,
+          "epoch": 0,
+          "silence_bytes": 960,
+          "recovery_wait_us": 9653,
+          "gap_id": 12,
+          "peak_before": 2928,
+          "recovery_release_reason": "queue_ready",
+          "recovery_target_us": 120000,
+          "resume_queue_bytes": 2400,
+          "source_return_queue_bytes": 480,
+          "source_returned_at_us": -576460557410563,
+          "inserted_silence_us": 20000,
+          "peak_after": 2448,
+          "source_unavailable_us": 10198
+        },
+        "report_index": 12
+      },
+      "events": [
+        {
+          "index": 12759,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557599879,
+            "late_us": 1988,
+            "pending_frames": 0,
+            "work_us": 39
+          }
+        },
+        {
+          "index": 12758,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557599865,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12760,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557590879,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12762,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557590787,
+            "late_us": 1080,
+            "pending_frames": 0,
+            "work_us": 213
+          }
+        },
+        {
+          "index": 12761,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557590594,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12763,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557580910,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12765,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557580655,
+            "late_us": 1212,
+            "pending_frames": 0,
+            "work_us": 388
+          }
+        },
+        {
+          "index": 12764,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557580299,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12768,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557570966,
+            "late_us": 901,
+            "pending_frames": 0,
+            "work_us": 402
+          }
+        },
+        {
+          "index": 12766,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557570859,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12767,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557570581,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12771,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557560789,
+            "late_us": 1078,
+            "pending_frames": 0,
+            "work_us": 282
+          }
+        },
+        {
+          "index": 12769,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557560753,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12770,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557560524,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12774,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557550908,
+            "late_us": 959,
+            "pending_frames": 0,
+            "work_us": 350
+          }
+        },
+        {
+          "index": 12772,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557550852,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12773,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557550588,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12775,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557540899,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12777,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557540793,
+            "late_us": 1074,
+            "pending_frames": 0,
+            "work_us": 328
+          }
+        },
+        {
+          "index": 12776,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557540488,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12778,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "at_us": -576460557539664,
+            "queue_bytes": 4800,
+            "dropped_bytes": 0,
+            "queue_before_bytes": 0
+          }
+        },
+        {
+          "index": 12781,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557539633,
+            "late_us": 3,
+            "pending_frames": 1,
+            "work_us": 93
+          }
+        },
+        {
+          "index": 12779,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557539617,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12780,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557539543,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12783,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557537886,
+            "late_us": 750,
+            "pending_frames": 0,
+            "work_us": 79
+          }
+        },
+        {
+          "index": 12782,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557537816,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12786,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557535927,
+            "late_us": 1709,
+            "pending_frames": 1,
+            "work_us": 117
+          }
+        },
+        {
+          "index": 12784,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557535909,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12785,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557535814,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12788,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557533892,
+            "late_us": 1912,
+            "pending_frames": 0,
+            "work_us": 72
+          }
+        },
+        {
+          "index": 12787,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557533829,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12791,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557531877,
+            "late_us": 1941,
+            "pending_frames": 1,
+            "work_us": 104
+          }
+        },
+        {
+          "index": 12789,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557531856,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12790,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557531776,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12792,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557530957,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2400
+          }
+        },
+        {
+          "index": 12794,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557529951,
+            "late_us": 1820,
+            "pending_frames": 0,
+            "work_us": 41
+          }
+        },
+        {
+          "index": 12793,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557529916,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12797,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557527922,
+            "late_us": 1986,
+            "pending_frames": 1,
+            "work_us": 103
+          }
+        },
+        {
+          "index": 12795,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557527905,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12796,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557527823,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12799,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557525926,
+            "late_us": 1890,
+            "pending_frames": 0,
+            "work_us": 88
+          }
+        },
+        {
+          "index": 12798,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557525844,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12802,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557523915,
+            "late_us": 1919,
+            "pending_frames": 1,
+            "work_us": 140
+          }
+        },
+        {
+          "index": 12800,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557523894,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12801,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557523778,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12804,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557521909,
+            "late_us": 1863,
+            "pending_frames": 0,
+            "work_us": 77
+          }
+        },
+        {
+          "index": 12803,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557521839,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12805,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557520915,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12807,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557519894,
+            "late_us": 1935,
+            "pending_frames": 0,
+            "work_us": 73
+          }
+        },
+        {
+          "index": 12806,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557519877,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12808,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557510806,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12810,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557510779,
+            "late_us": 1050,
+            "pending_frames": 0,
+            "work_us": 333
+          }
+        },
+        {
+          "index": 12809,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557510475,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12813,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557499414,
+            "late_us": 2415,
+            "pending_frames": 0,
+            "work_us": 1516
+          }
+        },
+        {
+          "index": 12811,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557499394,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12812,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557497934,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12814,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557490937,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12816,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557489945,
+            "late_us": 1884,
+            "pending_frames": 0,
+            "work_us": 30
+          }
+        },
+        {
+          "index": 12815,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557489930,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12817,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557480899,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12819,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557479906,
+            "late_us": 1923,
+            "pending_frames": 0,
+            "work_us": 21
+          }
+        },
+        {
+          "index": 12818,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557479894,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12820,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557470965,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12822,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557469880,
+            "late_us": 1949,
+            "pending_frames": 0,
+            "work_us": 16
+          }
+        },
+        {
+          "index": 12821,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557469873,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12823,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557460913,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12825,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557459891,
+            "late_us": 1938,
+            "pending_frames": 0,
+            "work_us": 59
+          }
+        },
+        {
+          "index": 12824,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557459871,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12828,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557450938,
+            "late_us": 891,
+            "pending_frames": 0,
+            "work_us": 337
+          }
+        },
+        {
+          "index": 12826,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557450914,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12827,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557450621,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12829,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557440875,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12831,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557440665,
+            "late_us": 1164,
+            "pending_frames": 0,
+            "work_us": 447
+          }
+        },
+        {
+          "index": 12830,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557440277,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12834,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557430715,
+            "late_us": 1114,
+            "pending_frames": 0,
+            "work_us": 252
+          }
+        },
+        {
+          "index": 12833,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557430668,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12832,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557430543,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12838,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557420776,
+            "late_us": 1053,
+            "pending_frames": 0,
+            "work_us": 651
+          }
+        },
+        {
+          "index": 12836,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557420761,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12835,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser"
+          },
+          "kind": "playout_gap",
+          "measurements": {
+            "cause": "source_queue_empty",
+            "at_us": -576460557420761,
+            "started_at_us": -576460557420761,
+            "boundary": "browser_pcm",
+            "duration_us": 0,
+            "epoch": 0,
+            "silence_bytes": 480,
+            "recovery_wait_us": 0,
+            "gap_id": 12,
+            "peak_before": 2928,
+            "recovery_release_reason": null,
+            "recovery_target_us": null,
+            "resume_queue_bytes": null,
+            "source_return_queue_bytes": null,
+            "source_returned_at_us": null,
+            "inserted_silence_us": 10000,
+            "peak_after": null,
+            "source_unavailable_us": 0
+          }
+        },
+        {
+          "index": 12837,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557420154,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12839,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "at_us": -576460557412726,
+            "queue_bytes": 4800,
+            "dropped_bytes": 0,
+            "queue_before_bytes": 0
+          }
+        },
+        {
+          "index": 12842,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557412664,
+            "late_us": 4,
+            "pending_frames": 1,
+            "work_us": 666
+          }
+        },
+        {
+          "index": 12840,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557412645,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12841,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557412009,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12843,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557410563,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 480
+          }
+        },
+        {
+          "index": 12845,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557409712,
+            "late_us": 1956,
+            "pending_frames": 0,
+            "work_us": 1451
+          }
+        },
+        {
+          "index": 12844,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557408273,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12848,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557406927,
+            "late_us": 1331,
+            "pending_frames": 1,
+            "work_us": 104
+          }
+        },
+        {
+          "index": 12846,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557406896,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12847,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557406826,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12850,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557404931,
+            "late_us": 1889,
+            "pending_frames": 0,
+            "work_us": 73
+          }
+        },
+        {
+          "index": 12849,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557404868,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12853,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557402910,
+            "late_us": 1945,
+            "pending_frames": 1,
+            "work_us": 92
+          }
+        },
+        {
+          "index": 12851,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557402892,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12852,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557402822,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12854,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser"
+          },
+          "kind": "playout_gap",
+          "measurements": {
+            "cause": "source_resumed",
+            "at_us": -576460557400910,
+            "started_at_us": -576460557420761,
+            "boundary": "browser_pcm",
+            "duration_us": 19851,
+            "epoch": 0,
+            "silence_bytes": 960,
+            "recovery_wait_us": 9653,
+            "gap_id": 12,
+            "peak_before": 2928,
+            "recovery_release_reason": "queue_ready",
+            "recovery_target_us": 120000,
+            "resume_queue_bytes": 2400,
+            "source_return_queue_bytes": 480,
+            "source_returned_at_us": -576460557410563,
+            "inserted_silence_us": 20000,
+            "peak_after": 2448,
+            "source_unavailable_us": 10198
+          }
+        },
+        {
+          "index": 12855,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557400910,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1440
+          }
+        },
+        {
+          "index": 12857,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557400772,
+            "late_us": 2043,
+            "pending_frames": 0,
+            "work_us": 322
+          }
+        },
+        {
+          "index": 12856,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557400477,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12860,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557398937,
+            "late_us": 1511,
+            "pending_frames": 1,
+            "work_us": 85
+          }
+        },
+        {
+          "index": 12858,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557398926,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 12859,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557398858,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12862,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557396925,
+            "late_us": 1925,
+            "pending_frames": 0,
+            "work_us": 30
+          }
+        },
+        {
+          "index": 12861,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557396902,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12865,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557394949,
+            "late_us": 1945,
+            "pending_frames": 1,
+            "work_us": 86
+          }
+        },
+        {
+          "index": 12863,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460557394941,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12864,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557394866,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12867,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460557392952,
+            "late_us": 1909,
+            "pending_frames": 0,
+            "work_us": 23
+          }
+        },
+        {
+          "index": 12866,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460557392932,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 12869,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557390927,
+            "late_us": 2000,
+            "pending_frames": 0,
+            "work_us": 26
+          }
+        },
+        {
+          "index": 12868,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557390918,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12870,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557390914,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 12872,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557381950,
+            "late_us": 977,
+            "pending_frames": 0,
+            "work_us": 23
+          }
+        },
+        {
+          "index": 12871,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557381939,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12873,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557380870,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12875,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557371957,
+            "late_us": 970,
+            "pending_frames": 0,
+            "work_us": 13
+          }
+        },
+        {
+          "index": 12874,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557371953,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12876,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557370901,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 12879,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557360953,
+            "late_us": 1974,
+            "pending_frames": 0,
+            "work_us": 75
+          }
+        },
+        {
+          "index": 12877,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557360945,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12878,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557360912,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12881,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557351955,
+            "late_us": 972,
+            "pending_frames": 0,
+            "work_us": 29
+          }
+        },
+        {
+          "index": 12880,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557351944,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12882,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557350873,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 12884,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460557341946,
+            "late_us": 981,
+            "pending_frames": 0,
+            "work_us": 33
+          }
+        },
+        {
+          "index": 12883,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460557341931,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 12885,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460557340795,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        }
+      ]
+    },
+    {
+      "gap": {
+        "index": 25531,
+        "metadata": {
+          "session_id": "AIszepAMzmDzAndidDz-bJu6",
+          "channel": "browser"
+        },
+        "kind": "playout_gap",
+        "measurements": {
+          "cause": "source_resumed",
+          "at_us": -576460533426935,
+          "started_at_us": -576460533477855,
+          "boundary": "browser_pcm",
+          "duration_us": 50920,
+          "epoch": 0,
+          "silence_bytes": 2400,
+          "recovery_wait_us": 19939,
+          "gap_id": 19,
+          "peak_before": 4320,
+          "recovery_release_reason": "queue_ready",
+          "recovery_target_us": 120000,
+          "resume_queue_bytes": 4800,
+          "source_return_queue_bytes": 1920,
+          "source_returned_at_us": -576460533446874,
+          "inserted_silence_us": 50000,
+          "peak_after": 4080,
+          "source_unavailable_us": 30981
+        },
+        "report_index": 19
+      },
+      "events": [
+        {
+          "index": 25413,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533656906,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25415,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533655911,
+            "late_us": 998,
+            "pending_frames": 0,
+            "work_us": 24
+          }
+        },
+        {
+          "index": 25414,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533655902,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25416,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533646917,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25418,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533645957,
+            "late_us": 952,
+            "pending_frames": 0,
+            "work_us": 23
+          }
+        },
+        {
+          "index": 25417,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533645948,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25419,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533637755,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25421,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533634951,
+            "late_us": 1958,
+            "pending_frames": 0,
+            "work_us": 33
+          }
+        },
+        {
+          "index": 25420,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533634938,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25422,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533627734,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25424,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533624952,
+            "late_us": 1957,
+            "pending_frames": 0,
+            "work_us": 31
+          }
+        },
+        {
+          "index": 25423,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533624943,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25425,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533617742,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25427,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533614951,
+            "late_us": 1958,
+            "pending_frames": 0,
+            "work_us": 27
+          }
+        },
+        {
+          "index": 25426,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533614940,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25428,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533607723,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25430,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533604919,
+            "late_us": 1990,
+            "pending_frames": 0,
+            "work_us": 34
+          }
+        },
+        {
+          "index": 25429,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533604904,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25431,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533597710,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25433,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533595881,
+            "late_us": 1028,
+            "pending_frames": 0,
+            "work_us": 37
+          }
+        },
+        {
+          "index": 25432,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533595868,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25434,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533587748,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25436,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533585925,
+            "late_us": 984,
+            "pending_frames": 0,
+            "work_us": 32
+          }
+        },
+        {
+          "index": 25435,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533585911,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25437,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "at_us": -576460533584281,
+            "queue_bytes": 4800,
+            "dropped_bytes": 0,
+            "queue_before_bytes": 0
+          }
+        },
+        {
+          "index": 25440,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533584268,
+            "late_us": 2,
+            "pending_frames": 1,
+            "work_us": 146
+          }
+        },
+        {
+          "index": 25438,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533584210,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 25439,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533584127,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25442,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533582845,
+            "late_us": 425,
+            "pending_frames": 0,
+            "work_us": 83
+          }
+        },
+        {
+          "index": 25441,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533582771,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25445,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533580835,
+            "late_us": 1435,
+            "pending_frames": 1,
+            "work_us": 265
+          }
+        },
+        {
+          "index": 25443,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533580681,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25444,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533580576,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25447,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533578903,
+            "late_us": 1664,
+            "pending_frames": 0,
+            "work_us": 123
+          }
+        },
+        {
+          "index": 25446,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533578788,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25448,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533577828,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25451,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533576964,
+            "late_us": 1812,
+            "pending_frames": 1,
+            "work_us": 108
+          }
+        },
+        {
+          "index": 25449,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533576926,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25450,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533576862,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25453,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533574873,
+            "late_us": 1927,
+            "pending_frames": 0,
+            "work_us": 77
+          }
+        },
+        {
+          "index": 25452,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533574803,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25456,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533572926,
+            "late_us": 1867,
+            "pending_frames": 1,
+            "work_us": 349
+          }
+        },
+        {
+          "index": 25454,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533572782,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25455,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533572659,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25458,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533570888,
+            "late_us": 1686,
+            "pending_frames": 0,
+            "work_us": 26
+          }
+        },
+        {
+          "index": 25457,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533570867,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25461,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533568919,
+            "late_us": 1940,
+            "pending_frames": 1,
+            "work_us": 95
+          }
+        },
+        {
+          "index": 25459,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533568900,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25460,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533568828,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25462,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533567881,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3360
+          }
+        },
+        {
+          "index": 25464,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533566875,
+            "late_us": 1947,
+            "pending_frames": 0,
+            "work_us": 44
+          }
+        },
+        {
+          "index": 25463,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533566838,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25466,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533564934,
+            "late_us": 1894,
+            "pending_frames": 0,
+            "work_us": 24
+          }
+        },
+        {
+          "index": 25465,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533564926,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25467,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533556900,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25469,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533554852,
+            "late_us": 1976,
+            "pending_frames": 0,
+            "work_us": 48
+          }
+        },
+        {
+          "index": 25468,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533554832,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25470,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533547856,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25472,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533545839,
+            "late_us": 989,
+            "pending_frames": 0,
+            "work_us": 23
+          }
+        },
+        {
+          "index": 25471,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533545831,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25473,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533536927,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25475,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533535858,
+            "late_us": 970,
+            "pending_frames": 0,
+            "work_us": 28
+          }
+        },
+        {
+          "index": 25474,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533535847,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25476,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533526878,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25478,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533525896,
+            "late_us": 932,
+            "pending_frames": 0,
+            "work_us": 27
+          }
+        },
+        {
+          "index": 25477,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533525885,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25479,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533516930,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25481,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533514893,
+            "late_us": 1935,
+            "pending_frames": 0,
+            "work_us": 143
+          }
+        },
+        {
+          "index": 25480,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533514805,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25482,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533506943,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25484,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533505896,
+            "late_us": 932,
+            "pending_frames": 0,
+            "work_us": 18
+          }
+        },
+        {
+          "index": 25483,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533505889,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25485,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533497860,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25487,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533494919,
+            "late_us": 1909,
+            "pending_frames": 0,
+            "work_us": 28
+          }
+        },
+        {
+          "index": 25486,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533494909,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25488,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533487859,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25490,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533484924,
+            "late_us": 1904,
+            "pending_frames": 0,
+            "work_us": 19
+          }
+        },
+        {
+          "index": 25489,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533484916,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25492,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533477855,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25491,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser"
+          },
+          "kind": "playout_gap",
+          "measurements": {
+            "cause": "source_queue_empty",
+            "at_us": -576460533477855,
+            "started_at_us": -576460533477855,
+            "boundary": "browser_pcm",
+            "duration_us": 0,
+            "epoch": 0,
+            "silence_bytes": 480,
+            "recovery_wait_us": 0,
+            "gap_id": 19,
+            "peak_before": 4320,
+            "recovery_release_reason": null,
+            "recovery_target_us": null,
+            "resume_queue_bytes": null,
+            "source_return_queue_bytes": null,
+            "source_returned_at_us": null,
+            "inserted_silence_us": 10000,
+            "peak_after": null,
+            "source_unavailable_us": 0
+          }
+        },
+        {
+          "index": 25494,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533474991,
+            "late_us": 1837,
+            "pending_frames": 0,
+            "work_us": 30
+          }
+        },
+        {
+          "index": 25493,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533474985,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25495,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533466938,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25497,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533464917,
+            "late_us": 1911,
+            "pending_frames": 0,
+            "work_us": 31
+          }
+        },
+        {
+          "index": 25496,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533464903,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25498,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533456935,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25500,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533454924,
+            "late_us": 1904,
+            "pending_frames": 0,
+            "work_us": 24
+          }
+        },
+        {
+          "index": 25499,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533454915,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25501,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_received",
+          "measurements": {
+            "bytes": 4800,
+            "at_us": -576460533453944,
+            "queue_bytes": 4800,
+            "dropped_bytes": 0,
+            "queue_before_bytes": 0
+          }
+        },
+        {
+          "index": 25504,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533453934,
+            "late_us": 1,
+            "pending_frames": 1,
+            "work_us": 56
+          }
+        },
+        {
+          "index": 25502,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533453924,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 25503,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533453882,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25506,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533451948,
+            "late_us": 987,
+            "pending_frames": 0,
+            "work_us": 35
+          }
+        },
+        {
+          "index": 25505,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533451918,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25509,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533449895,
+            "late_us": 2014,
+            "pending_frames": 1,
+            "work_us": 131
+          }
+        },
+        {
+          "index": 25507,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533449885,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25508,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533449767,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25511,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533447882,
+            "late_us": 1880,
+            "pending_frames": 0,
+            "work_us": 59
+          }
+        },
+        {
+          "index": 25510,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533447827,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25512,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533446874,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25515,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533445927,
+            "late_us": 1893,
+            "pending_frames": 1,
+            "work_us": 69
+          }
+        },
+        {
+          "index": 25513,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533445919,
+            "queue_bytes": 1920
+          }
+        },
+        {
+          "index": 25514,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533445860,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25517,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533443941,
+            "late_us": 1914,
+            "pending_frames": 0,
+            "work_us": 42
+          }
+        },
+        {
+          "index": 25516,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533443903,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25520,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533441947,
+            "late_us": 1949,
+            "pending_frames": 1,
+            "work_us": 44
+          }
+        },
+        {
+          "index": 25518,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533441940,
+            "queue_bytes": 960
+          }
+        },
+        {
+          "index": 25519,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533441907,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25522,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533439838,
+            "late_us": 2064,
+            "pending_frames": 0,
+            "work_us": 75
+          }
+        },
+        {
+          "index": 25521,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533439781,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25525,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533437763,
+            "late_us": 1997,
+            "pending_frames": 1,
+            "work_us": 135
+          }
+        },
+        {
+          "index": 25523,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 960,
+            "at_us": -576460533437744,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25524,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533437632,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25526,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533436816,
+            "source_bytes": 0,
+            "silence_bytes": 480,
+            "queue_bytes": 4320
+          }
+        },
+        {
+          "index": 25528,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 1,
+            "at_us": -576460533435873,
+            "late_us": 1753,
+            "pending_frames": 0,
+            "work_us": 29
+          }
+        },
+        {
+          "index": 25527,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "frame",
+          "measurements": {
+            "bytes": 480,
+            "at_us": -576460533435846,
+            "duration_us": 10000
+          }
+        },
+        {
+          "index": 25530,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533433943,
+            "late_us": 1899,
+            "pending_frames": 0,
+            "work_us": 31
+          }
+        },
+        {
+          "index": 25529,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533433933,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25532,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533426935,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 25531,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser"
+          },
+          "kind": "playout_gap",
+          "measurements": {
+            "cause": "source_resumed",
+            "at_us": -576460533426935,
+            "started_at_us": -576460533477855,
+            "boundary": "browser_pcm",
+            "duration_us": 50920,
+            "epoch": 0,
+            "silence_bytes": 2400,
+            "recovery_wait_us": 19939,
+            "gap_id": 19,
+            "peak_before": 4320,
+            "recovery_release_reason": "queue_ready",
+            "recovery_target_us": 120000,
+            "resume_queue_bytes": 4800,
+            "source_return_queue_bytes": 1920,
+            "source_returned_at_us": -576460533446874,
+            "inserted_silence_us": 50000,
+            "peak_after": 4080,
+            "source_unavailable_us": 30981
+          }
+        },
+        {
+          "index": 25534,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533423926,
+            "late_us": 1916,
+            "pending_frames": 0,
+            "work_us": 45
+          }
+        },
+        {
+          "index": 25533,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533423908,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25535,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533417864,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 3840
+          }
+        },
+        {
+          "index": 25537,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533413971,
+            "late_us": 1871,
+            "pending_frames": 0,
+            "work_us": 28
+          }
+        },
+        {
+          "index": 25536,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533413960,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25538,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533406925,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        },
+        {
+          "index": 25540,
+          "metadata": {
+            "direction": "output",
+            "session_id": "AIszepAMzmDzAndidDz-bJu6"
+          },
+          "kind": "tick",
+          "measurements": {
+            "blocked": 0,
+            "delay_ms": 10,
+            "at_us": -576460533403950,
+            "late_us": 1892,
+            "pending_frames": 0,
+            "work_us": 25
+          }
+        },
+        {
+          "index": 25539,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "adapter_id": "jAK7kIG73m9Mb6E_pluudmlY"
+          },
+          "kind": "audio_read",
+          "measurements": {
+            "bytes": 0,
+            "at_us": -576460533403940,
+            "queue_bytes": 0
+          }
+        },
+        {
+          "index": 25541,
+          "metadata": {
+            "session_id": "AIszepAMzmDzAndidDz-bJu6",
+            "channel": "browser",
+            "epoch": 0
+          },
+          "kind": "playout",
+          "measurements": {
+            "at_us": -576460533397860,
+            "source_bytes": 480,
+            "silence_bytes": 0,
+            "queue_bytes": 2880
+          }
+        }
+      ]
+    }
+  ]
+}

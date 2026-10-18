@@ -1,0 +1,159 @@
+{
+  "baseline_sha256": "9260a52ce9f3b5639e8878cd418cc965c8b7e30ea13646f0440092c9046e2ac6",
+  "source_hashes_verified": true,
+  "database_snapshots_reviewed": 21,
+  "trials": [
+    {
+      "trial": "01-cardinal-124-r1",
+      "status": "failed",
+      "changed_orders": [],
+      "findings": [
+        {
+          "kind": "interpretation-timeouts",
+          "attempts": 4,
+          "backend_jobs": 0,
+          "root_cause": "Not established; timeout results identify the failed stage, not the upstream cause."
+        }
+      ]
+    },
+    {
+      "trial": "05-items-124-r1",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "12-correction-r1",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "14-followup-items-r1",
+      "status": "failed",
+      "changed_orders": [],
+      "findings": [
+        {
+          "kind": "required-status-not-explicit",
+          "observed_text": " up. Order 124 is on its way. Tracking says DEMO-124. No delivery instructions are listed.",
+          "assessment": "Correct backend target; reply says on its way, not out for delivery. This is a specificity/check-boundary failure, not proof of a false factual claim or wrong lookup."
+        }
+      ]
+    },
+    {
+      "trial": "19-spoken-approval-r1",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "20-browser-confirmation-r1",
+      "status": "passed",
+      "changed_orders": [
+        "124"
+      ],
+      "findings": []
+    },
+    {
+      "trial": "21-reconnect-r1",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "01-cardinal-124-r2",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "05-items-124-r2",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "12-correction-r2",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "14-followup-items-r2",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "19-spoken-approval-r2",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "20-browser-confirmation-r2",
+      "status": "passed",
+      "changed_orders": [
+        "124"
+      ],
+      "findings": []
+    },
+    {
+      "trial": "21-reconnect-r2",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "01-cardinal-124-r3",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "05-items-124-r3",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "12-correction-r3",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "14-followup-items-r3",
+      "status": "failed",
+      "changed_orders": [],
+      "findings": [
+        {
+          "kind": "interpretation-timeouts",
+          "attempts": 4,
+          "backend_jobs": 0,
+          "root_cause": "Not established; timeout results identify the failed stage, not the upstream cause."
+        }
+      ]
+    },
+    {
+      "trial": "19-spoken-approval-r3",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    },
+    {
+      "trial": "20-browser-confirmation-r3",
+      "status": "passed",
+      "changed_orders": [
+        "124"
+      ],
+      "findings": []
+    },
+    {
+      "trial": "21-reconnect-r3",
+      "status": "passed",
+      "changed_orders": [],
+      "findings": []
+    }
+  ]
+}

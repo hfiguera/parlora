@@ -1,0 +1,13 @@
+{
+  "scenario": "Live PCM24k synthetic LocalAudio, unchanged provider and pipeline limits",
+  "provider_chunks": 143,
+  "provider_bytes": 686400,
+  "provider_peak_queue_bytes": 5760,
+  "provider_dropped_bytes": 0,
+  "output_ticks": 1546,
+  "blocked_output_ticks": 0,
+  "maximum_tick_work_us": 11197,
+  "maximum_tick_lateness_us": 4501,
+  "playback_starvation_events": 3,
+  "finalized": true
+}

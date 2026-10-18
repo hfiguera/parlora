@@ -1,0 +1,7 @@
+/_build/
+/deps/
+/priv/
+/native/opus_rustler_probe/target/
+/erl_crash.dump
+/core
+/core.*

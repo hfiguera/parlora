@@ -1,0 +1,198 @@
+{
+  "date": "2026-09-16",
+  "runs": {
+    "macos": [
+      {
+        "playback_buffer_ms": 0,
+        "source_ms": 10000.0,
+        "gap_count": 4,
+        "inserted_silence_ms": 40.0,
+        "native_underrun_frames": 4,
+        "steady_native_underrun_frames": 0
+      },
+      {
+        "playback_buffer_ms": 60,
+        "source_ms": 10000.0,
+        "gap_count": 0,
+        "inserted_silence_ms": 0,
+        "native_underrun_frames": 4,
+        "steady_native_underrun_frames": 0
+      }
+    ],
+    "linux_virtual": [
+      {
+        "playback_buffer_ms": 0,
+        "source_ms": 10000.0,
+        "gap_count": 3,
+        "inserted_silence_ms": 30.0,
+        "native_underrun_frames": 1508,
+        "steady_native_underrun_frames": 0
+      },
+      {
+        "playback_buffer_ms": 60,
+        "source_ms": 10000.0,
+        "gap_count": 0,
+        "inserted_silence_ms": 0,
+        "native_underrun_frames": 1508,
+        "steady_native_underrun_frames": 0
+      }
+    ],
+    "live_90_seconds": {
+      "events": {
+        "extension": 18,
+        "ready": 3,
+        "audio_discontinuity": 85,
+        "result_delivery": 8,
+        "control_completed": 26,
+        "playback_observed": 16182,
+        "usage_updated": 6,
+        "delegation_requested": 3,
+        "request_started": 3,
+        "request_completed": 2,
+        "request_failed": 1,
+        "transcript_delta": 66,
+        "delegation_pending": 3,
+        "context_acknowledged": 3,
+        "stale_result": 1,
+        "context_wait_started": 2,
+        "delegation_associated": 2,
+        "task_submitted": 3
+      },
+      "usage": {
+        "seconds": 89.0,
+        "final?": true
+      },
+      "discontinuities": {
+        "running/channel/device_output_underrun": 5,
+        "running/channel/playback_starved": 16,
+        "startup/channel/capture_overflow": 62,
+        "startup/channel/device_output_underrun": 1,
+        "startup/session/startup_buffer_discard": 1
+      },
+      "queue_peaks": {
+        "capture_bytes": 960,
+        "playback_bytes": 2880,
+        "generated_bytes": 10560,
+        "uplink_bytes": 960
+      },
+      "process_peaks": {
+        "process_bytes": 548776,
+        "mailbox": 0
+      },
+      "max_sample_gap_ms": 1929,
+      "duration_seconds": 90,
+      "backend_requests": 3,
+      "backend_completion_ms": [
+        3001,
+        18001,
+        3001
+      ],
+      "completion_to_accept_ms": [
+        736,
+        601
+      ],
+      "vm_samples": [
+        {
+          "at_ms": 10939,
+          "vm": {
+            "processes": 178,
+            "beam_bytes": 141911220,
+            "code_bytes": 52689563,
+            "binary_bytes": 1634392,
+            "ets_bytes": 5169256,
+            "rss_bytes": 195002368
+          }
+        },
+        {
+          "at_ms": 20957,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 141893028,
+            "code_bytes": 52689563,
+            "binary_bytes": 1510952,
+            "ets_bytes": 5169256,
+            "rss_bytes": 195837952
+          }
+        },
+        {
+          "at_ms": 30971,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 142121068,
+            "code_bytes": 52689563,
+            "binary_bytes": 1776520,
+            "ets_bytes": 5169256,
+            "rss_bytes": 195772416
+          }
+        },
+        {
+          "at_ms": 40989,
+          "vm": {
+            "processes": 178,
+            "beam_bytes": 141913228,
+            "code_bytes": 52689563,
+            "binary_bytes": 1658680,
+            "ets_bytes": 5169256,
+            "rss_bytes": 195969024
+          }
+        },
+        {
+          "at_ms": 50003,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 141948820,
+            "code_bytes": 52689563,
+            "binary_bytes": 1561400,
+            "ets_bytes": 5169256,
+            "rss_bytes": 195936256
+          }
+        },
+        {
+          "at_ms": 60025,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 142132924,
+            "code_bytes": 52689563,
+            "binary_bytes": 1728240,
+            "ets_bytes": 5169256,
+            "rss_bytes": 195952640
+          }
+        },
+        {
+          "at_ms": 70047,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 142204076,
+            "code_bytes": 52689563,
+            "binary_bytes": 1824568,
+            "ets_bytes": 5169256,
+            "rss_bytes": 196608000
+          }
+        },
+        {
+          "at_ms": 80063,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 142495292,
+            "code_bytes": 52689563,
+            "binary_bytes": 1913264,
+            "ets_bytes": 5169256,
+            "rss_bytes": 196509696
+          }
+        },
+        {
+          "at_ms": 90079,
+          "vm": {
+            "processes": 177,
+            "beam_bytes": 142370332,
+            "code_bytes": 52689563,
+            "binary_bytes": 1817008,
+            "ets_bytes": 5169256,
+            "rss_bytes": 196526080
+          }
+        }
+      ],
+      "finalized": true
+    }
+  }
+}

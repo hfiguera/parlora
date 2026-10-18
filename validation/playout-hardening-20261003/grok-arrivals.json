@@ -1,0 +1,84 @@
+{
+  "complete": true,
+  "failure": null,
+  "provider": "Parlora.Providers.Grok",
+  "row_limit": 12000,
+  "arrivals": [
+    {
+      "bytes": 11744,
+      "at_us": 0,
+      "dropped_bytes": 0,
+      "duration_us": 244666,
+      "queue_bytes": 11744,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 30828,
+      "at_us": 121582,
+      "dropped_bytes": 0,
+      "duration_us": 642250,
+      "queue_bytes": 30828,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 22020,
+      "at_us": 400380,
+      "dropped_bytes": 0,
+      "duration_us": 458750,
+      "queue_bytes": 22020,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 11744,
+      "at_us": 661662,
+      "dropped_bytes": 0,
+      "duration_us": 244666,
+      "queue_bytes": 11744,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 60188,
+      "at_us": 1008922,
+      "dropped_bytes": 0,
+      "duration_us": 1253916,
+      "queue_bytes": 60188,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 139460,
+      "at_us": 2068368,
+      "dropped_bytes": 0,
+      "duration_us": 2905416,
+      "queue_bytes": 139460,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 171756,
+      "at_us": 2385920,
+      "dropped_bytes": 0,
+      "duration_us": 3578250,
+      "queue_bytes": 171756,
+      "queue_before_bytes": 0
+    },
+    {
+      "bytes": 16148,
+      "at_us": 2387453,
+      "dropped_bytes": 0,
+      "duration_us": 336416,
+      "queue_bytes": 187904,
+      "queue_before_bytes": 171756
+    },
+    {
+      "bytes": 4128,
+      "at_us": 2387566,
+      "dropped_bytes": 0,
+      "duration_us": 86000,
+      "queue_bytes": 192032,
+      "queue_before_bytes": 187904
+    }
+  ],
+  "dropped_bytes": 0,
+  "capture_seconds": 45,
+  "received_bytes": 468016,
+  "retained_bytes": 468016
+}

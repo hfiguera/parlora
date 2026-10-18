@@ -1,0 +1,136 @@
+{
+  "migration_allowed": false,
+  "retained_model": "jev-1.13.0",
+  "decision": "Candidate still adds clarification on a clear operation reply for a retained order and on delayed numeric corrections after the speech-act arbitration fix.",
+  "batches": {
+    "1": {
+      "jev-1.13.0": {
+        "passed": 133,
+        "attempts": 138
+      },
+      "jev-1.14.0": {
+        "passed": 132,
+        "attempts": 138
+      }
+    },
+    "2": {
+      "jev-1.13.0": {
+        "passed": 135,
+        "attempts": 138
+      },
+      "jev-1.14.0": {
+        "passed": 133,
+        "attempts": 138
+      }
+    }
+  },
+  "models": {
+    "jev-1.13.0": {
+      "policy_matches": 268,
+      "policy_attempts": 276,
+      "api_calls": 258,
+      "deterministic_bypasses": 18,
+      "median_ms": 122.0,
+      "failures_by_case": {
+        "progress": 6,
+        "completed_numeric_prefix_correction": 2
+      }
+    },
+    "jev-1.14.0": {
+      "policy_matches": 265,
+      "policy_attempts": 276,
+      "api_calls": 258,
+      "deterministic_bypasses": 18,
+      "median_ms": 109.0,
+      "failures_by_case": {
+        "pending_operation_keeps_clarified_order": 5,
+        "completed_numeric_prefix_correction": 6
+      }
+    }
+  },
+  "groups": {
+    "presence_controls": {
+      "jev-1.13.0": {
+        "passed": 42,
+        "attempts": 42
+      },
+      "jev-1.14.0": {
+        "passed": 42,
+        "attempts": 42
+      }
+    },
+    "admitted_read_continuations": {
+      "jev-1.13.0": {
+        "passed": 30,
+        "attempts": 30
+      },
+      "jev-1.14.0": {
+        "passed": 30,
+        "attempts": 30
+      }
+    },
+    "initial_requests_and_operation_changes": {
+      "jev-1.13.0": {
+        "passed": 42,
+        "attempts": 42
+      },
+      "jev-1.14.0": {
+        "passed": 42,
+        "attempts": 42
+      }
+    },
+    "explicit_corrections": {
+      "jev-1.13.0": {
+        "passed": 24,
+        "attempts": 24
+      },
+      "jev-1.14.0": {
+        "passed": 24,
+        "attempts": 24
+      }
+    },
+    "clarified_order_operation_reply": {
+      "jev-1.13.0": {
+        "passed": 6,
+        "attempts": 6
+      },
+      "jev-1.14.0": {
+        "passed": 1,
+        "attempts": 6
+      }
+    },
+    "delayed_numeric_correction": {
+      "jev-1.13.0": {
+        "passed": 4,
+        "attempts": 6
+      },
+      "jev-1.14.0": {
+        "passed": 0,
+        "attempts": 6
+      }
+    },
+    "progress_question": {
+      "jev-1.13.0": {
+        "passed": 0,
+        "attempts": 6
+      },
+      "jev-1.14.0": {
+        "passed": 6,
+        "attempts": 6
+      }
+    }
+  },
+  "coverage": {
+    "jev-1.13.0": {
+      "fixture_matches": 20,
+      "cases": 38,
+      "incorrect_suppressions": 0
+    },
+    "jev-1.14.0": {
+      "fixture_matches": 25,
+      "cases": 38,
+      "incorrect_suppressions": 0
+    }
+  },
+  "api_calls_total": 592
+}

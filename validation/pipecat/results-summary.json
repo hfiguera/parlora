@@ -1,0 +1,139 @@
+{
+  "evaluated_on": "2026-09-22",
+  "pilot": {
+    "schema_version": 1,
+    "planned": 20,
+    "status_counts": {
+      "ok": 20
+    },
+    "dataset": "pipecat-ai/stt-benchmark-data",
+    "revision": "3fe50170d520c951957b86996ef082a6ab87b394",
+    "reference_words": 510,
+    "pooled_wer_by_clip_end_deadline_ms": {
+      "0": 0.07254901960784314,
+      "250": 0.052941176470588235,
+      "500": 0.047058823529411764,
+      "1000": 0.029411764705882353,
+      "3000": 0.027450980392156862
+    },
+    "first_text_from_clip_start_ms": {
+      "p50": 2141.649,
+      "p95": 3597.946
+    },
+    "max_injection_lateness_ms": 11.023,
+    "infrastructure_ok": true,
+    "pilot_sanity_gate": true,
+    "gate_note": "20-clip pilot: all attempts usable, no missing transcripts or remaining sessions, max injection lateness <=100 ms, pooled WER <=25%. Not production certification.",
+    "normalization": "NFKC, lowercase, punctuation tokenization; apostrophes and digits preserved. No semantic/number normalization.",
+    "limitations": [
+      "Clip end is not an annotated speech endpoint.",
+      "Captions are observed by a deadline, not declared final.",
+      "No browser/phone transport, audible response, or task-success scoring.",
+      "All planned clips stay in the denominator, including failed/unattempted clips."
+    ]
+  },
+  "full_recovered": {
+    "schema_version": 1,
+    "planned": 1000,
+    "status_counts": {
+      "ok": 1000,
+      "missing_transcript": 1
+    },
+    "cohort": "recovered coverage",
+    "preserved_prior_successes": 695,
+    "prior_runs": [
+      "runs/full-20260922",
+      "runs/continuation-20260922"
+    ],
+    "scorer_sha256": "e3ffed39ec92529ed28b6605a005cf9a3b2b6d4bc3751ee0f41056e7a62a80d4",
+    "dataset": "pipecat-ai/stt-benchmark-data",
+    "revision": "3fe50170d520c951957b86996ef082a6ab87b394",
+    "reference_words": 23323,
+    "pooled_wer_by_clip_end_deadline_ms": {
+      "0": 0.06937357972816532,
+      "250": 0.05037945375809287,
+      "500": 0.04210436050250825,
+      "1000": 0.03322900141491232,
+      "3000": 0.03198559362003173
+    },
+    "first_text_from_clip_start_ms": {
+      "p50": 2061.185,
+      "p95": 3602.47
+    },
+    "max_injection_lateness_ms": 24.86,
+    "infrastructure_ok": true,
+    "transcript_coverage_complete": false,
+    "pilot_sanity_gate": false,
+    "gate_note": "20-clip pilot: all attempts usable, no missing transcripts or remaining sessions, max injection lateness <=100 ms, pooled WER <=25%. Not production certification.",
+    "normalization": "NFKC, lowercase, punctuation tokenization; apostrophes and digits preserved. No semantic/number normalization.",
+    "limitations": [
+      "Clip end is not an annotated speech endpoint.",
+      "Captions are observed by a deadline, not declared final.",
+      "No browser/phone transport, audible response, or task-success scoring.",
+      "All planned clips stay in the denominator, including failed/unattempted clips."
+    ]
+  },
+  "runs": [
+    {
+      "name": "pilot-20260922",
+      "started_at": "2026-09-22T20:39:53.931546Z",
+      "finished_at": "2026-09-22T20:41:36.464275Z",
+      "attempted": 20,
+      "ok": 20,
+      "failed": 0,
+      "active_sessions_at_end": 0,
+      "runner_sha256": "9ec5bbfb5fa0322168fd7a60db22b14ce099c7e498fc8afe7733ff0c3a9a5393",
+      "manifest_sha256": "a5ae9eb0230706b19d302a318ad1ffee5914d860c559ce05dc64572f223e27ea"
+    },
+    {
+      "name": "full-20260922",
+      "started_at": "2026-09-22T20:42:08.706735Z",
+      "finished_at": "2026-09-22T20:57:08.748888Z",
+      "attempted": 376,
+      "ok": 368,
+      "failed": 8,
+      "active_sessions_at_end": 0,
+      "runner_sha256": "979b3b436573872365505e07157f0219903dd8d22f8b3521756ba47b0cd89b05",
+      "manifest_sha256": "a5ae9eb0230706b19d302a318ad1ffee5914d860c559ce05dc64572f223e27ea"
+    },
+    {
+      "name": "diagnostic-20260922",
+      "started_at": "2026-09-22T20:57:52.674377Z",
+      "finished_at": "2026-09-22T20:57:53.207142Z",
+      "attempted": 1,
+      "ok": 0,
+      "failed": 1,
+      "active_sessions_at_end": 0,
+      "runner_sha256": "4bd4363d268e990f406bf13fbcb90480b28eefe3a20e3b84687343621706e7f7",
+      "manifest_sha256": "a5ae9eb0230706b19d302a318ad1ffee5914d860c559ce05dc64572f223e27ea"
+    },
+    {
+      "name": "continuation-20260922",
+      "started_at": "2026-09-22T21:00:07.771001Z",
+      "finished_at": "2026-09-22T21:13:24.510118Z",
+      "attempted": 328,
+      "ok": 327,
+      "failed": 1,
+      "active_sessions_at_end": 0,
+      "runner_sha256": "2a932a0e049f2f090d30e10fcb9c6c6a32c50e9cfdadfc036c36305da2e99272",
+      "manifest_sha256": "a5ae9eb0230706b19d302a318ad1ffee5914d860c559ce05dc64572f223e27ea"
+    },
+    {
+      "name": "continuation-2-20260922",
+      "started_at": "2026-09-22T21:15:02.061974Z",
+      "finished_at": "2026-09-22T21:27:36.808990Z",
+      "attempted": 305,
+      "ok": 305,
+      "failed": 0,
+      "active_sessions_at_end": 0,
+      "runner_sha256": "4120ea11e220228add85d2d1b3a415c875874a5f48e2574eafe3f76a1dd86323",
+      "manifest_sha256": "a5ae9eb0230706b19d302a318ad1ffee5914d860c559ce05dc64572f223e27ea"
+    }
+  ],
+  "audio_minutes": 159.8890763888889,
+  "full_raw_word_edits": 746,
+  "full_zero_error_clips": 613,
+  "missing_transcript_ids": [
+    "1a9823e0-ef24-71eb-cb3a-fc50f6bb8f52"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "session_id": "ZxiuCqRo1x08DtRTiVByKFC1",
+  "observer_enabled": true,
+  "outcome": "No startup stall reproduced; observer causality not established.",
+  "first_input_caption_at_ms": 1790297824455,
+  "first_tool_response_submitted_at_ms": 1790297825465,
+  "first_reply_caption_at_ms": 1790297826177,
+  "first_reply_audio_over_two_bytes_at_ms": 1790297826190,
+  "result_to_first_caption_ms": 712,
+  "result_to_first_audio_over_two_bytes_ms": 725,
+  "correction_input_caption_at_ms": 1790297832499,
+  "correction_result_submitted_at_ms": 1790297832509,
+  "correction_reply_caption_and_audio_at_ms": 1790297834332,
+  "correction_result_to_reply_ms": 1823,
+  "backend_executions": 2,
+  "first_response_scheduling": "WHEN_IDLE",
+  "associated_correction_response_scheduling": "SILENT",
+  "errors_recorded": [],
+  "timing_limitation": "Wire times are observer receipt times; not acoustic playback or speech-end measurements.",
+  "artifacts": {
+    "working-observer-on-reversal-metadata.jsonl": "d6cd4786627e6d9e278e061ec8b3cb99eca688ac215a8544b96962a9f6e9c334",
+    "working-observer-on-reversal-manifest.json": "ea7eecaa79bda84c47d5b825b91cadc4e1d7c477145dfca7f89172fb6e93ad8e",
+    "working-observer-on-reversal-browser.json": "568a0407bd966e7682075b3c5092cb2fd2d286e1d13288329af5c9651db53df3"
+  }
+}

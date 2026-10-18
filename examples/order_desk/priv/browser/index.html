@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OrderDesk · Parlora browser voice</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/voice.js" defer></script>
+  <script src="/orders.js" defer></script>
+  <!-- audio-diagnostics -->
+</head>
+<body>
+<a class="skip-link" href="#orders-heading">Skip to your orders</a>
+<main>
+  <header class="page-header">
+    <h1>Your orders. A conversation away.</h1>
+    <p>Ask about an order, check what’s in it, or draft new delivery instructions.</p>
+    <p class="note">OrderDesk · a Parlora demo with fictional orders and real saved changes.</p>
+  </header>
+  <div class="workspace">
+    <section class="conversation-panel" aria-labelledby="conversation-heading">
+      <h2 id="conversation-heading">Conversation</h2>
+      <p class="note">Use headphones. Wait for the greeting, then speak.</p>
+      <p id="connection" role="status">Disconnected</p>
+      <div class="controls" aria-label="Call controls">
+        <button id="connect" class="primary">Connect microphone</button>
+        <button id="disconnect" disabled>Disconnect</button>
+        <button id="mute" aria-pressed="false" disabled>Mute microphone</button>
+      </div>
+      <p id="microphone-state" class="note" role="status">Your microphone is off.</p>
+      <div id="transcript" role="log" aria-label="Conversation captions" aria-live="polite" aria-relevant="additions text" tabindex="0">
+        <p class="empty">Your conversation will appear here.<br>Try “Check order 123,” then “Actually, I meant 124.”</p>
+      </div>
+      <details id="playback-controls">
+        <summary>Audio controls</summary>
+        <div class="controls">
+          <button id="stop" disabled>Stop output</button>
+          <button id="clear" disabled>Clear queued audio</button>
+          <button id="resume" disabled>Resume output</button>
+        </div>
+        <audio id="speaker" aria-label="Assistant audio playback" autoplay controls></audio>
+        <p id="playback-feedback" class="note" role="status"></p>
+        <p class="note">Clearing removes audio queued by Parlora. Audio already sent to the browser may still play.</p>
+      </details>
+    </section>
+    <div class="order-workspace">
+      <section class="review-section" aria-labelledby="review-heading">
+        <h2 id="review-heading" tabindex="-1">Review delivery drafts <span id="draft-count" class="count" hidden></span></h2>
+        <p class="note">Nothing is saved until you confirm the exact order and text. Spoken approval does not save a change.</p>
+        <p id="proposal-notice" class="feedback" role="status" tabindex="-1"></p>
+        <div id="proposals"><p class="empty">Loading delivery drafts…</p></div>
+      </section>
+      <section aria-labelledby="orders-heading">
+        <div class="section-heading">
+          <h2 id="orders-heading" tabindex="-1">Your orders</h2>
+          <a href="#review-heading">Review drafts</a>
+        </div>
+        <p id="order-notice" class="feedback" role="status">Loading orders…</p>
+        <button id="retry-orders" hidden>Retry loading orders</button>
+        <div id="orders" class="order-grid"></div>
+      </section>
+      <section aria-labelledby="changes-heading">
+        <h2 id="changes-heading">Saved changes</h2>
+        <div id="changes"><p class="empty">Loading saved changes…</p></div>
+      </section>
+    </div>
+  </div>
+  <details id="diagnostics" class="diagnostics">
+    <summary>Connection and work observations</summary>
+    <p class="note">Developer diagnostics. Captions, provider acknowledgements, and transmission do not confirm that a result was heard.</p>
+    <p id="media-path" class="note">Media path: disconnected</p>
+    <button id="status" disabled>Work status</button>
+    <pre id="events" tabindex="0" aria-label="Connection events"></pre>
+    <p id="interpreter" class="note"></p>
+    <p class="note">Local demo customer · seeded records stored in SQLite.</p>
+  </details>
+  <!-- recorded-input -->
+</main>
+</body>
+</html>

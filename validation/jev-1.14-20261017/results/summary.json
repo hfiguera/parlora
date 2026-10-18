@@ -1,0 +1,181 @@
+{
+  "migration_allowed": false,
+  "retained_model": "jev-1.13.0",
+  "candidate_model": "jev-1.14.0",
+  "decision": "Hold: candidate introduces extra clarification on a clarified-order operation reply and a delayed numeric correction; do not lower confidence thresholds to force migration.",
+  "source_revision": "7e0c4098a4f29fda940b6e6916f797696686982e",
+  "thresholds": {
+    "interpretation": 0.8,
+    "clarification_coverage": 0.85
+  },
+  "runs": {
+    "initial-comparison": {
+      "cases": 41,
+      "repeats": 3,
+      "models": {
+        "jev-1.13.0": {
+          "policy_passed": 118,
+          "policy_attempts": 123,
+          "live_evaluations": 114,
+          "deterministic_bypasses": 9,
+          "live_passed": 109,
+          "latency_ms_median": 135.0,
+          "latency_ms_max": 467,
+          "failures_by_case": {
+            "running_items_suffix": 2,
+            "completed_items_suffix": 3
+          }
+        },
+        "jev-1.14.0": {
+          "policy_passed": 117,
+          "policy_attempts": 123,
+          "live_evaluations": 114,
+          "deterministic_bypasses": 9,
+          "live_passed": 108,
+          "latency_ms_median": 112.0,
+          "latency_ms_max": 205,
+          "failures_by_case": {
+            "completed_items_suffix": 3,
+            "spoken_yes_cannot_save": 3
+          }
+        }
+      },
+      "candidate_regressions": [
+        {
+          "name": "spoken_yes_cannot_save",
+          "pass": 1,
+          "baseline_judgment": "{:ok, %{order: \"unknown\", intent: \"none\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"unknown\", intent: \"none\", uncertain_fields: [\"intent\"]}}}"
+        },
+        {
+          "name": "spoken_yes_cannot_save",
+          "pass": 2,
+          "baseline_judgment": "{:ok, %{order: \"unknown\", intent: \"none\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"unknown\", intent: \"none\", uncertain_fields: [\"intent\"]}}}"
+        },
+        {
+          "name": "spoken_yes_cannot_save",
+          "pass": 3,
+          "baseline_judgment": "{:ok, %{order: \"unknown\", intent: \"none\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"unknown\", intent: \"none\", uncertain_fields: [\"intent\"]}}}"
+        }
+      ],
+      "candidate_improvements": [
+        {
+          "name": "running_items_suffix",
+          "pass": 1
+        },
+        {
+          "name": "running_items_suffix",
+          "pass": 2
+        }
+      ]
+    },
+    "comparison": {
+      "cases": 43,
+      "repeats": 3,
+      "models": {
+        "jev-1.13.0": {
+          "policy_passed": 125,
+          "policy_attempts": 129,
+          "live_evaluations": 120,
+          "deterministic_bypasses": 9,
+          "live_passed": 116,
+          "latency_ms_median": 122.0,
+          "latency_ms_max": 313,
+          "failures_by_case": {
+            "progress": 3,
+            "completed_numeric_prefix_correction": 1
+          }
+        },
+        "jev-1.14.0": {
+          "policy_passed": 122,
+          "policy_attempts": 129,
+          "live_evaluations": 120,
+          "deterministic_bypasses": 9,
+          "live_passed": 113,
+          "latency_ms_median": 109.5,
+          "latency_ms_max": 143,
+          "failures_by_case": {
+            "spoken_yes_cannot_save": 1,
+            "pending_operation_keeps_clarified_order": 3,
+            "completed_numeric_prefix_correction": 3
+          }
+        }
+      },
+      "candidate_regressions": [
+        {
+          "name": "spoken_yes_cannot_save",
+          "pass": 1,
+          "baseline_judgment": "{:ok, %{order: \"unknown\", intent: \"none\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"unknown\", intent: \"none\", uncertain_fields: [\"intent\"]}}}"
+        },
+        {
+          "name": "pending_operation_keeps_clarified_order",
+          "pass": 1,
+          "baseline_judgment": "{:ok, %{order: \"123\", intent: \"items\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"123\", intent: \"items\", uncertain_fields: [\"intent\"]}}}"
+        },
+        {
+          "name": "pending_operation_keeps_clarified_order",
+          "pass": 2,
+          "baseline_judgment": "{:ok, %{order: \"123\", intent: \"items\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"123\", intent: \"items\", uncertain_fields: [\"intent\"]}}}"
+        },
+        {
+          "name": "completed_numeric_prefix_correction",
+          "pass": 2,
+          "baseline_judgment": "{:ok, %{order: \"123\", intent: \"status\", additional?: false}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"123\", intent: \"status\", uncertain_fields: [\"relationship\"]}}}"
+        },
+        {
+          "name": "pending_operation_keeps_clarified_order",
+          "pass": 3,
+          "baseline_judgment": "{:ok, %{order: \"123\", intent: \"items\"}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"123\", intent: \"items\", uncertain_fields: [\"intent\"]}}}"
+        },
+        {
+          "name": "completed_numeric_prefix_correction",
+          "pass": 3,
+          "baseline_judgment": "{:ok, %{order: \"123\", intent: \"status\", additional?: false}}",
+          "candidate_judgment": "{:error, {:uncertain, %{order: \"123\", intent: \"status\", uncertain_fields: [\"relationship\"]}}}"
+        }
+      ],
+      "candidate_improvements": [
+        {
+          "name": "progress",
+          "pass": 1
+        },
+        {
+          "name": "progress",
+          "pass": 2
+        },
+        {
+          "name": "progress",
+          "pass": 3
+        }
+      ]
+    }
+  },
+  "coverage": {
+    "jev-1.13.0": {
+      "fixture_matches": 22,
+      "cases": 38,
+      "incorrect_suppressions": 0
+    },
+    "jev-1.14.0": {
+      "fixture_matches": 27,
+      "cases": 38,
+      "incorrect_suppressions": 0
+    }
+  },
+  "source_sha256": {
+    "examples/order_desk/scripts/semantic_judgment_report.exs": "e936c1cafe8d829698737f9d06442327a88206ac52a8ebbdda38acbf7e15fa2e",
+    "examples/order_desk/lib/order_desk/application.ex": "c78e48fca7b1d43bbd9328b252d1c98e8e32bc0eb6f4d71bd27c067229785bc4",
+    "examples/order_desk/lib/order_desk/app_policy.ex": "ae6eb79f42ff5f9ba1c01bf0344990fcc394e342d121bb420f40c2fa6c654a72",
+    "examples/order_desk/lib/order_desk/interpretation.ex": "e1a438f12c60af5e89ecd2fcf860faca221cbd0856fa98bdfedcb0dad6979e72",
+    "examples/order_desk/lib/order_desk/clarification_coverage.ex": "dd384e03703b38c1eab83c32abb2c2359fb602bf3ce4787c9df74247a70f60a2",
+    "validation/gemini/jev-clarification/contextual-cases.json": "b1f485c760e325e78329d3b80a9f458b03292f0264550cb37b63e7b3d73df5ee"
+  },
+  "initial_runner_sha256": "746b0dd2d4e442aee808f9235f0012e3c3ccd0fab6475589340f8a669c9f0db7"
+}

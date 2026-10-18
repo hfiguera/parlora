@@ -1,0 +1,771 @@
+{
+  "arrivals": [
+    {
+      "kind": "audio_received",
+      "at_us": 0,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 104526,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 202347,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 304167,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 412604,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 503130,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 617628,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 707933,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 802379,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 908542,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1002600,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1105900,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1202202,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1300721,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1401780,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1502020,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1606276,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1702155,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1802321,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 1934848,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2003078,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2101392,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2202323,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2302207,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2403203,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2505014,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2602413,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2703560,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2803250,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2901820,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 2999778,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3101818,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3208400,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3302554,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3400977,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3502954,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3605873,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3706400,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3810128,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 3909312,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4010013,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4105201,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4205798,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4306173,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4409661,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4505561,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4604987,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4707578,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4804698,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 4903362,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5010219,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5108298,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5210219,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5307365,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5403208,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5504702,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5605526,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5706450,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5812099,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 5907761,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6005155,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6106149,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6204991,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6302738,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6411500,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6503447,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6606505,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6705070,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6805979,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 6910351,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7007431,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7106179,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7205355,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7308633,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7411499,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7511175,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7610602,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7710237,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7809429,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 7909360,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8051774,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8119121,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8218408,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8317813,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8417751,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8516697,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8620433,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8722441,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8818081,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 8919558,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9017824,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9116484,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9217226,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9318017,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9416169,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9516433,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9615564,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9719750,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9888254,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 9988417,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10088316,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10409196,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10409477,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10507948,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10609680,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10702397,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10805900,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 10905127,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11004820,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11102233,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11245305,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11349536,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11446761,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11547260,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11646281,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11746242,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11855273,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 11947854,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12152199,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12226371,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12320423,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12435919,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12519571,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12662779,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12721395,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12825640,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 12917742,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13016790,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13117070,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13217920,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13338857,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13415717,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13515947,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13615602,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13715788,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13816663,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 13922444,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14017435,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14132716,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14238677,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14320275,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14416767,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14537879,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14618102,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14716650,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14815389,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 14917652,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 15018001,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 15129602,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 15217568,
+      "bytes": 4800
+    },
+    {
+      "kind": "audio_received",
+      "at_us": 15321919,
+      "bytes": 4800
+    }
+  ],
+  "windows": [
+    {
+      "source_ms": 10100.0,
+      "before_peak": 0,
+      "after_peak": 0
+    },
+    {
+      "source_ms": 12300.0,
+      "before_peak": 6144,
+      "after_peak": 5920
+    }
+  ]
+}
