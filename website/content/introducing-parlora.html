@@ -1,0 +1,98 @@
+<main id="main" class="rail article-main">
+  <header class="article-header">
+    <a class="back-link" href="{{BASE}}"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17 10H3m6-6-6 6 6 6"/></svg> All articles</a>
+    <h1>Introducing Parlora: build voice AI agents with Elixir</h1>
+    <p class="article-deck">{{ARTICLE_DESCRIPTION}}</p>
+    <div class="article-author">
+      <span>By Humberto Figuera</span>
+      <div class="author-profiles">
+        <a href="https://x.com/hfiguera" aria-label="Humberto Figuera on X (@hfiguera)" title="Humberto Figuera on X">
+          <svg class="profile-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>
+          <span>@hfiguera</span>
+        </a>
+        <a href="https://github.com/hfiguera" aria-label="Humberto Figuera on GitHub (@hfiguera)" title="Humberto Figuera on GitHub">
+          <svg class="profile-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <span>@hfiguera</span>
+        </a>
+      </div>
+    </div>
+    <div class="article-byline"><time datetime="{{ARTICLE_DATE}}">{{ARTICLE_DATE_LABEL}}</time><span>{{READ_TIME}} min read</span><span>Parlora {{ARTICLE_VERSION}}</span></div>
+  </header>
+  <div class="article-grid">
+    <aside class="contents" aria-label="Article contents">
+      <details open>
+        <summary>In this article</summary>
+        <nav aria-label="Article sections"><ol>
+          <li><a href="#what-problem-does-it-solve">What problem does it solve?</a></li>
+          <li><a href="#why-use-parlora">Why use Parlora?</a></li>
+          <li><a href="#how-do-you-get-started">How do you get started?</a></li>
+          <li><a href="#what-are-you-using">What are you using for voice AI?</a></li>
+        </ol></nav>
+      </details>
+    </aside>
+    <article class="prose" aria-label="Introducing Parlora">
+      <p>I’ve released <strong>Parlora 0.1.0</strong>, an open source Elixir framework for building voice AI agents that talk with people and perform actions through your application.</p>
+      <p>Parlora lets people talk naturally with your application while it retrieves information or performs actions. It coordinates the conversation and background work as people ask follow-up questions, change their requests, or interrupt the assistant.</p>
+      <p>You choose the voice provider, the audio channel, and the backend that performs application actions. Parlora brings them together within a session.</p>
+
+      <h2 id="what-problem-does-it-solve">What problem does it solve?</h2>
+      <p>A voice model provides the ability to listen and speak. A useful voice application also needs to interact with services, manage concurrent work, and respond when the person changes direction.</p>
+      <p>For example, someone asks about order 123. While the lookup is running, they say, “Actually, I meant 124.” The first lookup can still finish afterwards. Your application’s policy interprets the correction, and Parlora checks returning results against the current task before forwarding them for a spoken response.</p>
+      <p>A result can be correct for the original request and still be irrelevant to the current conversation.</p>
+      <p>Parlora provides the coordination around these interactions: backend tasks, corrections, cancellation, and result delivery. Your application supplies the policy that determines what a request means and which actions are allowed.</p>
+      <p>When you integrate a voice API directly, your application still needs to coordinate provider events, backend actions, and changes to the conversation. Parlora brings that coordination into a supervised Elixir session, alongside audio queues, playback controls, lifecycle deadlines, cleanup, and events for observing the session.</p>
+
+      <figure class="session-figure" aria-labelledby="session-title">
+        <h3 id="session-title">One conversation. Work in parallel.</h3>
+        <div class="flow-stage" data-step="overview">
+          <div class="flow-row">
+            <div class="flow-node channel"><span>Audio channel</span><small>Browser, phone or local audio</small></div>
+            <div class="flow-route audio-route" aria-hidden="true"><i></i><i></i></div>
+            <div class="flow-node coordinator"><span>Parlora</span><small>Session and task coordination</small></div>
+            <div class="flow-route provider-route" aria-hidden="true"><i></i><i></i></div>
+            <div class="flow-node provider"><span>Voice provider</span><small>Listens and speaks</small></div>
+          </div>
+          <div class="backend-route" aria-hidden="true"><i></i></div>
+          <div class="flow-node backend"><span>Your application</span><small>Backend actions and services</small></div>
+        </div>
+        <p class="flow-caption" aria-live="polite">Audio flows through Parlora in both directions. Your application performs the work, and its policy determines how results join the conversation.</p>
+        <div class="flow-controls" hidden>
+          <button type="button" class="flow-play">Play walkthrough</button>
+          <button type="button" class="flow-next">Next step</button>
+          <span class="flow-step">Overview</span>
+        </div>
+        <figcaption>Illustrative sequence, not a live session or measured timing. The walkthrough shows a request for application work; ordinary conversation can continue without a backend action.</figcaption>
+      </figure>
+
+      <h2 id="why-use-parlora">Why use Parlora?</h2>
+      <p>If you are building with Elixir, Parlora gives you a way to add voice interactions while keeping application logic in your existing services.</p>
+      <p>It currently supports OpenAI GPT-Live-1, Gemini Live, and Grok Voice, with audio through browser WebRTC, Twilio, Telnyx, or a local microphone and speakers.</p>
+      <p>For backend work, there are optional integrations with Jido, Sagents, and Legion. You can also implement your own backend. An action can be ordinary Elixir code, such as retrieving information or checking availability; it does not need another language model.</p>
+      <p>Those choices are independent. You can try a different voice provider while keeping your application actions, or expose a workflow through both a browser and a phone number.</p>
+      <p>Parlora focuses on <strong>full duplex speech to speech models</strong>. These models accept audio and produce spoken responses while caller audio can continue flowing. The current integrations use those capabilities directly, rather than assembling separate speech recognition, text generation, and speech synthesis services.</p>
+      <p>All audio passes through Parlora. Your application controls authorization, business rules, confirmations, and storage.</p>
+      <p>Elixir’s processes and supervision provide useful foundations for managing sessions and concurrent work. Parlora builds on those foundations to coordinate the conversation with your application.</p>
+
+      <h2 id="how-do-you-get-started">How do you get started?</h2>
+      <p>Parlora is available on <a href="https://hex.pm/packages/parlora">Hex</a>:</p>
+      <pre><code class="language-elixir">{:parlora, "~&gt; 0.1.0"}</code></pre>
+      <p>The <a href="https://hexdocs.pm/parlora/0.1.0/first-session.html">first working session tutorial</a> walks through creating a small Mix application where you ask for a demo shop’s opening hours and hear the result of a Jido action.</p>
+      <p>It includes the complete code and configuration, explains the native prerequisites, and shows how to handle session events and cleanup. You need Elixir 1.18 or later, Erlang/OTP 27 or later, and an API key for a supported voice provider.</p>
+      <p>From there, you can replace the demo action with something useful in your application.</p>
+      <p>A session brings together four pieces: an audio channel, a voice provider, a backend, and a context policy. The policy connects the conversation to your application’s rules, including how to handle follow-ups and corrections.</p>
+      <p>For a more complete example, the repository includes <a href="https://github.com/hfiguera/parlora/tree/v0.1.0/examples/order_desk"><strong>OrderDesk</strong></a>. It demonstrates order lookups, order corrections, and draft delivery instructions that require separate confirmation in the browser before saving.</p>
+      <p>Parlora is at version 0.1.0 and released under the <a href="https://github.com/hfiguera/parlora/blob/v0.1.0/LICENSE">MIT license</a>. I’m interested in seeing how these foundations fit applications beyond the examples.</p>
+
+      <h2 id="what-are-you-using">What are you using for voice AI?</h2>
+      <p>If you are already building voice applications, what does your stack look like? Which models and frameworks have you chosen, and why?</p>
+      <p>I would especially like to hear which parts have required the most work: audio delivery, interruptions, connecting conversations to application actions, or keeping track of changing requests.</p>
+      <p>If you are building a voice application, give Parlora a try. I’d love to hear what you build, how it works for you, and what could be improved. Your feedback will help guide its development.</p>
+      <p>You can <a href="https://github.com/hfiguera/parlora/issues">share feedback on GitHub</a> or <a href="https://x.com/hfiguera">find me on X</a>.</p>
+    </article>
+  </div>
+  <aside class="article-next">
+    <h2>Start with a conversation.</h2>
+    <p>The first session guide takes you from a Mix application to hearing the result of an action.</p>
+    <a href="https://hexdocs.pm/parlora/0.1.0/first-session.html">Build your first voice session <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h14m-6-6 6 6-6 6"/></svg></a>
+  </aside>
+</main>

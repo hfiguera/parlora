@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-19T05:57:54.193731+00:00",
+  "title": "Design System: Parlora publication",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm ivory",
+        "canonical": "#f6f1e8",
+        "tonalRamp": [
+          "oklch(15.00% 0.0131 82.40)",
+          "oklch(26.43% 0.0131 82.40)",
+          "oklch(37.86% 0.0131 82.40)",
+          "oklch(49.29% 0.0131 82.40)",
+          "oklch(60.71% 0.0131 82.40)",
+          "oklch(72.14% 0.0131 82.40)",
+          "oklch(83.57% 0.0131 82.40)",
+          "oklch(95.00% 0.0131 82.40)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Forest ink",
+        "canonical": "#183e36",
+        "tonalRamp": [
+          "oklch(15.00% 0.0458 177.54)",
+          "oklch(26.43% 0.0458 177.54)",
+          "oklch(37.86% 0.0458 177.54)",
+          "oklch(49.29% 0.0458 177.54)",
+          "oklch(60.71% 0.0458 177.54)",
+          "oklch(72.14% 0.0458 177.54)",
+          "oklch(83.57% 0.0458 177.54)",
+          "oklch(95.00% 0.0458 177.54)"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Muted leaf",
+        "canonical": "#526155",
+        "tonalRamp": [
+          "oklch(15.00% 0.0265 151.14)",
+          "oklch(26.43% 0.0265 151.14)",
+          "oklch(37.86% 0.0265 151.14)",
+          "oklch(49.29% 0.0265 151.14)",
+          "oklch(60.71% 0.0265 151.14)",
+          "oklch(72.14% 0.0265 151.14)",
+          "oklch(83.57% 0.0265 151.14)",
+          "oklch(95.00% 0.0265 151.14)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Terracotta",
+        "canonical": "#b84226",
+        "tonalRamp": [
+          "oklch(15.00% 0.1584 34.58)",
+          "oklch(26.43% 0.1584 34.58)",
+          "oklch(37.86% 0.1584 34.58)",
+          "oklch(49.29% 0.1584 34.58)",
+          "oklch(60.71% 0.1584 34.58)",
+          "oklch(72.14% 0.1584 34.58)",
+          "oklch(83.57% 0.1584 34.58)",
+          "oklch(95.00% 0.1584 34.58)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Deep terracotta",
+        "canonical": "#8b2e19",
+        "tonalRamp": [
+          "oklch(15.00% 0.1309 34.14)",
+          "oklch(26.43% 0.1309 34.14)",
+          "oklch(37.86% 0.1309 34.14)",
+          "oklch(49.29% 0.1309 34.14)",
+          "oklch(60.71% 0.1309 34.14)",
+          "oklch(72.14% 0.1309 34.14)",
+          "oklch(83.57% 0.1309 34.14)",
+          "oklch(95.00% 0.1309 34.14)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Warm rule",
+        "canonical": "#d8cbb7",
+        "tonalRamp": [
+          "oklch(15.00% 0.0308 78.76)",
+          "oklch(26.43% 0.0308 78.76)",
+          "oklch(37.86% 0.0308 78.76)",
+          "oklch(49.29% 0.0308 78.76)",
+          "oklch(60.71% 0.0308 78.76)",
+          "oklch(72.14% 0.0308 78.76)",
+          "oklch(83.57% 0.0308 78.76)",
+          "oklch(95.00% 0.0308 78.76)"
+        ]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Paper wash",
+        "canonical": "#ece6da",
+        "tonalRamp": [
+          "oklch(15.00% 0.0173 84.59)",
+          "oklch(26.43% 0.0173 84.59)",
+          "oklch(37.86% 0.0173 84.59)",
+          "oklch(49.29% 0.0173 84.59)",
+          "oklch(60.71% 0.0173 84.59)",
+          "oklch(72.14% 0.0173 84.59)",
+          "oklch(83.57% 0.0173 84.59)",
+          "oklch(95.00% 0.0173 84.59)"
+        ]
+      },
+      "code": {
+        "role": "neutral",
+        "displayName": "Deep code green",
+        "canonical": "#18352f",
+        "tonalRamp": [
+          "oklch(15.00% 0.0369 178.61)",
+          "oklch(26.43% 0.0369 178.61)",
+          "oklch(37.86% 0.0369 178.61)",
+          "oklch(49.29% 0.0369 178.61)",
+          "oklch(60.71% 0.0369 178.61)",
+          "oklch(72.14% 0.0369 178.61)",
+          "oklch(83.57% 0.0369 178.61)",
+          "oklch(95.00% 0.0369 178.61)"
+        ]
+      },
+      "selection": {
+        "role": "neutral",
+        "displayName": "Peach selection",
+        "canonical": "#e5c9b6",
+        "tonalRamp": [
+          "oklch(15.00% 0.0409 56.26)",
+          "oklch(26.43% 0.0409 56.26)",
+          "oklch(37.86% 0.0409 56.26)",
+          "oklch(49.29% 0.0409 56.26)",
+          "oklch(60.71% 0.0409 56.26)",
+          "oklch(72.14% 0.0409 56.26)",
+          "oklch(83.57% 0.0409 56.26)",
+          "oklch(95.00% 0.0409 56.26)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Index introduction title."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Article title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Article-entry linked title."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Article section heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base page text."
+      },
+      "reading": {
+        "displayName": "Reading",
+        "purpose": "Long article prose, limited to min(68ch, 720px)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Bylines, footer text and controls."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Inline and block code."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Source --ease token for diagram node transitions and signal loops."
+      },
+      {
+        "name": "node-transition",
+        "value": "300ms",
+        "purpose": "Diagram node color transitions."
+      },
+      {
+        "name": "signal-loop",
+        "value": "1500ms",
+        "purpose": "Illustrative route signal loop; no performance measurement."
+      },
+      {
+        "name": "walkthrough-step",
+        "value": "3400ms",
+        "purpose": "Illustrative explanation pacing; never live/provider timing."
+      },
+      {
+        "name": "copy-feedback-reset",
+        "value": "2500ms",
+        "purpose": "Reset copy feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Disable animation, transitions and smooth scroll; suppress moving walkthrough signals. An active walkthrough pauses when this preference becomes enabled."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-margin",
+        "value": "1100px"
+      },
+      {
+        "name": "single-column",
+        "value": "800px"
+      },
+      {
+        "name": "phone",
+        "value": "480px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Walkthrough primary",
+      "kind": "button",
+      "refersTo": "walkthrough-primary",
+      "description": "Forest control for starting, pausing, continuing and replaying the reader-controlled explanation.",
+      "html": "<button type=\"button\" class=\"ds-primary\">Play walkthrough</button>",
+      "css": ".ds-primary{font:400 14px/1.7 var(--font-body,\"DM Sans\",sans-serif);min-height:44px;border:1px solid var(--ink,#183e36);border-radius:5px;padding:8px 14px;cursor:pointer;background:var(--ink,#183e36);color:var(--paper,#f6f1e8);}.ds-primary:hover{background:var(--accent,#b84226);border-color:var(--accent,#b84226);color:var(--paper,#f6f1e8);}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-copy:focus-visible,.ds-nav a:focus-visible,.ds-entry a:focus-visible,.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#b84226);outline-offset:5px;}"
+    },
+    {
+      "name": "Walkthrough secondary",
+      "kind": "button",
+      "refersTo": "walkthrough-secondary",
+      "description": "Outlined control for advancing the explanation one named step at a time.",
+      "html": "<button type=\"button\" class=\"ds-secondary\">Next step</button>",
+      "css": ".ds-secondary{font:400 14px/1.7 var(--font-body,\"DM Sans\",sans-serif);min-height:44px;border:1px solid var(--ink,#183e36);border-radius:5px;padding:8px 14px;cursor:pointer;background:transparent;color:var(--ink,#183e36);}.ds-secondary:hover{background:var(--accent,#b84226);border-color:var(--accent,#b84226);color:var(--paper,#f6f1e8);}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-copy:focus-visible,.ds-nav a:focus-visible,.ds-entry a:focus-visible,.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#b84226);outline-offset:5px;}"
+    },
+    {
+      "name": "Code copy",
+      "kind": "button",
+      "refersTo": "copy-code",
+      "description": "Clipboard enhancement inside a syntax highlighted code block; code text is preserved and feedback resets after 2500ms.",
+      "html": "<div class=\"ds-code\"><code><span class=\"token punctuation\">{</span><span class=\"token atom\">:parlora</span><span class=\"token punctuation\">,</span> <span class=\"token string\">\"~&gt; 0.1.0\"</span><span class=\"token punctuation\">}</span></code><button class=\"ds-copy\" type=\"button\">Copy</button></div>",
+      "css": ".ds-code{position:relative;background:var(--code,#18352f);color:var(--paper,#f6f1e8);padding:56px 28px 28px;border-radius:12px;font:16px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;}.ds-copy{position:absolute;top:10px;right:12px;color:var(--paper,#f6f1e8);border:1px solid #809c8e;border-radius:5px;padding:4px 14px;background:transparent;font:400 14px/1.7 var(--font-body,\"DM Sans\",sans-serif);min-height:36px;cursor:pointer;}.ds-copy:hover{background:#31554a;}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-copy:focus-visible,.ds-nav a:focus-visible,.ds-entry a:focus-visible,.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#b84226);outline-offset:5px;}.ds-code .token.comment{color:#a3b3aa;}.ds-code .token.atom{color:#e9b4a4;}.ds-code .token.string{color:#dfd69b;}.ds-code .token.keyword{color:#b5d5cf;}.ds-code .token.function{color:#ecc18c;}.ds-code .token.variable{color:#d2c4e1;}.ds-code .token.punctuation{color:#c7d2c8;}"
+    },
+    {
+      "name": "Project navigation",
+      "kind": "nav",
+      "refersTo": "project-navigation",
+      "description": "Four ordinary project links with an underlined current page; phones retain all links.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Project navigation\"><a href=\"#blog\" aria-current=\"page\">Blog</a><a href=\"https://hexdocs.pm/parlora/\">Docs</a><a href=\"https://hex.pm/packages/parlora\">Hex</a><a href=\"https://github.com/hfiguera/parlora\">GitHub</a></nav>",
+      "css": ".ds-nav{display:flex;gap:36px;font:400 16px/1.7 var(--font-body,\"DM Sans\",sans-serif);}.ds-nav a{display:inline-block;color:var(--ink,#183e36);padding-block:12px;text-decoration:none;}.ds-nav a:hover,.ds-nav [aria-current]{color:var(--accent,#b84226);text-decoration:underline;text-underline-offset:7px;}@media(max-width:480px){.ds-nav{justify-content:space-between;gap:18px;font-size:14px;}}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-copy:focus-visible,.ds-nav a:focus-visible,.ds-entry a:focus-visible,.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#b84226);outline-offset:5px;}"
+    },
+    {
+      "name": "Open article entry",
+      "kind": "custom",
+      "refersTo": "post-entry",
+      "description": "Unboxed editorial row pairing metadata with a title, summary and article link.",
+      "html": "<article class=\"ds-entry\"><div class=\"ds-meta\">Announcement</div><div><h3><a href=\"#article\">Introducing Parlora</a></h3><p>Notes on building voice AI agents with Elixir.</p><a class=\"ds-read\" href=\"#article\">Read the article <svg viewBox=\"0 0 20 20\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 10h14m-6-6 6 6-6 6\"/></svg></a></div></article>",
+      "css": ".ds-entry{display:grid;grid-template-columns:220px minmax(0,1fr);gap:60px;padding-block:34px 48px;color:var(--ink,#183e36);font:400 18px/1.7 var(--font-body,\"DM Sans\",sans-serif);}.ds-meta{font-size:15px;color:var(--soft,#526155);}.ds-entry h3{margin:0;max-width:27ch;font:500 clamp(32px,3vw,42px)/1.2 var(--font-display,Fraunces,Georgia,serif);letter-spacing:-.025em;}.ds-entry h3 a{color:var(--ink,#183e36);text-decoration:none;}.ds-entry h3 a:hover{color:var(--accent,#b84226);text-decoration:underline;}.ds-entry p{max-width:66ch;margin:20px 0 0;font-size:19px;color:var(--soft,#526155);}.ds-read{display:inline-flex;gap:12px;align-items:center;margin-top:23px;font-size:17px;color:var(--accent,#b84226);text-underline-offset:.22em;}.ds-read:hover{color:var(--accent-hover,#8b2e19);}@media(max-width:800px){.ds-entry{grid-template-columns:1fr;gap:18px;}}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-copy:focus-visible,.ds-nav a:focus-visible,.ds-entry a:focus-visible,.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#b84226);outline-offset:5px;}"
+    },
+    {
+      "name": "Article contents",
+      "kind": "nav",
+      "refersTo": "contents",
+      "description": "Native disclosure and anchor navigation that works without JavaScript.",
+      "html": "<nav class=\"ds-contents\" aria-label=\"Article contents\"><details open><summary>On this page</summary><ol><li><a href=\"#what-is-parlora\">What is Parlora?</a></li><li><a href=\"#how-do-you-get-started\">How do you get started?</a></li></ol></details></nav>",
+      "css": ".ds-contents{color:var(--ink,#183e36);font:400 14px/1.7 var(--font-body,\"DM Sans\",sans-serif);padding-top:8px;}.ds-contents details{border-top:1px solid var(--line,#d8cbb7);padding-top:15px;}.ds-contents summary{cursor:pointer;font-weight:600;padding-block:6px;}.ds-contents ol{list-style:none;margin:12px 0 0;padding:0;}.ds-contents li+li{margin-top:9px;}.ds-contents a{display:block;color:var(--soft,#526155);text-decoration:none;padding-block:4px;}.ds-contents a:hover{color:var(--accent,#b84226);text-decoration:underline;}.ds-primary:focus-visible,.ds-secondary:focus-visible,.ds-copy:focus-visible,.ds-nav a:focus-visible,.ds-entry a:focus-visible,.ds-contents a:focus-visible,.ds-contents summary:focus-visible{outline:3px solid var(--accent,#b84226);outline-offset:5px;}"
+    },
+    {
+      "name": "Session explanation",
+      "kind": "custom",
+      "refersTo": "session-figure",
+      "description": "Static overview of the signature figure. The shipped script progressively adds reader-controlled named steps.",
+      "html": "<figure class=\"ds-figure\"><h3>One conversation. Work in parallel.</h3><div class=\"ds-row\"><div class=\"ds-node\"><span>Audio channel</span><small>Browser, phone or local audio</small></div><div class=\"ds-route\" aria-hidden=\"true\"></div><div class=\"ds-node ds-coordinator\"><span>Parlora</span><small>Session and application policy</small></div><div class=\"ds-route\" aria-hidden=\"true\"></div><div class=\"ds-node\"><span>Voice provider</span><small>Listens and speaks</small></div></div><div class=\"ds-backend-route\" aria-hidden=\"true\"></div><div class=\"ds-node ds-backend\"><span>Your application</span><small>Backend actions and services</small></div><p>Audio flows through Parlora in both directions. Your application performs the work, and its policy determines how results join the conversation.</p><figcaption>Illustrative sequence, not a live session or measured timing.</figcaption></figure>",
+      "css": ".ds-figure{margin:40px 0;padding:28px;background:var(--wash,#ece6da);color:var(--ink,#183e36);border-radius:12px;font:400 18px/1.7 var(--font-body,\"DM Sans\",sans-serif);}.ds-figure h3{margin:0;font:500 25px/1.3 var(--font-display,Fraunces,Georgia,serif);letter-spacing:-.015em;}.ds-row{padding-top:32px;display:grid;grid-template-columns:1fr 26px 1fr 26px 1fr;align-items:stretch;}.ds-node{padding:12px 6px;text-align:center;border-block:1px solid #b0b5a5;transition:background-color 300ms var(--ease,cubic-bezier(.16,1,.3,1)),color 300ms var(--ease,cubic-bezier(.16,1,.3,1));}.ds-node span{display:block;font-size:16px;font-weight:650;}.ds-node small{display:block;font-size:12px;line-height:1.6;margin-top:7px;}.ds-coordinator{background:var(--ink,#183e36);color:var(--paper,#f6f1e8);border-color:var(--ink,#183e36);}.ds-route{align-self:center;display:grid;gap:5px;}.ds-route:before,.ds-route:after{content:\"\";display:block;width:100%;height:1px;background:#738577;}.ds-backend-route{width:1px;height:28px;margin-inline:auto;background:#738577;}.ds-backend{width:calc((100% - 52px)/3);margin-inline:auto;}.ds-figure p{font-size:16px;line-height:1.65;min-height:5em;margin:25px 0 0;}.ds-figure figcaption{font-size:13px;line-height:1.7;color:var(--soft,#526155);margin-top:18px;}@media(max-width:480px){.ds-figure{padding:20px 16px;}.ds-row{grid-template-columns:1fr 14px 1fr 14px 1fr;}.ds-node{padding:10px 4px;}.ds-node span{font-size:14px;}.ds-backend{width:calc((100% - 28px)/3);}}@media(prefers-reduced-motion:reduce){.ds-node{transition:none;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The conversation journal",
+    "overview": "Parlora is an open, readable publication for developers building voice applications. Warm paper, forest ink and terracotta links give the technical material a human editorial character. Articles use generous leading, a narrow reading measure and quiet rules rather than a grid of promotional cards.\n\nThe maintainer explicitly selected the warm ivory, forest and terracotta palette and the Fraunces/DM Sans pairing from the approved journal preview. These are confirmed identity choices. Preserve their roles when extending the publication. Self-hosted fonts, ordinary HTML navigation and explanatory SVG geometry keep the experience independent of a frontend framework or external font service.",
+    "keyCharacteristics": [
+      "Light paper, strong forest text, restrained terracotta emphasis.",
+      "Expressive serif titles with steady sans-serif reading text.",
+      "Open article entries, fine rules and a separate contents margin.",
+      "Reader-controlled explanatory motion with a useful static equivalent."
+    ],
+    "rules": [
+      {
+        "name": "The Ink and Action Rule",
+        "body": "Forest carries reading and identity; terracotta identifies links, focus and purposeful emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Fraunces carries titles and the wordmark; DM Sans carries explanations, navigation and controls. Use the platform monospace stack only for code.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper Plane Rule",
+        "body": "Use spacing, rules and tonal insets to establish hierarchy; preserve the built system's flat treatment.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** preserve the maintainer-selected warm ivory, forest and terracotta palette and Fraunces/DM Sans roles.",
+      "**Do** keep the wide publication rail separate from the `min(68ch, 720px)` reading measure.",
+      "**Do** use open article rows, thin warm rules and tonal insets to organize reading.",
+      "**Do** retain visible keyboard focus, native links and disclosure, static explanations and reduced-motion behavior.",
+      "**Do** label explanatory motion as illustrative and keep its pacing separate from performance claims."
+    ],
+    "donts": [
+      "**Don't** turn article entries into a promotional card grid.",
+      "**Don't** make navigation, articles or the diagram's meaning depend on JavaScript.",
+      "**Don't** imply the walkthrough records audio, calls a provider or measures a real session.",
+      "**Don't** add copy or walkthrough analytics events or enable the beacon in default local previews."
+    ]
+  }
+}
