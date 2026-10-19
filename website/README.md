@@ -38,6 +38,8 @@ python3 website/build.py --output /tmp/parlora-blog-production --base-path /parl
 ```
 
 Every build checks local links, heading IDs, fonts, XML feeds and analytics mode.
+It also checks sharing metadata and the referenced PNG files, including their
+dimensions, size, public URLs and agreement between Open Graph and X tags.
 The browser checks cover the actual reading layout, walkthrough and code copy.
 
 ## GitHub Pages
@@ -45,8 +47,7 @@ The browser checks cover the actual reading layout, walkthrough and code copy.
 The `Blog` workflow checks builds on pull requests that change the site. On
 `main`, it builds with `/parlora/` as the base path, includes analytics, and
 deploys only generated output through GitHub Pages. The repository's Pages
-source must be set to **GitHub Actions** before the first deployment. This task
-does not enable Pages or publish the branch.
+source must be set to **GitHub Actions** before the first deployment.
 
 The site URL is https://hfiguera.github.io/parlora/. The local server and GitHub
 Pages both work without rewriting article routes: each route has an `index.html`.
@@ -85,3 +86,35 @@ their MIT license is included in `assets/vendor/Prism-LICENSE.txt`.
 Fraunces and DM Sans are self-hosted in `assets/fonts/`, with their SIL Open Font
 License notices alongside them. Browsers do not contact a font CDN. The faces
 and palette preserve the conversation journal preview selected by the maintainer.
+
+## Link previews
+
+The shared layout includes Open Graph metadata for services such as LinkedIn,
+Slack, Discord and forums, plus an X large image card. Titles and descriptions
+come from the same page metadata. Images use absolute HTTPS URLs, even in a
+local preview, because external crawlers need public assets. Metadata is in the
+initial HTML; JavaScript and analytics are not required to read it.
+
+`site.json` sets a default `social_image` with `path` and `alt`. An article can
+override it with its own image; otherwise it uses the default. Committed PNGs
+are 1200 × 630 pixels and under 5 MB. Article structured data includes the same
+image. The optional artwork renderer and its dependencies are not deployed and
+are not needed to build or test the site.
+
+To edit the artwork, update `social/render.py`, which uses the existing palette,
+voice mark and self-hosted OFL fonts, then regenerate the committed images:
+
+```sh
+python3 -m venv /tmp/parlora-social-assets
+/tmp/parlora-social-assets/bin/pip install -r website/social/requirements.txt
+/tmp/parlora-social-assets/bin/python website/social/render.py
+```
+
+After deployment, check the article and image URLs without authentication.
+Platform preview caches and workspace or forum settings can delay or disable
+previews; passing these checks does not force an existing post to refresh.
+LinkedIn's Post Inspector can request a fresh scrape. Do not delete an existing
+post just because its preview has not updated.
+
+References: https://ogp.me/ and
+https://docs.slack.dev/messaging/unfurling-links-in-messages/.

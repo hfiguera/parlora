@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 import re
 import shutil
+import struct
 import tempfile
 import xml.etree.ElementTree as ET
 
@@ -26,6 +27,7 @@ class Page(HTMLParser):
         self.links = []
         self.headings = []
         self.canonicals = []
+        self.meta = {}
         self.beacons = []
         self.text = []
         self.feed(text)
@@ -43,6 +45,11 @@ class Page(HTMLParser):
             self.headings.append(tag)
         if tag == "link" and attrs.get("rel") == "canonical":
             self.canonicals.append(attrs["href"])
+        if tag == "meta" and (attrs.get("property") or attrs.get("name")):
+            key = attrs.get("property") or attrs["name"]
+            if key in self.meta:
+                raise ValueError(f"Duplicate metadata: {key}")
+            self.meta[key] = attrs.get("content", "")
         if tag == "script" and attrs.get("src") == BEACON:
             self.beacons.append(json.loads(attrs.get("data-cf-beacon", "{}")))
 
@@ -70,6 +77,25 @@ def render(template, values):
 def date_label(value):
     day = date.fromisoformat(value)
     return f"{day.strftime('%B')} {day.day}, {day.year}"
+
+
+def png_dimensions(path):
+    header = path.read_bytes()[:24]
+    if len(header) != 24 or header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
+        raise ValueError(f"Expected a PNG sharing image: {path}")
+    return struct.unpack(">II", header[16:24])
+
+
+def social_values(image, url):
+    path = image["path"]
+    if not re.fullmatch(r"assets/social/[a-z0-9-]+\.png", path) or not image["alt"].strip():
+        raise ValueError(f"Invalid sharing image: {image}")
+    width, height = png_dimensions(SOURCE / path)
+    return {
+        "SOCIAL_IMAGE": escape(url + "/" + path, quote=True),
+        "IMAGE_ALT": escape(image["alt"], quote=True),
+        "IMAGE_WIDTH": str(width), "IMAGE_HEIGHT": str(height),
+    }
 
 
 def build(output, prefix="/", analytics=False):
@@ -108,6 +134,7 @@ def build(output, prefix="/", analytics=False):
                     f'<script defer src="{BEACON}" data-cf-beacon=\'{json.dumps({"token": site["cloudflare_token"]}, separators=(",", ":"))}\'></script>'
                     if analytics else ""
                 ),
+                **social_values(site["social_image"], url),
             }
             values.update(extra)
             target = stage / path
@@ -128,6 +155,7 @@ def build(output, prefix="/", analytics=False):
                 "datePublished": article["date"],
                 "author": {"@type": "Person", "name": site["author"], "url": "https://github.com/hfiguera"},
                 "mainEntityOfPage": url + f"/blog/{slug}/",
+                "image": url + "/" + article.get("social_image", site["social_image"])["path"],
             }
             write_page(
                 path, content, article["title"] + " | Parlora", article["description"],
@@ -135,6 +163,7 @@ def build(output, prefix="/", analytics=False):
                 ARTICLE_DATE=article["date"], ARTICLE_DATE_LABEL=date_label(article["date"]),
                 READ_TIME=read_time, ARTICLE_VERSION=escape(article["version"]),
                 STRUCTURED_DATA='<script type="application/ld+json">' + json.dumps(structured).replace("<", "\\u003c") + "</script>",
+                **social_values(article.get("social_image", site["social_image"]), url),
             )
             entries.append(
                 '<article class="post-entry">'
@@ -193,6 +222,7 @@ def verify(output, prefix="/", analytics=False):
             raise ValueError(f"Incorrect analytics beacon count in {path}")
         if analytics and page.beacons[0] != {"token": config["cloudflare_token"]}:
             raise ValueError(f"Incorrect analytics property in {path}")
+        verify_sharing(page, path, output, config["url"].rstrip("/"))
         for link in page.links:
             parts = urlsplit(link)
             if parts.scheme or parts.netloc:
@@ -219,6 +249,31 @@ def verify(output, prefix="/", analytics=False):
             if not (css.parent / asset).is_file():
                 raise ValueError(f"Missing CSS asset: {asset}")
     return len(html_pages)
+
+
+def verify_sharing(page, path, output, url):
+    meta = page.meta
+    for key in ("og:title", "og:description", "og:url", "og:type", "og:image", "og:image:alt"):
+        if not meta.get(key, "").strip():
+            raise ValueError(f"Missing sharing metadata {key} in {path}")
+    image_url = meta["og:image"]
+    if not image_url.startswith(url + "/assets/social/"):
+        raise ValueError(f"Sharing image must use the absolute public site URL in {path}")
+    image = (output / image_url.removeprefix(url + "/")).resolve()
+    if not image.is_relative_to(output) or not image.is_file():
+        raise ValueError(f"Missing sharing image in {path}: {image_url}")
+    width, height = png_dimensions(image)
+    if (width, height) != (1200, 630) or image.stat().st_size >= 5_000_000:
+        raise ValueError(f"Sharing image must be a 1200x630 PNG under 5 MB: {image}")
+    expected = {
+        "og:image:type": "image/png", "og:image:width": str(width), "og:image:height": str(height),
+        "og:url": page.canonicals[0], "twitter:card": "summary_large_image",
+        "twitter:title": meta["og:title"], "twitter:description": meta["og:description"],
+        "twitter:image": image_url, "twitter:image:alt": meta["og:image:alt"],
+    }
+    for key, value in expected.items():
+        if meta.get(key) != value:
+            raise ValueError(f"Incorrect sharing metadata {key} in {path}")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,10 @@
   "name": "Parlora",
   "author": "Humberto Figuera",
   "description": "Notes on building voice AI agents with Elixir. The conversations, the audio, and the work in between.",
+  "social_image": {
+    "path": "assets/social/parlora.png",
+    "alt": "Parlora. Voice AI agents, built with Elixir."
+  },
   "cloudflare_token": "f968ea7d6e614cc9a3e2d537ced91a10",
   "articles": [
     {
@@ -11,7 +15,11 @@
       "description": "What Parlora does, the problems it handles, and how to connect a spoken conversation to useful work in your application.",
       "date": "2026-10-18",
       "version": "0.1.0",
-      "category": "Project introduction"
+      "category": "Project introduction",
+      "social_image": {
+        "path": "assets/social/introducing-parlora.png",
+        "alt": "Introducing Parlora 0.1.0. Build voice AI agents with Elixir."
+      }
     }
   ]
 }

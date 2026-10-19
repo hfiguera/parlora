@@ -194,9 +194,13 @@ The system is flat and uses no box shadows. Hierarchy comes from whitespace, thi
 
 Most publication structure is open and square. Small controls use a gentle corner (5px); inline code uses a smaller corner (3px); code blocks and the explanatory figure use the shared inset corner (12px). Diagram signal dots are circular, while diagram nodes use fine horizontal rules rather than card outlines.
 
-The masthead and larger voice mark are inline SVG line geometry with rounded stroke caps. Utility arrows are inline stroked SVGs. Shipping visual assets consist of these SVG forms and the self-hosted fonts; there are no shipping raster images requiring provenance records.
+The masthead and larger voice mark are inline SVG line geometry with rounded stroke caps. Utility arrows are inline stroked SVGs. Social sharing also uses two authored 1200 × 630 PNGs, `website/assets/social/parlora.png` and `website/assets/social/introducing-parlora.png`. Their source is `website/social/render.py`; each embeds its origin, font licensing and design provenance. The files use the existing voice mark, palette and self-hosted fonts rather than stock or AI imagery.
 
 ## Components
+
+### Social Previews
+
+Sharing artwork adapts the journal to a fixed 1200 × 630 canvas. Fraunces carries the large headline; DM Sans carries the compact masthead and supporting text. Ivory ground, forest ink, fine warm rules and a restrained terracotta footer preserve the publication's identity. Keep all text inside the 68–72px side margins and check readability at 600 × 315. The announcement has its own artwork; other pages and articles without an override use the general Parlora image. The PNGs are static exports; they add no browser scripts or site build dependencies. Initial HTML exposes the same image, alt text, title and description through Open Graph and X metadata.
 
 ### Buttons
 

@@ -1,0 +1,4 @@
+# Optional artwork editing tools; not used by build.py, tests, CI or the website.
+Pillow==13.0.0
+fonttools==4.67.0
+brotli==1.2.0
