@@ -21,6 +21,9 @@ defmodule Parlora.Session.State do
     context_resolved?: true,
     adapters: %{},
     startup: %{
+      telemetry_session: nil,
+      telemetry_startup: nil,
+      telemetry_shutdown: nil,
       deadline_us: nil,
       pending: nil,
       owners: %{},
@@ -48,9 +51,16 @@ defmodule Parlora.Session.State do
   def new(options) do
     id = Keyword.fetch!(options, :id)
     limits = Keyword.fetch!(options, :limits)
+    telemetry = Parlora.Telemetry.start(:session, Parlora.Telemetry.session_metadata(options, id))
+    metadata = Map.put(telemetry.metadata, :parent_operation_id, telemetry.metadata.operation_id)
 
     %__MODULE__{
       id: id,
+      startup:
+        Map.merge(%__MODULE__{}.startup, %{
+          telemetry_session: telemetry,
+          telemetry_startup: Parlora.Telemetry.start(:startup, metadata)
+        }),
       health: Health.new(limits.max_records),
       limits: limits,
       options: options,

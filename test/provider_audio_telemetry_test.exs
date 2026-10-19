@@ -40,6 +40,8 @@ defmodule Parlora.ProviderAudioTelemetryTest do
                          at_us: 10,
                          duration_us: 100_000,
                          bytes: ^bytes,
+                         queue_duration_us: 100_000,
+                         oldest_age_us: 0,
                          queue_before_bytes: 0,
                          queue_bytes: ^bytes,
                          dropped_bytes: 0
@@ -51,8 +53,12 @@ defmodule Parlora.ProviderAudioTelemetryTest do
                OutputBuffer.push(queue, pcm, init, sequence, 20)
 
       assert_received {:audio_measurement, [:parlora, :provider, :audio_received],
-                       %{dropped_bytes: ^bytes, queue_bytes: ^bytes},
-                       %{outcome: :output_overflow}}
+                       %{
+                         dropped_bytes: ^bytes,
+                         queue_bytes: ^bytes,
+                         queue_duration_us: 100_000,
+                         oldest_age_us: 10
+                       }, %{outcome: :output_overflow}}
     end
   end
 
@@ -79,7 +85,13 @@ defmodule Parlora.ProviderAudioTelemetryTest do
       assert_received {:audio_measurement, [:parlora, :provider, :audio_read], measurements,
                        metadata}
 
-      assert Map.keys(measurements) |> Enum.sort() == [:at_us, :bytes, :queue_bytes]
+      assert Map.keys(measurements) |> Enum.sort() == [
+               :at_us,
+               :bytes,
+               :oldest_age_us,
+               :queue_bytes,
+               :queue_duration_us
+             ]
 
       assert metadata == %{
                session_id: init.session_id,
@@ -89,6 +101,8 @@ defmodule Parlora.ProviderAudioTelemetryTest do
 
       assert measurements.bytes == 960
       assert measurements.queue_bytes == 3_840
+      assert measurements.queue_duration_us == 80_000
+      assert is_integer(measurements.oldest_age_us) and measurements.oldest_age_us >= 0
       refute inspect({measurements, metadata}) =~ "private-test-key"
     end
   end

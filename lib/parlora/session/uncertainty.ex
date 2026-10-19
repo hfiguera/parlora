@@ -33,6 +33,11 @@ defmodule Parlora.Session.Uncertainty do
 
   defp mark_job(state, id, job, cause) do
     job =
+      job
+      |> Parlora.Telemetry.finish(:telemetry_queue, :uncertain)
+      |> Parlora.Telemetry.finish(:telemetry_backend, :uncertain)
+
+    job =
       Map.merge(job, %{
         status: :uncertain,
         uncertainty_reason: reason(cause),

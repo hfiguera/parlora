@@ -6,5 +6,9 @@
     "examples/*.{ex,exs}",
     "examples/support/**/*.{ex,exs}"
   ],
-  subdirectories: ["examples/order_desk", "validation/optional-backends/consumer"]
+  subdirectories: [
+    "examples/order_desk",
+    "examples/observability",
+    "validation/optional-backends/consumer"
+  ]
 ]

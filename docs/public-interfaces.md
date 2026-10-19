@@ -1000,21 +1000,9 @@ the configured startup buffer, or device playback evidence.
 
 ## Provider audio timeline telemetry
 
-All three providers emit `[:parlora, :provider, :audio_received]` once per decoded
-packet, before splitting it into pipeline frames. Measurements are `at_us`,
-`bytes`, format-aware `duration_us`, `queue_before_bytes`, `queue_bytes`, and
-`dropped_bytes`. Metadata contains `session_id`, `adapter_id`, `generation`, and
-`outcome` (`accepted` or a rejection code). `dropped_bytes` counts rejected incoming
-bytes; subsequent removal of previously queued audio is a separate discontinuity.
-Receipt is observed in the adapter's monotonic clock, not at the remote generator.
-
-`[:parlora, :provider, :audio_read]` reports `at_us`, removed `bytes`, remaining
-`queue_bytes`, and the same identity metadata. Correlate these with pipeline
-`:frame`/`:tick` and channel `:playout` events to separate receipt, local transfer,
-and consumption. Summed packet duration establishes the received source timeline;
-quiet source samples still count. These events contain no PCM, text or credentials
-and retain no history inside the library. Applications should keep their own
-collector bounded and keep synchronous telemetry handlers short.
+See [audio measurements](observability.md#audio-measurements) for provider receipt,
+queue and read events, their units, and how to correlate them with pipeline and
+playback observations.
 
 ## 15. Session health and opt-in progress deadlines
 
