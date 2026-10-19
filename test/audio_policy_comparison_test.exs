@@ -9,7 +9,7 @@ defmodule Parlora.AudioPolicyComparisonTest do
     arrivals =
       "validation/pcm-overflow/refill-trial-arrivals.json"
       |> File.read!()
-      |> Jason.decode!()
+      |> JSON.decode!()
       |> Map.fetch!("arrivals")
 
     bytes = Enum.reduce(arrivals, 0, &(&1["bytes"] + &2))

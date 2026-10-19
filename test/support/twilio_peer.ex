@@ -21,7 +21,7 @@ defmodule Parlora.TestSupport.TwilioPeer do
   end
 
   def send_message(peer, message) do
-    {:ok, websocket, data} = WebSocket.encode(peer.websocket, {:text, Jason.encode!(message)})
+    {:ok, websocket, data} = WebSocket.encode(peer.websocket, {:text, JSON.encode!(message)})
     {:ok, conn} = WebSocket.stream_request_body(peer.conn, peer.ref, data)
     %{peer | websocket: websocket, conn: conn}
   end
@@ -78,7 +78,7 @@ defmodule Parlora.TestSupport.TwilioPeer do
 
   defp decode({:data, _ref, data}, peer) do
     {:ok, websocket, frames} = WebSocket.decode(peer.websocket, data)
-    messages = for {:text, json} <- frames, do: Jason.decode!(json)
+    messages = for {:text, json} <- frames, do: JSON.decode!(json)
     %{peer | websocket: websocket, messages: peer.messages ++ messages}
   end
 

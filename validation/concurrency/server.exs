@@ -474,7 +474,7 @@ defmodule ParloraConcurrency.Server do
 
   get "/state" do
     report = GenServer.call(ParloraConcurrency.Observer, :report)
-    conn |> put_resp_content_type("application/json") |> send_resp(200, Jason.encode!(report))
+    conn |> put_resp_content_type("application/json") |> send_resp(200, JSON.encode!(report))
   end
 
   post "/command/:tag/:action/:round" do

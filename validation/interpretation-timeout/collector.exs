@@ -98,7 +98,7 @@ defmodule ParloraInterpretationTrace do
   end
 
   defp write(%{count: n} = state, record) when n < 44000 do
-    IO.write(state.file, Jason.encode!(record) <> "\n")
+    IO.write(state.file, JSON.encode!(record) <> "\n")
     %{state | count: n + 1}
   end
 

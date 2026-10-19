@@ -14,7 +14,7 @@ defmodule Parlora.RecordedAudioContinuityTest do
       capture =
         Path.join("validation/playout-hardening-20261003", file)
         |> File.read!()
-        |> Jason.decode!()
+        |> JSON.decode!()
 
       assert capture["complete"]
       assert capture["received_bytes"] == capture["retained_bytes"]
@@ -40,7 +40,7 @@ defmodule Parlora.RecordedAudioContinuityTest do
       arrivals =
         Path.join("validation/pcm-overflow", file)
         |> File.read!()
-        |> Jason.decode!()
+        |> JSON.decode!()
         |> Map.fetch!(key)
         |> Enum.filter(&(not Map.has_key?(&1, "kind") or &1["kind"] == "audio_received"))
 

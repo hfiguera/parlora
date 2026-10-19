@@ -75,9 +75,9 @@ defmodule OrderDesk.PhoneDiagnosticsTest do
     state = PhoneDiagnostics.snapshot()
     assert Process.alive?(observer)
     assert Enum.any?(state[id].events, &(&1.type == :request_completed))
-    refute Jason.encode!(state) =~ "Private business result"
-    refute Jason.encode!(state) =~ "Private transport data"
-    refute Jason.encode!(state) =~ "Do not retain"
+    refute JSON.encode!(state) =~ "Private business result"
+    refute JSON.encode!(state) =~ "Private transport data"
+    refute JSON.encode!(state) =~ "Do not retain"
 
     assert Enum.any?(
              state[id].events,

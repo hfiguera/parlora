@@ -18,12 +18,14 @@ defmodule Parlora.GrokAdapterTest do
     def handle_in({json, _metadata}, owner),
       do:
         (
-          send(owner, {:grok_command, Jason.decode!(json)})
+          send(owner, {:grok_command, JSON.decode!(json)})
           {:ok, owner}
         )
 
+    def handle_info({:raw_json, bytes}, owner), do: {:push, {:text, bytes}, owner}
+
     def handle_info({:grok_event, event}, owner),
-      do: {:push, {:text, Jason.encode!(event)}, owner}
+      do: {:push, {:text, JSON.encode!(event)}, owner}
   end
 
   defmodule Route do
@@ -60,6 +62,20 @@ defmodule Parlora.GrokAdapterTest do
 
     on_exit(fn -> Grok.terminate(:normal, state) end)
     %{state: state, server: server}
+  end
+
+  for {name, bytes} <- [truncated: ~s({"private":), invalid_unicode: ~S({"private":"\uD800"})] do
+    test "#{name} JSON fails safely at the provider boundary", context do
+      send(context.server, {:raw_json, unquote(bytes)})
+      state = receive_event(context.state, System.monotonic_time(:millisecond) + 2_000, 0)
+      assert state.status == :closed
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :failed,
+                        payload: %{error: %{details: %{reason: :invalid_json}}}
+                      }}
+    end
   end
 
   test "ready requires configuration acknowledgment and diagnostics redact keys", context do
@@ -439,7 +455,7 @@ defmodule Parlora.GrokAdapterTest do
       "type" => "response.function_call_arguments.done",
       "call_id" => id,
       "name" => Protocol.function(),
-      "arguments" => Jason.encode!(%{request: request})
+      "arguments" => JSON.encode!(%{request: request})
     }
 
   defp update(id, call),

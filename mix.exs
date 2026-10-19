@@ -55,7 +55,6 @@ defmodule Parlora.MixProject do
       {:jido, "~> 2.4.0", optional: true},
       {:sagents, "~> 0.17.1", optional: true},
       {:legion, "~> 0.6.0", optional: true},
-      {:jason, "~> 1.4 and >= 1.4.5"},
       {:telemetry, "~> 1.4 and >= 1.4.2"},
       {:ex_doc, "== 0.40.4", only: :dev, runtime: false},
       {:stream_data, "== 1.4.0", only: :test, runtime: false},

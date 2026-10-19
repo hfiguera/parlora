@@ -88,19 +88,19 @@ defmodule Parlora.GrokProtocolTest do
     call = %{
       "name" => Protocol.function(),
       "call_id" => "call",
-      "arguments" => Jason.encode!(%{request: "order 123"})
+      "arguments" => JSON.encode!(%{request: "order 123"})
     }
 
     assert {:new, %{"request" => "order 123"}, records} = Calls.admit(Calls.new(1), call)
     assert {:duplicate, ^records} = Calls.admit(records, call)
 
     assert {:error, %{code: :invalid_argument}} =
-             Calls.admit(records, %{call | "arguments" => Jason.encode!(%{request: "order 124"})})
+             Calls.admit(records, %{call | "arguments" => JSON.encode!(%{request: "order 124"})})
 
     assert {:error, %{code: :backpressure}} = Calls.admit(records, %{call | "call_id" => "other"})
     assert {:ok, command, records} = Calls.complete(records, "call", %{status: :superseded})
     assert command.item.call_id == "call"
-    assert Jason.decode!(command.item.output) == %{"status" => "superseded"}
+    assert JSON.decode!(command.item.output) == %{"status" => "superseded"}
     assert records.records["call"].status == :superseded
     assert {:error, _} = Calls.context(records, "call", "Obsolete result")
     assert {:error, _} = Calls.context(records, "unknown", "Result")
@@ -110,7 +110,7 @@ defmodule Parlora.GrokProtocolTest do
     call = %{
       "name" => Protocol.function(),
       "call_id" => "clarify",
-      "arguments" => Jason.encode!(%{request: "order"})
+      "arguments" => JSON.encode!(%{request: "order"})
     }
 
     {:new, _args, records} = Calls.admit(Calls.new(4), call)

@@ -46,7 +46,7 @@ defmodule Parlora.Channels.MediaStream.Socket do
 
   @impl true
   def handle_in({bytes, [opcode: :text]}, state) when byte_size(bytes) <= 16_384 do
-    case Jason.decode(bytes) do
+    case JSON.decode(bytes) do
       {:ok, message} when is_map(message) -> receive_message(state, message, byte_size(bytes))
       _invalid -> {:stop, :normal, 1008, state}
     end
@@ -136,7 +136,7 @@ defmodule Parlora.Channels.MediaStream.Socket do
   end
 
   defp push([], state), do: {:ok, state}
-  defp push(messages, state), do: {:push, Enum.map(messages, &{:text, Jason.encode!(&1)}), state}
+  defp push(messages, state), do: {:push, Enum.map(messages, &{:text, JSON.encode!(&1)}), state}
 
   defp replay(module, channel, message, :ok) do
     case module.receive_message(channel, message) do

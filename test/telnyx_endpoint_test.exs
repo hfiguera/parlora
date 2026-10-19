@@ -12,7 +12,7 @@ defmodule Parlora.TelnyxEndpointTest do
       "payload" => %{}
     }
 
-    body = Jason.encode!(%{"data" => data})
+    body = JSON.encode!(%{"data" => data})
 
     options = [
       public_key: Base.encode64(public),
@@ -29,6 +29,8 @@ defmodule Parlora.TelnyxEndpointTest do
           Plug.Test.conn(:post, "/events", body),
           signed(body <> " ", private)
           |> Plug.Conn.put_req_header("telnyx-signature-ed25519", "invalid"),
+          signed(~s({"data":), private),
+          signed(<<?{, 255, ?}>>, private),
           signed(String.duplicate("x", 16_385), private)
         ] do
       assert Endpoint.webhook(conn, options).status == 403

@@ -60,7 +60,7 @@ defmodule Parlora.Channels.Browser.Signaling do
 
   @impl true
   def handle_in({bytes, [opcode: :text]}, state) when byte_size(bytes) <= 65_536 do
-    case Jason.decode(bytes) do
+    case JSON.decode(bytes) do
       {:ok, message} when is_map(message) -> dispatch(message, state)
       _invalid -> {:stop, :normal, 1008, state}
     end
@@ -84,7 +84,7 @@ defmodule Parlora.Channels.Browser.Signaling do
   end
 
   def handle_info({:parlora_event, %Event{source: :session, type: :closed}}, state),
-    do: {:stop, :normal, 1000, {:text, Jason.encode!(%{type: "closed"})}, state}
+    do: {:stop, :normal, 1000, {:text, JSON.encode!(%{type: "closed"})}, state}
 
   def handle_info({:parlora_event, %Event{type: :transcript_delta, payload: payload}}, state),
     do:
@@ -262,5 +262,5 @@ defmodule Parlora.Channels.Browser.Signaling do
 
   defp media_status(_channel), do: %{status: :unavailable}
 
-  defp push(message, state), do: {:push, {:text, Jason.encode!(message)}, state}
+  defp push(message, state), do: {:push, {:text, JSON.encode!(message)}, state}
 end

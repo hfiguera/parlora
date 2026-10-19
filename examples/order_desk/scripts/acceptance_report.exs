@@ -17,7 +17,7 @@ defmodule OrderDesk.AcceptanceReport do
     if path = System.get_env("PARLORA_ACCEPTANCE_REPORT") do
       File.write!(
         path,
-        Jason.encode!(%{mode: "deterministic", cases: Enum.reverse(state)}, pretty: true)
+        JSON.encode!(%{mode: "deterministic", cases: Enum.reverse(state)})
       )
     end
 

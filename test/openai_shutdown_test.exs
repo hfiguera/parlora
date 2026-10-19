@@ -13,12 +13,14 @@ defmodule Parlora.OpenAIShutdownTest do
     end
 
     def handle_in({json, _metadata}, owner) do
-      send(owner, {:command, Jason.decode!(json)})
+      send(owner, {:command, JSON.decode!(json)})
       {:ok, owner}
     end
 
+    def handle_info({:raw_json, bytes}, owner), do: {:push, {:text, bytes}, owner}
+
     def handle_info({:event, event}, owner),
-      do: {:push, {:text, Jason.encode!(event)}, owner}
+      do: {:push, {:text, JSON.encode!(event)}, owner}
   end
 
   defmodule Route do
@@ -62,6 +64,20 @@ defmodule Parlora.OpenAIShutdownTest do
       pcm: pcm,
       port: port
     }
+  end
+
+  for {name, bytes} <- [truncated: ~s({"private":), invalid_unicode: ~S({"private":"\uD800"})] do
+    test "#{name} JSON fails safely at the provider boundary", context do
+      send(context.server, {:raw_json, unquote(bytes)})
+      state = receive_frame(context.state)
+      assert state.status == :closed
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :failed,
+                        payload: %{error: %{details: %{reason: :invalid_json}}}
+                      }}
+    end
   end
 
   test "new audio fires the armed hint once without changing queued data", context do

@@ -47,5 +47,5 @@ defmodule Parlora.Validation.Stability do
     end)
   end
 
-  def report(kind, data), do: IO.puts(Jason.encode!(%{validation: kind, measurements: data}))
+  def report(kind, data), do: IO.puts(JSON.encode!(%{validation: kind, measurements: data}))
 end

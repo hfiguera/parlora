@@ -123,7 +123,7 @@ defmodule Parlora.PlayoutValidation do
       steady_native_underrun_frames: stats.underrun - baseline.underrun
     }
 
-    IO.puts(Jason.encode!(report))
+    IO.puts(JSON.encode!(report))
     if report.source_ms != 10000.0, do: raise("Source audio was not fully consumed")
 
     if report.playback_buffer_ms == 60 and report.gap_count != 0,

@@ -157,7 +157,7 @@ defmodule ParloraAcceptance.Server do
     send_resp(
       put_resp_content_type(conn, "application/json"),
       200,
-      Jason.encode!(GenServer.call(ParloraAcceptance.Observer, :state))
+      JSON.encode!(GenServer.call(ParloraAcceptance.Observer, :state))
     )
   end
 

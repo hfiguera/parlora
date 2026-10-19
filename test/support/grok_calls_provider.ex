@@ -41,7 +41,7 @@ defmodule Parlora.TestSupport.GrokCallsProvider do
     call = %{
       "call_id" => id,
       "name" => Protocol.function(),
-      "arguments" => Jason.encode!(%{request: "Check an order"})
+      "arguments" => JSON.encode!(%{request: "Check an order"})
     }
 
     {:new, _, calls} = Calls.admit(state.calls, call)

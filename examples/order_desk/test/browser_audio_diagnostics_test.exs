@@ -48,8 +48,8 @@ defmodule OrderDesk.BrowserAudioDiagnosticsTest do
     assert call.truncated
     assert length(call.events) == 3
     assert Enum.map(call.events, & &1.metrics.bytes) == [480, 960, 1440]
-    refute Jason.encode!(call) =~ "private"
-    refute Jason.encode!(call) =~ "secret"
+    refute JSON.encode!(call) =~ "private"
+    refute JSON.encode!(call) =~ "secret"
     %{calls: [summary]} = Diagnostics.snapshot("owner", false)
     assert summary.events == []
     assert summary.events_seen == 5
@@ -78,10 +78,10 @@ defmodule OrderDesk.BrowserAudioDiagnosticsTest do
     assert own.status == 200
 
     assert %{"calls" => [%{"session_id" => ^id, "events" => [], "events_seen" => 1}]} =
-             Jason.decode!(own.resp_body)
+             JSON.decode!(own.resp_body)
 
     stranger = route(conn(:get, "/api/audio-diagnostics?session_id=#{id}"))
-    assert %{"calls" => []} = Jason.decode!(stranger.resp_body)
+    assert %{"calls" => []} = JSON.decode!(stranger.resp_body)
     close_session(session)
     await_closed(actor, System.monotonic_time(:millisecond) + 5_000)
   end
@@ -153,7 +153,7 @@ defmodule OrderDesk.BrowserAudioDiagnosticsTest do
     assert length(gaps) == 2
     assert Enum.map(gaps, & &1.recovery_release_reason) == [:quiet_refill, :speech_continuation]
     assert Enum.all?(gaps, &(&1.cause == :quiet_refill and &1.source_unavailable_us == 0))
-    refute Jason.encode!(gaps) =~ "private"
+    refute JSON.encode!(gaps) =~ "private"
     close_session(session)
   end
 

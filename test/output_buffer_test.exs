@@ -16,7 +16,7 @@ defmodule Parlora.OutputBufferTest do
   end
 
   test "all captured overflow windows replay without losing or reordering PCM" do
-    evidence = File.read!("docs/output-overflow-evidence.json") |> Jason.decode!()
+    evidence = File.read!("docs/output-overflow-evidence.json") |> JSON.decode!()
 
     for window <- evidence["windows"] do
       events = Enum.reject(window["events"], &(&1["event"] == "tick"))

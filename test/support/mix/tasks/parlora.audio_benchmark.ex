@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Parlora.AudioBenchmark do
 
     output = Keyword.get(options, :output, "/tmp/parlora-audio-benchmark.json")
     File.mkdir_p!(Path.dirname(output))
-    File.write!(output, Jason.encode!(report, pretty: true) <> "\n")
+    File.write!(output, JSON.encode!(report) <> "\n")
     Mix.shell().info("Audio gates: #{Enum.count(rows, & &1.passed)}/#{length(rows)}; #{output}")
     unless report.passed, do: Mix.raise("Audio acceptance gates failed; report preserved")
   end

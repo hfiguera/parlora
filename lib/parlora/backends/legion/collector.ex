@@ -74,7 +74,7 @@ defmodule Parlora.Backends.Legion.Collector do
       {:ok, value} ->
         # Only bounded, serializable values cross the generated-code boundary.
         if :erlang.external_size(value) <= 65_536 do
-          _json = Jason.encode!(value)
+          _json = JSON.encode!(value)
           {:reply, {:ok, value}, %{state | results: Map.put(state.results, name, value)}}
         else
           {:reply, {:error, "Native result exceeds limit"}, %{state | failed: true}}

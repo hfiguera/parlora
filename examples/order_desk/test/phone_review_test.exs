@@ -31,7 +31,7 @@ defmodule OrderDesk.PhoneReviewTest do
   test "root review adopts phone identity and confirmation notifies the matching live session" do
     Application.delete_env(:order_desk, :twilio_review_actor)
     old_page = route(conn(:get, "/api/orders"))
-    old_csrf = Jason.decode!(old_page.resp_body)["csrf"]
+    old_csrf = JSON.decode!(old_page.resp_body)["csrf"]
     [{name, cookie}] = Map.to_list(old_page.resp_cookies)
     actor = Parlora.ID.new()
     Application.put_env(:order_desk, :twilio_review_actor, actor)
@@ -54,7 +54,7 @@ defmodule OrderDesk.PhoneReviewTest do
     refute csrf == old_csrf
     [{name, cookie}] = Map.to_list(page.resp_cookies)
     dashboard = conn(:get, "/api/orders") |> put_req_cookie(name, cookie.value) |> route()
-    assert Enum.any?(Jason.decode!(dashboard.resp_body)["proposals"], &(&1["id"] == id))
+    assert Enum.any?(JSON.decode!(dashboard.resp_body)["proposals"], &(&1["id"] == id))
 
     response =
       conn(:post, "/api/proposals/#{id}/confirm", "{}")
@@ -89,7 +89,7 @@ defmodule OrderDesk.PhoneReviewTest do
     Application.put_env(:order_desk, :phone_review_actor, actor)
     Application.put_env(:order_desk, :cookie_secret, phone_secret)
     phone = route(conn(:get, "/api/orders"))
-    csrf = Jason.decode!(phone.resp_body)["csrf"]
+    csrf = JSON.decode!(phone.resp_body)["csrf"]
     jar = phone.resp_cookies
 
     Application.put_env(:order_desk, :browser_origin, "http://localhost:4000")
@@ -115,7 +115,7 @@ defmodule OrderDesk.PhoneReviewTest do
     response = route(confirm)
     assert response.status == 200
     assert get_session(response, :actor) == actor
-    assert Jason.decode!(response.resp_body)["result"]["duplicate"] == false
+    assert JSON.decode!(response.resp_body)["result"]["duplicate"] == false
     assert route(confirm).status == 200
     assert {:ok, %{instructions: "Leave it at the side door"}} = Store.order("825")
 
@@ -124,7 +124,7 @@ defmodule OrderDesk.PhoneReviewTest do
     Application.put_env(:order_desk, :cookie_secret, browser_secret)
     next = route(with_cookies(conn(:get, "/api/orders"), Map.merge(jar, response.resp_cookies)))
     assert get_session(next, :actor) == browser_actor
-    assert Jason.decode!(next.resp_body)["csrf"] == Jason.decode!(browser.resp_body)["csrf"]
+    assert JSON.decode!(next.resp_body)["csrf"] == JSON.decode!(browser.resp_body)["csrf"]
   end
 
   defp with_cookies(conn, cookies) do

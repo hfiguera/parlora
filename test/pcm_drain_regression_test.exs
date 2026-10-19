@@ -4,7 +4,7 @@ defmodule Parlora.PCMDrainRegressionTest do
   alias Parlora.Provider.OutputBuffer
 
   setup do
-    evidence = File.read!("validation/pcm-overflow/evidence.json") |> Jason.decode!()
+    evidence = File.read!("validation/pcm-overflow/evidence.json") |> JSON.decode!()
 
     init = %AdapterInit{
       session_id: "drain-regression",

@@ -41,7 +41,7 @@ defmodule Parlora.Validation.AudioSocket do
 
   @impl true
   def handle_in({json, [opcode: :text]}, state) do
-    message = Jason.decode!(json)
+    message = JSON.decode!(json)
     dispatch(message, state)
   end
 
@@ -157,5 +157,5 @@ defmodule Parlora.Validation.AudioSocket do
     :ok
   end
 
-  defp push(message, state), do: {:push, {:text, Jason.encode!(message)}, state}
+  defp push(message, state), do: {:push, {:text, JSON.encode!(message)}, state}
 end

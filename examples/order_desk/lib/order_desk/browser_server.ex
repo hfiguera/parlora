@@ -9,7 +9,7 @@ defmodule OrderDesk.BrowserServer do
 
   plug(:fetch_session)
   plug(:browser_identity)
-  plug(Plug.Parsers, parsers: [:json], json_decoder: Jason, length: 8_192)
+  plug(Plug.Parsers, parsers: [:json], json_decoder: JSON, length: 8_192)
   plug(:match)
   plug(:dispatch)
 
@@ -52,7 +52,7 @@ defmodule OrderDesk.BrowserServer do
   get "/health" do
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(200, Jason.encode!(%{active_sessions: OrderDesk.BrowserGate.count()}))
+    |> send_resp(200, JSON.encode!(%{active_sessions: OrderDesk.BrowserGate.count()}))
   end
 
   get "/" do
@@ -202,7 +202,7 @@ defmodule OrderDesk.BrowserServer do
       conn
       |> put_resp_content_type("application/json")
       |> put_resp_header("cache-control", "no-store")
-      |> send_resp(200, Jason.encode!(OrderDesk.BrowserICE.client_config()))
+      |> send_resp(200, JSON.encode!(OrderDesk.BrowserICE.client_config()))
     else
       send_resp(conn, 403, "Origin rejected")
     end
@@ -315,5 +315,5 @@ defmodule OrderDesk.BrowserServer do
       conn
       |> put_resp_content_type("application/json")
       |> put_resp_header("cache-control", "no-store")
-      |> send_resp(status, Jason.encode!(data))
+      |> send_resp(status, JSON.encode!(data))
 end

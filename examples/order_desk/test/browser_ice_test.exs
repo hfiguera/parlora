@@ -53,7 +53,7 @@ defmodule OrderDesk.BrowserICETest do
 
     assert turn.credential == Base.encode64(:crypto.mac(:hmac, :sha, ctx.secret, turn.username))
     assert first != second
-    refute Jason.encode!(first) =~ ctx.secret
+    refute JSON.encode!(first) =~ ctx.secret
 
     Application.put_env(:order_desk, :browser_ice, config)
     Application.put_env(:order_desk, :browser_origin, "http://localhost:4000")
@@ -72,7 +72,7 @@ defmodule OrderDesk.BrowserICETest do
 
     assert response.status == 200
     assert get_resp_header(response, "cache-control") == ["no-store"]
-    assert Jason.decode!(response.resp_body)["iceTransportPolicy"] == "relay"
+    assert JSON.decode!(response.resp_body)["iceTransportPolicy"] == "relay"
     refute response.resp_body =~ ctx.secret
     assert OrderDesk.BrowserGate.count() == 0
   end

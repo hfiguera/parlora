@@ -8,7 +8,7 @@ defmodule Parlora.Validation.AudioRouter do
 
   get "/health" do
     count = Agent.get(Parlora.Validation.AudioConnections, &MapSet.size/1)
-    send_resp(conn, 200, Jason.encode!(%{active: count}))
+    send_resp(conn, 200, JSON.encode!(%{active: count}))
   end
 
   get "/socket" do
@@ -83,7 +83,7 @@ if trace_directory, do: File.mkdir_p!(trace_directory)
 
 arrivals =
   if path = System.get_env("AUDIO_ARRIVAL_SCHEDULE"),
-    do: path |> File.read!() |> Jason.decode!() |> Map.fetch!("arrivals")
+    do: path |> File.read!() |> JSON.decode!() |> Map.fetch!("arrivals")
 
 if arrivals &&
      (reference == nil or Enum.sum(Enum.map(arrivals, & &1["bytes"])) != byte_size(reference)),

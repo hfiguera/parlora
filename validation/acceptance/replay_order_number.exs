@@ -8,7 +8,7 @@ evidence =
   __DIR__
   |> Path.join("results-after-overflow-fix/1-corrections.json")
   |> File.read!()
-  |> Jason.decode!()
+  |> JSON.decode!()
 
 transcripts =
   evidence["events"]

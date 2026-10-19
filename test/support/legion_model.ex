@@ -14,7 +14,7 @@ defmodule Parlora.TestSupport.LegionModel do
          Process.put(:legion_fixture_step, step + 1)
          send(observer, {:legion_model_call, id, step, self()})
          {:ok, body, conn} = Plug.Conn.read_body(conn)
-         send(observer, {:legion_wire, id, Jason.decode!(body)})
+         send(observer, {:legion_wire, id, JSON.decode!(body)})
          code = if is_function(code, 1), do: code.(step), else: code
 
          if code == :error do
@@ -42,7 +42,7 @@ defmodule Parlora.TestSupport.LegionModel do
                  id: "fc_fixture",
                  call_id: "call_fixture",
                  name: "structured_output",
-                 arguments: Jason.encode!(action)
+                 arguments: JSON.encode!(action)
                }
              ],
              usage: %{input_tokens: 12, output_tokens: 8, total_tokens: 20}

@@ -4,7 +4,7 @@ defmodule Parlora.SpeechRecoveryTest do
 
   test "recorded mid-speech stalls resume earlier without additional speech gaps or sample loss" do
     fixture =
-      File.read!("test/fixtures/gpt-live-speech-recovery-20261004.json") |> Jason.decode!()
+      File.read!("test/fixtures/gpt-live-speech-recovery-20261004.json") |> JSON.decode!()
 
     for report <- fixture["reports"], phase <- 0..9_000//1_000 do
       result = replay(report, phase)

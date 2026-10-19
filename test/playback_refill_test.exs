@@ -4,7 +4,7 @@ defmodule Parlora.PlaybackRefillTest do
   alias Parlora.TestSupport.MemoryAudio
 
   test "recorded provider jitter no longer inserts silence at the two nonzero boundaries" do
-    evidence = File.read!("validation/pcm-overflow/starvation-evidence.json") |> Jason.decode!()
+    evidence = File.read!("validation/pcm-overflow/starvation-evidence.json") |> JSON.decode!()
     arrivals = Enum.filter(evidence["events"], &(&1["kind"] == "audio_received"))
     old = replay(arrivals, :pipeline, 60)
     fixed = replay(arrivals, :channel, 120)
@@ -19,7 +19,7 @@ defmodule Parlora.PlaybackRefillTest do
   end
 
   test "bounded recovery avoids the repeated speech gap in the longer live trial" do
-    fixture = File.read!("validation/pcm-overflow/refill-trial-arrivals.json") |> Jason.decode!()
+    fixture = File.read!("validation/pcm-overflow/refill-trial-arrivals.json") |> JSON.decode!()
     trial = replay(fixture["arrivals"], :channel, 120, false)
     fixed = replay(fixture["arrivals"], :channel, 120)
 

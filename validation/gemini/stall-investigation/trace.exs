@@ -132,7 +132,7 @@ defmodule ParloraGeminiStallTrace do
     next =
       Enum.reduce(frames, s, fn
         {kind, json}, acc when kind in [:text, :binary] ->
-          case Jason.decode(json) do
+          case JSON.decode(json) do
             {:ok, value} ->
               write(
                 acc,
@@ -376,7 +376,7 @@ defmodule ParloraGeminiStallTrace do
 
   defp write(s, row) do
     if s.count < 10_000 and s.bytes < 8_000_000 do
-      data = Jason.encode!(Map.put(row, :at_ms, System.system_time(:millisecond))) <> "\n"
+      data = JSON.encode!(Map.put(row, :at_ms, System.system_time(:millisecond))) <> "\n"
       IO.binwrite(s.file, data)
       %{s | count: s.count + 1, bytes: s.bytes + byte_size(data)}
     else

@@ -38,7 +38,7 @@ defmodule Parlora.Channels.Telnyx.Commands do
       when action in @actions and is_binary(call_id) and byte_size(call_id) in 1..512 and
              is_binary(command_id) and byte_size(command_id) in 1..128 and is_map(parameters) do
     with {:ok, settings} <- settings(options),
-         {:ok, body} <- Jason.encode(Map.put(parameters, "command_id", command_id)),
+         {:ok, body} <- encode_parameters(Map.put(parameters, "command_id", command_id)),
          true <- byte_size(body) <= 16_384 do
       path = settings.uri.path <> "/calls/" <> URI.encode(call_id, &URI.char_unreserved?/1)
       uri = %{settings.uri | path: path <> "/actions/" <> Atom.to_string(action)}
@@ -51,6 +51,14 @@ defmodule Parlora.Channels.Telnyx.Commands do
 
   def execute(_action, _call_id, _command_id, _parameters, _options),
     do: Error.tuple(:invalid_argument, "Invalid Telnyx command")
+
+  # JSON exposes only raising encoders. Keep invalid host parameters inside
+  # the command's sanitized admission error contract, before any network I/O.
+  defp encode_parameters(parameters) do
+    {:ok, JSON.encode!(parameters)}
+  rescue
+    _exception -> {:error, :invalid_parameters}
+  end
 
   defp settings(options) do
     key = Keyword.get(options, :api_key)
@@ -89,7 +97,7 @@ defmodule Parlora.Channels.Telnyx.Commands do
   end
 
   defp accepted(response, id, number) do
-    case Jason.decode(response) do
+    case JSON.decode(response) do
       {:ok, %{"data" => %{"result" => "ok"}}} ->
         {:ok, %{command_id: id, accepted?: true, attempts: number}}
 
@@ -123,7 +131,7 @@ defmodule Parlora.Channels.Telnyx.Commands do
   defp retry_delay(_error, delay), do: delay
 
   defp response_details(status, body) do
-    case Jason.decode(body) do
+    case JSON.decode(body) do
       {:ok, %{"errors" => errors}} when is_list(errors) ->
         codes =
           for %{"code" => code} <- errors,

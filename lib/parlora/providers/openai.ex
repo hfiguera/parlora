@@ -444,7 +444,7 @@ defmodule Parlora.Providers.OpenAI do
   defp frame(_frame, %{status: :recovering} = state), do: state
 
   defp frame({:text, json}, state) do
-    case Jason.decode(json) do
+    case JSON.decode(json) do
       {:ok, event} ->
         state = %{state | diagnostics: Diagnostics.received(state.diagnostics, event)}
         handle_event(Protocol.translate(event), state)
@@ -722,7 +722,7 @@ defmodule Parlora.Providers.OpenAI do
   defp now, do: System.monotonic_time(:microsecond)
 
   defp send_json(state, command) do
-    next = send_frame(state, {:text, Jason.encode!(command)})
+    next = send_frame(state, {:text, JSON.encode!(command)})
 
     if next.status == :closed,
       do: next,

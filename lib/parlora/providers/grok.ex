@@ -285,7 +285,7 @@ defmodule Parlora.Providers.Grok do
   defp frame(:open, state), do: transmit(%{state | status: :starting}, state.config.setup)
 
   defp frame({kind, json}, state) when kind in [:text, :binary] do
-    case Jason.decode(json) do
+    case JSON.decode(json) do
       {:ok, event} when is_map(event) -> event(event, state)
       _invalid -> fail(state, :invalid_json)
     end
@@ -516,7 +516,7 @@ defmodule Parlora.Providers.Grok do
   defp notify(state), do: OutputBuffer.notify(state)
 
   defp transmit(%{status: :closed} = state, _command), do: state
-  defp transmit(state, command), do: wire(state, {:text, Jason.encode!(command)})
+  defp transmit(state, command), do: wire(state, {:text, JSON.encode!(command)})
 
   defp wire(state, frame) do
     case WebSocketConnection.send(state.socket, frame) do

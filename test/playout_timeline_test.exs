@@ -40,7 +40,7 @@ defmodule Parlora.PlayoutTimelineTest do
     )
 
     assert :ok = PlayoutTimeline.close(trace)
-    report = File.read!(trace.path) |> Jason.decode!()
+    report = File.read!(trace.path) |> JSON.decode!()
     assert report["seen"] == 131_073
     assert report["truncated"]
     assert Enum.map(report["rows"], & &1["kind"]) == ["run", "tick"]

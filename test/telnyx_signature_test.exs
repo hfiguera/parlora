@@ -17,7 +17,7 @@ defmodule Parlora.TelnyxSignatureTest do
     refute Signature.valid?(
              context.public,
              "1000",
-             Jason.encode!(Jason.decode!(body)),
+             JSON.encode!(JSON.decode!(body)),
              signature,
              now: 1000
            )

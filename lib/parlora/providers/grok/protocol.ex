@@ -99,7 +99,7 @@ defmodule Parlora.Providers.Grok.Protocol do
   def result(id, output),
     do: %{
       type: "conversation.item.create",
-      item: %{type: "function_call_output", call_id: id, output: Jason.encode!(output)}
+      item: %{type: "function_call_output", call_id: id, output: JSON.encode!(output)}
     }
 
   def audio(bytes), do: %{type: "input_audio_buffer.append", audio: Base.encode64(bytes)}

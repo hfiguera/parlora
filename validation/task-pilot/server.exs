@@ -41,7 +41,7 @@ defmodule ParloraTaskPilot.Server do
 
   post "/__pilot/order-numbers" do
     {:ok, body, conn} = Plug.Conn.read_body(conn, length: 16_384)
-    text = Jason.decode!(body)["text"]
+    text = JSON.decode!(body)["text"]
     json(conn, %{numbers: OrderDesk.Speech.numbers(text)})
   end
 
@@ -58,7 +58,7 @@ defmodule ParloraTaskPilot.Server do
   end
 
   defp json(conn, data),
-    do: send_resp(put_resp_content_type(conn, "application/json"), 200, Jason.encode!(data))
+    do: send_resp(put_resp_content_type(conn, "application/json"), 200, JSON.encode!(data))
 end
 
 unless System.get_env("PARLORA_ACCEPTANCE_LIVE") == "1", do: raise("Live opt-in required")

@@ -31,7 +31,7 @@ defmodule Parlora.Channels.Telnyx.Endpoint do
          {:ok, body, conn} <-
            Conn.read_body(conn, length: 16_384, read_length: 16_384, read_timeout: 1_000),
          :ok <- Signature.verify(conn, Keyword.fetch!(options, :public_key), body),
-         {:ok, %{"data" => data}} <- Jason.decode(body),
+         {:ok, %{"data" => data}} <- JSON.decode(body),
          true <- valid_event?(data) do
       case Keyword.fetch!(options, :on_event).(data) do
         :ok -> respond(conn, 200, "OK")
