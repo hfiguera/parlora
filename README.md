@@ -55,8 +55,13 @@ supplying one API key from your voice provider, and running a local voice sessio
 You can ask for a demo shop's opening hours and hear the result of a read-only
 Jido action.
 
-Parlora is currently installed from source. You need a Parlora checkout,
-**Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the
+Install Parlora from [Hex](https://hex.pm/packages/parlora):
+
+```elixir
+{:parlora, "~> 0.1.0"}
+```
+
+You need **Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the
 [native prerequisites](docs/beam-compatibility.md). The tutorial uses your local
 microphone and speakers, builds only the native bindings needed for local audio,
 and includes the context policy, event loop, and session cleanup.

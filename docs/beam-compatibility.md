@@ -73,10 +73,10 @@ Builds for browser audio only or phone audio only can omit `libasound2-dev` and 
 
 ## Install libopus in a custom prefix
 
-From the Parlora source directory:
+From your host application, after running `mix deps.get`:
 
 ```sh
-scripts/install_opus.sh "$HOME/.local/parlora-opus"
+sh deps/parlora/scripts/install_opus.sh "$HOME/.local/parlora-opus"
 export PKG_CONFIG_PATH="$HOME/.local/parlora-opus/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 export OPUS_LIB_DIR="$HOME/.local/parlora-opus/lib"
 export LD_LIBRARY_PATH="$HOME/.local/parlora-opus/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"

@@ -10,6 +10,7 @@ defmodule Parlora.MixProject do
       app: :parlora,
       name: "Parlora",
       version: "0.1.0",
+      source_url: "https://github.com/hfiguera/parlora",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,9 +20,9 @@ defmodule Parlora.MixProject do
       description: "An Elixir framework for building real-time voice AI agents",
       package: [
         licenses: ["MIT"],
-        links: %{},
+        links: %{"GitHub" => "https://github.com/hfiguera/parlora"},
         files:
-          ~w(lib native/*/src native/*/Cargo.toml native/*/Cargo.lock native/*/build.rs mix.exs mix.lock README.md LICENSE docs/public-interfaces.md docs/first-session.md docs/using-parlora.md docs/beam-compatibility.md docs/output-recovery.md docs/openai-provider.md docs/gemini-provider.md docs/grok-provider.md docs/jido-backend.md docs/sagents-backend.md docs/legion-backend.md docs/browser-channel.md docs/twilio-channel.md docs/telnyx-channel.md examples/order_desk/README.md examples/order_desk/APPLICATION.md scripts/install_opus.sh rust-toolchain.toml)
+          ~w(lib native/*/src native/*/Cargo.toml native/*/Cargo.lock native/*/build.rs mix.exs mix.lock README.md CHANGELOG.md LICENSE docs/public-interfaces.md docs/first-session.md docs/using-parlora.md docs/beam-compatibility.md docs/output-recovery.md docs/openai-provider.md docs/gemini-provider.md docs/grok-provider.md docs/jido-backend.md docs/sagents-backend.md docs/legion-backend.md docs/browser-channel.md docs/twilio-channel.md docs/telnyx-channel.md examples/order_desk/README.md examples/order_desk/APPLICATION.md scripts/install_opus.sh rust-toolchain.toml)
       ],
       dialyzer: [
         plt_add_apps:
@@ -69,9 +70,11 @@ defmodule Parlora.MixProject do
   defp docs do
     [
       main: "readme",
+      source_ref: "v0.1.0",
       filter_modules: ~r/^Elixir\.Parlora(?:\.|$)/,
       extras: [
         "README.md",
+        "CHANGELOG.md",
         "docs/first-session.md",
         "docs/using-parlora.md",
         "docs/beam-compatibility.md",
@@ -96,7 +99,7 @@ defmodule Parlora.MixProject do
         Channels: ~r/(browser|twilio|telnyx)-channel/,
         Providers: ~r/(openai|gemini|grok)-provider/,
         Backends: ~r/(jido|sagents|legion)-backend/,
-        Reference: ~r/(output-recovery|public-interfaces|LICENSE)/
+        Reference: ~r/(output-recovery|public-interfaces|CHANGELOG|LICENSE)/
       ],
       groups_for_modules: [
         "Session API": [Parlora, Parlora.Event, Parlora.Status, Parlora.SessionHealth],

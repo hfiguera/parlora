@@ -7,10 +7,9 @@ backend language model, database, or custom application modules are needed.
 
 ## 1. Create the host application
 
-Create a fresh Mix application alongside your Parlora checkout:
+Create a fresh Mix application:
 
 ```sh
-# In the directory containing the parlora checkout:
 mix new voice_demo
 cd voice_demo
 mkdir -p config
@@ -21,16 +20,14 @@ In the new application's `mix.exs`, replace `deps/0` with:
 ```elixir
 defp deps do
   [
-    {:parlora, path: "../parlora"},
+    {:parlora, "~> 0.1.0"},
     {:jido, "== 2.4.0"}
   ]
 end
 ```
 
-The path assumes `voice_demo` and `parlora` are siblings. Adjust it if needed.
 Use a compatible Elixir/OTP pair from the [requirements guide](beam-compatibility.md).
-The checkout and OrderDesk have development version pins; this new host uses the
-runtime you select for it.
+This new host uses the runtime you select for it.
 
 ## 2. Configure the build before compiling
 

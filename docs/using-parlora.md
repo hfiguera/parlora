@@ -36,31 +36,24 @@ provider or add a TTS stage.
 ## 1. Install
 
 Install the [runtime and native prerequisites](beam-compatibility.md) first.
-Parlora is currently unpublished; add a source dependency to your application:
+Add Parlora to your application's dependencies:
 
 ```elixir
 defp deps do
   [
-    {:parlora, path: "../parlora"},
+    {:parlora, "~> 0.1.0"},
     {:jido, "== 2.4.0"}
   ]
 end
 ```
 
-Adjust the path to your checkout. This guide uses Jido; omit it if you implement
+This guide uses Jido; omit it if you implement
 `Parlora.Backend`, or select [Sagents](sagents-backend.md) or [Legion](legion-backend.md).
 The frameworks are optional and do not select the voice provider.
 
-Run `mix deps.get` and commit your application's lockfile. To vendor Parlora's
-source in your application, build the package from the checkout:
-
-```sh
-mix hex.build --unpack --output /absolute/path/to/my_app/vendor/parlora
-```
-
-Then declare `{:parlora, path: "vendor/parlora"}` in that application. Dependency
-configuration files are not inherited: put native settings and runtime secrets
-in the host application's own config.
+Run `mix deps.get` and commit your application's lockfile. Dependency configuration
+files are not inherited: put native settings and runtime secrets in the host
+application's own config.
 
 ## 2. Choose a starting example
 
