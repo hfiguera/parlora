@@ -277,7 +277,7 @@ defmodule OrderDesk.SaveAnnouncements do
     normalized = normalize(text)
 
     Regex.match?(~r/\b(?:saved|updated)\b/u, normalized) and
-      not Regex.match?(~r/\b(?:not|never|isn't|hasn't|haven't|don't|cannot)\b/u, normalized) and
+      not Regex.match?(~r/\b(?:not|never|cannot|[\p{L}]+n't)\b/u, normalized) and
       result.order in OrderDesk.Speech.numbers(text) and
       destination?(normalized, result.instructions)
   end
@@ -289,8 +289,13 @@ defmodule OrderDesk.SaveAnnouncements do
       contains_words?(destination(text), destination(literal))
   end
 
-  defp contains_words?(text, words),
-    do: words != "" and String.contains?(" " <> text <> " ", " " <> words <> " ")
+  # Paired single quotes delimit a phrase without erasing apostrophes inside
+  # words. Require both quotes so a streamed prefix such as 'front door cannot
+  # confirm a different destination such as 'front doorway'.
+  defp contains_words?(text, words) do
+    words != "" and
+      String.contains?(" " <> text <> " ", [" " <> words <> " ", " '" <> words <> "' "])
+  end
 
   # Only these grammatical alternatives are equivalent for this demo. Do not
   # erase arbitrary prepositions (in the garage differs from at the garage),
@@ -302,12 +307,13 @@ defmodule OrderDesk.SaveAnnouncements do
     |> String.replace(~r/\bin my front door\b/u, "at my front door")
   end
 
-  # Comparison only: preserve stored and announced text. Normalize this known
-  # spelling pair as a whole word, without fuzzy destination matching.
+  # Comparison only: preserve stored and announced text. Canonicalize quote style
+  # and this spelling pair without erasing apostrophes in contractions or names.
   defp normalize(text) do
     text
     |> String.downcase()
     |> String.replace(~r/\bneighbour\b/u, "neighbor")
+    |> String.replace(~r/[‘’]/u, "'")
     |> String.replace(~r/[^\p{L}\p{N}']+/u, " ")
     |> String.trim()
   end

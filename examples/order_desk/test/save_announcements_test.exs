@@ -185,6 +185,170 @@ defmodule OrderDesk.SaveAnnouncementsTest do
     refute_receive {:context, _duplicate}, 250
   end
 
+  test "a single-quoted save confirmation retires the announcement without retry" do
+    {_session, worker} = start(provider: Parlora.Providers.OpenAI, deadline_ms: 1_000)
+    saved = %{result(8) | order: "123", instructions: "Left in my front door"}
+    SaveAnnouncements.saved(worker, saved)
+    assert_receive {:context, %{kind: :speakable, content: content}}, 1_000
+    assert content =~ saved.instructions
+
+    speech(worker, "The delivery instructions for order one-two-three are saved as: '")
+    speech(worker, "Left in my front door")
+    assert SaveAnnouncements.status(worker).pending == 1
+    speech(worker, "'.")
+
+    assert %{pending: 0, evidence: %{"123" => %{version: 8, stage: :transcript_observed}}} =
+             SaveAnnouncements.status(worker)
+
+    assert :sys.get_state(worker).awaiting_evidence == %{}
+    SaveAnnouncements.saved(worker, saved)
+    refute_receive {:context, _retry_or_duplicate}, 250
+  end
+
+  test "quoted destinations preserve apostrophes within words and literal stored text" do
+    for {open, close} <- [{"'", "'"}, {"\"", "\""}, {"‘", "’"}, {"“", "”"}] do
+      saved = %{result() | instructions: "Leave it at O'Neill's front door"}
+      text = "Saved order 124: #{open}Leave it at O'Neill's front door#{close}."
+      state = confirmation_state(saved)
+
+      state =
+        Enum.reduce(String.graphemes(text), state, fn delta, state ->
+          observe_confirmation(state, delta)
+        end)
+
+      assert state.pending == [], text
+      assert state.evidence["124"].stage == :transcript_observed
+      assert state.versions["124"] == saved.version
+    end
+  end
+
+  test "quoted confirmations retain negation, order, destination, speaker and submission checks" do
+    saved = %{result(8) | order: "123", instructions: "Left in my front door"}
+
+    negated =
+      for denial <- [
+            "not",
+            "never",
+            "isn't",
+            "hasn't",
+            "haven't",
+            "don't",
+            "didn't",
+            "doesn't",
+            "wasn't",
+            "weren't",
+            "can't",
+            "couldn't",
+            "wouldn't",
+            "shouldn't",
+            "won't",
+            "cannot",
+            "isn’t",
+            "hasn’t",
+            "haven’t",
+            "don’t",
+            "didn’t",
+            "wasn’t",
+            "can’t",
+            "won’t"
+          ],
+          do: {:assistant, "Order 123 #{denial} saved as: 'Left in my front door'."}
+
+    invalid = [
+      {:assistant, "Saved order 124: 'Left in my front door'."},
+      {:assistant, "Saved order 123: 'Left in my back door'."},
+      {:assistant, "Saved order 123: 'Left behind my front door'."},
+      {:assistant, "Saved order 123: 'Left in my front doorway'."},
+      {:assistant, "Saved order 123: 'Left in their front door'."},
+      {:assistant, "Saved order 123: 'Left in my front door'way."},
+      {:assistant, "Saved order 123: 'Left in my front door"},
+      {:user, "Saved order 123: 'Left in my front door'."}
+    ]
+
+    for {speaker, text} <- negated ++ invalid do
+      state = observe_confirmation(confirmation_state(saved), text, speaker)
+      assert length(state.pending) == 1, text
+      assert state.evidence == %{}, text
+    end
+
+    state = confirmation_state(saved)
+    state = %{state | pending: [%{attempts: 0, result: saved}]}
+    state = observe_confirmation(state, "Saved order 123: 'Left in my front door'.")
+    assert length(state.pending) == 1
+    assert state.evidence == %{}
+  end
+
+  test "a quoted streamed prefix cannot confirm a longer or different destination" do
+    saved = %{result() | instructions: "Left in my front door"}
+
+    for text <- [
+          "Saved order 124: 'Left in my front doorway'.",
+          "Saved order 124: ‘Left in my front doorway’.",
+          "Saved order 124: 'Left in my front door, not my back door'."
+        ] do
+      Enum.reduce(String.graphemes(text), confirmation_state(saved), fn delta, state ->
+        state = observe_confirmation(state, delta)
+        assert length(state.pending) == 1, text
+        assert state.evidence == %{}, text
+        state
+      end)
+    end
+  end
+
+  test "late quoted evidence matches only the current saved destination" do
+    saved = %{result(8) | instructions: "Left in my front door"}
+    state = %{confirmation_state(saved) | pending: [], awaiting_evidence: %{"124" => saved}}
+    state = observe_confirmation(state, "Saved order 124: 'Leave it with my neighbor'.")
+    assert state.awaiting_evidence == %{"124" => saved}
+    assert state.evidence == %{}
+
+    state = observe_confirmation(state, "reset", :user)
+    state = observe_confirmation(state, "Saved order 124: 'Left in my front door'.")
+    assert state.awaiting_evidence == %{}
+    assert state.evidence["124"] == %{version: 8, stage: :transcript_observed}
+  end
+
+  test "quote handling cannot confuse destinations with different possessors or prepositions" do
+    for {instructions, spoken} <- [
+          {"Leave it at O'Neill's front door", "Leave it at ONeill's front door"},
+          {"Leave it at O'Neill's front door", "Leave it at O'Neills front door"},
+          {"Leave it at my neighbor's front door", "Leave it at my front door"},
+          {"Leave it in my garage", "Leave it at my garage"}
+        ] do
+      state = confirmation_state(%{result() | instructions: instructions})
+      state = observe_confirmation(state, "Saved order 124: '#{spoken}'.")
+      assert length(state.pending) == 1
+      assert state.evidence == %{}
+    end
+  end
+
+  defp confirmation_state(saved) do
+    %{
+      pending: [%{attempts: 1, result: saved}],
+      awaiting_evidence: %{},
+      text: "",
+      last_speech: 0,
+      evidence: %{},
+      versions: %{saved.order => saved.version},
+      coordinate?: false
+    }
+  end
+
+  defp observe_confirmation(state, text, speaker \\ :assistant) do
+    {:noreply, state} =
+      SaveAnnouncements.handle_info(
+        {:parlora_event,
+         %Event{
+           source: :provider,
+           type: :transcript_delta,
+           payload: %{speaker: speaker, delta: text}
+         }},
+        state
+      )
+
+    state
+  end
+
   for {stored, spoken} <- [{"neighbor", "neighbour"}, {"neighbour", "neighbor"}] do
     @stored stored
     @spoken spoken
