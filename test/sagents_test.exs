@@ -30,8 +30,7 @@ defmodule Parlora.SagentsTest do
                         provider_generation: 7,
                         facts: %{order: "124"}
                       }
-                    }},
-                   1_000
+                    }}
 
     send(worker, :finish)
     assert_receive {:parlora_event, %Event{type: :request_completed, request_id: "slow"}}
@@ -60,7 +59,7 @@ defmodule Parlora.SagentsTest do
     assert :ok = Backend.submit(pid, request("multi", %{order: "123"}))
     assert_receive {:read_tool, "multi"}
     assert_receive {:model_call, "multi", 1, _}
-    assert_receive {:parlora_event, %Event{type: :request_completed}}, 1_000
+    assert_receive {:parlora_event, %Event{type: :request_completed}}
   end
 
   for mode <- [:model_error, :tool_error, :no_tool] do
@@ -68,7 +67,7 @@ defmodule Parlora.SagentsTest do
     test "#{mode} cannot turn model content into authoritative completion" do
       pid = backend(@mode)
       assert :ok = Backend.submit(pid, request("failure", %{order: "123"}))
-      assert_receive {:parlora_event, %Event{type: :request_uncertain, payload: payload}}, 1_000
+      assert_receive {:parlora_event, %Event{type: :request_uncertain, payload: payload}}
       refute inspect(payload) =~ "private-key-and-prompt"
       refute_receive {:parlora_event, %Event{type: :request_completed}}, 20
       assert :sys.get_state(pid).jobs == %{}
@@ -103,15 +102,14 @@ defmodule Parlora.SagentsTest do
             :shutdown_deadline
         end
 
-      assert_receive {:DOWN, ^monitor, :process, ^worker, :killed}, 1_000
+      assert_receive {:DOWN, ^monitor, :process, ^worker, :killed}
 
       assert_receive {:parlora_event,
                       %Event{
                         type: :request_uncertain,
                         request_id: "stopped",
                         payload: %{reason: ^expected_reason}
-                      }},
-                     1_000
+                      }}
 
       refute_receive {:parlora_event, %Event{type: :request_cancelled}}, 20
       assert :sys.get_state(pid).jobs == %{}
@@ -129,8 +127,7 @@ defmodule Parlora.SagentsTest do
                       type: :request_uncertain,
                       request_id: "stopped",
                       payload: %{reason: :execution_deadline}
-                    }},
-                   1_000
+                    }}
 
     refute_receive {:parlora_event, %Event{type: :request_cancelled}}, 20
     refute_receive {:parlora_event, %Event{type: :request_completed}}, 20
@@ -157,7 +154,7 @@ defmodule Parlora.SagentsTest do
     assert_receive {:lookup_waiting, "123", worker}
     refs = Enum.map([pid, supervisor, worker], &Process.monitor/1)
     Process.exit(owner, :kill)
-    Enum.each(refs, fn ref -> assert_receive {:DOWN, ^ref, :process, _, _}, 1_000 end)
+    Enum.each(refs, fn ref -> assert_receive {:DOWN, ^ref, :process, _, _} end)
   end
 
   test "expired requests do not start and status does not expose private state" do

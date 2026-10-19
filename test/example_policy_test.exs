@@ -57,7 +57,7 @@ defmodule Parlora.ExamplePolicyTest do
       ", 3"
     ])
 
-    assert_receive {:submitted, first}, 1_000
+    assert_receive {:submitted, first}
     assert first.input == %{order: "123"}
 
     captions(provider, [
@@ -76,7 +76,7 @@ defmodule Parlora.ExamplePolicyTest do
       "4"
     ])
 
-    assert_receive {:submitted, corrected}, 1_000
+    assert_receive {:submitted, corrected}
     assert corrected.input == %{order: "124"}
     assert corrected.task_id == first.task_id
     assert corrected.task_revision == 2
@@ -113,7 +113,7 @@ defmodule Parlora.ExamplePolicyTest do
       assert_receive {:parlora_event, %Event{type: :context_wait_started}}
       assert Parlora.status(session).delegations["missing"].status == :pending
       refute_receive {:submitted, _request}, 10
-      assert_receive {:context, clarification}, 500
+      assert_receive {:context, clarification}
       assert clarification.content =~ "three-digit"
       assert clarification.delegation_id == "missing"
       assert Progress.status(Parlora.status(session)) =~ "clarification attempted"
@@ -129,7 +129,7 @@ defmodule Parlora.ExamplePolicyTest do
 
       refute_receive {:context, _duplicate}, 50
       captions(provider, [" 1", ", 2", ", 4"])
-      assert_receive {:submitted, request}, 500
+      assert_receive {:submitted, request}
       assert request.input == %{order: "124"}
       FakeBackend.complete(backend, request, "Out for delivery today")
       assert_receive {:context, %{content: "Out for delivery today"}}
@@ -166,7 +166,7 @@ defmodule Parlora.ExamplePolicyTest do
     captions(provider, [" Actually check order banana"])
     assert_receive {:parlora_event, %Event{type: :context_wait_started}}
     FakeBackend.complete(backend, first, "Old answer must stay held")
-    assert_receive {:context, clarification}, 500
+    assert_receive {:context, clarification}
     assert clarification.content =~ "three-digit"
     assert Parlora.status(session).interpretation == :unresolved
     refute_receive {:context, %{content: "Old answer must stay held"}}, 50

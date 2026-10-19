@@ -45,8 +45,7 @@ defmodule Parlora.SessionHealthTest do
                       source: :session,
                       type: :progress_changed,
                       payload: %{id: ^id, status: ^status}
-                    }},
-                   1_000
+                    }}
   end
 
   test "idle ready sessions have no implicit deadline; numeric counters omit content" do

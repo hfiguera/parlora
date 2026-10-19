@@ -84,7 +84,7 @@ defmodule Parlora.OpenAIShutdownTest do
     assert closing.status == :closing
     assert closing.inbound.bytes == 0
     assert closing.outbound.bytes == 0
-    assert_receive {:command, %{"type" => "session.close", "event_id" => "close-1"}}, 1_000
+    assert_receive {:command, %{"type" => "session.close", "event_id" => "close-1"}}
 
     # Exceed receive capacity as well as the old queue's age limit. Once closing,
     # neither tail audio nor malformed base64 should abort usage finalization.
@@ -256,7 +256,7 @@ defmodule Parlora.OpenAIShutdownTest do
                       payload: %{id: "early-new-call", offset_ms: 10_300}
                     }}
 
-    assert_receive {:command, %{"event_id" => "completed-result", "delegation_id" => nil}}, 1_000
+    assert_receive {:command, %{"event_id" => "completed-result", "delegation_id" => nil}}
 
     refute_received {:parlora_event,
                      %Event{type: :delegation_requested, payload: %{id: "automatic-retry"}}}
@@ -319,7 +319,7 @@ defmodule Parlora.OpenAIShutdownTest do
         "end_ms" => 100
       })
 
-    assert_receive {:command, %{"event_id" => "held-result"}}, 1_000
+    assert_receive {:command, %{"event_id" => "held-result"}}
     assert state.pending[update.id] == :context
 
     state =
@@ -347,8 +347,7 @@ defmodule Parlora.OpenAIShutdownTest do
 
     {:reply, :ok, state} = OpenAI.handle_call({:append, update}, nil, state)
 
-    assert_receive {:command, %{"event_id" => "same-result", "delegation_id" => "old-call"}},
-                   1_000
+    assert_receive {:command, %{"event_id" => "same-result", "delegation_id" => "old-call"}}
 
     state = %{state | retired_delegations: state.delegations}
     assert {:reply, :ok, ^state} = OpenAI.handle_call({:append, update}, nil, state)
@@ -362,8 +361,8 @@ defmodule Parlora.OpenAIShutdownTest do
     {worker, monitor} =
       Recovery.connect(self(), 1, "test", {:http, "127.0.0.1", context.port, "/"})
 
-    assert_receive {:peer, server}, 1_000
-    assert_receive {:output_connection, 1, {:ok, conn, ref}}, 1_000
+    assert_receive {:peer, server}
+    assert_receive {:output_connection, 1, {:ok, conn, ref}}
 
     {:ok, original} =
       Protocol.start(
@@ -399,8 +398,7 @@ defmodule Parlora.OpenAIShutdownTest do
                         "audio" => %{"output" => %{"voice" => %{"id" => "voice_recovery"}}},
                         "instructions" => "A warm adult voice."
                       }
-                    }},
-                   1_000
+                    }}
 
     send(server, {:event, %{"type" => "session.started", "session" => %{"id" => "new-session"}}})
     state = receive_active(state)
@@ -504,8 +502,8 @@ defmodule Parlora.OpenAIShutdownTest do
     }
 
     {:reply, :ok, state} = OpenAI.handle_call({:append, update}, nil, state)
-    assert_receive {:command, %{"event_id" => "silent-greeting"}}, 1_000
-    assert_receive {:command_ack_timeout, "silent-greeting"} = timeout, 1_000
+    assert_receive {:command, %{"event_id" => "silent-greeting"}}
+    assert_receive {:command_ack_timeout, "silent-greeting"} = timeout
     {:noreply, closed} = OpenAI.handle_info(timeout, state)
     assert closed.status == :closed
     assert closed.pending == %{}

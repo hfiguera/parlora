@@ -40,7 +40,7 @@ defmodule Parlora.SessionTest do
     assert_receive {:adapter, :channel, channel}
     assert_receive {:adapter, :provider, provider}
     assert_receive {:adapter, :backend, backend}
-    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 1_000
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
     {pid, channel, provider, backend}
   end
 
@@ -103,7 +103,7 @@ defmodule Parlora.SessionTest do
     assert_receive {:output_recovery, 1, _}
     FakeBackend.complete(backend, first, "Obsolete order 123")
     FakeBackend.complete(backend, current, "Current order 124")
-    assert_receive {:parlora_event, %Event{type: :request_completed}}, 1_000
+    assert_receive {:parlora_event, %Event{type: :request_completed}}
     refute_receive {:context, _}, 30
     MemoryAudio.inject(provider, :output_recovered, %{token: 1})
     transcript(provider, " please continue")
@@ -394,7 +394,7 @@ defmodule Parlora.SessionTest do
     transcript(provider, "order 124")
     delegate(provider)
     assert_receive {:submitted, request}
-    assert_receive {:context, notice}, 1_000
+    assert_receive {:context, notice}
     assert notice.content =~ "Do not promise the work is still running"
     assert notice.content =~ "Do not claim any external action completed"
     assert Parlora.status(pid).jobs[request.id].uncertainty_reason == :job_deadline

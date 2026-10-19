@@ -104,8 +104,7 @@ defmodule Parlora.TwilioSocketTest do
       })
 
     assert_receive {:parlora_event,
-                    %Event{type: :playback_observed, payload: %{stage: :device_reported_playback}}},
-                   1_000
+                    %Event{type: :playback_observed, payload: %{stage: :device_reported_playback}}}
 
     monitors = for pid <- [session, socket, provider, backend], do: {pid, Process.monitor(pid)}
     TwilioPeer.close(peer)

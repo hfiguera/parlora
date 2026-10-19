@@ -307,7 +307,7 @@ defmodule Parlora.SessionShutdownTest do
     provider = elem(state.adapters.provider, 1)
     :ok = MemoryAudio.inject(provider, :transcript_delta, %{speaker: :user, delta: "order 123"})
     :ok = MemoryAudio.inject(provider, :delegation_requested, %{id: "call", offset_ms: 0})
-    assert_receive {:submitted, request}, 1_000
+    assert_receive {:submitted, request}
     request
   end
 

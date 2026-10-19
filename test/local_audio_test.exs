@@ -195,14 +195,13 @@ defmodule Parlora.LocalAudioTest do
                       observed_at_us: observed,
                       payload: %{cause: :device_output_underrun, poll_gap_us: gap} = payload
                     }}
-                   when gap >= 150_000 and observed >= resumed_at,
-                   1_000
+                   when gap >= 150_000 and observed >= resumed_at
 
     assert payload.frames > 0
     assert payload.output_rate > 0
     assert payload.last_capture_us >= 0
     assert payload.last_playback_us >= 0
-    assert_receive {:poll, %{poll_gap_us: ^gap} = timing}, 1_000
+    assert_receive {:poll, %{poll_gap_us: ^gap} = timing}
     assert timing.capture_us >= timing.last_capture_us
     assert timing.playback_us >= timing.last_playback_us
     assert timing.observe_us >= timing.last_observe_us

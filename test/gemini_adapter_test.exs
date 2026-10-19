@@ -59,7 +59,7 @@ defmodule Parlora.GeminiAdapterTest do
         "serverContent" => %{"inputTranscription" => %{"text" => "Goodbye"}}
       })
 
-    assert_receive {:gemini_response_deadline, token}, 100
+    assert_receive {:gemini_response_deadline, token}
     {:noreply, state} = Gemini.handle_info({:gemini_response_deadline, token}, state)
 
     assert_receive {:parlora_event,
@@ -116,7 +116,7 @@ defmodule Parlora.GeminiAdapterTest do
       end)
 
     token = original.token
-    assert_receive {:gemini_response_deadline, ^token}, 500
+    assert_receive {:gemini_response_deadline, ^token}
     {:noreply, state} = Gemini.handle_info({:gemini_response_deadline, token}, state)
 
     assert_receive {:parlora_event,
@@ -203,7 +203,7 @@ defmodule Parlora.GeminiAdapterTest do
                     }}
 
     token = original_watch.token
-    assert_receive {:gemini_response_deadline, ^token}, 500
+    assert_receive {:gemini_response_deadline, ^token}
     {:noreply, state} = Gemini.handle_info({:gemini_response_deadline, token}, state)
     assert_receive {:parlora_event, %Event{type: :response_status, payload: %{status: :delayed}}}
 

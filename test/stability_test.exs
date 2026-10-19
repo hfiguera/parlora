@@ -60,7 +60,7 @@ defmodule Parlora.StabilityTest do
   test "deadline uncertainty, transcript exhaustion, and provider loss have explicit outcomes" do
     {session, _channel, provider, backend, pids} = boot(job_timeout_ms: 30)
     request = request(provider, 123)
-    assert_receive {:parlora_event, %Event{type: :request_uncertain}}, 500
+    assert_receive {:parlora_event, %Event{type: :request_uncertain}}
     assert Parlora.status(session).jobs[request.id].status == :uncertain
     FakeBackend.complete(backend, request, "late verified result")
     assert_receive {:context, %{content: "late verified result"}}

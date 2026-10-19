@@ -87,11 +87,10 @@ defmodule Parlora.RuntimeCommandsTest do
     assert :ok = Parlora.expect_progress(pid, "still-responsive", 20, until: :explicit)
 
     assert_receive {:parlora_event,
-                    %Event{type: :progress_changed, payload: %{status: :timed_out}}},
-                   300
+                    %Event{type: :progress_changed, payload: %{status: :timed_out}}}
 
     assert :ok = Parlora.close(pid)
-    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 500
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}
     assert_down(state, pid)
     refute_received {:submitted, _request}
   end
@@ -100,10 +99,9 @@ defmodule Parlora.RuntimeCommandsTest do
     {pid, state} = boot([backend: :submit], job_timeout_ms: 100)
     delegate(state)
     assert_receive {:blocked_command, :submit, _owner}
-    assert_receive {:parlora_event, %Event{source: :session, type: :request_uncertain}}, 400
+    assert_receive {:parlora_event, %Event{source: :session, type: :request_uncertain}}
 
-    assert_receive {:parlora_event, %Event{source: :session, type: :closed, payload: payload}},
-                   500
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed, payload: payload}}
 
     assert Map.values(payload.jobs) == [:uncertain]
     assert_down(state, pid)
@@ -118,7 +116,7 @@ defmodule Parlora.RuntimeCommandsTest do
     assert Parlora.status(pid).status == :ready
     assert :ok = Parlora.close(pid)
     assert {:error, %{details: %{outcome: :unknown}}} = Task.await(client)
-    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 500
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}
     assert_down(state, pid)
   end
 

@@ -201,7 +201,7 @@ defmodule Parlora.LegionTest do
                     %Event{type: :request_uncertain, payload: %{reason: :framework_failure}}},
                    2_000
 
-    assert_receive {:DOWN, ^ref, :process, ^collector, _}, 1_000
+    assert_receive {:DOWN, ^ref, :process, ^collector, _}
   end
 
   test "iteration and retry limits bound actual model calls" do

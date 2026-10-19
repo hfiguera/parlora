@@ -144,8 +144,7 @@ defmodule Parlora.TwilioChannelTest do
     assert :ok = Twilio.write_audio(channel, frame)
     assert {:ok, [_media, _mark], _wait} = Twilio.pull(channel)
 
-    assert_receive {:parlora_event, %Event{type: :failed, payload: %{error: %{code: :timeout}}}},
-                   500
+    assert_receive {:parlora_event, %Event{type: :failed, payload: %{error: %{code: :timeout}}}}
 
     assert_receive {:parlora_event, %Event{type: :playback_observed, payload: %{stage: :unknown}}}
     assert_receive {:parlora_event, %Event{type: :closed}}
