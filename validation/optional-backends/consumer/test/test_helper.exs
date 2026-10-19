@@ -24,4 +24,6 @@ if Application.fetch_env!(:optional_backend_consumer, :profile) == :jido do
   await_discovery.(await_discovery)
 end
 
-ExUnit.start(capture_log: true, assert_receive_timeout: 1_000)
+# Copied backend tests use the same asynchronous observation budget as the
+# library suite, independently of their fixture execution deadlines.
+ExUnit.start(capture_log: true, assert_receive_timeout: 5_000)
