@@ -1,5 +1,6 @@
 defmodule Parlora.TelemetryTest do
   use ExUnit.Case, async: false
+  @lifecycle_timeout 5_000
   alias Parlora.{Event, Telemetry}
   alias Parlora.TestSupport.{FakeBackend, MemoryAudio, MemoryChannel, MemoryProvider, OrderPolicy}
 
@@ -42,10 +43,46 @@ defmodule Parlora.TelemetryTest do
   end
 
   defp close(pid, id) do
+    state = :sys.get_state(pid)
+    # Closing is asynchronous. Its deadline bounds the operation; observing its
+    # exit needs a separate scheduling allowance, even if cleanup uses the full
+    # deadline while scanning for orphaned OTP descendants.
+    timeout = state.limits.shutdown_timeout_ms + @lifecycle_timeout
+
+    owned =
+      for {_role, owner} <- state.startup.owners,
+          process <- [owner.owner, owner.watcher],
+          do: {process, Process.monitor(process)}
+
     ref = Process.monitor(pid)
     assert :ok = Parlora.close(pid)
-    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, timeout
     assert_receive {:observation, [:parlora, :session, :stop], _, %{session_id: ^id}}
+
+    # Watchers finish their orphan sweeps after the coordinator exits. Do not
+    # leave those sweeps competing with the next fixture's cleanup.
+    for {process, monitor} <- owned do
+      assert_receive {:DOWN, ^monitor, :process, ^process, _reason}, @lifecycle_timeout
+    end
+  end
+
+  test "shutdown observation allows the configured deadline before its scheduling allowance" do
+    {pid, id} =
+      boot(
+        channel: {MemoryChannel, observer: self(), no_close_event: true},
+        # Exceed the suite's five-second receive timeout deliberately. A missing
+        # close notification must exercise the real deadline, without leaving
+        # only a few milliseconds for the test to observe the eventual exit.
+        limits: [shutdown_timeout_ms: 6_000]
+      )
+
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
+    close(pid, id)
+
+    assert_receive {:observation, [:parlora, :shutdown, :stop], _,
+                    %{session_id: ^id, outcome: :timeout}}
+
+    refute_received {:observation, [:parlora, :session, :stop], _, %{session_id: ^id}}
   end
 
   test "startup ends at readiness and shutdown measures actual coordinator cleanup" do
