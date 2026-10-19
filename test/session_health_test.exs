@@ -75,7 +75,7 @@ defmodule Parlora.SessionHealthTest do
   end
 
   test "acknowledged commands and continuing input do not satisfy response expectation" do
-    {pid, channel, _provider, _backend} = session()
+    {pid, channel, _provider, _backend} = session(limits: [shutdown_timeout_ms: 100])
     :ok = Parlora.expect_progress(pid, "opening", 100, on_timeout: :close)
 
     :ok =
@@ -90,8 +90,13 @@ defmodule Parlora.SessionHealthTest do
     :ok = MemoryAudio.audio(channel, AudioFrame.pcm(:binary.copy(<<0, 0>>, 240), "input", 0))
     changed("opening", :timed_out)
     assert_receive {:parlora_event, %Event{type: :failed, payload: %{cause: :progress_timeout}}}
-    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 1_000
-    eventually(fn -> not Process.alive?(pid) and not Process.alive?(channel) end)
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, @lifecycle_timeout
+
+    for process <- [pid, channel] do
+      ref = Process.monitor(process)
+      assert_receive {:DOWN, ^ref, :process, ^process, _reason}, @lifecycle_timeout
+    end
+
     {fresh, _, _, _} = session(context: %{previous_order: "124"})
     assert Parlora.snapshot(fresh).tasks == %{}
     refute_receive {:submitted, _}, 30
@@ -236,7 +241,7 @@ defmodule Parlora.SessionHealthTest do
   end
 
   test "queued captions cannot satisfy an elapsed deadline when scheduling resumes" do
-    {pid, _, provider, _} = session()
+    {pid, _, provider, _} = session(limits: [shutdown_timeout_ms: 100])
     :ok = Parlora.expect_progress(pid, "delayed", 40, on_timeout: :close)
     :sys.suspend(pid)
 
@@ -255,7 +260,7 @@ defmodule Parlora.SessionHealthTest do
                       type: :closed,
                       payload: %{health: %{expectation: %{status: :timed_out}}}
                     }},
-                   1_000
+                   @lifecycle_timeout
   end
 
   test "an early timer notification preserves the real deadline" do
