@@ -3,7 +3,7 @@
 `Parlora.Backends.Jido` runs a Jido agent defined by your application for each admitted
 request. For a complete application with a context policy and event receiver,
 start with [Your first working session](first-session.md). The order example below
-shows how to adapt the integration to an existing application. Jido is optional. Add `{:jido, "== 2.4.0"}` to your application's
+shows how to adapt the integration to an existing application. Jido is optional. Add `{:jido, "~> 2.4.0"}` to your application's
 dependencies and supervise an instance:
 
 ```elixir

@@ -1,7 +1,7 @@
 # Legion backend
 
 `Parlora.Backends.Legion` runs isolated Lua agents with operations
-admitted by your application. Add `{:legion, "== 0.6.0"}` only when selecting this optional backend.
+admitted by your application. Add `{:legion, "~> 0.6.0"}` only when selecting this optional backend.
 No Legion store, database, recovery worker, or framework supervisor is required.
 
 ## Configuration

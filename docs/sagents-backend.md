@@ -1,7 +1,7 @@
 # Sagents backend
 
 `Parlora.Backends.Sagents` runs Sagents tool execution for each request. Add the
-optional dependency `{:sagents, "== 0.17.1"}` only when selecting this backend.
+optional dependency `{:sagents, "~> 0.17.1"}` only when selecting this backend.
 No Sagents supervisor or persistent agent session is required.
 
 ## Configuration
