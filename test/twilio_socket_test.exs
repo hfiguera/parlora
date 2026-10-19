@@ -170,16 +170,26 @@ defmodule Parlora.TwilioSocketTest do
       assert :ok = MemoryAudio.audio(call.provider, frame)
     end
 
-    {[first_audio, _mark], _first_peer} = TwilioPeer.receive_messages(first.peer, 2)
-    {[second_audio, _mark], second_peer} = TwilioPeer.receive_messages(second.peer, 2)
+    {[first_audio, first_mark], first_peer} = TwilioPeer.receive_messages(first.peer, 2)
+    {[second_audio, second_mark], second_peer} = TwilioPeer.receive_messages(second.peer, 2)
     assert first_audio["streamSid"] == @stream
     assert second_audio["streamSid"] == second_stream
     assert Base.decode64!(first_audio["media"]["payload"]) == :binary.copy(<<1>>, 160)
     assert Base.decode64!(second_audio["media"]["payload"]) == :binary.copy(<<2>>, 160)
 
+    # A real Twilio peer echoes playback marks. Leaving either mark pending
+    # races the channel's acknowledgment deadline while observing teardown.
+    first_peer = acknowledge_playback(first_peer, first.session, first_mark, 2)
+    second_peer = acknowledge_playback(second_peer, second.session, second_mark, 2)
+
     ref = Process.monitor(first.session)
-    TwilioPeer.close(first.peer)
+    second_ref = Process.monitor(second.session)
+    TwilioPeer.close(first_peer)
     assert_receive {:DOWN, ^ref, :process, _pid, _reason}, 2_000
+
+    # Exercise the window that failed on CI, past the default 2-second mark
+    # deadline. Acknowledged playback must not expire or close the other call.
+    refute_receive {:DOWN, ^second_ref, :process, _pid, _reason}, 2_100
     assert Parlora.status(second.session).status == :ready
     assert Parlora.status(second.session).jobs == %{}
 
@@ -189,8 +199,31 @@ defmodule Parlora.TwilioSocketTest do
                AudioFrame.new(:binary.copy(<<3>>, 160), AudioFormat.pcmu(), "provider", 1)
              )
 
-    {[audio, _mark], _peer} = TwilioPeer.receive_messages(second_peer, 2)
+    {[audio, mark], peer} = TwilioPeer.receive_messages(second_peer, 2)
     assert Base.decode64!(audio["media"]["payload"]) == :binary.copy(<<3>>, 160)
+    acknowledge_playback(peer, second.session, mark, 3)
+  end
+
+  defp acknowledge_playback(peer, session, mark, sequence) do
+    session_id = Parlora.status(session).session_id
+
+    peer =
+      TwilioPeer.send_message(peer, %{
+        "event" => "mark",
+        "sequenceNumber" => Integer.to_string(sequence),
+        "streamSid" => mark["streamSid"],
+        "mark" => mark["mark"]
+      })
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      session_id: ^session_id,
+                      source: :channel,
+                      type: :playback_observed,
+                      payload: %{stage: :device_reported_playback, boundary: :twilio_mark}
+                    }}
+
+    peer
   end
 
   defp connect_call(port, path, call, stream) do
