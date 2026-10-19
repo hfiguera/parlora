@@ -98,6 +98,22 @@ def social_values(image, url):
     }
 
 
+def syntax_scripts(content, prefix):
+    grammars = [
+        grammar for grammar, aliases in (
+            ("elixir", ("elixir",)),
+            ("bash", ("bash", "sh", "shell")),
+        ) if any(f"language-{alias}" in content for alias in aliases)
+    ]
+    if not grammars:
+        return ""
+    core = f'<script defer data-manual src="{prefix}assets/vendor/prism-core.min.js"></script>'
+    return "\n  ".join([core] + [
+        f'<script defer src="{prefix}assets/vendor/prism-{grammar}.min.js"></script>'
+        for grammar in grammars
+    ])
+
+
 def build(output, prefix="/", analytics=False):
     prefix = base_path(prefix)
     output = Path(output).resolve()
@@ -125,11 +141,7 @@ def build(output, prefix="/", analytics=False):
                 "TYPE": "website",
                 "BLOG_CURRENT": ' aria-current="page"' if path == "index.html" else "",
                 "STRUCTURED_DATA": "",
-                "SYNTAX_SCRIPTS": (
-                    f'<script defer data-manual src="{prefix}assets/vendor/prism-core.min.js"></script>\n'
-                    f'  <script defer src="{prefix}assets/vendor/prism-elixir.min.js"></script>'
-                    if "language-elixir" in content else ""
-                ),
+                "SYNTAX_SCRIPTS": syntax_scripts(content, prefix),
                 "ANALYTICS": (
                     f'<script defer src="{BEACON}" data-cf-beacon=\'{json.dumps({"token": site["cloudflare_token"]}, separators=(",", ":"))}\'></script>'
                     if analytics else ""
@@ -172,7 +184,7 @@ def build(output, prefix="/", analytics=False):
                 '<div class="post-summary">'
                 f'<h3><a href="{prefix}blog/{slug}/">{escape(article["title"])}</a></h3>'
                 f'<p>{escape(article["description"])}</p>'
-                f'<a class="article-link" href="{prefix}blog/{slug}/">Read the introduction '
+                f'<a class="article-link" href="{prefix}blog/{slug}/">Read the article '
                 '<svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h14m-6-6 6 6-6 6"/></svg></a></div></article>'
             )
         write_page("index.html", (SOURCE / "content/index.html").read_text(), "Parlora | Voice AI agents with Elixir", site["description"], ARTICLES="\n".join(entries))

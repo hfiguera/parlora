@@ -79,3 +79,5 @@ if __name__ == "__main__":
            "The conversation. The work in between.", "Parlora")
     render("introducing-parlora.png", ["Introducing", "Parlora."],
            "Build voice AI agents with Elixir.", "Parlora 0.1.0")
+    render("observability.png", ["Understanding", "a voice session."],
+           "Metrics, traces and logs in Parlora 0.2.0.", "Parlora 0.2.0")

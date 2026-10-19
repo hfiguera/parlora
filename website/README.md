@@ -73,9 +73,11 @@ Setup reference: https://developers.cloudflare.com/web-analytics/get-started/
 
 ## Syntax highlighting
 
-Elixir blocks marked with `class="language-elixir"` are highlighted by a local
-copy of Prism 1.30.0 (core and Elixir grammar only). Scripts load only on pages
-containing Elixir blocks, before `site.js`. No CDN or npm install is needed.
+Elixir blocks marked with `class="language-elixir"` and shell blocks marked with
+`class="language-shell"` are highlighted by a local copy of Prism 1.30.0 (core,
+Elixir and Bash grammars). Scripts load only the grammars needed by each page,
+before `site.js`. Bash also accepts `language-bash` and `language-sh`.
+No CDN or npm install is needed.
 Code remains readable without JavaScript, and copying uses the original text.
 
 The vendored files come from https://github.com/PrismJS/prism/tree/v1.30.0/components;

@@ -10,7 +10,7 @@ document.querySelectorAll(".prose pre").forEach((block) => {
   button.type = "button";
   button.className = "copy-code";
   button.textContent = "Copy";
-  button.setAttribute("aria-label", "Copy dependency code");
+  button.setAttribute("aria-label", "Copy code");
   const status = document.createElement("span");
   status.className = "sr-only";
   status.setAttribute("role", "status");
