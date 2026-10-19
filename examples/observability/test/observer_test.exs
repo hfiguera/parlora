@@ -73,3 +73,63 @@ defmodule ParloraObserverBufferTest do
     assert :sys.get_state(pid).spans == %{}
   end
 end
+
+defmodule ParloraObserverUnitsTest do
+  use ExUnit.Case, async: false
+
+  test "exported duration units and buckets are seconds, not native units or microseconds" do
+    token = Parlora.Telemetry.start(:backend, %{session_id: "units-test"})
+
+    :telemetry.execute(
+      [:parlora, :backend, :stop],
+      %{
+        duration: System.convert_time_unit(200, :millisecond, :native),
+        count: 1,
+        monotonic_time: System.monotonic_time()
+      },
+      Map.put(token.metadata, :outcome, :rejected)
+    )
+
+    :telemetry.execute(
+      [:parlora, :provider, :audio_received],
+      %{queue_duration_us: 120_000, queue_bytes: 5760, dropped_bytes: 0},
+      %{}
+    )
+
+    :telemetry.execute([:parlora, :audio, :tick], %{late_us: 25_000}, %{direction: :calibration})
+
+    :telemetry.execute([:parlora, :audio, :playout], %{playback_target_ms: 120}, %{
+      channel: :calibration
+    })
+
+    body = TelemetryMetricsPrometheus.Core.scrape()
+    assert body =~ ~s(parlora_backend_stop_duration_seconds_sum{outcome="rejected"} 0.2)
+    assert body =~ ~s(parlora_backend_stop_duration_seconds_bucket{outcome="rejected",le="0.1"} 0)
+
+    assert body =~
+             ~s(parlora_backend_stop_duration_seconds_bucket{outcome="rejected",le="0.25"} 1)
+
+    assert body =~ "parlora_provider_audio_received_queue_duration_seconds_sum 0.12"
+
+    [_, late] =
+      Regex.run(~r/parlora_audio_tick_late_seconds_sum\{direction="calibration"\} ([^\n]+)/, body)
+
+    assert_in_delta String.to_float(late), 0.025, 1.0e-12
+    assert body =~ ~s(parlora_audio_playout_target_seconds_sum{channel="calibration"} 0.12)
+    refute body =~ "late_us"
+    refute body =~ "queue_duration_us"
+  end
+
+  test "events without a stage are retained and grouping does not require IDs" do
+    Parlora.Telemetry.event(%Parlora.Event{
+      session_id: "not-a-metric-label",
+      source: :session,
+      type: :request_uncertain,
+      payload: %{reason: :execution_deadline}
+    })
+
+    body = TelemetryMetricsPrometheus.Core.scrape()
+    assert body =~ ~s(stage="none",type="request_uncertain")
+    refute body =~ "not-a-metric-label"
+  end
+end

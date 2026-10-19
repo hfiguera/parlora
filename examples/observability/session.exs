@@ -7,11 +7,12 @@ alias Parlora.TestSupport.{MemoryChannel, MemoryProvider, MemoryAudio, FakeBacke
 alias Parlora.Event
 
 defmodule ParloraObserver.Demo do
-  def run do
+  def run(options \\ []) do
     {:ok, session} =
       Parlora.start_session(
         channel: {MemoryChannel, observer: self()},
-        provider: {MemoryProvider, observer: self()},
+        provider:
+          {MemoryProvider, observer: self(), reject_context: options[:reject_context] == true},
         backend: {FakeBackend, observer: self()},
         context_policy: {OrderPolicy, []},
         event_sink: self()
@@ -60,12 +61,39 @@ defmodule ParloraObserver.Demo do
         5_000 -> raise "No request"
       end
 
-    FakeBackend.complete(backend, request, "private-observability-sentinel result")
+    Process.sleep(Keyword.get(options, :backend_delay_ms, 0))
+
+    if options[:uncertain] do
+      FakeBackend.inject(backend, :request_uncertain, %{reason: :execution_deadline},
+        request_id: request.id
+      )
+
+      receive do
+        {:parlora_event, %Event{type: :request_uncertain}} -> :ok
+      after
+        5_000 -> raise "No uncertainty observation"
+      end
+    end
+
+    FakeBackend.complete(
+      backend,
+      request,
+      "private-observability-sentinel result",
+      Keyword.get(options, :result, :completed)
+    )
 
     receive do
       {:context, _update} -> :ok
     after
       5_000 -> raise "No delivery"
+    end
+
+    receive do
+      {:parlora_event, %Event{type: :result_delivery, payload: %{stage: stage}}}
+      when stage in [:accepted, :rejected] ->
+        :ok
+    after
+      5_000 -> raise "No terminal delivery observation"
     end
 
     :ok = Parlora.close(session)

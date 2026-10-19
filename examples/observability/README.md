@@ -35,13 +35,47 @@ Use these MetricsQL queries in VictoriaMetrics:
 
 ```promql
 parlora_session_stop_count_total
-parlora_backend_stop_duration_sum / parlora_backend_stop_duration_count
-histogram_quantile(0.95, sum(rate(parlora_delivery_stop_duration_bucket[5m])) by (le))
+parlora_backend_stop_duration_seconds_sum / parlora_backend_stop_duration_seconds_count
+histogram_quantile(0.95, sum(rate(parlora_delivery_stop_duration_seconds_bucket[5m])) by (le))
 ```
 
 The Collector normalizes counter names with `_total`. Duration histograms are in
-milliseconds. A single demo is enough to check ingestion, not to estimate meaningful
+seconds, explicitly named `_seconds`; multiply by 1000 when displaying milliseconds. A single demo is enough to check ingestion, not to estimate meaningful
 percentiles. Run multiple sessions or use your own host for operational statistics.
+
+Queue sizes, audio ages and playback targets are observation distributions across
+sessions, not global last-value gauges. They are weighted by observations, not by
+call; do not interpret them as per-call averages or user-perceived latency.
+Operation metrics group by bounded outcome; tick lateness groups by direction,
+and runtime counters by source, type and stage (`none` when absent). Session,
+request and task IDs belong in traces, never metric labels.
+
+For a repeatable workload, stop the demo and run:
+
+```sh
+mix run workload.exs
+```
+
+This runs 48 real offline sessions with 50, 100, 200 and 350 ms backend delays.
+It also probes the actual provider output buffer with 100, 200 and 400 ms of
+PCM silence and verifies that it drains. These isolated probes check queue timing,
+not model delivery or audible playback. Twelve sessions each exercise successful work, failed work, rejected delivery,
+and uncertain execution followed by a verified result. Failure is an injected
+backend result, not a real upstream outage. It writes raw timing observations to
+`/tmp/parlora-observability-workload.json` and keeps the host running. Verify the
+stored metrics and traces against those observations in another terminal:
+
+```sh
+python3 verify_workload.py /tmp/parlora-observability-workload.json
+```
+
+Useful graph queries (the duration expression is displayed in milliseconds):
+
+```promql
+sum by (outcome) (parlora_backend_stop_count_total)
+1000 * sum by (outcome) (parlora_backend_stop_duration_seconds_sum) / sum by (outcome) (parlora_backend_stop_duration_seconds_count)
+sum by (source, type, stage) (parlora_runtime_event_count_total)
+```
 
 In the traces UI, select service `parlora-observability-demo`. Session, startup,
 policy, queue, backend, delivery and shutdown spans share a trace and carry IDs as
