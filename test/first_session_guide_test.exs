@@ -10,6 +10,9 @@ Code.compile_string(source, "docs/first-session.md")
 
 defmodule Parlora.FirstSessionGuideTest do
   use ExUnit.Case, async: true
+  # The copied demo retains the default five-second session shutdown budget.
+  # Its task also stops Jido; allow observation headroom for both phases.
+  @shutdown_timeout 10_000
   import ExUnit.CaptureIO
   alias Parlora.{ContextUpdate, Event}
   alias Parlora.TestSupport.{ContractProvider, MemoryAudio, MemoryChannel}
@@ -37,7 +40,7 @@ defmodule Parlora.FirstSessionGuideTest do
         assert map_size(Parlora.status(session).jobs) == 2
 
         :ok = Parlora.close(session, :finish)
-        assert :ok = Task.await(runner, 2_000)
+        assert :ok = Task.await(runner, @shutdown_timeout)
         await_stopped([session, channel, provider])
         refute Process.whereis(FirstVoice.Jido)
       end)
@@ -48,10 +51,11 @@ defmodule Parlora.FirstSessionGuideTest do
 
   test "the demo duration closes the session and releases its Jido supervisor" do
     capture_io(fn ->
-      {runner, session, channel, provider} = boot()
+      # Missing close acknowledgement must still settle at the real deadline.
+      {runner, session, channel, provider} = boot(no_close_event: true)
       assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
       send(runner.pid, {:stop_demo, session})
-      assert :ok = Task.await(runner, 2_000)
+      assert :ok = Task.await(runner, @shutdown_timeout)
       await_stopped([session, channel, provider])
       refute Process.whereis(FirstVoice.Jido)
     end)
@@ -62,7 +66,7 @@ defmodule Parlora.FirstSessionGuideTest do
       capture_io(fn ->
         capabilities = %{ContractProvider.profile(%Parlora.AudioFormat{}) | full_duplex?: false}
         {runner, session, channel, provider} = boot(capabilities: capabilities)
-        assert :ok = Task.await(runner, 2_000)
+        assert :ok = Task.await(runner, @shutdown_timeout)
         await_stopped([session, channel, provider])
         refute Process.whereis(FirstVoice.Jido)
       end)
