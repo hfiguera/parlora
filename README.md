@@ -90,7 +90,7 @@ phone calls. Use it to explore these workflows after your first working session.
 - **Channels:** [Browser](docs/browser-channel.md), [Twilio](docs/twilio-channel.md), [Telnyx](docs/telnyx-channel.md). Local audio options are documented in `Parlora.Channels.LocalAudio`.
 - **Providers:** [OpenAI](docs/openai-provider.md), [Gemini](docs/gemini-provider.md), [Grok](docs/grok-provider.md).
 - **Backends:** [Jido](docs/jido-backend.md), [Sagents](docs/sagents-backend.md), [Legion](docs/legion-backend.md).
-- **Reference:** [Adapter contracts and data](docs/public-interfaces.md), [observability](docs/observability.md).
+- **Reference:** [Adapter contracts and data](docs/public-interfaces.md), [metrics, traces and logs](docs/observability.md).
 
 Sessions live in memory. Your application persists business state and supplies
 history/context when starting a fresh session. Cancellation and corrections do

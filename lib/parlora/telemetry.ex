@@ -1,23 +1,14 @@
 defmodule Parlora.Telemetry do
   @moduledoc """
-  Runtime measurements for monitoring configured by the host application.
+  Telemetry event names for observing Parlora sessions.
 
-  Parlora emits `:telemetry` events; it installs no handlers, reporters, exporters
-  or Logger configuration. See the [observability guide](observability.html) for
-  the event contract, units, timing boundaries and integration examples.
+  Parlora emits measurements; your application configures metric reporters,
+  tracing exporters and logging. No monitoring service is required.
 
-  Operation events are `[:parlora, operation, :start | :stop]`. Start measurements
-  contain native-unit `system_time` and `monotonic_time`; stop adds native-unit
-  `duration` and `count: 1`. `operation_id` pairs observations across processes;
-  `parent_operation_id` links work to its session. IDs are correlation metadata,
-  never recommended metric labels. These IDs are not OpenTelemetry trace IDs.
-
-  `[:parlora, :runtime, :event]` provides allowlisted operational observations.
-  It excludes transcripts, prompts, tool inputs/results, error text and options.
-  The older `[:parlora, :event]` counter remains available unchanged.
-
-  Handlers execute synchronously in the emitting process. Keep them fast and
-  offload bounded export work. No monitoring backend is needed to use Parlora.
+  Use `events/0` with `:telemetry.attach_many/4` to observe operation lifecycles and
+  operational events. Audio event names are selected separately. See
+  [Metrics, traces and logs](observability.html) for a complete handler example,
+  event definitions, units and timing boundaries.
   """
   alias Parlora.ID
 
@@ -37,7 +28,12 @@ defmodule Parlora.Telemetry do
   @identity ~w(session_id operation_id parent_operation_id request_id task_id delegation_id
     command_id adapter_id)a
 
-  @doc "The low-volume operation and runtime event names in the public contract."
+  @doc """
+  Returns operation start/stop names and `[:parlora, :runtime, :event]`.
+
+  This lists names without attaching a handler. It excludes audio measurements
+  and the older `[:parlora, :event]` counter.
+  """
   @spec events() :: [[atom()]]
   def events do
     for(operation <- @operations, stage <- [:start, :stop], do: [:parlora, operation, stage]) ++

@@ -158,6 +158,9 @@ monitor the session process if you need to wait for its exit. A cancellation
 request does not prove an external operation was reversed. Preserve operation
 idempotency and reconcile uncertain writes in your application.
 
+For runtime metrics, distributed traces and logging integration, see
+[Metrics, traces and logs](observability.md).
+
 ## Provider selection and reliability
 
 Use [OpenAI](openai-provider.md), [Gemini](gemini-provider.md), or
