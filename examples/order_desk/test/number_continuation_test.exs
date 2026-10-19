@@ -118,6 +118,7 @@ defmodule OrderDesk.NumberContinuationTest do
     {session, provider} = start()
     first(provider)
     ScriptedProvider.say(provider, "\nWait, what items are in order one hundred twenty")
+    settle_number(session)
     assert event(:task_submitted).payload.request.input.order == "120"
     context("Order 120 was not found")
     ScriptedProvider.say(provider, " four")
@@ -132,11 +133,14 @@ defmodule OrderDesk.NumberContinuationTest do
     {session, provider} = start()
     first(provider)
     ScriptedProvider.say(provider, "\nWait, what items are in order one hundred")
+    settle_number(session)
     assert event(:task_submitted).payload.request.input.order == "100"
     context("Order 100 was not found")
     ScriptedProvider.say(provider, " twenty")
     event(:context_wait_started)
-    refute_receive {:parlora_event, %Event{type: :task_submitted}}, 120
+    # Deliberately exceed the former 200 ms fixture window. Only the explicit
+    # settling message may advance this continuation scenario.
+    refute_receive {:parlora_event, %Event{type: :task_submitted}}, 300
     ScriptedProvider.say(provider, " four")
     ScriptedProvider.delegate(provider, "correction")
     assert event(:task_submitted).payload.request.input.order == "124"
@@ -146,9 +150,10 @@ defmodule OrderDesk.NumberContinuationTest do
   end
 
   test "uncertainty after number admission advances through recovery instead of restarting admission" do
-    {_session, provider} = start(fn _ -> {:ok, %{intent: "items", order: "unknown"}} end)
+    {session, provider} = start(fn _ -> {:ok, %{intent: "items", order: "unknown"}} end)
     ScriptedProvider.say(provider, "Check one hundred twenty")
     ScriptedProvider.delegate(provider, "uncertain")
+    settle_number(session)
     context("Please clarify")
     refute_receive {:context, _duplicate}, 350
     refute_receive {:parlora_event, %Event{type: :task_submitted}}, 50
@@ -172,6 +177,7 @@ defmodule OrderDesk.NumberContinuationTest do
     {session, provider} = start()
     first(provider)
     ScriptedProvider.say(provider, "\nWait, what items are in order one-twenty")
+    settle_number(session)
     assert event(:task_submitted).payload.request.input.order == "120"
     context("Order 120 was not found")
     ScriptedProvider.say(provider, " four")
@@ -226,6 +232,7 @@ defmodule OrderDesk.NumberContinuationTest do
     {session, provider} = start()
     first(provider)
     ScriptedProvider.say(provider, "\nWait, what items are in order 120")
+    settle_number(session)
     assert event(:task_submitted).payload.request.input.order == "120"
     context("Order 120 was not found")
     ScriptedProvider.say(provider, " four")
@@ -325,6 +332,7 @@ defmodule OrderDesk.NumberContinuationTest do
     {session, provider} = start(classifier)
     ScriptedProvider.say(provider, "What items are in order 120")
     ScriptedProvider.delegate(provider, "first")
+    settle_number(session)
     assert event(:task_submitted).payload.request.input.order == "120"
     context("Order 120 was not found")
     ScriptedProvider.say(provider, " huh")
@@ -353,7 +361,7 @@ defmodule OrderDesk.NumberContinuationTest do
           {AppPolicy,
            [
              classify: classify,
-             number_settle_ms: 200,
+             number_settle_ms: 30_000,
              clarification_settle_ms: 100,
              clarification_verify_ms: 60
            ]}
@@ -367,6 +375,15 @@ defmodule OrderDesk.NumberContinuationTest do
     assert_receive {:scripted_provider, provider}
     event(:ready)
     {session, provider}
+  end
+
+  # Keep prefix expiry separate from the time needed to assert or inject the
+  # next segment. Late-tail cases explicitly deliver the current timer message;
+  # prompt continuations replace it before expiry. Production still uses 600 ms.
+  defp settle_number(session) do
+    %{payload: %{target: key, recheck_after_ms: 30_000}} = event(:context_wait_started)
+    {token, _timer} = :sys.get_state(session).context_waits[key]
+    send(session, {:context_wait, key, token})
   end
 
   # Model-boundary fixture: a bare tail is ambiguous. The real live replay checks
