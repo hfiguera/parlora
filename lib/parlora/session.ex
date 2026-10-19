@@ -646,12 +646,18 @@ defmodule Parlora.Session do
     end
   end
 
-  defp apply_event(%{output_recovery: %{token: token}} = state, %Event{
-         source: :provider,
-         type: :output_recovered,
-         payload: %{token: token}
-       }) do
-    Telemetry.stop(state.output_recovery.telemetry, :reconnected)
+  defp apply_event(
+         %{
+           status: :ready,
+           output_recovery: %{token: token, stage: :reconnecting, telemetry: telemetry}
+         } = state,
+         %Event{
+           source: :provider,
+           type: :output_recovered,
+           payload: %{token: token}
+         }
+       ) do
+    Telemetry.stop(telemetry, :reconnected)
     # The adapter's connection incarnation changed. Tasks and their revision /
     # execution identity did not; no backend submit or retry occurs here.
     %{

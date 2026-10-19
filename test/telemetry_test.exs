@@ -342,6 +342,89 @@ defmodule Parlora.TelemetryTest do
     refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
   end
 
+  test "duplicate completions cannot finish recovery twice or change a newer recovery" do
+    {pid, id} = boot()
+    assert_receive {:adapter, :provider, provider}
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
+    MemoryAudio.inject(provider, :output_recovery_requested, %{token: 1, cause: :output_overflow})
+    assert_receive {:output_recovery, 1, _snapshot}
+    assert_receive {:observation, [:parlora, :recovery, :start], _, %{session_id: ^id} = first}
+    MemoryAudio.inject(provider, :output_recovered, %{token: 1})
+
+    assert_receive {:observation, [:parlora, :recovery, :stop], _,
+                    %{session_id: ^id, operation_id: first_operation, outcome: :reconnected}}
+
+    assert first_operation == first.operation_id
+    recovered = Parlora.status(pid).output_recovery
+    assert recovered.stage == :awaiting_user
+
+    MemoryAudio.inject(provider, :output_recovered, %{token: 1})
+    assert Parlora.status(pid).output_recovery == recovered
+    refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
+
+    MemoryAudio.inject(provider, :output_recovery_requested, %{token: 2, cause: :output_overflow})
+    assert_receive {:output_recovery, 2, _snapshot}
+    assert_receive {:observation, [:parlora, :recovery, :start], _, %{session_id: ^id} = second}
+    assert second.operation_id != first_operation
+    reconnecting = Parlora.status(pid).output_recovery
+    assert reconnecting.stage == :reconnecting
+
+    MemoryAudio.inject(provider, :output_recovered, %{token: 1})
+    assert Parlora.status(pid).output_recovery == reconnecting
+    refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
+    MemoryAudio.inject(provider, :output_recovered, %{token: 2})
+
+    assert_receive {:observation, [:parlora, :recovery, :stop], _,
+                    %{session_id: ^id, operation_id: second_operation, outcome: :reconnected}}
+
+    assert second_operation == second.operation_id
+    assert Parlora.status(pid).output_recovery.stage == :awaiting_user
+    close(pid, id)
+    refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
+  end
+
+  test "late recovery completion during shutdown cannot change state or restart its deadline" do
+    {pid, id} =
+      boot(channel: {MemoryChannel, observer: self(), no_close_event: true})
+
+    assert_receive {:adapter, :channel, channel}
+    assert_receive {:adapter, :provider, provider}
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}
+    provider_init = :sys.get_state(provider).init
+    channel_init = :sys.get_state(channel).init
+    MemoryAudio.inject(provider, :output_recovery_requested, %{token: 1, cause: :output_overflow})
+    assert_receive {:output_recovery, 1, _snapshot}
+    assert_receive {:observation, [:parlora, :recovery, :start], _, %{session_id: ^id} = recovery}
+    ref = Process.monitor(pid)
+    assert :ok = Parlora.close(pid)
+    closing = Parlora.status(pid)
+    timer = :sys.get_state(pid).shutdown_timer
+    assert closing.status == :closing
+    assert closing.output_recovery.stage == :reconnecting
+
+    assert_receive {:observation, [:parlora, :recovery, :stop], _,
+                    %{session_id: ^id, operation_id: operation, outcome: :closed}}
+
+    assert operation == recovery.operation_id
+
+    # Deliver an observation retained before the provider was closed. The open
+    # channel keeps shutdown pending without sleeping or racing the deadline.
+    Event.emit(provider_init, :provider, :output_recovered, %{token: 1})
+    after_late = Parlora.status(pid)
+    assert after_late.status == :closing
+    assert after_late.output_recovery == closing.output_recovery
+    assert :sys.get_state(pid).shutdown_timer == timer
+    refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
+
+    Event.emit(channel_init, :channel, :closed)
+    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+
+    assert_receive {:observation, [:parlora, :shutdown, :stop], _,
+                    %{session_id: ^id, outcome: :completed}}
+
+    refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
+  end
+
   test "interruption timing includes the clear barrier and completed resume command" do
     {pid, id} = boot(provider: {InterruptibleProvider, observer: self()})
     assert_receive {:adapter, :provider, provider}

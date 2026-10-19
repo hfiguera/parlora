@@ -80,10 +80,15 @@ defmodule Parlora.SessionTest do
     assert Parlora.status(pid).output_recovery.token == 1
     MemoryAudio.inject(provider, :output_recovered, %{token: 1})
     assert Parlora.status(pid).output_recovery.stage == :awaiting_user
+    MemoryAudio.inject(provider, :output_recovered, %{token: 1})
+    assert Parlora.status(pid).output_recovery.stage == :awaiting_user
     refute_receive {:context, _}, 30
     transcript(provider, " please continue")
     assert_receive {:context, %{content: "Verified action completed once"}}
     assert Parlora.status(pid).output_recovery == nil
+    MemoryAudio.inject(provider, :output_recovered, %{token: 1})
+    assert Parlora.status(pid).output_recovery == nil
+    assert Parlora.status(pid).status == :ready
     FakeBackend.complete(backend, request, "Duplicate completion")
     refute_receive {:context, _}, 30
     refute_receive {:submitted, _}, 30
