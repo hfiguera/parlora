@@ -46,6 +46,14 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result['checks']['no_internal_silence'])
         self.assertTrue(result['checks']['duration_accounting_40ms'])
 
+    def test_faint_codec_tail_does_not_extend_signal_duration_or_progression(self):
+        tail = [round(500 * math.sin(2 * math.pi * 900 * n / 24000))
+                for n in range(24 * 80)]
+        result = self.fixture(lambda x:x + tail)
+        self.assertTrue(result['checks']['duration_accounting_40ms'])
+        self.assertTrue(result['checks']['frequency_progression'])
+        self.assertTrue(result['passed'])
+
     def test_one_ms_gap_between_full_level_audio_still_fails(self):
         result = self.fixture(lambda x:x[:24000] + [0]*24 + x[24024:])
         self.assertFalse(result['checks']['no_internal_silence'])

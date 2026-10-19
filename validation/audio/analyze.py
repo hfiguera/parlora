@@ -83,15 +83,18 @@ def analyze(directory):
         return next((s for s in records if s['type'] == 'inbound-rtp' and s.get('kind') == 'audio'), {})
     before, after = incoming(warm.get('warmStats', [])), incoming(warm.get('stats', []))
     concealed = after.get('concealedSamples', 0) - before.get('concealedSamples', 0)
-    duration_ms = (last - first + 1) * 10
+    # Use the same reference-level millisecond edges as the gap guard. Coarse
+    # windows at the quieter gap threshold can include a decaying codec tail.
+    signal_first_ms, signal_last_ms = active_ms[0], active_ms[-1]
+    duration_ms = signal_last_ms - signal_first_ms + 1
     expected_ms = len(reference) * 1000 / reference_rate
     startup_ms = warm['trackFirstSignalAtMs']-warm['runAtMs'] if 'trackFirstSignalAtMs' in warm else None
     errors = []
     # NetEq legitimately time-stretches audio. Verify the full chirp frequency
     # progression rather than treating a rigid first-second phase match as truth.
-    for block in range(first + 10, last - 10, 10):
-        segment = received[block * width:(block + 10) * width]
-        t = ((block - first) * .01 + .05) * expected_ms / duration_ms
+    for millisecond in range(signal_first_ms + 100, signal_last_ms - 99, 100):
+        segment = received[millisecond * unit:(millisecond + 100) * unit]
+        t = ((millisecond - signal_first_ms) * .001 + .05) * expected_ms / duration_ms
         slope = min(70, 3500000 / expected_ms)
         errors.append(abs(frequency(segment, reference_rate) - (220 + slope * t)))
     accelerated_ms = (after.get('removedSamplesForAcceleration',0)-before.get('removedSamplesForAcceleration',0)) * 1000 / rate
@@ -124,7 +127,7 @@ def analyze(directory):
                        'clear_under_200ms': interruption.get('clear_us', 999999) <= 200000,
                        'old_epoch_rejected': interruption.get('old_epoch_rejected', False),
                        'resumed': any(e['type']=='resumed' for e in warm['events']),
-                       'post_resume_signal': bool(silent_ms) and last*10 > max(silent_ms)+100,
+                       'post_resume_signal': bool(silent_ms) and signal_last_ms > max(silent_ms)+100,
                        'single_interruption': single})
     report = {'boundary': 'Chromium decoded MediaStreamTrack via TrackProcessor, before WebAudio and speakers', 'checks': checks,
               'passed': all(checks.values()), 'signal_duration_ms': duration_ms,
