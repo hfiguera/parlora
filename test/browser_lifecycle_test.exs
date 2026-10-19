@@ -17,17 +17,25 @@ defmodule Parlora.BrowserLifecycleTest do
   end
 
   test "signaling owner death closes the peer and codec resources" do
+    observer = self()
+
     owner =
       spawn(fn ->
+        receive do
+          {:parlora_browser, _channel, :attached} = message -> send(observer, message)
+        end
+
         receive do
           :finish -> :ok
         end
       end)
 
+    on_exit(fn -> Process.exit(owner, :kill) end)
     {:ok, channel} = Browser.start_link(init(), signaling: owner)
     Process.unlink(channel)
-    # A call is ordered after native startup and before inspection.
-    assert {:ok, _} = Browser.capabilities(channel)
+    # Native and peer initialization complete asynchronously after start_link.
+    # Observe attachment within the startup deadline, not the command timeout.
+    assert_receive {:parlora_browser, ^channel, :attached}, %Limits{}.startup_timeout_ms
     state = :sys.get_state(channel)
     refs = Enum.map([channel, state.pc], &Process.monitor/1)
     send(owner, :finish)
