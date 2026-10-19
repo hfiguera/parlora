@@ -7,7 +7,7 @@ evidence =
   __DIR__
   |> Path.join("results/6-interrupt-disconnect.json")
   |> File.read!()
-  |> Jason.decode!()
+  |> JSON.decode!()
 
 failure =
   Enum.find(evidence["events"], fn event ->

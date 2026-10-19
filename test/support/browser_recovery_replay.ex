@@ -6,7 +6,7 @@ defmodule Parlora.TestSupport.BrowserRecoveryReplay do
   alias Parlora.TestSupport.MemoryAudio
 
   def run do
-    evidence = File.read!("validation/browser-recovery-overflow/evidence.json") |> Jason.decode!()
+    evidence = File.read!("validation/browser-recovery-overflow/evidence.json") |> JSON.decode!()
 
     init = %AdapterInit{
       session_id: "recovery-replay",

@@ -24,7 +24,7 @@ defmodule Parlora.OpenAIProtocolTest do
     for format <- [%AudioFormat{}, AudioFormat.pcmu()],
         voice <- ["marin", "cedar", %{id: "voice_test"}, %{"id" => "voice_test"}] do
       assert {:ok, startup} = Protocol.start([api_key: "test", voice: voice], format)
-      wire = startup |> Jason.encode!() |> Jason.decode!()
+      wire = startup |> JSON.encode!() |> JSON.decode!()
       expected = if is_binary(voice), do: voice, else: %{"id" => "voice_test"}
       assert wire["session"]["audio"]["output"]["voice"] == expected
       assert wire["session"]["store"] == false

@@ -69,12 +69,12 @@ defmodule Parlora.GeminiLiveProbe do
 
       {:parlora_event, %Event{type: :transcript_delta, payload: payload}} ->
         row = %{speaker: payload.speaker, text: payload.delta, ms: elapsed(started)}
-        IO.puts(Jason.encode!(row))
+        IO.puts(JSON.encode!(row))
         loop(provider, init, path, started, %{report | captions: [row | report.captions]}, worker)
 
       {:parlora_event, %Event{type: :delegation_requested, payload: payload}} ->
         Process.send_after(self(), {:result, payload.id}, 3_000)
-        IO.puts(Jason.encode!(%{event: :delegation, ms: elapsed(started)}))
+        IO.puts(JSON.encode!(%{event: :delegation, ms: elapsed(started)}))
         loop(provider, init, path, started, %{report | calls: report.calls + 1}, worker)
 
       {:result, id} ->
@@ -87,7 +87,7 @@ defmodule Parlora.GeminiLiveProbe do
             content: "Order 124 is arriving Friday."
           })
 
-        IO.puts(Jason.encode!(%{event: :result_sent, ok: result == :ok, ms: elapsed(started)}))
+        IO.puts(JSON.encode!(%{event: :result_sent, ok: result == :ok, ms: elapsed(started)}))
         loop(provider, init, path, started, report, worker)
 
       {:parlora_event, %Event{type: :context_submitted}} ->
@@ -205,7 +205,7 @@ defmodule Parlora.GeminiLiveProbe do
            (report.calls > 0 and report.submitted > 0))
 
     IO.puts(
-      Jason.encode!(%{
+      JSON.encode!(%{
         result: reason,
         passed: passed,
         elapsed_ms: elapsed(started),

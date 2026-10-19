@@ -21,7 +21,7 @@ async def main():
     {:ok, %{setup: setup}} = Parlora.Providers.Gemini.Protocol.start(
       [api_key: "offline-schema-check"], %Parlora.AudioFormat{})
     response = Parlora.Providers.Gemini.Protocol.tool_result("audit-call", %{result: "Order 124 is arriving Friday."})
-    IO.puts("SCHEMA_JSON:" <> Jason.encode!(%{setup: setup, response: response}))
+    IO.puts("SCHEMA_JSON:" <> JSON.encode!(%{setup: setup, response: response}))
     """
     result = await asyncio.to_thread(
         subprocess.run,

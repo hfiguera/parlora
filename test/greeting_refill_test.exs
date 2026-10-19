@@ -6,7 +6,7 @@ defmodule Parlora.GreetingRefillTest do
     events =
       "test/fixtures/greeting-refill-20261004.json"
       |> File.read!()
-      |> Jason.decode!()
+      |> JSON.decode!()
       |> Map.fetch!("events")
 
     initial = %{

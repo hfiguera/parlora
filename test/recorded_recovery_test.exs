@@ -6,7 +6,7 @@ defmodule Parlora.RecordedRecoveryTest do
   test "recorded full-cushion gaps resume earlier without losing source samples" do
     for id <- [3, 14] do
       report =
-        File.read!("validation/browser-retry-20260921/audio-gap-#{id}.json") |> Jason.decode!()
+        File.read!("validation/browser-retry-20260921/audio-gap-#{id}.json") |> JSON.decode!()
 
       old = replay(report, :historical)
       fixed = replay(report, :current)
@@ -23,7 +23,7 @@ defmodule Parlora.RecordedRecoveryTest do
   end
 
   test "a short shortage resumes from one batch without waiting for the second" do
-    report = File.read!("validation/browser-cushion-20260921/gap-2.json") |> Jason.decode!()
+    report = File.read!("validation/browser-cushion-20260921/gap-2.json") |> JSON.decode!()
     fixed = replay(report, :current)
     assert report["gap"]["measurements"]["inserted_silence_us"] == 120_000
     assert fixed.gap.inserted_silence_us == 30_000
@@ -41,7 +41,7 @@ defmodule Parlora.RecordedRecoveryTest do
     for {id, silence} <- [{4, 20_000}, {9, 30_000}, {14, 90_000}] do
       report =
         File.read!("validation/browser-recovery-threshold-20260921/gap-#{id}.json")
-        |> Jason.decode!()
+        |> JSON.decode!()
 
       fixed = replay(report, :current)
       recorded = report["gap"]["measurements"]
@@ -56,7 +56,7 @@ defmodule Parlora.RecordedRecoveryTest do
   test "latest live gap releases queued speech without the half-shortage hold" do
     fixture =
       File.read!("validation/browser-gap-20260921/call-1748/trace-excerpts.json")
-      |> Jason.decode!()
+      |> JSON.decode!()
 
     for report <- fixture["reports"] do
       fixed = replay(report, :current)
@@ -73,7 +73,7 @@ defmodule Parlora.RecordedRecoveryTest do
   test "recorded hiccups drain promptly once the current shortage cushion is ready" do
     fixture =
       File.read!("validation/browser-gap-20260921/call-1826/trace-excerpts.json")
-      |> Jason.decode!()
+      |> JSON.decode!()
 
     for report <- fixture["gaps"], id = report["gap"]["report_index"], id in [6, 8, 9] do
       fixed = replay(report, :current)

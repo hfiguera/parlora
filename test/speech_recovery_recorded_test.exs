@@ -7,7 +7,7 @@ defmodule Parlora.SpeechRecoveryRecordedTest do
   @tag timeout: 180_000
   test "complete captured call shortens both reported speech stalls without increasing interruptions" do
     fixture =
-      File.read!("validation/speech-recovery-20261004/gpt-live-call.json") |> Jason.decode!()
+      File.read!("validation/speech-recovery-20261004/gpt-live-call.json") |> JSON.decode!()
 
     pcm =
       Enum.map_join(fixture["levels"], fn [bytes, peak] ->

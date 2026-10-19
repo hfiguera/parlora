@@ -18,7 +18,7 @@ defmodule Parlora.BrowserDiagnosticsTest do
       }
 
       assert {:push, {:text, encoded}, %{}} = Signaling.handle_info({:parlora_event, event}, %{})
-      message = Jason.decode!(encoded)
+      message = JSON.decode!(encoded)
       assert message["event"] == "request_uncertain"
       assert message["request_id"] == "lookup"
       assert message["payload"] == %{"reason" => expected}
@@ -40,7 +40,7 @@ defmodule Parlora.BrowserDiagnosticsTest do
     }
 
     assert {:push, {:text, encoded}, %{}} = Signaling.handle_info({:parlora_event, event}, %{})
-    message = Jason.decode!(encoded)
+    message = JSON.decode!(encoded)
     assert message["event"] == "response_status"
     assert message["payload"]["status"] == "delayed"
     assert message["payload"]["elapsed_ms"] == 12_003
@@ -62,7 +62,7 @@ defmodule Parlora.BrowserDiagnosticsTest do
     assert {:push, {:text, encoded}, %{}} = Signaling.handle_info({:parlora_event, event}, %{})
 
     assert %{"payload" => %{"segment_id" => "reply-2", "delta" => "Saved."}} =
-             Jason.decode!(encoded)
+             JSON.decode!(encoded)
   end
 
   test "signaling preserves GPT Live timeline intervals for browser caption grouping" do
@@ -79,12 +79,21 @@ defmodule Parlora.BrowserDiagnosticsTest do
 
     assert {:push, {:text, encoded}, %{}} = Signaling.handle_info({:parlora_event, event}, %{})
 
-    assert Jason.decode!(encoded)["payload"] == %{
+    assert JSON.decode!(encoded)["payload"] == %{
              "speaker" => "assistant",
              "delta" => "Saved.",
              "start_ms" => 15_000,
              "end_ms" => 17_000
            }
+  end
+
+  test "malformed JSON signaling closes with the existing policy code" do
+    state = %{session: self(), channel: nil, controls: 0}
+
+    for body <- [~s({"type":), <<?{, 255, ?}>>, "null", "[]"] do
+      assert {:stop, :normal, 1008, ^state} =
+               Signaling.handle_in({body, [opcode: :text]}, state)
+    end
   end
 
   alias Parlora.Native.Opus
@@ -324,7 +333,7 @@ defmodule Parlora.BrowserDiagnosticsTest do
     }
 
     assert {:push, {:text, encoded}, %{}} = Signaling.handle_info({:parlora_event, event}, %{})
-    payload = Jason.decode!(encoded)["payload"]
+    payload = JSON.decode!(encoded)["payload"]
     assert payload["cause"] == "source_resumed"
     assert payload["duration_us"] == 210_000
     assert payload["peak_after"] == 2_000

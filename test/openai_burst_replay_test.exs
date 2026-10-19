@@ -8,7 +8,7 @@ defmodule Parlora.OpenAIBurstReplayTest do
   test "the complete ended-call arrival trace drains in order at every 10 ms render phase" do
     fixture =
       File.read!("validation/output-recovery-20261004/ended-call-envelope.json")
-      |> Jason.decode!()
+      |> JSON.decode!()
 
     known =
       Enum.map_join(fixture["levels"], fn [bytes, peak] ->

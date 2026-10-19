@@ -53,7 +53,7 @@ defmodule OrderDesk.Store do
         id,
         status,
         tracking,
-        Jason.encode!(items)
+        JSON.encode!(items)
       ])
     end
 
@@ -263,7 +263,7 @@ defmodule OrderDesk.Store do
       id: id,
       status: status,
       tracking: tracking,
-      items: Jason.decode!(items),
+      items: JSON.decode!(items),
       instructions: text,
       version: version
     }

@@ -115,7 +115,7 @@ if Code.ensure_loaded?(Legion) do
 
     test "repeated draft execution is cached; only authenticated browser confirmation saves once" do
       page = conn(:get, "/api/orders") |> route()
-      dashboard = Jason.decode!(page.resp_body)
+      dashboard = JSON.decode!(page.resp_body)
       actor = get_session(page, :actor)
       {:ok, before_order} = Store.order("825")
 
@@ -131,9 +131,9 @@ if Code.ensure_loaded?(Legion) do
       path = "/api/proposals/#{proposal.id}/confirm"
       assert %{status: 403} = confirmation(page, path, "wrong")
       assert %{status: 200, resp_body: first} = confirmation(page, path, dashboard["csrf"])
-      assert Jason.decode!(first)["result"]["duplicate"] == false
+      assert JSON.decode!(first)["result"]["duplicate"] == false
       assert %{status: 200, resp_body: second} = confirmation(page, path, dashboard["csrf"])
-      assert Jason.decode!(second)["result"]["duplicate"] == true
+      assert JSON.decode!(second)["result"]["duplicate"] == true
       assert {:ok, after_order} = Store.order("825")
       assert after_order.version == before_order.version + 1
       assert after_order.instructions == "Reception"
@@ -182,7 +182,7 @@ if Code.ensure_loaded?(Legion) do
                    id: "fc_fixture",
                    call_id: "call_fixture",
                    name: "structured_output",
-                   arguments: Jason.encode!(action)
+                   arguments: JSON.encode!(action)
                  }
                ],
                usage: %{input_tokens: 12, output_tokens: 8, total_tokens: 20}

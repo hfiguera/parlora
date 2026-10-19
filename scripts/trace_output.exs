@@ -59,14 +59,14 @@ defmodule Parlora.OutputTrace do
           acc
 
         {_index, row}, acc ->
-          IO.puts(file, Jason.encode!(row))
+          IO.puts(file, JSON.encode!(row))
           acc
       end,
       :ok,
       table
     )
 
-    IO.puts(file, Jason.encode!(%{events_seen: count, truncated: count > @event_limit}))
+    IO.puts(file, JSON.encode!(%{events_seen: count, truncated: count > @event_limit}))
   end
 end
 

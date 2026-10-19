@@ -283,7 +283,7 @@ defmodule Parlora.Providers.Gemini do
   end
 
   defp frame({kind, json}, state) when kind in [:text, :binary] do
-    case Jason.decode(json) do
+    case JSON.decode(json) do
       {:ok, event} -> Enum.reduce(Protocol.events(event), state, &event/2)
       _invalid -> fail(state, :invalid_json)
     end
@@ -545,7 +545,7 @@ defmodule Parlora.Providers.Gemini do
   end
 
   defp go_away_delay(_value), do: 1
-  defp transmit(state, command), do: wire(state, {:text, Jason.encode!(command)})
+  defp transmit(state, command), do: wire(state, {:text, JSON.encode!(command)})
 
   defp wire(state, frame) do
     case Connection.send(state.socket, frame) do

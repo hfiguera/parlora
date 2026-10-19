@@ -8,7 +8,7 @@ defmodule OrderDesk.AudioProbe do
 
   def run do
     reports = Enum.map([:baseline, :cpu_load, :injected_stall], &run_case/1)
-    IO.puts(Jason.encode!(%{schedulers: System.schedulers_online(), cases: reports}))
+    IO.puts(JSON.encode!(%{schedulers: System.schedulers_online(), cases: reports}))
   end
 
   def record(event, measurements, metadata, table) do

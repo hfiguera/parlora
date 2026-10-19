@@ -102,14 +102,11 @@ path =
 
 File.write!(
   path,
-  Jason.encode!(
-    %{
-      runs: runs,
-      native_per_second: System.convert_time_unit(1, :second, :native),
-      observations: drain.(drain, [])
-    },
-    pretty: true
-  )
+  JSON.encode!(%{
+    runs: runs,
+    native_per_second: System.convert_time_unit(1, :second, :native),
+    observations: drain.(drain, [])
+  })
 )
 
 IO.puts("Raw timing evidence: #{path}")

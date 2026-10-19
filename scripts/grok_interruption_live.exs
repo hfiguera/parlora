@@ -66,7 +66,7 @@ defmodule Parlora.GrokInterruptionProbe do
 
       {:parlora_event, %Event{type: :transcript_delta, payload: caption}} ->
         row = %{speaker: caption.speaker, text: caption.delta, ms: now() - state.started}
-        IO.puts(Jason.encode!(row))
+        IO.puts(JSON.encode!(row))
         loop(%{state | captions: state.captions ++ [row], idle: false})
 
       {:parlora_event, %Event{source: :provider, type: :output_interrupted}} ->
@@ -160,7 +160,7 @@ defmodule Parlora.GrokInterruptionProbe do
         String.contains?(String.downcase(answer), "hello")
 
     IO.puts(
-      Jason.encode!(%{
+      JSON.encode!(%{
         passed: passed,
         model: "grok-voice-3.0",
         reasoning_effort: :high,

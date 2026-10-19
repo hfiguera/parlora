@@ -5,7 +5,7 @@ defmodule Parlora.AcceptanceBurstTest do
 
   test "captured 600 ms burst drains in order at playback speed within the unchanged age limit" do
     evidence =
-      File.read!("validation/acceptance/results/6-interrupt-disconnect.json") |> Jason.decode!()
+      File.read!("validation/acceptance/results/6-interrupt-disconnect.json") |> JSON.decode!()
 
     failure =
       Enum.find(evidence["events"], &(get_in(&1, ["payload", "cause"]) == "output_overflow"))

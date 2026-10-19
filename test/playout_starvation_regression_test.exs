@@ -3,7 +3,7 @@ defmodule Parlora.PlayoutStarvationRegressionTest do
   alias Parlora.{AudioFrame, AudioQueue, Playout}
 
   setup do
-    evidence = File.read!("validation/pcm-overflow/starvation-evidence.json") |> Jason.decode!()
+    evidence = File.read!("validation/pcm-overflow/starvation-evidence.json") |> JSON.decode!()
     %{events: evidence["events"]}
   end
 

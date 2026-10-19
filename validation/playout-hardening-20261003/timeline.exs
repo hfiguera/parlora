@@ -53,7 +53,7 @@ defmodule Parlora.Validation.PlayoutTimeline do
 
     File.write!(
       trace.path,
-      Jason.encode!(%{rows: rows, seen: count, limit: @limit, truncated: count > @limit}) <> "\n"
+      JSON.encode!(%{rows: rows, seen: count, limit: @limit, truncated: count > @limit}) <> "\n"
     )
 
     :ets.delete(trace.table)

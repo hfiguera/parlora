@@ -340,7 +340,7 @@ cases =
 
 replay =
   if options[:replay] do
-    saved = options[:replay] |> File.read!() |> Jason.decode!()
+    saved = options[:replay] |> File.read!() |> JSON.decode!()
     Map.new(saved["results"], &{{&1["name"], &1["pass"], &1["requested_model"]}, &1})
   end
 
@@ -371,7 +371,7 @@ results =
           saved = Map.fetch!(replay, {item.name, pass, model})
 
           unless saved["returned_model"] == model and
-                   Jason.decode!(Jason.encode!(state)) == saved["input"],
+                   JSON.decode!(JSON.encode!(state)) == saved["input"],
                  do: raise("Replay context or classification boundary changed: #{item.name}")
 
           {:ok,
@@ -473,7 +473,7 @@ results =
     }
 
     IO.puts(
-      Jason.encode!(
+      JSON.encode!(
         Map.take(record, [
           :name,
           :pass,
@@ -491,29 +491,26 @@ results =
 
 File.write!(
   output,
-  Jason.encode!(
-    %{
-      method:
-        if(replay,
-          do:
-            "Saved typed answers replayed through real AppPolicy with identical verified input states; no API calls. Model fields identify the original observations, not new service responses.",
-          else:
-            "Identical synthetic dialogue snapshots evaluated sequentially with each pinned live model and real AppPolicy; no cache, retries, backend execution, or real order writes. Nil returned_model means deterministic policy handling bypassed JEV."
-        ),
-      mode: if(replay, do: "frozen_replay", else: "live"),
-      replay_source_sha256:
-        if(replay,
-          do: :crypto.hash(:sha256, File.read!(options[:replay])) |> Base.encode16(case: :lower)
-        ),
-      newly_failed: Enum.count(results, &(&1.previously_passed == true and not &1.passed)),
-      recorded_at: DateTime.utc_now(),
-      models: models,
-      repeats: repeats,
-      cases: length(cases),
-      results: results
-    },
-    pretty: true
-  )
+  JSON.encode!(%{
+    method:
+      if(replay,
+        do:
+          "Saved typed answers replayed through real AppPolicy with identical verified input states; no API calls. Model fields identify the original observations, not new service responses.",
+        else:
+          "Identical synthetic dialogue snapshots evaluated sequentially with each pinned live model and real AppPolicy; no cache, retries, backend execution, or real order writes. Nil returned_model means deterministic policy handling bypassed JEV."
+      ),
+    mode: if(replay, do: "frozen_replay", else: "live"),
+    replay_source_sha256:
+      if(replay,
+        do: :crypto.hash(:sha256, File.read!(options[:replay])) |> Base.encode16(case: :lower)
+      ),
+    newly_failed: Enum.count(results, &(&1.previously_passed == true and not &1.passed)),
+    recorded_at: DateTime.utc_now(),
+    models: models,
+    repeats: repeats,
+    cases: length(cases),
+    results: results
+  })
 )
 
 IO.puts(

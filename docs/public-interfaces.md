@@ -96,6 +96,15 @@ Transcript entries retain `speaker`, `delta`, `start_ms`, `end_ms`, `provider_ge
 
 Event IDs identify observations; they do not make events exactly-once or create a total ordering across processes. Match results to request/task revision and provider generation. Keep audio out of payloads of control events and default telemetry. Unknown observations specific to an adapter can use `:extension` with a namespaced payload; core behavior must not depend on them.
 
+### JSON values at adapter boundaries
+
+Parlora uses Elixir's built-in `JSON` module for provider messages, channel
+signaling and Telnyx commands. Use maps, lists, strings, numbers, booleans and
+`nil` for values sent over these boundaries; `nil` becomes JSON `null`.
+Custom structs need a `JSON.Encoder` implementation, or conversion to plain data
+before passing them to an adapter. A `Jason.Encoder` implementation alone is not
+used. Legion operation results must also be JSON encodable.
+
 ### In-memory sessions and application persistence
 
 Parlora keeps session state in memory and retains live lifecycle events plus history and application context supplied at startup. Applications can subscribe to events, store relevant facts in their own format, and seed a fresh session with selected history and verified prior outcomes. These inputs do not resume old jobs, restore adapter resources, or replay a saved runtime snapshot.

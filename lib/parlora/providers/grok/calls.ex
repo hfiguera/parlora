@@ -8,7 +8,7 @@ defmodule Parlora.Providers.Grok.Calls do
   def admit(calls, %{"call_id" => id, "name" => name, "arguments" => encoded} = event)
       when is_binary(id) and id != "" and is_binary(encoded) and byte_size(encoded) <= 8_192 do
     with true <- name == Protocol.function(),
-         {:ok, %{"request" => request} = args} <- Jason.decode(encoded),
+         {:ok, %{"request" => request} = args} <- JSON.decode(encoded),
          true <- map_size(args) == 1 and is_binary(request) and byte_size(request) in 1..4_096,
          {:new, log} <- CommandLog.admit(calls.log, id, {name, args}) do
       record = %{status: :pending, arguments: args, group: event["response_id"] || id}

@@ -51,7 +51,7 @@ defmodule Parlora.AudioTraceTest do
     assert_receive {:parlora_event, %Event{type: :audio_discontinuity} = event}
     event = %{event | payload: Map.put(event.payload, :private, "never-display")}
     assert {:push, {:text, json}, %{}} = Signaling.handle_info({:parlora_event, event}, %{})
-    payload = Jason.decode!(json)["payload"]
+    payload = JSON.decode!(json)["payload"]
     assert payload["queue_bytes"] == 4_800
     assert payload["dropped_bytes"] == 4_800
     assert payload["incoming_bytes"] == 0

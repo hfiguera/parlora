@@ -31,7 +31,7 @@ defmodule OrderDesk.ApplicationFlowTest do
     Application.put_env(:order_desk, :browser_origin, "http://localhost:4000")
     on_exit(fn -> Application.delete_env(:order_desk, :browser_origin) end)
     response = conn(:get, "/api/orders") |> route()
-    %{"csrf" => csrf} = Jason.decode!(response.resp_body)
+    %{"csrf" => csrf} = JSON.decode!(response.resp_body)
     [{cookie_name, cookie}] = Map.to_list(response.resp_cookies)
     base = conn(:post, "/api/proposals") |> put_req_cookie(cookie_name, cookie.value)
     assert %{status: 403} = base |> route()
@@ -44,24 +44,24 @@ defmodule OrderDesk.ApplicationFlowTest do
     assert %{status: 200, resp_body: first} =
              request(response, "/api/proposals/#{id}/confirm", %{}, csrf)
 
-    assert Jason.decode!(first)["result"]["duplicate"] == false
+    assert JSON.decode!(first)["result"]["duplicate"] == false
 
     assert %{status: 200, resp_body: duplicate} =
              request(response, "/api/proposals/#{id}/confirm", %{}, csrf)
 
-    assert Jason.decode!(duplicate)["result"]["duplicate"] == true
+    assert JSON.decode!(duplicate)["result"]["duplicate"] == true
     assert {:ok, after_order} = OrderDesk.Store.order("825")
     assert after_order.version == before_order.version + 1
     assert after_order.instructions == body.instructions
     stranger = conn(:get, "/api/orders") |> route()
-    stranger_csrf = Jason.decode!(stranger.resp_body)["csrf"]
+    stranger_csrf = JSON.decode!(stranger.resp_body)["csrf"]
     assert %{status: 409} = request(stranger, "/api/proposals/#{id}/confirm", %{}, stranger_csrf)
   end
 
   defp request(session, path, body, csrf) do
     [{name, cookie}] = Map.to_list(session.resp_cookies)
 
-    conn(:post, path, Jason.encode!(body))
+    conn(:post, path, JSON.encode!(body))
     |> put_req_cookie(name, cookie.value)
     |> put_req_header("origin", "http://localhost:4000")
     |> put_req_header("x-csrf-token", csrf)

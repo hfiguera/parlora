@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Use Elixir's built-in `JSON` module and remove the direct Jason dependency.
+  Minimum runtime requirements remain Elixir 1.18 and OTP 27. Dependencies may
+  still install Jason for their own use. Custom structs passed across JSON
+  adapter boundaries now need `JSON.Encoder` instead of `Jason.Encoder`, or
+  conversion to plain data. Development reports use compact JSON.
+
 - Allow compatible Hex dependency updates while retaining the current minimum
   versions. Optional backends stay within their current minor releases.
 - Add a scheduled Linux check that resolves the latest allowed dependencies and

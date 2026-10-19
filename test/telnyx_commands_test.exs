@@ -40,7 +40,7 @@ defmodule Parlora.TelnyxCommandsTest do
       assert_receive {:request, "/v2/calls/v3%3Acall%2Fopaque/actions/answer",
                       ["Bearer test-key"], body}
 
-      assert Jason.decode!(body) == %{"command_id" => "stable-id"}
+      assert JSON.decode!(body) == %{"command_id" => "stable-id"}
     end
   end
 
@@ -64,7 +64,7 @@ defmodule Parlora.TelnyxCommandsTest do
   end
 
   test "already-ended responses preserve call-state evidence without claiming command acceptance" do
-    body = Jason.encode!(%{errors: [%{code: "90018", detail: "private upstream text"}]})
+    body = JSON.encode!(%{errors: [%{code: "90018", detail: "private upstream text"}]})
 
     for responses <- [[{422, body}], [{503, "unavailable"}, {422, body}]] do
       options = server(responses)
@@ -96,7 +96,7 @@ defmodule Parlora.TelnyxCommandsTest do
     end
 
     errors = for code <- 10_000..10_020, do: %{code: to_string(code)}
-    options = server([{422, Jason.encode!(%{errors: errors})}])
+    options = server([{422, JSON.encode!(%{errors: errors})}])
     assert {:error, error} = Commands.execute(:hangup, "call", "id", %{}, options)
     assert Enum.count_until(error.details.telnyx_codes, 9) == 8
   end
@@ -129,7 +129,7 @@ defmodule Parlora.TelnyxCommandsTest do
              Commands.execute(:streaming_start, "call", "start-id", params, options)
 
     assert_receive {:request, "/v2/calls/call/actions/streaming_start", _headers, body}
-    fields = Jason.decode!(body)
+    fields = JSON.decode!(body)
     assert fields["stream_auth_token"] == "call-specific-token"
     assert fields["stream_bidirectional_mode"] == "rtp"
     assert fields["stream_codec"] == "PCMU"
@@ -148,6 +148,31 @@ defmodule Parlora.TelnyxCommandsTest do
              Commands.execute(:dial, "call", "id", %{}, options)
 
     assert {:error, %{code: :invalid_argument}} = Commands.execute(:answer, "call", "id", %{}, [])
+  end
+
+  test "invalid JSON parameters return sanitized admission errors without sending a request" do
+    options = server([])
+
+    for value <- [<<255>>, {:private, "secret"}, self(), %URI{host: "secret"}] do
+      assert {:error, error} =
+               Commands.execute(:answer, "call", "id", %{"nested" => [value]}, options)
+
+      assert error.code == :invalid_argument
+      refute inspect(error) =~ "secret"
+    end
+
+    refute_received {:request, _, _, _}
+  end
+
+  test "malformed successful responses remain uncertain and never expose decoder details" do
+    for body <- [~s({"data":), <<?{, 255, ?}>>] do
+      assert {:error, error} =
+               Commands.execute(:answer, "call", "id", %{}, server([{200, body}]))
+
+      assert error.details.reason == :invalid_response
+      assert error.details.outcome == :unknown
+      assert error.details.attempts == 1
+    end
   end
 
   defp server(responses) do

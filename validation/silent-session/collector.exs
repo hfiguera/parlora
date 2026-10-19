@@ -15,7 +15,7 @@ defmodule ParloraSilentSession.Collector do
     File.write!(base <> ".pcm", report.pcm)
     File.chmod!(base <> ".pcm", 0o600)
     metadata = Map.delete(report, :pcm)
-    File.write!(base <> ".json", Jason.encode!(metadata, pretty: true))
+    File.write!(base <> ".json", JSON.encode!(metadata))
     File.chmod!(base <> ".json", 0o600)
     {:noreply, %{state | reports: Map.put(state.reports, id, Map.drop(metadata, [:events]))}}
   end

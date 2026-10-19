@@ -14,11 +14,13 @@ defmodule Parlora.GeminiAdapterTest do
     end
 
     def handle_in({json, _metadata}, owner) do
-      send(owner, {:command, Jason.decode!(json)})
+      send(owner, {:command, JSON.decode!(json)})
       {:ok, owner}
     end
 
-    def handle_info({:event, event}, owner), do: {:push, {:binary, Jason.encode!(event)}, owner}
+    def handle_info({:raw_json, bytes}, owner), do: {:push, {:binary, bytes}, owner}
+
+    def handle_info({:event, event}, owner), do: {:push, {:binary, JSON.encode!(event)}, owner}
   end
 
   defmodule Route do
@@ -48,6 +50,22 @@ defmodule Parlora.GeminiAdapterTest do
     state = %{state | socket: socket, status: :starting}
     on_exit(fn -> Gemini.terminate(:normal, state) end)
     %{state: state, server: server, port: port}
+  end
+
+  for {name, bytes} <- [truncated: ~s({"private":), invalid_unicode: ~S({"private":"\uD800"})] do
+    test "#{name} JSON fails safely at the provider boundary", context do
+      send(context.server, {:raw_json, unquote(bytes)})
+      socket = Mint.HTTP.get_socket(context.state.socket.conn)
+      {:ok, bytes} = :gen_tcp.recv(socket, 0, 2_000)
+      {:noreply, state} = Gemini.handle_info({:tcp, socket, bytes}, context.state)
+      assert state.status == :closed
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :failed,
+                        payload: %{error: %{details: %{reason: :invalid_json}}}
+                      }}
+    end
   end
 
   test "a response delay is observable without socket writes or terminating a late reply",
