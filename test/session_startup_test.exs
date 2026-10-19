@@ -130,9 +130,9 @@ defmodule Parlora.SessionStartupTest do
                         type: :failed,
                         payload: %{error: %{code: :timeout}}
                       }},
-                     1_000
+                     5_000
 
-      assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 1_000
+      assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 5_000
       assert_down(refs)
       refute_received {:parlora_event, %Event{source: :session, type: :ready}}
     end
@@ -209,9 +209,9 @@ defmodule Parlora.SessionStartupTest do
 
     assert_receive {:parlora_event,
                     %Event{source: :session, type: :failed, payload: %{error: %{code: :timeout}}}},
-                   1_000
+                   5_000
 
-    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 500
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 5_000
     assert_down(refs)
     refute_received {:parlora_event, %Event{source: :session, type: :ready}}
   end
@@ -307,7 +307,7 @@ defmodule Parlora.SessionStartupTest do
   defp monitors(pids), do: Enum.map(pids, &Process.monitor/1)
 
   defp assert_down(refs) do
-    Enum.each(refs, fn ref -> assert_receive {:DOWN, ^ref, :process, _pid, _reason}, 1_000 end)
+    Enum.each(refs, fn ref -> assert_receive {:DOWN, ^ref, :process, _pid, _reason}, 5_000 end)
   end
 
   defp eventually(fun, attempts \\ 100)

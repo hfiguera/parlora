@@ -205,15 +205,33 @@ defmodule Parlora.TelnyxChannelTest do
   end
 
   test "queue expiration cannot reset the deadline for permanently missing marks" do
-    channel = start_channel(max_inflight_ms: 20, max_age_ms: 20, mark_timeout_ms: 160)
+    channel = start_channel(max_inflight_ms: 20, max_age_ms: 20, mark_timeout_ms: 5_000)
     assert :ok = Telnyx.write_audio(channel, output_frame(0, 1))
     assert {:ok, [_packet, _mark], _wait} = Telnyx.pull(channel)
+    pending = :sys.get_state(channel).playback.pending
     assert :ok = Telnyx.write_audio(channel, output_frame(1, 2))
     Process.sleep(30)
     assert {:ok, [], _wait} = Telnyx.pull(channel)
 
     assert_receive {:parlora_event,
                     %Event{type: :audio_discontinuity, payload: %{cause: :output_stale}}}
+
+    # Expiring queued audio must preserve the original mark timestamp. This
+    # checks the deadline directly instead of using a narrow wall-clock window.
+    assert :sys.get_state(channel).playback.pending == pending
+
+    # Move that unchanged mark past its deadline, then exercise the real
+    # watchdog without racing a 160 ms window on a shared runner.
+    :sys.replace_state(channel, fn state ->
+      expired =
+        Map.new(state.playback.pending, fn {name, record} ->
+          {name, %{record | sent_at_us: System.monotonic_time(:microsecond) - 5_000_000}}
+        end)
+
+      %{state | playback: %{state.playback | pending: expired}}
+    end)
+
+    send(channel, :watchdog)
 
     assert_receive {:parlora_event,
                     %Event{
@@ -229,7 +247,7 @@ defmodule Parlora.TelnyxChannelTest do
                         }
                       }
                     }},
-                   500
+                   5_000
 
     assert_receive {:parlora_event,
                     %Event{

@@ -141,7 +141,7 @@ defmodule Parlora.PolicyFailureTest do
         provider: {MemoryProvider, observer: self()},
         backend: {FakeBackend, observer: self()},
         context_policy: {ControlledPolicy, observer: self()},
-        # Keep the shutdown deadline inside this fixture's one-second assertions.
+        # Keep shutdown short without relying on the test's observation budget.
         limits: Keyword.put_new(limits, :shutdown_timeout_ms, 200),
         event_sink: self()
       )

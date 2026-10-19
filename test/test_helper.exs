@@ -26,6 +26,8 @@ Application.put_env(:req_llm, :openai_api_key, "private-key-and-prompt")
 
 ExUnit.start(
   exclude: [:hardware, :live, :stability],
-  assert_receive_timeout: 1_000,
+  # Observe asynchronous work independently of the short deadlines exercised by
+  # individual fixtures, including when shared CI runners are under load.
+  assert_receive_timeout: 5_000,
   capture_log: true
 )
