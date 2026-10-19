@@ -1,0 +1,110 @@
+<main id="main" class="rail article-main">
+  <header class="article-header">
+    <a class="back-link" href="{{BASE}}"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17 10H3m6-6-6 6 6 6"/></svg> All articles</a>
+    <h1>Understanding a voice session with Parlora 0.2.0</h1>
+    <p class="article-deck">{{ARTICLE_DESCRIPTION}}</p>
+    <div class="article-author">
+      <span>By Humberto Figuera</span>
+      <div class="author-profiles">
+        <a href="https://x.com/hfiguera" aria-label="Humberto Figuera on X (@hfiguera)" title="Humberto Figuera on X">
+          <svg class="profile-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>
+          <span>@hfiguera</span>
+        </a>
+        <a href="https://github.com/hfiguera" aria-label="Humberto Figuera on GitHub (@hfiguera)" title="Humberto Figuera on GitHub">
+          <svg class="profile-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <span>@hfiguera</span>
+        </a>
+      </div>
+    </div>
+    <div class="article-byline"><time datetime="{{ARTICLE_DATE}}">{{ARTICLE_DATE_LABEL}}</time><span>{{READ_TIME}} min read</span><span>Parlora {{ARTICLE_VERSION}}</span></div>
+  </header>
+  <div class="article-grid">
+    <aside class="contents" aria-label="Article contents">
+      <details open>
+        <summary>In this article</summary>
+        <nav aria-label="Article sections"><ol>
+          <li><a href="#following-the-work">Following the work</a></li>
+          <li><a href="#start-with-one-event">Start with one event</a></li>
+          <li><a href="#metrics-and-traces">From one call to a pattern</a></li>
+          <li><a href="#investigating-audio">Investigating an audio gap</a></li>
+          <li><a href="#useful-logs">Keeping logs useful</a></li>
+          <li><a href="#try-it-locally">Try it locally</a></li>
+        </ol></nav>
+      </details>
+    </aside>
+    <article class="prose" aria-label="Observability in Parlora 0.2.0">
+      <p>A voice assistant pauses before answering. Was it waiting for your backend? Was audio sitting in a queue? Did the connection need to recover? To the person on the call, each can sound like the same delay.</p>
+      <p>Listening to test calls matters, but it leaves you guessing about what happened inside the application. A transcript tells you what was said. It tells you much less about the work running alongside the conversation or how audio moved through the system.</p>
+      <p><strong>Parlora 0.2.0 adds an observability contract built on Elixir’s <code>:telemetry</code>.</strong> It gives your application measurements and events for following a session, investigating delays, and connecting what happened in one call to patterns across many calls.</p>
+      <p>If you are new to Parlora, it is an Elixir framework for building voice AI agents with full-duplex speech-to-speech models. It coordinates the voice provider, audio channel, application policy, and backend work. The <a href="{{BASE}}blog/introducing-parlora/">introduction</a> explains how those pieces fit together.</p>
+
+      <h2 id="following-the-work">Following the work through a session</h2>
+      <p>A useful starting point is to separate the stages that can otherwise disappear into “the assistant was slow.” A request can wait before the backend starts, spend time executing, and then wait for its result to be submitted to the voice provider.</p>
+      <p>For example, your service might return quickly while its result waits for the conversation to reach a suitable point. Looking only at service latency would miss that wait. Looking only at the length of the call would hide both.</p>
+      <p>Parlora exposes separate operation events for backend queue time, observed execution, and result delivery. There are also events for session startup and shutdown, policy evaluation, interruptions, and connection recovery. Each operation has a start and a stop, with timing measurements and an outcome.</p>
+      <p>Those boundaries matter. Backend execution starts when Parlora observes the backend’s start notification. Delivery ends at the first delivery outcome; acceptance by a provider does not prove that someone heard the result. The measurements help you locate a delay without turning every observation into a claim about the caller’s experience.</p>
+
+      <h2 id="start-with-one-event">Start with one event</h2>
+      <p>You can use the new events without installing an exporter or running a monitoring service. Add Parlora to your application, or update an existing dependency:</p>
+      <pre><code class="language-elixir">{:parlora, "~&gt; 0.2.0"}</code></pre>
+      <p>Here is a complete handler that logs one summary when a session stops:</p>
+      <pre><code class="language-elixir">defmodule MyApp.ParloraObserver do
+  require Logger
+
+  def attach do
+    :telemetry.attach(
+      "my-app-parlora-session",
+      [:parlora, :session, :stop],
+      &amp;__MODULE__.handle_event/4,
+      nil
+    )
+  end
+
+  def detach, do: :telemetry.detach("my-app-parlora-session")
+
+  def handle_event(_event, %{duration: duration}, %{outcome: outcome}, _config) do
+    duration_ms = System.convert_time_unit(duration, :native, :microsecond) / 1_000
+    Logger.info("Parlora session stopped: outcome=#{outcome} duration_ms=#{duration_ms}")
+  end
+end</code></pre>
+      <p>Call <code>MyApp.ParloraObserver.attach()</code> once from your application’s startup code, before starting sessions. It observes sessions throughout that VM. Call <code>detach()</code> when removing the integration.</p>
+      <p>Operation durations use Erlang’s native time units, so the conversion in the handler is important. Audio fields ending in <code>_us</code> already use microseconds. The <a href="https://hexdocs.pm/parlora/0.2.0/observability.html">observability guide</a> lists the events, units, and exact timing boundaries.</p>
+      <p>Telemetry handlers run synchronously in the process emitting the event. Keep them short. Update a metric or hand work to a bounded buffer; send HTTP requests and perform exports outside the callback.</p>
+
+      <h2 id="metrics-and-traces">From one call to a pattern</h2>
+      <p>Metrics help you see whether something is happening more often. You might track startup time, backend queue and execution durations, delivery outcomes, and audio queue observations. Group them by a small set of categories, such as operation and outcome, so a graph remains useful as traffic grows.</p>
+      <p>Traces help you follow an individual session. Operation events carry an <code>operation_id</code>, and child operations point to the session through <code>parent_operation_id</code>. Backend request operations also carry task and request identifiers. A tracing integration can use these to put the related operations together, even when the work crosses processes.</p>
+      <p>Keep those identifiers in traces or selected logs rather than using them as metric labels. Giving every session its own metric series makes aggregation harder and increases storage costs.</p>
+      <p>Parlora emits the observations. Your application chooses the metric reporter, tracing SDK, exporter, sampling, and retention. It does not automatically create OpenTelemetry spans or require a particular service. The development example below shows one way to make that connection.</p>
+
+      <h2 id="investigating-audio">Investigating an audio gap</h2>
+      <p>Audio needs more than a request timer. A backend can complete on time while playback still pauses, and a healthy connection can carry audio that arrives unevenly.</p>
+      <p>The built-in voice providers expose the duration of queued audio and the age of the oldest queued frame. The audio pipeline reports scheduling lateness and how long it has been blocked. Together, these observations help you see whether audio is accumulating, draining, or waiting to move.</p>
+      <p>For browser PCM playback, gap observations also separate time without available source audio from the additional time spent waiting for the recovery buffer. That distinction helps you investigate whether changing playback behavior could help, or whether the application was already waiting for more source audio.</p>
+      <p>For example, suppose someone hears a pause even though the backend finished quickly. The audio queue drained, and the playback observations show a period without source audio followed by additional recovery buffering. That points the investigation toward audio arrival and playback recovery. You can then compare those observations with the surrounding events to narrow down the cause.</p>
+      <p>A gap alone is not enough to identify its cause. Silence can be intentional, and a source shortage does not tell you whether the provider, network, or local processing caused it. Compare the observations with what you heard, the surrounding audio, and the other events from that session.</p>
+
+      <h2 id="useful-logs">Keeping logs useful</h2>
+      <p>Observability should not turn a voice session into a log line for every audio frame. A session summary can be useful at <code>:info</code>. Selected diagnostics belong at <code>:debug</code> while investigating a problem. Unexpected conditions may deserve <code>:warning</code>, and unrecovered failures may deserve <code>:error</code>. Your application decides which events to log and configures Logger.</p>
+      <p>The new operational telemetry stream selects correlation fields and known categories without copying transcripts, prompts, tool data, or credentials. Conversation events from <code>Parlora.subscribe/2</code> are a separate API and can contain application content, so select and redact that content before exporting it.</p>
+      <p>These events describe how Parlora ran. Whether a booking succeeded, an answer was correct, or a customer was satisfied remains an application concern.</p>
+
+      <h2 id="try-it-locally">Try it locally</h2>
+      <p>The repository includes an optional development host with VictoriaMetrics, VictoriaTraces, and an OpenTelemetry Collector. It runs an offline Parlora session with deterministic adapters, so you can explore the integration without provider API keys or a microphone.</p>
+      <p>From a checkout of <a href="https://github.com/hfiguera/parlora/tree/v0.2.0">Parlora 0.2.0</a>, with Docker running and the <a href="https://hexdocs.pm/parlora/0.2.0/beam-compatibility.html">runtime and build prerequisites</a> installed:</p>
+      <pre><code class="language-shell">cd examples/observability
+docker compose up -d
+mix deps.get
+mix run demo.exs</code></pre>
+      <p>Leave the command running after it prints the session ID. Docker exposes the dashboards on your computer. With the example running, open <a href="http://localhost:18428/vmui/">VictoriaMetrics</a> for metrics and <a href="http://localhost:19428/select/vmui/">VictoriaTraces</a> for traces. These <code>localhost</code> URLs point to your own computer, using the ports configured in the example’s Docker Compose file.</p>
+      <p>The <a href="https://github.com/hfiguera/parlora/blob/v0.2.0/examples/observability/README.md">example guide</a> includes queries to paste into each UI, a workload that also produces audio queue measurements, verification commands, and shutdown instructions.</p>
+      <p>The workload uses simulated delays and failures so you can see how they appear in your metrics and traces. All of the monitoring dependencies stay in this separate example application.</p>
+      <p>If you try it in your application, I would like to hear which measurements help you explain a call and which questions are still difficult to answer. You can <a href="https://github.com/hfiguera/parlora/issues">share feedback on GitHub</a> or <a href="https://x.com/hfiguera">find me on X</a>.</p>
+    </article>
+  </div>
+  <aside class="article-next">
+    <h2>Connect your own monitoring.</h2>
+    <p>The guide covers the public events, their timing boundaries, and how to turn them into metrics, traces, and useful logs.</p>
+    <a href="https://hexdocs.pm/parlora/0.2.0/observability.html">Read the observability guide <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h14m-6-6 6 6-6 6"/></svg></a>
+  </aside>
+</main>

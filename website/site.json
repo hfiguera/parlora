@@ -10,6 +10,18 @@
   "cloudflare_token": "f968ea7d6e614cc9a3e2d537ced91a10",
   "articles": [
     {
+      "slug": "observability-in-parlora",
+      "title": "Understanding a voice session with Parlora 0.2.0",
+      "description": "Follow the work behind a voice conversation with metrics, traces, and useful logs, using the monitoring tools your application chooses.",
+      "date": "2026-10-19",
+      "version": "0.2.0",
+      "category": "Observability",
+      "social_image": {
+        "path": "assets/social/observability.png",
+        "alt": "Understanding a voice session. Metrics, traces and logs in Parlora 0.2.0."
+      }
+    },
+    {
       "slug": "introducing-parlora",
       "title": "Introducing Parlora: build voice AI agents with Elixir",
       "description": "What Parlora does, the problems it handles, and how to connect a spoken conversation to useful work in your application.",
