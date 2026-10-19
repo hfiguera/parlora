@@ -1,5 +1,8 @@
 defmodule Parlora.LegionTest do
-  use ExUnit.Case, async: true
+  # Native Lua time/CPU/heap budgets are real-time integration checks. Keep
+  # them out of the async pool so startup cannot consume a different case's
+  # deadline before its gated operation is reached.
+  use ExUnit.Case, async: false
   alias Parlora.{AdapterInit, BackendRequest, Event, Limits}
   alias Parlora.Backends.Legion, as: Backend
   alias Parlora.TestSupport.LegionModel
@@ -192,14 +195,16 @@ defmodule Parlora.LegionTest do
   end
 
   test "sandbox time budget stops a blocked native call before the outer job deadline" do
-    pid = backend(:complete, %Limits{job_timeout_ms: 10_000}, sandbox_timeout: 100)
+    # Allow sandbox initialization before the blocked operation. Its one-second
+    # limit still precedes both the fixture's five-second gate and the outer
+    # ten-second job deadline.
+    pid = backend(:complete, %Limits{job_timeout_ms: 10_000}, sandbox_timeout: 1_000)
     assert :ok = Backend.submit(pid, request("sandbox-time", %{order: "123", gate: true}))
     assert_receive {:lookup_waiting, "123", collector}, 5_000
     ref = Process.monitor(collector)
 
     assert_receive {:parlora_event,
-                    %Event{type: :request_uncertain, payload: %{reason: :framework_failure}}},
-                   2_000
+                    %Event{type: :request_uncertain, payload: %{reason: :framework_failure}}}
 
     assert_receive {:DOWN, ^ref, :process, ^collector, _}
   end

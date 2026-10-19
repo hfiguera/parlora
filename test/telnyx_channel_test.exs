@@ -1,5 +1,8 @@
 defmodule Parlora.TelnyxChannelTest do
-  use ExUnit.Case, async: true
+  # The paced playback-window test deliberately retains the default mark
+  # deadline. Run without competing async modules so scheduler delays do not
+  # turn its brief simulated pause into a missing-mark timeout.
+  use ExUnit.Case, async: false
   alias Parlora.{AdapterInit, AudioFormat, AudioFrame, Event, Limits}
   alias Parlora.Channels.Telnyx
 
