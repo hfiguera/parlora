@@ -20,7 +20,7 @@ In the new application's `mix.exs`, replace `deps/0` with:
 ```elixir
 defp deps do
   [
-    {:parlora, "~> 0.1.0"},
+    {:parlora, "~> 0.2.0"},
     {:jido, "== 2.4.0"}
   ]
 end

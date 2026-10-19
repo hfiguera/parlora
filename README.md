@@ -58,7 +58,7 @@ Jido action.
 Install Parlora from [Hex](https://hex.pm/packages/parlora):
 
 ```elixir
-{:parlora, "~> 0.1.0"}
+{:parlora, "~> 0.2.0"}
 ```
 
 You need **Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the

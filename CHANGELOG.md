@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.0
+
+Adds a public observability contract while keeping monitoring configuration in
+the host application. Existing session and adapter APIs remain compatible.
+
+- Telemetry events for session startup and shutdown, policy evaluation, backend
+  queue and execution times, result delivery, recovery, and interruption handling.
+- Operational events with bounded categories and selected metadata, without
+  copying transcripts, application payloads, or credentials into the new events.
+- Provider audio queue duration and age measurements, plus audio pipeline blocked
+  duration measurements.
+- A metrics, traces and logs guide covering event definitions, units, timing
+  boundaries, and application control of reporters, exporters, and logging.
+- An optional development example using VictoriaMetrics, VictoriaTraces, and an
+  OpenTelemetry Collector, with repeatable workloads and export verification.
+- Regression coverage for duplicate, outdated, and late recovery completion
+  notifications, including notifications received during shutdown.
+
+No monitoring SDK or service is required by the library. Elixir, Erlang/OTP,
+and native build requirements are unchanged.
+
 ## 0.1.0
 
 First public release of Parlora, an Elixir framework for building real-time voice

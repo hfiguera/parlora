@@ -41,7 +41,7 @@ Add Parlora to your application's dependencies:
 ```elixir
 defp deps do
   [
-    {:parlora, "~> 0.1.0"},
+    {:parlora, "~> 0.2.0"},
     {:jido, "== 2.4.0"}
   ]
 end
