@@ -26,7 +26,7 @@ defmodule Parlora.Backends.Legion.Job do
   def configuration(options) do
     cond do
       not Code.ensure_loaded?(Legion) ->
-        Error.tuple(:unsupported, "Install optional legion == 0.6.0 to use this backend")
+        Error.tuple(:unsupported, "Install optional legion ~> 0.6.0 to use this backend")
 
       not is_function(options[:execution], 1) ->
         Error.tuple(:invalid_argument, "Legion requires an execution factory")

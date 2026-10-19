@@ -42,7 +42,7 @@ Add Parlora to your application's dependencies:
 defp deps do
   [
     {:parlora, "~> 0.2.0"},
-    {:jido, "== 2.4.0"}
+    {:jido, "~> 2.4.0"}
   ]
 end
 ```

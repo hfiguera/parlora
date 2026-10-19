@@ -2,7 +2,7 @@ defmodule Parlora.Backends.Jido do
   @moduledoc """
   Runs a fresh Jido AgentServer for each request, observed outside session/audio callbacks.
 
-  Install optional `jido == 2.4.0` in applications selecting this backend.
+  Install optional `jido ~> 2.4.0` in applications selecting this backend.
   Requires `:agent` and `:result` (terminal Jido state to a map containing `:status`,
   `:facts`, and optional `:summary`). `:signal` maps a BackendRequest to a Jido.Signal;
   its default is `parlora.request`. Optional `:cancel_signal` enables advisory cancellation.
@@ -25,7 +25,7 @@ defmodule Parlora.Backends.Jido do
   def start_link(init, options) do
     cond do
       not Code.ensure_loaded?(Jido.AgentServer) ->
-        Error.tuple(:unsupported, "Install optional jido == 2.4.0 to use this backend")
+        Error.tuple(:unsupported, "Install optional jido ~> 2.4.0 to use this backend")
 
       not is_atom(Keyword.get(options, :agent)) or Keyword.get(options, :agent) == nil or
           not is_function(Keyword.get(options, :result), 1) ->

@@ -1,6 +1,6 @@
 defmodule Parlora.Backends.Legion do
   @moduledoc """
-  Optional Legion 0.6.0 execution in isolated Lua agents.
+  Optional Legion 0.6.x execution in isolated Lua agents.
 
   Supply `:execution`, a request factory returning `%{model: model_spec,
   task: string, operations: %{name => zero_arity_function}, result: mapper}`.

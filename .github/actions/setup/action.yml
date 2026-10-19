@@ -16,6 +16,9 @@ inputs:
   quality:
     description: Restore Dialyzer PLTs
     default: 'false'
+  dependency-resolution:
+    description: Use the committed lockfile (locked) or resolve current allowed versions (latest)
+    default: 'locked'
 runs:
   using: composite
   steps:
@@ -87,9 +90,9 @@ runs:
         path: |
           deps
           _build/*/lib
-        key: beam-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-${{ hashFiles('mix.lock', 'mix.exs') }}
+        key: beam-v1${{ inputs.dependency-resolution == 'latest' && '-latest' || '' }}-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-${{ hashFiles('mix.lock', 'mix.exs') }}
         restore-keys: |
-          beam-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-
+          beam-v1${{ inputs.dependency-resolution == 'latest' && '-latest' || '' }}-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ env.PARLORA_NATIVE_ABI }}-${{ hashFiles('rust-toolchain.toml', 'native/**/Cargo.lock', 'scripts/install_opus.sh') }}-
     - name: Compile the current library source on every run
       if: inputs.library == 'true'
       shell: bash
@@ -104,5 +107,13 @@ runs:
         key: plt-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-${{ hashFiles('mix.lock', 'mix.exs') }}
         restore-keys: |
           plt-v1-${{ inputs.platform }}-${{ runner.arch }}-${{ inputs.elixir }}-${{ inputs.otp }}-
-    - shell: bash
-      run: mix deps.get --check-locked
+    - name: Resolve dependencies
+      shell: bash
+      env:
+        PARLORA_DEPENDENCY_RESOLUTION: ${{ inputs.dependency-resolution }}
+      run: |
+        case "$PARLORA_DEPENDENCY_RESOLUTION" in
+          locked) mix deps.get --check-locked ;;
+          latest) mix deps.update --all ;;
+          *) echo "Unknown dependency resolution mode" >&2; exit 1 ;;
+        esac

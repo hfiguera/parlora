@@ -21,7 +21,7 @@ In the new application's `mix.exs`, replace `deps/0` with:
 defp deps do
   [
     {:parlora, "~> 0.2.0"},
-    {:jido, "== 2.4.0"}
+    {:jido, "~> 2.4.0"}
   ]
 end
 ```

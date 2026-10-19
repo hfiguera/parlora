@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Allow compatible Hex dependency updates while retaining the current minimum
+  versions. Optional backends stay within their current minor releases.
+- Add a scheduled Linux check that resolves the latest allowed dependencies and
+  runs the library suite. Routine CI continues using the committed lockfile.
+
 ## 0.2.0
 
 Adds a public observability contract while keeping monitoring configuration in

@@ -13,7 +13,7 @@ defmodule Parlora.Backends.Sagents.Job do
 
     cond do
       not Code.ensure_loaded?(Sagents.Agent) ->
-        Error.tuple(:unsupported, "Install optional sagents == 0.17.1 to use this backend")
+        Error.tuple(:unsupported, "Install optional sagents ~> 0.17.1 to use this backend")
 
       not is_function(Keyword.get(options, :agent), 1) or
         not is_function(Keyword.get(options, :result), 1) or

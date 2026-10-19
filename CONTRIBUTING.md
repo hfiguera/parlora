@@ -26,6 +26,43 @@ resource readiness alone does not establish that a callback has already run.
 Session process exit and adapter cleanup are separate observations; tests that
 need complete teardown must monitor the owned adapter processes too.
 
+## Dependency requirements
+
+`mix.exs` allows compatible updates while `mix.lock` records the exact versions
+used for development and routine CI. Host applications resolve Parlora's
+requirements with their own lockfile; a dependency's lockfile does not constrain
+them. Keep the development tool requirements and toolchain pins unchanged when
+widening library dependency ranges.
+
+Stable infrastructure dependencies allow later 1.x releases, with the currently
+tested versions as their minimums. Dependencies below 1.0 and optional backend
+integrations allow patch updates within the current minor version. Jido also
+stays within its current minor version because the adapter depends on its
+execution and cancellation APIs. Expand these ranges only after checking the
+upstream changes and testing the affected integration. Keep native toolchain and
+Cargo constraints separate from Hex dependency requirements.
+
+Routine CI uses `mix deps.get --check-locked`. One additional Linux job on the
+nightly schedule and manual **full** runs uses `mix deps.update --all`, then
+compiles, checks compile cycles, and runs the complete library suite, including
+all three backend integrations. It saves the resolved lockfile as an artifact for
+investigation without committing it. The job uses the current development
+Elixir/OTP pair; the locked build retains the full supported runtime matrix.
+
+To reproduce that resolution locally, use a disposable checkout of the revision
+you want to check so the development lockfile stays unchanged:
+
+```sh
+MIX_ENV=test mix deps.update --all
+MIX_ENV=test mix compile --warnings-as-errors
+MIX_ENV=test mix xref graph --format cycles --label compile-connected --fail-above 0
+MIX_ENV=test mix test --warnings-as-errors --raise
+```
+
+When establishing or lowering a minimum version, test that version on the
+supported runtimes before changing the requirement. A successful latest-version
+run does not establish compatibility with an untested lower bound.
+
 ## Compatibility and packaged consumers
 
 The workflow in `.github/workflows/ci.yml` checks compilation and the full library
