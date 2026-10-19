@@ -1,8 +1,7 @@
 defmodule Parlora.Session.Progress do
   @moduledoc false
-  alias Parlora.Session.Health
-  alias Parlora.Session.State
-  alias Parlora.Session.Uncertainty
+  alias Parlora.Session.{Health, State, Uncertainty}
+  alias Parlora.Telemetry
 
   def snapshot(state) do
     %{
@@ -65,13 +64,26 @@ defmodule Parlora.Session.Progress do
         end),
       health: Health.snapshot(state.health),
       playback: state.playback,
-      output_recovery: state.output_recovery
+      output_recovery:
+        if(state.output_recovery, do: Map.delete(state.output_recovery, :telemetry))
     }
   end
 
   def started(state, event) do
     case state.jobs[event.request_id] do
       %{request: %{task_revision: revision}} = job when revision == event.payload.task_revision ->
+        job =
+          if Map.has_key?(job, :started_at_us) or job.status != :submitted do
+            job
+          else
+            job
+            |> Telemetry.finish(:telemetry_queue, :started)
+            |> Map.put(
+              :telemetry_backend,
+              Telemetry.start(:backend, Telemetry.request(state, job.request))
+            )
+          end
+
         %{
           state
           | jobs:
@@ -89,6 +101,11 @@ defmodule Parlora.Session.Progress do
 
   def delivery(state, request, stage, command_id \\ nil) do
     job = state.jobs[request.id]
+
+    job =
+      if stage in [:accepted, :rejected, :unknown, :unconfirmed, :stale, :not_applicable],
+        do: Telemetry.finish(job, :telemetry_delivery, stage),
+        else: job
 
     job =
       Map.merge(job, %{

@@ -123,6 +123,8 @@ defmodule Parlora.AudioPipeline do
         work_us: finished - started,
         late_us: max(0, started - state.deadline),
         pending_frames: length(next.pending),
+        blocked_duration_us:
+          if(next.blocked_since_us, do: max(0, finished - next.blocked_since_us), else: 0),
         blocked: if(next.blocked_since_us == nil, do: 0, else: 1),
         delay_ms: max(1, div(duration_us + 999, 1_000))
       },

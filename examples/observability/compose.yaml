@@ -1,0 +1,25 @@
+name: parlora-observability
+services:
+  metrics:
+    image: victoriametrics/victoria-metrics:v1.151.0
+    command: ["-retentionPeriod=7d"]
+    ports: ["127.0.0.1:18428:8428"]
+    volumes: ["metrics:/victoria-metrics-data"]
+    restart: "no"
+  traces:
+    image: victoriametrics/victoria-traces:v0.11.0
+    command: ["-retentionPeriod=7d"]
+    ports: ["127.0.0.1:19428:10428"]
+    volumes: ["traces:/victoria-traces-data"]
+    restart: "no"
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.160.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    ports: ["127.0.0.1:14318:4318", "127.0.0.1:13133:13133"]
+    volumes: ["./collector.yaml:/etc/otelcol/config.yaml:ro"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [metrics, traces]
+    restart: "no"
+volumes:
+  metrics:
+  traces:

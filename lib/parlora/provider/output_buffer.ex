@@ -57,7 +57,13 @@ defmodule Parlora.Provider.OutputBuffer do
         {:ok, _frames, rest} ->
           :telemetry.execute(
             [:parlora, :provider, :audio_read],
-            %{at_us: now, bytes: queue.bytes - rest.bytes, queue_bytes: rest.bytes},
+            %{
+              at_us: now,
+              bytes: queue.bytes - rest.bytes,
+              queue_bytes: rest.bytes,
+              queue_duration_us: AudioFormat.duration_us(init.audio_format, rest.bytes),
+              oldest_age_us: oldest_age(rest, now)
+            },
             metadata(init)
           )
 
@@ -70,10 +76,10 @@ defmodule Parlora.Provider.OutputBuffer do
   end
 
   defp received(result, before, pcm, init, now) do
-    {bytes, dropped, outcome} =
+    {queue, dropped, outcome} =
       case result do
-        {:ok, {queue, _sequence}} -> {queue.bytes, 0, :accepted}
-        {:error, error} -> {before.bytes, byte_size(pcm), error.code}
+        {:ok, {queue, _sequence}} -> {queue, 0, :accepted}
+        {:error, error} -> {before, byte_size(pcm), error.code}
       end
 
     :telemetry.execute(
@@ -83,11 +89,20 @@ defmodule Parlora.Provider.OutputBuffer do
         bytes: byte_size(pcm),
         duration_us: AudioFormat.duration_us(init.audio_format, byte_size(pcm)),
         queue_before_bytes: before.bytes,
-        queue_bytes: bytes,
+        queue_bytes: queue.bytes,
+        queue_duration_us: AudioFormat.duration_us(init.audio_format, queue.bytes),
+        oldest_age_us: oldest_age(queue, now),
         dropped_bytes: dropped
       },
       Map.put(metadata(init), :outcome, outcome)
     )
+  end
+
+  defp oldest_age(queue, now) do
+    case :queue.peek(queue.items) do
+      {:value, frame} -> max(0, now - frame.timestamp_us)
+      :empty -> 0
+    end
   end
 
   defp metadata(init),

@@ -258,6 +258,7 @@ defmodule Parlora.Event do
         )
       )
 
+    Parlora.Telemetry.event(event)
     send(init.event_sink, {:parlora_event, event})
     :telemetry.execute([:parlora, :event], %{count: 1}, %{source: source, type: type})
     event

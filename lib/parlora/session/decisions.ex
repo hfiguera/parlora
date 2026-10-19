@@ -460,6 +460,14 @@ defmodule Parlora.Session.Decisions do
     task = Map.drop(task, [:context_wait, :clarification])
     id = ID.new()
     request = request(state, task, id)
+    queue = Parlora.Telemetry.start(:backend_queue, Parlora.Telemetry.request(state, request))
+
+    state = %{
+      state
+      | jobs:
+          Map.put(state.jobs, id, %{request: request, status: :queued, telemetry_queue: queue})
+    }
+
     Process.send_after(self(), {:job_deadline, id}, state.limits.job_timeout_ms)
     task = %{task | request_ids: [id | task.request_ids]}
     state = put_task(state, task)
@@ -471,7 +479,7 @@ defmodule Parlora.Session.Decisions do
         request_id: id
       )
 
-      %{state | jobs: Map.put(state.jobs, id, %{request: request, status: :queued})}
+      state
     end
   end
 
@@ -484,7 +492,17 @@ defmodule Parlora.Session.Decisions do
         request_id: request.id
       )
 
-      %{state | jobs: Map.put(state.jobs, request.id, %{request: request, status: :failed})}
+      %{
+        state
+        | jobs:
+            Map.put(
+              state.jobs,
+              request.id,
+              state.jobs[request.id]
+              |> Parlora.Telemetry.finish(:telemetry_queue, :timeout)
+              |> Map.put(:status, :failed)
+            )
+      }
     else
       dispatch_current(state, request)
     end
@@ -497,11 +515,15 @@ defmodule Parlora.Session.Decisions do
       state = %{
         state
         | jobs:
-            Map.put(state.jobs, request.id, %{
-              request: request,
-              status: :submitted,
-              admission: :pending
-            })
+            Map.put(
+              state.jobs,
+              request.id,
+              Map.merge(state.jobs[request.id], %{
+                request: request,
+                status: :submitted,
+                admission: :pending
+              })
+            )
       }
 
       Commands.run(
@@ -515,7 +537,17 @@ defmodule Parlora.Session.Decisions do
         start: &submission_started(&1, request.id)
       )
     else
-      %{state | jobs: Map.put(state.jobs, request.id, %{request: request, status: :cancelled})}
+      %{
+        state
+        | jobs:
+            Map.put(
+              state.jobs,
+              request.id,
+              state.jobs[request.id]
+              |> Parlora.Telemetry.finish(:telemetry_queue, :cancelled)
+              |> Map.put(:status, :cancelled)
+            )
+      }
     end
   end
 
@@ -545,12 +577,27 @@ defmodule Parlora.Session.Decisions do
       {%{status: status} = job, {:error, error}} when status in [:submitted, :uncertain] ->
         cond do
           error.details[:execution] == :never_submitted ->
-            %{state | jobs: Map.put(state.jobs, request.id, %{job | status: :cancelled})}
+            %{
+              state
+              | jobs:
+                  Map.put(
+                    state.jobs,
+                    request.id,
+                    job
+                    |> Parlora.Telemetry.finish(:telemetry_queue, :cancelled)
+                    |> Map.put(:status, :cancelled)
+                  )
+            }
 
           error.code == :timeout or error.details[:outcome] == :unknown ->
             Uncertainty.mark(state, request.id, :unknown)
 
           true ->
+            job =
+              job
+              |> Parlora.Telemetry.finish(:telemetry_queue, :rejected)
+              |> Parlora.Telemetry.finish(:telemetry_backend, :rejected)
+
             state = %{state | jobs: Map.put(state.jobs, request.id, %{job | status: :failed})}
 
             resolve_delegation(state, request.delegation_id, %{

@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: parlora-demo
+          scrape_interval: 2s
+          static_configs:
+            - targets: [host.docker.internal:19100]
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 128
+    spike_limit_mib: 32
+  batch:
+    timeout: 1s
+    send_batch_size: 64
+exporters:
+  prometheusremotewrite:
+    endpoint: http://metrics:8428/api/v1/write
+    sending_queue:
+      enabled: true
+      queue_size: 100
+  otlphttp/traces:
+    traces_endpoint: http://traces:10428/insert/opentelemetry/v1/traces
+    sending_queue:
+      enabled: true
+      queue_size: 100
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [prometheusremotewrite]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/traces]

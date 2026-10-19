@@ -11,7 +11,8 @@ defmodule Parlora.Session do
     ContextUpdate,
     Error,
     Event,
-    ID
+    ID,
+    Telemetry
   }
 
   alias Parlora.Session.{Commands, ContextWait, Decisions, Health, Progress, State, Uncertainty}
@@ -228,6 +229,14 @@ defmodule Parlora.Session do
   def handle_info({ref, result}, %{policy_task: %{ref: ref} = work} = state) do
     Process.demonitor(ref, [:flush])
     Process.cancel_timer(work.timer)
+    outcome = if match?({:ok, _}, result), do: :ok, else: :error
+
+    outcome =
+      if match?({:ok, _}, result) and state.context.revision != work.revision,
+        do: :superseded,
+        else: outcome
+
+    Telemetry.stop(work.telemetry, outcome)
     state = %{state | policy_task: nil}
 
     next =
@@ -242,6 +251,7 @@ defmodule Parlora.Session do
   end
 
   def handle_info({:policy_timeout, ref}, %{policy_task: %{ref: ref} = work} = state) do
+    Telemetry.stop(work.telemetry, :timeout)
     Task.Supervisor.terminate_child(SessionSupervisor.via(state.id, :tasks), work.pid)
     Process.demonitor(ref, [:flush])
     Process.cancel_timer(work.timer)
@@ -258,6 +268,7 @@ defmodule Parlora.Session do
         %{policy_task: %{ref: ref} = work} = state
       ) do
     Process.cancel_timer(work.timer)
+    Telemetry.stop(work.telemetry, :error)
 
     {:noreply,
      policy_failed(
@@ -366,7 +377,7 @@ defmodule Parlora.Session do
     end
   end
 
-  def handle_info(:shutdown_timeout, state) do
+  def handle_info(message, state) when message in [:shutdown_timeout, :shutdown_settled] do
     terminate_policy(state)
     Enum.each(state.startup.owners, fn {_role, owner} -> AdapterOwner.cancel(owner.watcher) end)
 
@@ -379,15 +390,49 @@ defmodule Parlora.Session do
       })
 
     State.broadcast(state, event)
-    {:stop, :normal, state}
+
+    state = %{
+      state
+      | jobs: Map.new(state.jobs, fn {id, job} -> {id, Telemetry.close_job(job)} end)
+    }
+
+    timed_out? =
+      message == :shutdown_timeout or
+        System.monotonic_time(:microsecond) >= state.startup.telemetry_shutdown.deadline_us
+
+    Telemetry.stop(
+      state.startup.telemetry_shutdown,
+      if(timed_out?, do: :timeout, else: :completed)
+    )
+
+    Telemetry.stop(state.startup.telemetry_session, :closed)
+
+    {:stop, :normal,
+     %{state | startup: %{state.startup | telemetry_session: nil, telemetry_shutdown: nil}}}
   end
 
   def handle_info(_message, state), do: {:noreply, state}
 
   @impl true
-  def terminate(_reason, state) do
+  def terminate(reason, state) do
+    outcome =
+      if reason in [:normal, :shutdown] or match?({:shutdown, _}, reason),
+        do: :closed,
+        else: :error
+
+    Telemetry.stop(
+      state.startup.telemetry_startup,
+      if(outcome == :closed, do: :cancelled, else: :failed)
+    )
+
+    Telemetry.stop(state.startup.telemetry_shutdown, outcome)
+    Telemetry.stop(get_in(state.output_recovery || %{}, [:telemetry]), :error)
+
+    Enum.each(state.jobs, fn {_id, job} -> Telemetry.close_job(job) end)
+
     abort_startup(state)
     terminate_policy(state)
+    Telemetry.stop(state.startup.telemetry_session, outcome)
   end
 
   defp start_adapter(state, role) do
@@ -440,6 +485,12 @@ defmodule Parlora.Session do
         do: "Session readiness deadline expired",
         else: "Adapter startup failed"
 
+    Telemetry.stop(
+      state.startup.telemetry_startup,
+      if(reason == :timeout, do: :timeout, else: :failed)
+    )
+
+    state = %{state | startup: %{state.startup | telemetry_startup: nil}}
     State.emit(state, :failed, %{error: Error.new(reason, message)})
     begin_close(state, :cancel)
   end
@@ -580,7 +631,12 @@ defmodule Parlora.Session do
         | output_recovery:
             Map.merge(payload, %{
               stage: :reconnecting,
-              started_at_us: System.monotonic_time(:microsecond)
+              started_at_us: System.monotonic_time(:microsecond),
+              telemetry:
+                Telemetry.start(:recovery, %{
+                  session_id: state.id,
+                  parent_operation_id: state.startup.telemetry_session.metadata.operation_id
+                })
             })
       }
 
@@ -595,9 +651,14 @@ defmodule Parlora.Session do
          type: :output_recovered,
          payload: %{token: token}
        }) do
+    Telemetry.stop(state.output_recovery.telemetry, :reconnected)
     # The adapter's connection incarnation changed. Tasks and their revision /
     # execution identity did not; no backend submit or retry occurs here.
-    %{state | output_recovery: Map.put(state.output_recovery, :stage, :awaiting_user)}
+    %{
+      state
+      | output_recovery:
+          state.output_recovery |> Map.put(:stage, :awaiting_user) |> Map.delete(:telemetry)
+    }
   end
 
   defp apply_event(%{status: :ready} = state, %Event{
@@ -610,9 +671,15 @@ defmodule Parlora.Session do
     if function_exported?(module, :resume_output, 2) do
       pipeline = state.output_pipeline
 
+      telemetry =
+        Telemetry.start(:interruption, %{
+          session_id: state.id,
+          parent_operation_id: state.startup.telemetry_session.metadata.operation_id
+        })
+
       callback = fn -> resume_after_clear(pipeline, module, pid, token) end
 
-      queue_recovery(state, callback)
+      queue_recovery(state, callback, telemetry)
     else
       begin_close(state, :cancel)
     end
@@ -767,14 +834,19 @@ defmodule Parlora.Session do
          do: module.resume_output(pid, token)
   end
 
-  defp queue_recovery(state, callback) do
+  defp queue_recovery(state, callback, telemetry \\ nil) do
     complete = fn current, reply ->
+      Telemetry.stop(telemetry, if(reply == :ok, do: :completed, else: :unknown))
       if(reply == :ok, do: current, else: begin_close(current, :cancel))
     end
 
     case Commands.enqueue(state, :provider, callback, complete) do
-      {:ok, next} -> next
-      _error -> begin_close(state, :cancel)
+      {:ok, next} ->
+        next
+
+      _error ->
+        Telemetry.stop(telemetry, :rejected)
+        begin_close(state, :cancel)
     end
   end
 
@@ -914,13 +986,14 @@ defmodule Parlora.Session do
 
   defp complete_startup(state) do
     if System.monotonic_time(:microsecond) < state.startup.deadline_us do
+      Telemetry.stop(state.startup.telemetry_startup, :ready)
       State.emit(state, :ready, %{capabilities: state.ready})
 
       Enum.each([state.input_pipeline, state.output_pipeline], fn pid ->
         send(pid, {:activate_pipeline, state.startup.pipeline_token})
       end)
 
-      %{state | status: :ready}
+      %{state | status: :ready, startup: %{state.startup | telemetry_startup: nil}}
     else
       startup_failed(state, :timeout)
     end
@@ -970,6 +1043,12 @@ defmodule Parlora.Session do
     {module, options} = state.policy
     snapshot = state.context
 
+    telemetry =
+      Telemetry.start(:policy, %{
+        session_id: state.id,
+        parent_operation_id: state.startup.telemetry_session.metadata.operation_id
+      })
+
     task =
       Task.Supervisor.async_nolink(
         SessionSupervisor.via(state.id, :tasks),
@@ -982,7 +1061,13 @@ defmodule Parlora.Session do
 
     %{
       state
-      | policy_task: %{ref: task.ref, pid: task.pid, revision: snapshot.revision, timer: timer},
+      | policy_task: %{
+          ref: task.ref,
+          pid: task.pid,
+          revision: snapshot.revision,
+          timer: timer,
+          telemetry: telemetry
+        },
         policy_trigger: trigger,
         context_resolved?: false
     }
@@ -1051,7 +1136,15 @@ defmodule Parlora.Session do
           now = System.monotonic_time(:microsecond)
 
           job =
+            job
+            |> Telemetry.finish(:telemetry_queue, result.status)
+            |> Telemetry.finish(:telemetry_backend, result.status)
+
+          delivery = delivery_telemetry(state, request)
+
+          job =
             Map.merge(job, %{
+              telemetry_delivery: delivery,
               status: result.status,
               result: result,
               delivery: :pending,
@@ -1075,6 +1168,11 @@ defmodule Parlora.Session do
         state
     end
   end
+
+  defp delivery_telemetry(%{status: :ready} = state, request),
+    do: Telemetry.start(:delivery, Telemetry.request(state, request))
+
+  defp delivery_telemetry(_state, _request), do: nil
 
   defp deliver_pending(
          %{context_resolved?: true, policy_task: nil, status: :ready, output_recovery: nil} =
@@ -1222,11 +1320,37 @@ defmodule Parlora.Session do
   defp begin_close(%{status: :closing} = state, _policy), do: state
 
   defp begin_close(state, policy) do
+    Telemetry.stop(state.startup.telemetry_startup, :cancelled)
+
+    telemetry =
+      Telemetry.start(:shutdown, %{
+        session_id: state.id,
+        parent_operation_id: state.startup.telemetry_session.metadata.operation_id
+      })
+
+    Telemetry.stop(get_in(state.output_recovery || %{}, [:telemetry]), :closed)
+
+    state =
+      if state.output_recovery,
+        do: %{state | output_recovery: Map.delete(state.output_recovery, :telemetry)},
+        else: state
+
     deadline = System.monotonic_time(:microsecond) + state.limits.shutdown_timeout_ms * 1_000
     timer = Process.send_after(self(), :shutdown_timeout, state.limits.shutdown_timeout_ms)
     starting? = state.status == :starting
     abort_startup(state)
-    state = %{state | status: :closing, startup: %{state.startup | pending: nil}}
+
+    state = %{
+      state
+      | status: :closing,
+        startup: %{
+          state.startup
+          | pending: nil,
+            telemetry_startup: nil,
+            telemetry_shutdown: Map.put(telemetry, :deadline_us, deadline)
+        }
+    }
+
     state = Commands.close(state)
     state = health_update(state, Health.close(state.health))
 
@@ -1246,6 +1370,8 @@ defmodule Parlora.Session do
 
     jobs =
       Map.new(state.jobs, fn {id, job} ->
+        job = Telemetry.close_job(job)
+
         {id, if(job.status == :queued, do: %{job | status: :cancelled}, else: job)}
       end)
 
@@ -1272,7 +1398,7 @@ defmodule Parlora.Session do
   defp finish_close_if_settled(state) do
     if MapSet.size(state.startup.cleanup) == 0 and
          Enum.all?(Map.keys(state.startup.owners), &MapSet.member?(state.closing_adapters, &1)),
-       do: send(self(), :shutdown_timeout)
+       do: send(self(), :shutdown_settled)
 
     state
   end
@@ -1295,6 +1421,7 @@ defmodule Parlora.Session do
   defp terminate_policy(%{policy_task: nil}, _notify), do: nil
 
   defp terminate_policy(state, notify) do
+    Telemetry.stop(state.policy_task.telemetry, :cancelled)
     Process.cancel_timer(state.policy_task.timer)
     Process.demonitor(state.policy_task.ref, [:flush])
     AdapterOwner.stop(state.policy_task.pid, notify)
