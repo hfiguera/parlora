@@ -25,7 +25,10 @@ document.querySelector('#start').onclick = async () => {
               const samples=new Float32Array(data.numberOfFrames);
               data.copyTo(samples,{planeIndex:0,format:'f32-planar'});
               result.trackSampleRate=data.sampleRate;
-              if(result.trackFirstSignalAtMs===undefined && samples.some(x=>Math.abs(x)>.01)) result.trackFirstSignalAtMs=performance.now();
+              if(samples.some(x=>Math.abs(x)>.01)) {
+                result.trackFirstSignalAtMs ??= performance.now();
+                result.trackLastSignalAtMs = performance.now();
+              }
               result.trackSamples.push(samples);data.close();
             }
           } catch(error){result.trackCaptureError=String(error);}
@@ -81,8 +84,11 @@ document.querySelector('#start').onclick = async () => {
               const incoming=stats.find(s=>s.type==='inbound-rtp'&&s.kind==='audio');
               if(incoming && result.receiverTimeline.length<4096) {
                 result.receiverTimeline.push({at_ms:performance.now()-result.runAtMs,
-                  packetsReceived:incoming.packetsReceived,packetsLost:incoming.packetsLost,
+                  packetsReceived:incoming.packetsReceived,packetsLost:incoming.packetsLost,packetsDiscarded:incoming.packetsDiscarded,
                   concealedSamples:incoming.concealedSamples,concealmentEvents:incoming.concealmentEvents,
+                  totalSamplesReceived:incoming.totalSamplesReceived,
+                  insertedSamplesForDeceleration:incoming.insertedSamplesForDeceleration,
+                  removedSamplesForAcceleration:incoming.removedSamplesForAcceleration,
                   jitter:incoming.jitter,jitterBufferDelay:incoming.jitterBufferDelay,
                   jitterBufferTargetDelay:incoming.jitterBufferTargetDelay,
                   jitterBufferEmittedCount:incoming.jitterBufferEmittedCount});

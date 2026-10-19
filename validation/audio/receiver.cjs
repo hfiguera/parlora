@@ -10,7 +10,7 @@ async function run() {
   const seconds = Number(process.env.AUDIO_SECONDS || 10);
   if(!Number.isInteger(seconds) || seconds<3 || seconds>300) throw Error('AUDIO_SECONDS must be 3..300');
   const workers = Array.from({length:workerCount},()=>new Worker(`const end=Date.now()+${(seconds+5)*1000};let n=0;while(Date.now()<end){n+=Math.sqrt(Math.random());}`,{eval:true}));
-  const browser = await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required','--use-fake-device-for-media-stream']});
+  const browser = await chromium.launch({channel:process.env.BROWSER_CHANNEL || undefined,headless:true,args:['--autoplay-policy=no-user-gesture-required','--use-fake-device-for-media-stream']});
   try {
     const page=await browser.newPage();
     const trace = process.env.AUDIO_TIMELINE==='1' ? '&trace=1' : '';

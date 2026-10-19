@@ -15,6 +15,7 @@ python3 validation/audio/test_analyze.py
 python3 - <<'PYCODE'
 import socket
 with socket.socket() as listener:
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:listener.bind(('127.0.0.1',4002))
     except OSError:raise SystemExit('Port 4002 is occupied; refusing to test against another server')
 PYCODE

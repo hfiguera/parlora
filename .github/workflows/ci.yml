@@ -111,6 +111,9 @@ jobs:
       - name: Check audio playback
         run: scripts/audio_benchmark.sh "$RUNNER_TEMP/audio-gates"
         if: env.PARLORA_INTEGRATION == 'true'
+        env:
+          BROWSER_CHANNEL: chromium
+          AUDIO_TIMELINE: '1'
       - name: Run full offline release checks
         run: scripts/release_check.sh "$RUNNER_TEMP/order_desk" --output "$RUNNER_TEMP/release-check"
         if: env.PARLORA_INTEGRATION == 'true' && env.PARLORA_FULL_CI == 'true'
