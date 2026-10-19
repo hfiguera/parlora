@@ -92,7 +92,15 @@ def analyze(directory):
     errors = []
     # NetEq legitimately time-stretches audio. Verify the full chirp frequency
     # progression rather than treating a rigid first-second phase match as truth.
-    for millisecond in range(signal_first_ms + 100, signal_last_ms - 99, 100):
+    # Keep each whole window inside the same 10 ms ending guard as the gap
+    # check. Otherwise a slightly longer decoded tail adds a window containing
+    # ringing instead of the chirp. Anchor a final window at that guarded end
+    # as well, so valid audio near the ending is still checked.
+    final_start_ms = signal_last_ms + 1 - 10 - 100
+    frequency_starts = list(range(signal_first_ms + 100, final_start_ms + 1, 100))
+    if frequency_starts and frequency_starts[-1] != final_start_ms:
+        frequency_starts.append(final_start_ms)
+    for millisecond in frequency_starts:
         segment = received[millisecond * unit:(millisecond + 100) * unit]
         t = ((millisecond - signal_first_ms) * .001 + .05) * expected_ms / duration_ms
         slope = min(70, 3500000 / expected_ms)

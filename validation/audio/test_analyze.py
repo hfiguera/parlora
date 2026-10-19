@@ -13,9 +13,9 @@ spec.loader.exec_module(analyzer)
 
 
 class AnalysisTest(unittest.TestCase):
-    def fixture(self, transform, mode="normal"):
+    def fixture(self, transform, mode="normal", duration_ms=2000):
         reference = [round(8000 * math.sin(2 * math.pi * (220 * n / 24000 + 35 * (n / 24000)**2)))
-                     for n in range(48000)]
+                     for n in range(duration_ms * 24)]
         received = [0] * 12000 + transform(reference.copy()) + [0] * 12000
         with tempfile.TemporaryDirectory() as tmp:
             directory = pathlib.Path(tmp)
@@ -53,6 +53,42 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result['checks']['duration_accounting_40ms'])
         self.assertTrue(result['checks']['frequency_progression'])
         self.assertTrue(result['passed'])
+
+    def codec_tail(self, samples):
+        # Model the recorded CI edge case: the onset crosses the activity
+        # threshold late, and lower-frequency ringing extends the ending.
+        # A measured duration just over 10 seconds used to select an extra
+        # frequency window that straddled the end of the actual chirp.
+        samples[:24 * 9] = [0] * (24 * 9)
+        tail = [round(1600 * math.exp(-n / (24 * 15)) *
+                      math.sin(2 * math.pi * 300 * n / 24000))
+                for n in range(24 * 10)]
+        return samples + tail
+
+    def test_terminal_codec_tail_does_not_fail_frequency_progression(self):
+        result = self.fixture(self.codec_tail, duration_ms=10_000)
+        self.assertGreater(result['signal_duration_ms'], 10_000)
+        self.assertTrue(result['checks']['frequency_progression'])
+        self.assertTrue(result['passed'])
+
+    def test_wrong_frequency_in_final_tone_window_still_fails_with_codec_tail(self):
+        def transform(samples):
+            samples[-24 * 100:] = [round(8000 * math.sin(2 * math.pi * 1000 * n / 24000))
+                                   for n in range(24 * 100)]
+            return self.codec_tail(samples)
+
+        result = self.fixture(transform, duration_ms=10_000)
+        self.assertFalse(result['checks']['frequency_progression'])
+        self.assertTrue(result['checks']['duration_accounting_40ms'])
+
+    def test_one_ms_gap_near_tone_end_still_fails_with_codec_tail(self):
+        def transform(samples):
+            samples[-24 * 30:-24 * 29] = [0] * 24
+            return self.codec_tail(samples)
+
+        result = self.fixture(transform, duration_ms=10_000)
+        self.assertFalse(result['checks']['no_internal_silence'])
+        self.assertTrue(result['checks']['duration_accounting_40ms'])
 
     def test_one_ms_gap_between_full_level_audio_still_fails(self):
         result = self.fixture(lambda x:x[:24000] + [0]*24 + x[24024:])
