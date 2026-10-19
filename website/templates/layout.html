@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f1e8">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL}}">
+  <meta property="og:site_name" content="Parlora">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:url" content="{{CANONICAL}}">
+  <meta property="og:type" content="{{TYPE}}">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/svg+xml" href="{{BASE}}assets/favicon.svg">
+  <link rel="alternate" type="application/rss+xml" title="Parlora blog" href="{{BASE}}feed.xml">
+  <link rel="preload" href="{{BASE}}assets/fonts/dmsans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{BASE}}assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{BASE}}assets/site.css">
+  {{SYNTAX_SCRIPTS}}
+  <script src="{{BASE}}assets/site.js" defer></script>
+  {{STRUCTURED_DATA}}
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header rail">
+    <a class="brand" href="{{BASE}}" aria-label="Parlora blog home">
+      <svg class="brand-mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><path d="M4 13v6m6-13v20m6-23v26m6-20v14m6-10v6"/></svg>
+      <span>Parlora</span>
+    </a>
+    <nav aria-label="Project navigation">
+      <a href="{{BASE}}"{{BLOG_CURRENT}}>Blog</a>
+      <a href="https://hexdocs.pm/parlora/">Docs</a>
+      <a href="https://hex.pm/packages/parlora">Hex</a>
+      <a href="https://github.com/hfiguera/parlora">GitHub</a>
+    </nav>
+  </header>
+  {{CONTENT}}
+  <footer class="site-footer rail">
+    <div><a class="footer-brand" href="{{BASE}}">Parlora</a><p>Voice AI agents, built with Elixir.</p></div>
+    <nav aria-label="Footer navigation">
+      <a href="{{BASE}}feed.xml">RSS feed</a>
+      <a href="{{BASE}}privacy/">Analytics privacy</a>
+      <a href="https://github.com/hfiguera/parlora/blob/main/LICENSE">MIT license</a>
+      <a href="#top">Back to top <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4m-5 5 5-5 5 5"/></svg></a>
+    </nav>
+  </footer>
+  {{ANALYTICS}}
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "url": "https://hfiguera.github.io/parlora",
+  "name": "Parlora",
+  "author": "Humberto Figuera",
+  "description": "Notes on building voice AI agents with Elixir. The conversations, the audio, and the work in between.",
+  "cloudflare_token": "f968ea7d6e614cc9a3e2d537ced91a10",
+  "articles": [
+    {
+      "slug": "introducing-parlora",
+      "title": "Introducing Parlora: build voice AI agents with Elixir",
+      "description": "What Parlora does, the problems it handles, and how to connect a spoken conversation to useful work in your application.",
+      "date": "2026-10-18",
+      "version": "0.1.0",
+      "category": "Project introduction"
+    }
+  ]
+}
