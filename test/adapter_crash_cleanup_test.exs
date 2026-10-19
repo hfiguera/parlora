@@ -1,5 +1,9 @@
 defmodule Parlora.AdapterCrashCleanupTest do
   use ExUnit.Case, async: true
+
+  # Orphan discovery sweeps run asynchronously across the VM. Allow scheduling
+  # headroom for observing cleanup; session shutdown deadlines have separate tests.
+  @lifecycle_timeout 5_000
   alias Parlora.{Event, SessionSupervisor}
   alias Parlora.TestSupport.{FakeBackend, MemoryChannel, MemoryProvider, OrderPolicy}
 
@@ -51,31 +55,41 @@ defmodule Parlora.AdapterCrashCleanupTest do
         )
 
       on_exit(fn -> if Process.alive?(session), do: Process.exit(session, :kill) end)
-      assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 1_000
+      assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, @lifecycle_timeout
       state = :sys.get_state(session)
-      assert_receive {:orphan_candidate, first}
-      assert_receive {:orphan_candidate, second}
+      assert_receive {:orphan_candidate, first}, @lifecycle_timeout
+      assert_receive {:orphan_candidate, second}, @lifecycle_timeout
       {:ok, unrelated} = Leaf.start_link(observer: self())
-      assert_receive {:orphan_candidate, ^unrelated}
+      assert_receive {:orphan_candidate, ^unrelated}, @lifecycle_timeout
       on_exit(fn -> Process.exit(unrelated, :kill) end)
       supervisor = GenServer.whereis(SessionSupervisor.via(state.id, :adapters))
       owner = state.startup.owners.backend.owner
       adapter = elem(state.adapters.backend, 1)
       victim = if @victim == :owner, do: owner, else: adapter
 
-      pids = [
-        session,
-        supervisor,
-        owner,
-        adapter,
-        first,
-        second,
-        state.startup.owners.backend.watcher
+      owned = [
+        session: session,
+        supervisor: supervisor,
+        owner: owner,
+        adapter: adapter,
+        leaf: first,
+        nested_leaf: second,
+        watcher: state.startup.owners.backend.watcher
       ]
 
-      refs = Enum.map(pids, &Process.monitor/1)
+      on_exit(fn -> Enum.each(owned, fn {_role, pid} -> Process.exit(pid, :kill) end) end)
+      monitors = for {role, pid} <- owned, do: {role, pid, Process.monitor(pid)}
+      deadline = System.monotonic_time(:millisecond) + @lifecycle_timeout
       Process.exit(victim, :kill)
-      for ref <- refs, do: assert_receive({:DOWN, ^ref, :process, _pid, _reason}, 1_000)
+
+      for {role, pid, ref} <- monitors do
+        remaining = max(0, deadline - System.monotonic_time(:millisecond))
+
+        assert_receive {:DOWN, ^ref, :process, ^pid, _reason},
+                       remaining,
+                       "Crash cleanup timed out waiting for #{role} #{inspect(pid)}"
+      end
+
       assert Process.alive?(unrelated)
     end
   end
