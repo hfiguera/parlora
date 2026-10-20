@@ -180,6 +180,11 @@ defmodule Parlora.TestSupport.MemoryAudio do
          :ok <- epoch_valid(state, frame),
          {:ok, queue} <- AudioQueue.push(state.outbound, frame) do
       queue = if state.suppressed, do: state.outbound, else: queue
+
+      if state.options[:observe_writes] == true and is_pid(state.options[:observer]) do
+        send(state.options[:observer], {:audio_written, self(), frame})
+      end
+
       {:reply, :ok, %{state | outbound: queue}}
     else
       error -> {:reply, error, state}
