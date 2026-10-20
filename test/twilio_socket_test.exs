@@ -1,5 +1,8 @@
 defmodule Parlora.TwilioSocketTest do
-  use ExUnit.Case, async: true
+  # These network cases exercise the default 200 ms queue freshness and playback
+  # acknowledgment deadlines. Unrelated async load can legitimately expire a
+  # queued packet before the socket owner gets scheduled to pull it.
+  use ExUnit.Case, async: false
   alias Parlora.{AudioFormat, AudioFrame, Event}
   alias Parlora.TestSupport.{MemoryAudio, TwilioPeer}
 
@@ -39,6 +42,7 @@ defmodule Parlora.TwilioSocketTest do
                    provider:
                      {MemoryProvider,
                       observer: observer,
+                      observe_writes: true,
                       capabilities: Parlora.Providers.OpenAI.Protocol.capabilities()},
                    backend: {FakeBackend, observer: observer},
                    context_policy: {OrderPolicy, []},
@@ -90,9 +94,11 @@ defmodule Parlora.TwilioSocketTest do
 
     frame = AudioFrame.new(data, AudioFormat.pcmu(), "provider", 0)
     :ok = MemoryAudio.audio(provider, frame)
+    await_output_handoff(session)
     {[media, mark], peer} = TwilioPeer.receive_messages(peer, 2)
     assert media["event"] == "media"
     assert Base.decode64!(media["media"]["payload"]) == data
+    assert_receive {:audio_written, ^provider, %{data: ^data, duration_us: 10_000}}
     assert [%{data: ^data, duration_us: 10_000}] = MemoryAudio.drain(provider)
 
     peer =
@@ -170,17 +176,16 @@ defmodule Parlora.TwilioSocketTest do
       assert :ok = MemoryAudio.audio(call.provider, frame)
     end
 
+    await_output_handoff(first.session)
     {[first_audio, first_mark], first_peer} = TwilioPeer.receive_messages(first.peer, 2)
+    first_peer = acknowledge_playback(first_peer, first.session, first_mark, 2)
+    await_output_handoff(second.session)
     {[second_audio, second_mark], second_peer} = TwilioPeer.receive_messages(second.peer, 2)
+    second_peer = acknowledge_playback(second_peer, second.session, second_mark, 2)
     assert first_audio["streamSid"] == @stream
     assert second_audio["streamSid"] == second_stream
     assert Base.decode64!(first_audio["media"]["payload"]) == :binary.copy(<<1>>, 160)
     assert Base.decode64!(second_audio["media"]["payload"]) == :binary.copy(<<2>>, 160)
-
-    # A real Twilio peer echoes playback marks. Leaving either mark pending
-    # races the channel's acknowledgment deadline while observing teardown.
-    first_peer = acknowledge_playback(first_peer, first.session, first_mark, 2)
-    second_peer = acknowledge_playback(second_peer, second.session, second_mark, 2)
 
     ref = Process.monitor(first.session)
     second_ref = Process.monitor(second.session)
@@ -199,9 +204,86 @@ defmodule Parlora.TwilioSocketTest do
                AudioFrame.new(:binary.copy(<<3>>, 160), AudioFormat.pcmu(), "provider", 1)
              )
 
+    await_output_handoff(second.session)
     {[audio, mark], peer} = TwilioPeer.receive_messages(second_peer, 2)
     assert Base.decode64!(audio["media"]["payload"]) == :binary.copy(<<3>>, 160)
     acknowledge_playback(peer, second.session, mark, 3)
+  end
+
+  test "delayed socket output expires explicitly and fresh audio still reaches the same session" do
+    listener = start_supervised!({Bandit, plug: {Route, self()}, ip: {127, 0, 0, 1}, port: 0})
+    {:ok, {_ip, port}} = ThousandIsland.listener_info(listener)
+    call = connect_call(port, "/media", @call, @stream)
+    id = Parlora.status(call.session).session_id
+    stale = :binary.copy(<<1>>, 160)
+    fresh = :binary.copy(<<2>>, 160)
+
+    on_exit(fn ->
+      try do
+        :sys.resume(call.socket)
+      catch
+        :exit, _closed -> :ok
+      after
+        TwilioPeer.close(call.peer)
+      end
+    end)
+
+    # Hold the real transport owner, while the pipeline and channel still run.
+    # This models dispatch starvation without racing a fixed sleep against the
+    # queue's default freshness deadline.
+    assert :ok = :sys.suspend(call.socket)
+    assert :ok = MemoryAudio.audio(call.provider, output_frame(stale, 0))
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      session_id: ^id,
+                      source: :channel,
+                      type: :playback_observed,
+                      payload: %{stage: :queued}
+                    }}
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      session_id: ^id,
+                      source: :channel,
+                      type: :audio_discontinuity,
+                      payload: %{
+                        cause: :output_stale,
+                        dropped_bytes: 160,
+                        dropped_frames: 1,
+                        dropped_duration_us: 20_000
+                      }
+                    }}
+
+    assert Parlora.status(call.session).status == :ready
+    assert :ok = :sys.resume(call.socket)
+    assert :ok = MemoryAudio.audio(call.provider, output_frame(fresh, 1))
+    await_output_handoff(call.session)
+    {[audio, mark], peer} = TwilioPeer.receive_messages(call.peer, 2)
+    assert audio["streamSid"] == @stream
+    assert Base.decode64!(audio["media"]["payload"]) == fresh
+    acknowledge_playback(peer, call.session, mark, 2)
+    assert Parlora.status(call.session).status == :ready
+
+    refute_received {:parlora_event, %Event{session_id: ^id, source: :channel, type: :failed}}
+  end
+
+  defp output_frame(bytes, sequence),
+    do: AudioFrame.new(bytes, AudioFormat.pcmu(), "provider", sequence)
+
+  defp await_output_handoff(session) do
+    id = Parlora.status(session).session_id
+
+    # The socket's receive budget starts after transport handoff, not provider
+    # enqueue. Surface expiration explicitly instead of waiting for bytes which
+    # the channel has correctly discarded under its freshness contract.
+    assert_receive {:parlora_event,
+                    %Event{session_id: ^id, source: :channel, type: type, payload: payload}}
+                   when (type == :playback_observed and payload.stage == :handed_off) or
+                          (type == :audio_discontinuity and payload.cause == :output_stale)
+
+    assert type == :playback_observed,
+           "Output expired before socket handoff: #{inspect(payload)}"
   end
 
   defp acknowledge_playback(peer, session, mark, sequence) do

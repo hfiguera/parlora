@@ -1,5 +1,7 @@
 defmodule Parlora.TelnyxSocketTest do
-  use ExUnit.Case, async: true
+  # Exercise the real channel freshness deadline without competing with the
+  # async suite's CPU load and VM-wide cleanup sweeps.
+  use ExUnit.Case, async: false
   alias Parlora.{AudioFormat, AudioFrame, Event}
   alias Parlora.TestSupport.{MemoryAudio, TelnyxPeer, TwilioPeer}
 
@@ -24,6 +26,7 @@ defmodule Parlora.TelnyxSocketTest do
                      provider:
                        {MemoryProvider,
                         observer: observer,
+                        observe_writes: true,
                         capabilities: Parlora.Providers.OpenAI.Protocol.capabilities()},
                      backend: {FakeBackend, observer: observer},
                      context_policy: {OrderPolicy, []},
@@ -96,7 +99,7 @@ defmodule Parlora.TelnyxSocketTest do
     assert_receive {:parlora_event,
                     %Event{type: :playback_observed, payload: %{boundary: :telnyx_mark}}}
 
-    Process.sleep(60)
+    assert_receive {:audio_written, ^provider, %{data: ^bytes}}
     assert [%{data: ^bytes}] = MemoryAudio.drain(provider)
     monitors = for pid <- [session, socket, provider, backend], do: {pid, Process.monitor(pid)}
     send(owner, :stop)
