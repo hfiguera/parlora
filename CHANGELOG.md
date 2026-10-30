@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Upgrade Bandit to 1.14.1, ExWebRTC to 0.18.0, WebSockAdapter to 0.7.0,
+  and optional Sagents to 0.19.2. Update the required DTLS, LangChain, ReqLLM,
+  and model-catalog dependencies. Include Plug.Crypto 2.2.1's secret-redaction
+  fix while retaining the other locked versions.
+
 - Add Phonic-1 as a supported speech-to-speech provider, with
   asynchronous client delegation and PCM24 streaming, including conversion for
   mu-law channels. See the [Phonic guide](docs/phonic-provider.md) for capabilities

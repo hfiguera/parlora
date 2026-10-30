@@ -1,0 +1,317 @@
+{
+  "base_commit": "6f8ad69c9c769ca29faa182a7ce75be95606d643",
+  "branch": "dependency-upgrades",
+  "method": "Diff old/new published Hex source archives; verify archive checksums against Hex release API; inspect changed code against application call sites.",
+  "packages": [
+    {
+      "package": "bandit",
+      "sources": [
+        {
+          "version": "1.13.1",
+          "url": "https://repo.hex.pm/tarballs/bandit-1.13.1.tar",
+          "sha256": "39028f0b5a21404661410a6c19275060a9822c9dcca70b7c3e4e4fa50b11da58"
+        },
+        {
+          "version": "1.14.1",
+          "url": "https://repo.hex.pm/tarballs/bandit-1.14.1.tar",
+          "sha256": "87c7ee5e08fb5f22d4e072e681e1101266a21432889b08ef8d0cb0c1450f8bba"
+        }
+      ],
+      "diff_sha256": "97936dd28fb8c608a8214e83ac7ea3f2c1060f3b5e96b41e0c1c5ea537ca884d"
+    },
+    {
+      "package": "ex_webrtc",
+      "sources": [
+        {
+          "version": "0.17.0",
+          "url": "https://repo.hex.pm/tarballs/ex_webrtc-0.17.0.tar",
+          "sha256": "a1efcc34e6903d1e9a37ae59312beab3ce258a6c30dccd5973a85ed8b545ee98"
+        },
+        {
+          "version": "0.18.0",
+          "url": "https://repo.hex.pm/tarballs/ex_webrtc-0.18.0.tar",
+          "sha256": "a88d1c7dc09020104a04b38f3985224a09982b30f16e0108596a527e6ee26cf1"
+        }
+      ],
+      "diff_sha256": "44fa3ce829633b85015698bb8be780a4882b9df7a334b415e35a8d0f5fc707e4"
+    },
+    {
+      "package": "websock_adapter",
+      "sources": [
+        {
+          "version": "0.6.0",
+          "url": "https://repo.hex.pm/tarballs/websock_adapter-0.6.0.tar",
+          "sha256": "50021a85bce8f203b086705d9e0c5415e2c7eb05d319111b0428fe71f9934617"
+        },
+        {
+          "version": "0.7.0",
+          "url": "https://repo.hex.pm/tarballs/websock_adapter-0.7.0.tar",
+          "sha256": "a7243f803540425d4890e4c7bc0af9b2519e3935b6c01d9a924ba63527549d65"
+        }
+      ],
+      "diff_sha256": "9488c509750c261c8f8b6a3663c15015d2e9ca8696e124bef78d18cb6496f892"
+    },
+    {
+      "package": "sagents",
+      "sources": [
+        {
+          "version": "0.17.1",
+          "url": "https://repo.hex.pm/tarballs/sagents-0.17.1.tar",
+          "sha256": "ccb464df8bda3635affb796c6daa4165f21ad8401e9d26e66c924bd4b54aaa4a"
+        },
+        {
+          "version": "0.19.2",
+          "url": "https://repo.hex.pm/tarballs/sagents-0.19.2.tar",
+          "sha256": "6dfbd8f15ab9b170dae2c4fd8bb5eeb2c8fd4a58f43fc21169377849d7041e76"
+        }
+      ],
+      "diff_sha256": "11cbbac823fe072a445b67864d2690c481efbe1d6053a03f023d883210d38b92"
+    },
+    {
+      "package": "ex_dtls",
+      "sources": [
+        {
+          "version": "0.18.1",
+          "url": "https://repo.hex.pm/tarballs/ex_dtls-0.18.1.tar",
+          "sha256": "02aa48094982d231043cce4b02e6f2c6cfafc7e308c4afe116785641f92f0a56"
+        },
+        {
+          "version": "0.18.2",
+          "url": "https://repo.hex.pm/tarballs/ex_dtls-0.18.2.tar",
+          "sha256": "941f5c15d02ffffbee9635f49e8c655ff81502b965330f7d22518c45614d1464"
+        }
+      ],
+      "diff_sha256": "35e58b5b69c21955f1fc3bc7e9725f63873a4e86f3b00bd772d25568da8605c9"
+    },
+    {
+      "package": "langchain",
+      "sources": [
+        {
+          "version": "0.15.3",
+          "url": "https://repo.hex.pm/tarballs/langchain-0.15.3.tar",
+          "sha256": "ca37a13cd327c1b9de958cbf26b8968690d6549f9380a147ee686af31f4a62b7"
+        },
+        {
+          "version": "0.15.7",
+          "url": "https://repo.hex.pm/tarballs/langchain-0.15.7.tar",
+          "sha256": "cfe454ae5c03376d1c0f3b9da916cddd57b78826af74390eb6e608e00ea97a08"
+        }
+      ],
+      "diff_sha256": "6bca8ca0c64d30030f43b6609ae875b1465eb4b6bce3c56246f2c6d3570f008d"
+    },
+    {
+      "package": "req_llm",
+      "sources": [
+        {
+          "version": "1.26.0",
+          "url": "https://repo.hex.pm/tarballs/req_llm-1.26.0.tar",
+          "sha256": "a2c46ed5f01dd318d546f3383b535c833dcb13d0faaec3aea766a8fbf035a18f"
+        },
+        {
+          "version": "1.29.0",
+          "url": "https://repo.hex.pm/tarballs/req_llm-1.29.0.tar",
+          "sha256": "0d632304e9acc6099fc743b18036559e08bcbd5335cab8347f2fa858c691a081"
+        }
+      ],
+      "diff_sha256": "0c948edf173bf9e89775f843bf5760db6a9a2e68a1f09338403b040d5c69e264"
+    },
+    {
+      "package": "llm_db",
+      "sources": [
+        {
+          "version": "2026.9.8",
+          "url": "https://repo.hex.pm/tarballs/llm_db-2026.9.8.tar",
+          "sha256": "d0b5d807e7e68d2ee62afb1969061714daece24ba6953abe7cec8b80c8d48a5c"
+        },
+        {
+          "version": "2026.10.7",
+          "url": "https://repo.hex.pm/tarballs/llm_db-2026.10.7.tar",
+          "sha256": "eb4aa0a64ce3c4d80bd49a2e87ba830f5d2b2bed46fe5e2fc0e4ee0eb17c04bb"
+        }
+      ],
+      "diff_sha256": "887cad411d726da814a4a0eed16c9a0ce8dd34b644444b4547d2598874cb22c7"
+    },
+    {
+      "package": "plug_crypto",
+      "sources": [
+        {
+          "version": "2.2.0",
+          "url": "https://repo.hex.pm/tarballs/plug_crypto-2.2.0.tar",
+          "sha256": "83a95744ab1c75876542b6fab135fcc176280e0f301a111c1f757fddcec95d2c"
+        },
+        {
+          "version": "2.2.1",
+          "url": "https://repo.hex.pm/tarballs/plug_crypto-2.2.1.tar",
+          "sha256": "4417ccbd8f85e627321cd07d2ab9c4b621f1fd883b9905af241f9b4b780b94b6"
+        }
+      ],
+      "diff_sha256": "f7c3cb414c056fd650f75003d36c91903103bed93fb8f600ee47b14ceadb9cbd"
+    }
+  ],
+  "validation": {
+    "snapshot_dirty": true,
+    "source_sha256": {
+      "mix.exs": "5e192b8d5674867caef16c4ca95acaf5461c5d931b6c7b11ec52a0547b7b886c",
+      "mix.lock": "727567a6d51619022e312113b596ad2a8c0ecf31699781cc9f550314cd5a6def",
+      "examples/order_desk/mix.exs": "ab4194fe729a6f099c4ee7027d506af9423b062b3749adac9d7fe6f838287897",
+      "examples/order_desk/mix.lock": "b04ab12c0f63af5b5baad4b4bc181baea4c56d5b330d55aa782db0545f9c850d",
+      "validation/optional-backends/consumer/mix.exs": "01c35b8fbe6ed6e8d94446a015edcffbd63eb3da3856893a3d932fc48c1bb91f",
+      "lib/parlora/backends/sagents.ex": "6e585005e7107cc0cbdd3522bfdd48d764b73bfdbe1793c6a32001ac83d768d3",
+      "lib/parlora/backends/sagents/job.ex": "5d327024aa5aebc2407d2d83d19a539136e3b269933b79493cd979632f421332"
+    },
+    "checks": [
+      {
+        "name": "macos full mix ci",
+        "platform": "macOS arm64 / Elixir 1.20.4 / OTP 29.1.2",
+        "passed": 603,
+        "excluded": 3,
+        "dialyzer_errors": 0,
+        "status": "passed"
+      },
+      {
+        "name": "linux full mix ci",
+        "platform": "Linux x86_64 / Elixir 1.20.4 / OTP 29.1.2",
+        "passed": 603,
+        "excluded": 3,
+        "dialyzer_errors": 0,
+        "status": "passed"
+      },
+      {
+        "name": "linux minimum compatibility",
+        "platform": "Elixir 1.18.5 / OTP 27.3.4.15",
+        "raw_result": "6 properties, 600 tests, 0 failures, 3 excluded",
+        "status": "passed"
+      },
+      {
+        "name": "linux intermediate compatibility",
+        "platform": "Elixir 1.19.5 / OTP 28.5",
+        "raw_result": "6 properties, 597 tests, 0 failures (3 excluded)",
+        "status": "passed"
+      },
+      {
+        "name": "linux stability",
+        "passed": 3,
+        "session_cycles": 100,
+        "corrections": 500,
+        "status": "passed"
+      },
+      {
+        "name": "packaged default OrderDesk",
+        "passed": 248,
+        "production_release_smoke": true,
+        "status": "passed"
+      },
+      {
+        "name": "packaged Sagents OrderDesk",
+        "passed": 251,
+        "production_release_smoke": true,
+        "status": "passed"
+      },
+      {
+        "name": "optional backend isolation and releases",
+        "tests": {
+          "none": 11,
+          "jido": 33,
+          "sagents": 24,
+          "legion": 35
+        },
+        "status": "passed"
+      },
+      {
+        "name": "browser audio",
+        "seeded_matrix_cases": 200,
+        "scenarios": [
+          "steady",
+          "jitter",
+          "burst",
+          "variable",
+          "interrupt",
+          "disconnect",
+          "reconnect"
+        ],
+        "status": "passed"
+      },
+      {
+        "name": "browser concurrency",
+        "cohorts": [
+          "warmup-4",
+          "normal-1",
+          "normal-2",
+          "normal-4",
+          "stall-4",
+          "disconnect-4"
+        ],
+        "status": "passed"
+      },
+      {
+        "name": "browser UI and guide",
+        "voice_cycles": 3,
+        "guide_cycles": 2,
+        "order_ui": {
+          "save": true,
+          "reload": true,
+          "duplicate_prevented": true,
+          "rejection": true,
+          "confirmation_focus": true,
+          "failed_confirmation_retry": true,
+          "refresh_recovery": true,
+          "edit_preserved": true,
+          "keyboard_entry": true,
+          "responsive_large_text": true,
+          "page_errors": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "JavaScript helpers and evaluators",
+        "passed": 48,
+        "status": "passed"
+      },
+      {
+        "name": "strict documentation generation",
+        "status": "passed"
+      },
+      {
+        "name": "Plug.Crypto",
+        "sign_verify_round_trip": true,
+        "encrypt_decrypt_round_trip": true,
+        "invalid_token_rejection": true,
+        "secret_redaction_checks": 6,
+        "status": "passed"
+      },
+      {
+        "name": "direct dependency versions",
+        "all_up_to_date": true,
+        "status": "passed"
+      }
+    ],
+    "log_sha256": {
+      "ci-final.log": "59e4676bab213fb2cacf40817ff243f553a912101f655d2206b4e1469243c022",
+      "linux-ci-final.log": "272c4fada6ac3187b5ed6711cb12a63aef8ffbf196000f416379e852080df2fa",
+      "linux-otp27-final.log": "52ff130f4d91ee258cd18be0f9acc10b30f18d317ed23a44117841fdadf783f6",
+      "linux-otp28-final.log": "0749c11df3b419a640c351ea0c19e115562a5bcdbaf5efc6ce7fe8900e5e520f",
+      "linux-stability-final.log": "e9c6e102aa5a78a597432a17fecfa84a6345ba196e1a466461b0fa72a420fe0d",
+      "consumer-final-default.log": "bb97358713c010302eead1a7e09c188a2aa689c6f08e0092ac426c666bbe2dc0",
+      "consumer-final-sagents.log": "5a52749ecd6aa95434acc7bba2403c74a709392b73356bf216f7602058dcd5e6",
+      "optional-final-none.log": "32405ea6fe10cebe0604d68d8f122c23e62a47001db5441a541493d072c54754",
+      "optional-final-jido.log": "f375e99123aca549b4b99d72e7da1208889e118cce78accacbaaa465d99274eb",
+      "optional-final-sagents.log": "2bccd5e1ec36273f4d25a39a6c271d959a7fa85888d57c7808a9992d5dd26262",
+      "optional-final-legion.log": "84bba07760b5314dd0458e4a9dc76b2c97a51612ebebc546309221d80214e1c9",
+      "javascript.log": "7f80c05aaca10a9e980f7c33eb239e2e51c74181cf684b01a558f7f6916b6df0",
+      "docs-final.log": "87973f94d9f7ec44940f0de687b06e2c72462c6cac78cef1828278f4c0cc322e",
+      "crypto-probe.log": "6d8c14008e787e8de46902d82a1ab0ef9e4bad2e439a1add42c70de4f66c6855",
+      "browser-final.log": "61efb6cbdbb2ee7d32f4b91cb6b56d0690880b61cc0c81b098111110b52cac2d",
+      "audio-final.log": "a61f658d6824118fe890a22c432dfe172a0e0a7aa48365a3b190c4ba265599b0",
+      "concurrency-final.log": "b861dbaf492ca5a1d75b82138c5b272646ee371a461023bb63ae7c813b01bd1e",
+      "outdated-final.log": "896e8b2adcc84b61dd64b092965f2b38bdcea02897bbc807fa2be1021317c363"
+    },
+    "additional_artifact_sha256": {
+      "audio-final/report.json": "64d2cbe7e6ed60f099d465d32fbcfcc5037146ca95d4fd3dbb20c888147e73dd",
+      "audio-final/matrix.json": "58479744a92d8359c1a7c300a9e8174ec08f47ff2414618644c4ab6d73ab05d1",
+      "concurrency-final/report.json": "0853e96a5e5f4b5932b984a90ca5b8429adbaa3f513d5390be1d0723a26b9d20",
+      "crypto_probe.exs": "ac3190974ffccb6d4ed6c547b09749bdfd6ecb1a7cf8f75b8907b9d54f218cf6"
+    },
+    "log_handling": "Temporary GitHub release-asset query strings omitted from copied logs.",
+    "limits": "Offline synthetic checks only. Consumer/browser checks ran on macOS; Linux coverage includes CI, OTP 27/28 compatibility and stability. No new live-provider, physical-audio or human listening tests."
+  }
+}

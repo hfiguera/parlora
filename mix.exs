@@ -44,16 +44,16 @@ defmodule Parlora.MixProject do
 
   defp deps do
     [
-      {:ex_webrtc, "~> 0.17.0"},
-      {:bandit, "~> 1.13 and >= 1.13.1"},
+      {:ex_webrtc, "~> 0.18.0"},
+      {:bandit, "~> 1.14 and >= 1.14.1"},
       {:plug, "~> 1.20 and >= 1.20.3"},
-      {:websock_adapter, "~> 0.6.0"},
+      {:websock_adapter, "~> 0.7.0"},
       {:websock, "~> 0.5.3"},
       {:mint, "~> 1.11"},
       {:mint_web_socket, "~> 1.0 and >= 1.0.6"},
       {:rustler, "~> 0.38.0", runtime: false},
       {:jido, "~> 2.4.0", optional: true},
-      {:sagents, "~> 0.17.1", optional: true},
+      {:sagents, "~> 0.19.2", optional: true},
       {:legion, "~> 0.6.0", optional: true},
       {:telemetry, "~> 1.4 and >= 1.4.2"},
       {:ex_doc, "== 0.40.4", only: :dev, runtime: false},
