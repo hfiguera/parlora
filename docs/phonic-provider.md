@@ -1,24 +1,30 @@
 # Phonic provider
 
-`Parlora.Providers.Phonic` is an experimental Phonic-1 speech-to-speech adapter.
+`Parlora.Providers.Phonic` is a supported Phonic-1 speech-to-speech adapter.
 It connects directly to `wss://api.phonic.ai/v1/sts/ws`; applications continue
 to own their channels, context policies, backend execution, and task revisions.
 No Phonic SDK or persistent hosted agent is required.
 
 ## Integration status
 
-Phonic-1 is accepted into Parlora as an **experimental speech-to-speech provider**.
+Phonic-1 is a **supported speech-to-speech provider** in Parlora.
 The adapter has offline regression coverage, successful live-service probes,
-and a successful manual OrderDesk workflow. OrderDesk is a separate example
-application used to exercise the integration.
+and successful manual OrderDesk calls through the browser, Twilio, and Telnyx.
+OrderDesk is a separate example application used to exercise the integration.
+
+Promotion follows fixes for stalled result announcements, duplicate replies,
+and abnormal session shutdown. Linux validation passed the full library CI,
+native binding checks, stability tests, standalone OrderDesk production release
+checks, and strict documentation generation.
 
 The longer automated OrderDesk workflow now passes repeated live runs after
 Phonic continuation and reply-coordination fixes. The [stall investigation](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/interpretation-scheduling/stall-investigation.md)
 and [reply-coordination follow-up](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/interpretation-scheduling/reply-coordination.md)
 record the reproduced causes, regressions, cross-provider checks, and evidence
-limits. This qualifies that workflow; experimental acceptance does not establish
-general production readiness. See also the
-[acceptance evidence](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/phonic/README.md#acceptance-decision).
+limits. Support covers the documented adapter capabilities and tested workflows.
+Reliability under sustained production load and varied network conditions remains
+unqualified. See also the
+[initial acceptance evidence](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/phonic/README.md#acceptance-decision).
 
 ## Usage
 

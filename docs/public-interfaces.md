@@ -154,8 +154,9 @@ Initial channel events:
 This interface supports a **continuous full-duplex voice provider with client
 delegation and speakable context injection**. Built-in providers are
 [OpenAI GPT-Live-1](openai-provider.md), [Gemini 3.8 Live](gemini-provider.md),
-[Grok Voice 3.0](grok-provider.md), and experimental [Phonic-1](phonic-provider.md). Callback compatibility is necessary but does
-not make arbitrary voice architectures interchangeable.
+[Grok Voice 3.0](grok-provider.md), and [Phonic-1](phonic-provider.md).
+Callback compatibility is necessary but does not make arbitrary voice
+architectures interchangeable.
 
 Before starting either audio pipeline, the coordinator requires:
 

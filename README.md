@@ -40,9 +40,9 @@ explains these terms in more detail.
 
 | Audio channels | Voice providers | Backend integrations |
 | --- | --- | --- |
-| Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0, Phonic-1 (experimental) | Jido, Sagents, Legion, or your own `Parlora.Backend` |
+| Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0, Phonic-1 | Jido, Sagents, Legion, or your own `Parlora.Backend` |
 
-Phonic-1 is accepted into Parlora as an experimental speech-to-speech provider.
+Phonic-1 is a supported speech-to-speech provider in Parlora.
 See the [Phonic guide](docs/phonic-provider.md#integration-status) for validation
 evidence and remaining qualification limits.
 

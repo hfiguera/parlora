@@ -102,7 +102,9 @@ and exactly one explicitly confirmed save with spoken confirmation.
 
 These results qualify this tested workflow. They do not establish reliability
 across all conversations, channels, service conditions, or physical playback.
-Phonic remains an accepted **experimental provider**. The unexplained historical
+At the time of this investigation, Phonic remained an accepted **experimental
+provider**. The [current acceptance decision](../phonic/README.md#acceptance-decision)
+records its subsequent promotion to supported status. The unexplained historical
 Gemini items attempt remains recorded rather than being declared fixed.
 
 ## Reproduce with provider messages

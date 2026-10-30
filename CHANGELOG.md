@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add Phonic-1 as an accepted experimental speech-to-speech provider, with
+- Add Phonic-1 as a supported speech-to-speech provider, with
   asynchronous client delegation and PCM24 streaming, including conversion for
   mu-law channels. See the [Phonic guide](docs/phonic-provider.md) for capabilities
   and remaining qualification limits.

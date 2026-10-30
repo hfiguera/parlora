@@ -11,24 +11,39 @@ including PCM, mu-law, bounded TLS cleanup, and a synthetic Twilio stream.
 
 ## Acceptance decision
 
-Phonic-1 is accepted into Parlora as an **experimental provider**. This decision
-is supported by the implemented adapter, offline regression coverage, live wire
-and real-adapter probes, and a successful manual OrderDesk call on October 29,
-2026. That call handled an order correction, status and item lookups, delivery
-instructions, a draft, and a separately confirmed save. Four backend requests
-completed; the session recorded 29 interpretation evaluations and zero errors.
+Phonic-1 is a **supported provider** in Parlora. Promotion from experimental
+status follows regression and live-service proof for result continuation,
+duplicate reply coordination, and normal shutdown, plus successful manual
+OrderDesk calls through the browser, Twilio, and Telnyx.
+
+The initial experimental acceptance on October 29, 2026 was supported by the
+implemented adapter, offline regression coverage, live wire and real-adapter
+probes, and a successful manual OrderDesk call. That call handled an order
+correction, status and item lookups, delivery instructions, a draft, and a
+separately confirmed save. Four backend requests completed; the session recorded
+29 interpretation evaluations and zero errors.
 
 The [longer-workflow follow-up](../interpretation-scheduling/stall-investigation.md)
 reproduced and fixed two Phonic continuation defects. Phonic and the other three
 providers completed repeated live workflows. The report retains failed attempts
 and distinguishes a fixed Gemini harness issue from an older unexplained items
 timeout. See also the [original results](../interpretation-scheduling/README.md#observed-results-2026-10-29).
-The experimental acceptance decision does not establish production readiness or
-reliability across all conversations and channels.
 
 The [reply-coordination follow-up](../interpretation-scheduling/reply-coordination.md)
 adds coverage for duplicate announcements as well as workflow completion, and
 records the Phonic-only scheduling change and stronger live checks.
+
+Linux validation of runtime commit `646313a` passed full `mix ci`: 603 library
+checks, all three native bindings, and static analysis including Dialyzer with
+zero errors. The standalone packaged OrderDesk consumer passed 248 tests and
+its production release smoke test. Three stability tests covered 100 session
+cycles and 500 corrections; 11 Python tooling tests also passed. Strict
+documentation generation passed after the link correction in `4de4dc1`.
+
+Support covers the documented adapter capabilities and tested workflows.
+Reliability under sustained production load and varied network conditions
+remains unqualified. Automatic reconnect, initial history, and usage reporting
+remain unsupported; see the [provider guide](../../docs/phonic-provider.md).
 
 ## Wire probes
 
