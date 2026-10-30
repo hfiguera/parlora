@@ -1,8 +1,10 @@
 # OrderDesk interpretation scheduling validation
 
-These checks exercise the example application. They do not change Parlora's
-provider adapters, session validation, JEV model, confidence thresholds, number
-normalization, or database confirmation rules.
+The original scheduling changes exercise the example application without changing
+provider adapters. The [stall follow-up](stall-investigation.md) isolates and fixes
+two Phonic continuation defects and corrects a harness wording assumption. Other
+adapters, session validation, JEV model, confidence thresholds, number normalization,
+and database confirmation rules remain unchanged.
 
 ## Deterministic regressions
 
@@ -84,6 +86,10 @@ of deferred policy evaluations represent cheap rechecks, not TypeSafe calls.
 
 ## Observed results (2026-10-29)
 
+The table below retains the scheduling-patch observations at `69f4fd5`. For subsequent
+fixes, repeated live passes, and remaining evidence limits, see the
+[stall investigation](stall-investigation.md).
+
 | Check | Result |
 | --- | --- |
 | OrderDesk tests, warnings as errors | 248 passed |
@@ -115,9 +121,10 @@ volume and does not establish a network latency improvement.
 assertions. `providers-summary.json` also records failed longer attempts and a
 successful baseline Phonic stress run. Earlier development runs included a
 Phonic provider `response_timeout`, Gemini order transcription/uncertainty, and
-harness wording/timing assumptions. The final harness accepts varied question
-and save wording and waits for output to settle. The cause of the final live
-stalls has not been isolated; do not attribute them to a provider or to this
-patch without a controlled reproduction. The larger workflow is **not fully
-qualified across all providers**. Passing offline tests and one successful
-scenario are not a guarantee that every live conversation succeeds.
+harness wording/timing assumptions. That harness accepted varied save wording
+and waited for output to settle, but still required question punctuation. At that
+point, the final live stalls had not been isolated and the larger workflow was
+not fully qualified across all providers. The [follow-up](stall-investigation.md)
+records the subsequent controlled reproductions, fixes, passes, and remaining
+limits. Passing offline tests and a finite set of successful scenarios do not
+guarantee that every live conversation succeeds.

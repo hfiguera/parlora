@@ -12,10 +12,12 @@ The adapter has offline regression coverage, successful live-service probes,
 and a successful manual OrderDesk workflow. OrderDesk is a separate example
 application used to exercise the integration.
 
-Production qualification remains pending while longer automated stress-test
-stalls are investigated. The [acceptance evidence](../validation/phonic/README.md#acceptance-decision)
-and [longer-workflow results](../validation/interpretation-scheduling/README.md#observed-results-2026-10-29)
-record the successful checks and unresolved scenarios.
+The longer automated OrderDesk workflow now passes repeated live runs after
+two Phonic continuation fixes. The [stall investigation](../validation/interpretation-scheduling/stall-investigation.md)
+records the reproduced causes, regressions, cross-provider checks, and evidence
+limits. This qualifies that workflow; experimental acceptance does not establish
+general production readiness. See also the
+[acceptance evidence](../validation/phonic/README.md#acceptance-decision).
 
 ## Usage
 

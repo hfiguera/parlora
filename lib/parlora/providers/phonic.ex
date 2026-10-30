@@ -44,6 +44,7 @@ defmodule Parlora.Providers.Phonic do
       conversation_id: nil,
       commands: %CommandLog{limit: init.limits.max_records},
       calls: Calls.new(init.limits.max_records),
+      associated_results: MapSet.new(),
       tool_timers: %{},
       acknowledgments: %{},
       tool_timeout_ms: config.tools |> hd() |> Map.fetch!(:tool_call_output_timeout_ms),
@@ -132,7 +133,7 @@ defmodule Parlora.Providers.Phonic do
       {:ok, command, calls} ->
         next = state |> cancel_timer(:tool_timers, id) |> Map.put(:calls, calls)
         next = transmit(next, command)
-        next = if outcome[:status] == :rejected, do: %{next | continuation?: true}, else: next
+        next = association_continuation(next, outcome)
         {:reply, submission_reply(next), continue_response(next)}
 
       {terminal, _calls} when terminal in [:duplicate, :expired] ->
@@ -273,6 +274,38 @@ defmodule Parlora.Providers.Phonic do
 
   defp submission_reply(_state), do: :ok
 
+  # Async tool output only adds context; it does not request speech. A result
+  # can arrive through a late association after an earlier reply consumed the
+  # speakable continuation. Resume once per result in this caller turn. The
+  # retained call limit also bounds this set; duplicate associations must not
+  # create a generate_reply/delegation feedback loop.
+  defp association_continuation(
+         state,
+         %{
+           status: :associated,
+           task_status: :completed,
+           result_delivery: delivery,
+           result: result
+         }
+       )
+       when delivery in [:awaiting_provider, :accepted, :unconfirmed, :unknown] and
+              is_binary(result) and result != "" do
+    if MapSet.member?(state.associated_results, result) do
+      state
+    else
+      %{
+        state
+        | continuation?: true,
+          associated_results: MapSet.put(state.associated_results, result)
+      }
+    end
+  end
+
+  defp association_continuation(state, %{status: :rejected}),
+    do: %{state | continuation?: true}
+
+  defp association_continuation(state, _outcome), do: state
+
   defp continue_response(
          %{
            status: :ready,
@@ -329,7 +362,13 @@ defmodule Parlora.Providers.Phonic do
   defp event(_event, %{status: status} = state) when status != :ready, do: state
 
   defp event(%{"type" => "user_started_speaking"}, state) do
-    state = %{state | caller_speaking: true, auto_response_pending: true}
+    state = %{
+      state
+      | caller_speaking: true,
+        auto_response_pending: true,
+        associated_results: MapSet.new()
+    }
+
     interrupt(state)
   end
 
@@ -422,6 +461,15 @@ defmodule Parlora.Providers.Phonic do
         })
 
         state = %{state | calls: calls}
+        # An automatic turn can consist solely of this tool call, with no
+        # assistant speech boundary. It is progress, not an outstanding speech
+        # response. Let the later result/association request its continuation;
+        # do not generate before that output has been supplied.
+        state =
+          if state.caller_speaking,
+            do: state,
+            else: clear_response_watch(%{state | auto_response_pending: false})
+
         arm_timer(state, :tool_timers, id, :phonic_tool_timeout, state.tool_timeout_ms, %{})
 
       {:duplicate, _calls} ->

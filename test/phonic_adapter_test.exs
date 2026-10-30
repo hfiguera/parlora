@@ -165,6 +165,58 @@ defmodule Parlora.PhonicAdapterTest do
     refute_receive {:parlora_event, %Event{type: :playback_observed}}, 10
   end
 
+  test "a completed late association resumes after a reply consumed the original continuation",
+       context do
+    state = ready(context)
+    state = deliver(context, state, call("original", "order 123"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:append, update("corrected", "original")}, nil, state)
+
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    state = deliver(context, state, call("corrected-call", "order 124"))
+    state = deliver(context, state, started())
+    state = deliver(context, state, finished())
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    state = deliver(context, state, call("late", "get the result"))
+    state = deliver(context, state, started())
+    state = deliver(context, state, finished())
+    refute state.continuation?
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :accepted,
+      result: "Verified result"
+    }
+
+    {:reply, :ok, state} = Phonic.handle_call({:resolve_delegation, "late", outcome}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "late"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, finished())
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:resolve_delegation, "corrected-call", outcome}, nil, state)
+
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+
+    # A fresh caller turn may explicitly ask for the same result again.
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 2}, nil, state)
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    state = deliver(context, state, started())
+    state = deliver(context, state, finished())
+    state = deliver(context, state, call("repeat", "order 124 again"))
+    {:reply, :ok, _} = Phonic.handle_call({:resolve_delegation, "repeat", outcome}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+  end
+
   test "interruption events in either order clear once and retain fresh speech behind the clear barrier",
        context do
     for events <- [
@@ -190,6 +242,61 @@ defmodule Parlora.PhonicAdapterTest do
       assert {:reply, {:ok, frames}, _} = Phonic.handle_call({:read, 960}, nil, state)
       assert Enum.map_join(frames, & &1.data) == :binary.copy(<<3, 0>>, 480)
     end
+  end
+
+  test "late associations do not announce pending work or undeliverable results", context do
+    state = ready(context)
+
+    for {id, status, delivery} <- [
+          {"pending", :running, nil},
+          {"undelivered", :completed, :pending},
+          {"no-summary", :completed, :not_applicable},
+          {"obsolete", :completed, :stale}
+        ] do
+      state = deliver(context, state, call(id, "order"))
+
+      outcome = %{
+        status: :associated,
+        task_status: status,
+        result_delivery: delivery,
+        result: "This request is already tracked."
+      }
+
+      {:reply, :ok, state} = Phonic.handle_call({:resolve_delegation, id, outcome}, nil, state)
+      assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => ^id}}
+      refute state.continuation?
+      refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    end
+  end
+
+  test "a tool-only automatic turn releases the speech wait for a completed result", context do
+    state = ready(context)
+    state = deliver(context, state, call("original", "order 123"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:append, update("corrected", "original")}, nil, state)
+
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    old_watch = state.response_watch.token
+    state = deliver(context, state, call("corrected-call", "order 124"))
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :accepted,
+      result: "Verified result"
+    }
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:resolve_delegation, "corrected-call", outcome}, nil, state)
+
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    assert {:noreply, ^state} = Phonic.handle_info({:phonic_response_timeout, old_watch}, state)
   end
 
   test "results during caller speech wait for the automatic turn and a missing turn has a deadline",

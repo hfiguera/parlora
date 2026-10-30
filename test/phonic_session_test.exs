@@ -3,6 +3,35 @@ defmodule Parlora.PhonicSessionTest do
   alias Parlora.{AudioFormat, Event}
   alias Parlora.TestSupport.{FakeBackend, MemoryChannel, OrderPolicy, PhonicPeer}
 
+  defmodule AssociationPolicy do
+    @behaviour Parlora.ContextPolicy
+
+    @impl true
+    def interpret(snapshot, trigger, options) do
+      case OrderPolicy.interpret(snapshot, trigger, options) do
+        {:ok, []} ->
+          with {id, _entry} <-
+                 Enum.find(snapshot.pending_delegations, &(elem(&1, 1).status == :pending)),
+               {task_id, task} <- Enum.at(snapshot.tasks, 0) do
+            {:ok,
+             [
+               %Parlora.ContextDecision{
+                 kind: :associate_delegation,
+                 delegation_id: id,
+                 task_id: task_id,
+                 expected_task_revision: task.revision
+               }
+             ]}
+          else
+            _ -> {:ok, []}
+          end
+
+        result ->
+          result
+      end
+    end
+  end
+
   defmodule LocalProvider do
     @moduledoc false
     use GenServer
@@ -118,7 +147,42 @@ defmodule Parlora.PhonicSessionTest do
     refute_receive {:submitted, _}, 20
   end
 
-  defp boot(port, format) do
+  test "a real session resumes a completed late association without another backend request",
+       context do
+    {session, server, _channel, backend} = boot(context.port, %AudioFormat{}, AssociationPolicy)
+    emit(server, %{"type" => "input_text", "text" => "order 124"})
+    emit(server, call("original"))
+    assert_receive {:submitted, request}
+    :ok = FakeBackend.complete(backend, request, "Current verified order 124")
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    emit(server, %{"type" => "tool_call_output_processed", "tool_call_id" => "original"})
+    assert_receive {:parlora_event, %Event{type: :result_delivery, payload: %{stage: :accepted}}}
+    emit(server, %{"type" => "assistant_started_speaking"})
+    emit(server, %{"type" => "assistant_finished_speaking"})
+    emit(server, call("late"))
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "tool_call_output",
+                      "tool_call_id" => "late",
+                      "output" => %{
+                        "status" => "associated",
+                        "task_status" => "completed",
+                        "result_delivery" => "accepted",
+                        "result" => "Current verified order 124"
+                      }
+                    }}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    refute_receive {:submitted, _duplicate}, 20
+    assert map_size(Parlora.status(session).jobs) == 1
+  end
+
+  defp boot(port, format, policy \\ OrderPolicy) do
     caps = %Parlora.Channel.Capabilities{
       input_formats: [format],
       output_formats: [format],
@@ -131,7 +195,7 @@ defmodule Parlora.PhonicSessionTest do
         provider: {LocalProvider, api_key: "private-test", port: port},
         channel: {MemoryChannel, observer: self(), capabilities: caps},
         backend: {FakeBackend, observer: self()},
-        context_policy: {OrderPolicy, []},
+        context_policy: {policy, []},
         event_sink: self()
       )
 
@@ -155,4 +219,12 @@ defmodule Parlora.PhonicSessionTest do
   end
 
   defp emit(server, message), do: send(server, {:phonic_event, message})
+
+  defp call(id),
+    do: %{
+      "type" => "tool_call",
+      "tool_call_id" => id,
+      "tool_name" => "delegate_to_backend",
+      "parameters" => %{"request" => "order 124"}
+    }
 end

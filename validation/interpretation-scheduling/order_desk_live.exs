@@ -252,7 +252,9 @@ defmodule Parlora.OrderDeskInterpretationLive do
           String.contains?(text, "desk lamp")
 
         :clarify ->
-          proposals == [] and String.contains?(text, "?")
+          proposals == [] and
+            String.contains?(text, ["instruction", "wording"]) and
+            String.contains?(text, ["?", "tell", "provide", "state", "say", "what", "would you"])
 
         :draft ->
           Enum.any?(proposals, &(&1.status == "pending")) and text != ""
@@ -311,6 +313,10 @@ defmodule Parlora.OrderDeskInterpretationLive do
       operations: operations,
       interpretation: OrderDesk.Interpretation.stats(),
       failures: state.failures,
+      final_status:
+        inspect(Parlora.status(state.session), limit: :infinity, printable_limit: :infinity),
+      final_snapshot:
+        inspect(Parlora.snapshot(state.session), limit: :infinity, printable_limit: :infinity),
       evidence: OrderDesk.Interpretation.evidence(),
       requests: Enum.reverse(state.requests),
       captions: Enum.reverse(state.captions)
@@ -319,9 +325,12 @@ defmodule Parlora.OrderDeskInterpretationLive do
     File.mkdir_p!(Path.dirname(state.output))
     File.write!(state.output, JSON.encode!(report))
     IO.puts(JSON.encode!(Map.take(report, [:passed, :result, :calls, :checks])))
-    unless report.passed, do: System.halt(1)
+    report
   end
 end
 
-[directory, output] = System.argv()
-Parlora.OrderDeskInterpretationLive.run(directory, output)
+unless System.get_env("ORDER_DESK_LIVE_IMPORT") == "1" do
+  [directory, output] = System.argv()
+  report = Parlora.OrderDeskInterpretationLive.run(directory, output)
+  unless report.passed, do: System.halt(1)
+end

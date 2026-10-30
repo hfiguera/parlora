@@ -15,9 +15,11 @@ and real-adapter probes, and a successful manual OrderDesk call on October 29,
 instructions, a draft, and a separately confirmed save. Four backend requests
 completed; the session recorded 29 interpretation evaluations and zero errors.
 
-Longer automated stress runs remain partially qualified: OpenAI and Grok
-completed the workflow, while Gemini and Phonic had unresolved stalls. See the
-[recorded results](../interpretation-scheduling/README.md#observed-results-2026-10-29).
+The [longer-workflow follow-up](../interpretation-scheduling/stall-investigation.md)
+reproduced and fixed two Phonic continuation defects. Phonic and the other three
+providers completed repeated live workflows. The report retains failed attempts
+and distinguishes a fixed Gemini harness issue from an older unexplained items
+timeout. See also the [original results](../interpretation-scheduling/README.md#observed-results-2026-10-29).
 The experimental acceptance decision does not establish production readiness or
 reliability across all conversations and channels.
 

@@ -7,6 +7,10 @@
   mu-law channels. See the [Phonic guide](docs/phonic-provider.md) for capabilities
   and remaining qualification limits.
 
+- Resume Phonic result announcements after completed late tool associations,
+  suppress duplicate association continuations, and treat tool-only automatic
+  turns as progress so they cannot strand a queued result behind a speech wait.
+
 - Use Elixir's built-in `JSON` module and remove the direct Jason dependency.
   Minimum runtime requirements remain Elixir 1.18 and OTP 27. Dependencies may
   still install Jason for their own use. Custom structs passed across JSON
