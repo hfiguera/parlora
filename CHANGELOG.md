@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Add Phonic-1 as a supported speech-to-speech provider, with
+  asynchronous client delegation and PCM24 streaming, including conversion for
+  mu-law channels. See the [Phonic guide](docs/phonic-provider.md) for capabilities
+  and remaining qualification limits.
+
+- Resume Phonic result announcements after completed late tool associations,
+  suppress duplicate association continuations, and treat tool-only automatic
+  turns as progress so they cannot strand a queued result behind a speech wait.
+- Hold Phonic speakable updates until their explicit result reply can begin,
+  preventing an automatic answer followed by a duplicate continuation. Preserve
+  tool-only recovery, corrections, cancellation, and bounded context admission.
+- End normal Phonic sessions with WebSocket close code 1000 and bounded TLS
+  cleanup, avoiding the abnormal-disconnect recovery delay after callers hang up.
+
 - Use Elixir's built-in `JSON` module and remove the direct Jason dependency.
   Minimum runtime requirements remain Elixir 1.18 and OTP 27. Dependencies may
   still install Jason for their own use. Custom structs passed across JSON

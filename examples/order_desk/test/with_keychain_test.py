@@ -38,6 +38,26 @@ class KeychainLauncherTest(unittest.TestCase):
             "ORDER_DESK_TWILIO": "incoming",
         }
 
+    def test_phonic_uses_its_existing_keychain_service(self):
+        requested, execute = self.run_wrapper({"PARLORA_PROVIDER": "phonic"})
+        self.assertEqual(requested, [[
+            "/usr/bin/security", "find-generic-password", "-s",
+            "parlora-phonic-development", "-w",
+        ]])
+        self.assertEqual(execute.call_args.args[2]["PHONIC_API_KEY"], "dummy-secret")
+        self.assertNotIn("OPENAI_API_KEY", execute.call_args.args[2])
+
+    def test_explicit_phonic_key_bypasses_keychain(self):
+        requested, execute = self.run_wrapper({
+            "PARLORA_PROVIDER": "phonic", "PHONIC_API_KEY": "dummy-phonic",
+        })
+        self.assertEqual(requested, [])
+        self.assertEqual(execute.call_args.args[2]["PHONIC_API_KEY"], "dummy-phonic")
+
+    def test_missing_phonic_key_stops_before_launch(self):
+        with self.assertRaisesRegex(SystemExit, "selected provider's Keychain credential"):
+            self.run_wrapper({"PARLORA_PROVIDER": "phonic"}, keychain_status=1)
+
     def test_incoming_calls_use_only_the_documented_credentials(self):
         settings = self.base() | {
             "TWILIO_ACCOUNT_SID": "dummy-account",

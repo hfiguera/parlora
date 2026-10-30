@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "model": "phonic-1",
+  "qualification": "bounded synthetic protocol and adapter smoke evidence; no human/PSTN or production qualification",
+  "wire_probes": {
+    "baseline-pcm": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "tool_called": true,
+        "result_announced": true
+      },
+      "timeout": false,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:49:10.566250+00:00",
+      "executed_script_sha256": "5dd6caefbd842d91b5ddca7e11892be00782996f57a58a634bf641086256fe54",
+      "report_sha256": "229dba4c88331da50474c9a50dede235d4ad8d6f0a09b2f9b8a61062a5e77cf9"
+    },
+    "pending-pcm": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "tool_called": true,
+        "result_announced": true,
+        "answered_while_pending": true
+      },
+      "timeout": false,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:50:07.501080+00:00",
+      "executed_script_sha256": "5dd6caefbd842d91b5ddca7e11892be00782996f57a58a634bf641086256fe54",
+      "report_sha256": "2e7a938f5c8c8f72e3e0b32f3e0527a24b2048e4988f4aecd1558342b0a247a1"
+    },
+    "correction-pcm": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "tool_called": true,
+        "result_announced": true,
+        "correction_delegated": true,
+        "no_obsolete_fact": true
+      },
+      "timeout": false,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:49:11.712769+00:00",
+      "executed_script_sha256": "5dd6caefbd842d91b5ddca7e11892be00782996f57a58a634bf641086256fe54",
+      "report_sha256": "b642dc4924848e19a4eaae5472d8a8f3da6792047600f0904d2d468b62f883c0"
+    },
+    "interruption-pcm": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "interruption_observed": true
+      },
+      "timeout": false,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:51:52.033348+00:00",
+      "executed_script_sha256": "cf560f89c68f83cdb1e0be73a9fabce1f0a304fba591fd927bf329dfe764e37e",
+      "report_sha256": "0cafb93d2d61427ed31295253025b7686dbda57902423a665e7ebe24b36850b0"
+    },
+    "reconnect-pcm": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "resumed": true
+      },
+      "timeout": true,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:50:07.501097+00:00",
+      "executed_script_sha256": "5dd6caefbd842d91b5ddca7e11892be00782996f57a58a634bf641086256fe54",
+      "report_sha256": "d6f2bfb94a9e1b15a7643cd9173f5c6aa55c6cca76a07cf5a1733beca354ba39"
+    },
+    "baseline-pcmu": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "tool_called": false,
+        "result_announced": false
+      },
+      "timeout": true,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:51:53.133328+00:00",
+      "executed_script_sha256": "cf560f89c68f83cdb1e0be73a9fabce1f0a304fba591fd927bf329dfe764e37e",
+      "report_sha256": "dec53c44cbdadbe4bfcad035a0850a441f52d04c5bfe6ec65b09457cac795d9c"
+    },
+    "baseline-pcmu-sensitive": {
+      "checks": {
+        "configured": true,
+        "audio_received": true,
+        "no_provider_error": true,
+        "tool_called": false,
+        "result_announced": false
+      },
+      "timeout": true,
+      "retention": "provider-default",
+      "started_at": "2026-10-30T00:54:01.684250+00:00",
+      "executed_script_sha256": "bda983ad7b066775f391e43b93d0d2fcf192abfeb032f4357459a55e17e075b6",
+      "report_sha256": "2eb9ef15ae42895dcf181f1283186927cbf2e2a80e601056055dd80bf1d72031"
+    }
+  },
+  "actual_elixir_adapter": {
+    "adapter-pcm": {
+      "passed": true,
+      "result": "completed",
+      "codec": "pcm",
+      "wire_format": "pcm_24000",
+      "calls": 1,
+      "submissions": 1,
+      "acknowledgments": 1,
+      "audio_bytes": 644160,
+      "synthetic_speech": true,
+      "report_sha256": "fb9238a9cccad97ff32defc9cdf59f6de6b6329faa5dc5ce9d13a8f17987884e"
+    },
+    "adapter-pcmu": {
+      "passed": true,
+      "result": "completed",
+      "codec": "pcmu",
+      "wire_format": "pcm_24000",
+      "calls": 1,
+      "submissions": 1,
+      "acknowledgments": 1,
+      "audio_bytes": 116639,
+      "synthetic_speech": true,
+      "report_sha256": "bdfd30eb7933bd9b3823637f25fa38f80f9085845626617c818c3dc1e97a1d4f"
+    }
+  },
+  "account_limitations": {
+    "zero_data_retention_request": "rejected",
+    "error_code": "data_retention_not_allowed"
+  },
+  "adapter_decisions": {
+    "wire_format": "pcm_24000",
+    "pcmu_pipeline": "internal G.711 and streaming resampling",
+    "reconnect": "explicit close, no transparent replay",
+    "retention": "provider defaults unless zero_data_retention explicitly requested; no silent fallback"
+  },
+  "sdk_revisions": {
+    "phonic-node": "ab7a279d71646c952d5764286e3536bfb2f2830d",
+    "phonic-python": "f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0"
+  },
+  "repeated_delegation_regression": {
+    "allow_tool_chaining": false,
+    "wait_for_response": false,
+    "before": {
+      "manual_call_unique_tool_calls": 63,
+      "items_calls": 20,
+      "instructions_calls": 20,
+      "draft_calls": 20,
+      "tool_errors": 0,
+      "tool_timeouts": 0
+    },
+    "wire_probes": {
+      "baseline": {
+        "calls": 1,
+        "checks": {
+          "configured": true,
+          "audio_received": true,
+          "no_provider_error": true,
+          "tool_called": true,
+          "one_delegation_per_request": true,
+          "result_announced": true
+        },
+        "timeout": false,
+        "started_at": "2026-10-30T01:19:33.099848+00:00",
+        "script_sha256": "8b406f5382d1ad6990178df676fcea6a01f8dbf4a0ec5fae18fb7e46ddc96c3c",
+        "report_sha256": "cb1f3b2805ce95ab1c8cd98bfab11740ddb23371922bfa49cfb4271a9fdc666d"
+      },
+      "pending": {
+        "calls": 1,
+        "checks": {
+          "configured": true,
+          "audio_received": true,
+          "no_provider_error": true,
+          "tool_called": true,
+          "one_delegation_per_request": true,
+          "result_announced": true,
+          "answered_while_pending": true
+        },
+        "timeout": false,
+        "started_at": "2026-10-30T01:19:33.099831+00:00",
+        "script_sha256": "8b406f5382d1ad6990178df676fcea6a01f8dbf4a0ec5fae18fb7e46ddc96c3c",
+        "report_sha256": "b194a671c07884ad540949e7e7b1c5691bb059a192fc63e99193fc00f101099b"
+      },
+      "correction": {
+        "calls": 2,
+        "checks": {
+          "configured": true,
+          "audio_received": true,
+          "no_provider_error": true,
+          "tool_called": true,
+          "one_delegation_per_request": true,
+          "result_announced": true,
+          "correction_delegated": true,
+          "no_obsolete_fact": true
+        },
+        "timeout": false,
+        "started_at": "2026-10-30T01:19:33.167776+00:00",
+        "script_sha256": "8b406f5382d1ad6990178df676fcea6a01f8dbf4a0ec5fae18fb7e46ddc96c3c",
+        "report_sha256": "424e67fde064255743c5eaf50fab0c9a11662df00eb5c9a64d6ac03caf1fb0a4"
+      }
+    },
+    "actual_order_desk": {
+      "passed": true,
+      "calls": {
+        "instructions": 1,
+        "items": 1,
+        "greeting": 0,
+        "draft": 1
+      },
+      "backend_completions": 3,
+      "checks": {
+        "completed": true,
+        "one_call_per_request": true,
+        "three_backend_completions": true,
+        "one_review_draft": true,
+        "draft_has_requested_text": true,
+        "voice_did_not_save": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "audio_bytes": 1794240,
+      "channel": "in-memory PCM through actual OrderDesk/Parlora pipeline",
+      "database": ":memory:",
+      "script_sha256": "4eec74a6a7b2e6d1e17ed0655aa4eb16c479e2d414a8272b6511360fb860682f",
+      "report_sha256": "a83c42cde8d7e1c9cb4e89e4b8517912b68762e0becba36a72aa05eff190b5b2"
+    }
+  }
+}

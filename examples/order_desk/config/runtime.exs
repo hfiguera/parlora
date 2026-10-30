@@ -5,6 +5,7 @@ import Config
 config :order_desk, :openai_api_key, System.get_env("OPENAI_API_KEY")
 config :order_desk, :gemini_api_key, System.get_env("GEMINI_API_KEY")
 config :order_desk, :grok_api_key, System.get_env("XAI_API_KEY")
+config :order_desk, :phonic_api_key, System.get_env("PHONIC_API_KEY")
 
 backend =
   case System.get_env("PARLORA_BACKEND", "jido") do
@@ -48,7 +49,8 @@ voice_provider =
     "openai" -> :openai
     "gemini" -> :gemini
     "grok" -> :grok
-    _invalid -> raise "PARLORA_PROVIDER must be openai, gemini, or grok"
+    "phonic" -> :phonic
+    _invalid -> raise "PARLORA_PROVIDER must be openai, gemini, grok, or phonic"
   end
 
 config :order_desk, :voice_provider, voice_provider

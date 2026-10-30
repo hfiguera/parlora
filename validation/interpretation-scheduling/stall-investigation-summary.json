@@ -1,0 +1,505 @@
+{
+  "observed_date_local": "2026-10-29 America/Denver",
+  "scope": "Actual adapters and OrderDesk example; synthetic PCM; isolated :memory: stores; explicit confirmation API",
+  "configured_models": {
+    "phonic": "phonic-1",
+    "gemini": "gemini-3.8-live",
+    "openai": "gpt-live-1",
+    "grok": "grok-voice-3.0",
+    "interpreter": "jev-1.13.0"
+  },
+  "source_before": "7616fa5",
+  "final_source_sha256": {
+    "lib/parlora/providers/phonic.ex": "3d52ba048f0cf4d87670f328915b0c915f1c53147e57c1a4d1df7c7f5cd52837",
+    "validation/interpretation-scheduling/order_desk_live.exs": "b75b20b723991cff88d42aa9f079c75042959bad86a5bd22e295e1997cd4bff6"
+  },
+  "pcm_sha256": {
+    "clarify.pcm": "874deb2271b907f059538223ce5e58a8298365e259f8860de657b9d8aeb7590a",
+    "correction.pcm": "7a6e97a55c07a614b4c465587c5e74a205b64b730140227e7107b6345226bddf",
+    "draft.pcm": "3bb3bfd6c36e11562ea0dc7dea5e6a456fdc3316e028d083a24bd75d3cbbd03f",
+    "items.pcm": "aad76584ce119de6ab69c55aed612b1a4868ebc4e3957359b64a949e0a17ca81",
+    "lookup.pcm": "528d7c9af32ac20cc430e7aa08f113da05eed96c8a930b54e436185ef611de94",
+    "newdraft.pcm": "c0ca6f69ab081def68a28a99af4de88f363921c7d2d7922de15e59183e4da1bc",
+    "refusal.pcm": "e5eb652e51ff54809e40a18800fa9f335bc58f2d80f35b0a8266a7f93778ec24"
+  },
+  "confirmed_causes": [
+    {
+      "case": "completed late Phonic association",
+      "artifact": "investigation-phonic-current-1.json",
+      "timeline_ms": {
+        "result_submitted": 17553,
+        "original_continuation_requested": 22366,
+        "late_associations_submitted": [
+          25603,
+          25605
+        ]
+      },
+      "observation": "No continuation after late outputs; timeout at correction"
+    },
+    {
+      "case": "tool-only Phonic automatic turn",
+      "artifact": "investigation-phonic-fixed-2.json",
+      "timeline_ms": {
+        "user_finished": 23611,
+        "tool_call": 23846,
+        "completed_association_submitted": 23950,
+        "output_processed": 24020
+      },
+      "observation": "Automatic response wait retained despite tool progress; response_timeout"
+    },
+    {
+      "case": "Gemini harness punctuation",
+      "artifact": "investigation-gemini-current-1.json",
+      "assistant_clarification": "Please state the complete instruction you'd like me to add for delivery.",
+      "observation": "Valid wording request lacked question mark; harness supplied no next input"
+    }
+  ],
+  "deterministic_proof": {
+    "before_adapter": "7616fa5 loaded only into test VM",
+    "before": {
+      "passed": 23,
+      "failed": 3
+    },
+    "after": {
+      "passed": 26,
+      "failed": 0
+    },
+    "library_suite": {
+      "passed": 587,
+      "properties": 6,
+      "tests": 581,
+      "excluded": 3
+    },
+    "order_desk_tests_passed": 248,
+    "browser_js_tests_passed": 3
+  },
+  "remaining_limit": "Historical qualified-gemini.json items timeout was not reproduced; its capture cannot establish a root cause or fix. Finite workflow passes do not establish general production readiness.",
+  "runs": [
+    {
+      "artifact": "investigation-gemini-baseline-1.json",
+      "provider": "gemini",
+      "variant": "app baseline 53474ca; original adapter",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 6,
+      "failures": [],
+      "interpretation": {
+        "calls": 20,
+        "last_ms": 334,
+        "hits": 9,
+        "failures": 7
+      },
+      "trace_duration_ms": 92145
+    },
+    {
+      "artifact": "investigation-gemini-current-1.json",
+      "provider": "gemini",
+      "variant": "7616fa5, before fixes",
+      "result": "timeout",
+      "passed": false,
+      "final_stage": "clarify",
+      "assertions_passed": 6,
+      "assertions_total": 12,
+      "backend_operations": 3,
+      "delegations": 3,
+      "failures": [],
+      "interpretation": {
+        "calls": 6,
+        "errors": 0,
+        "deferred": 19,
+        "uncertain": 0,
+        "stale": 0,
+        "last_ms": 98,
+        "hits": 2,
+        "skipped": 3
+      },
+      "trace_duration_ms": 59139
+    },
+    {
+      "artifact": "investigation-gemini-fixed-1.json",
+      "provider": "gemini",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 7,
+      "failures": [],
+      "interpretation": {
+        "calls": 9,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 0,
+        "stale": 2,
+        "last_ms": 325,
+        "hits": 7,
+        "skipped": 4
+      },
+      "trace_duration_ms": 102902
+    },
+    {
+      "artifact": "investigation-gemini-fixed-2.json",
+      "provider": "gemini",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 7,
+      "failures": [],
+      "interpretation": {
+        "calls": 9,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 0,
+        "stale": 1,
+        "last_ms": 328,
+        "hits": 5,
+        "skipped": 3
+      },
+      "trace_duration_ms": 92000
+    },
+    {
+      "artifact": "investigation-gemini-fixed-3.json",
+      "provider": "gemini",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "failed",
+      "passed": false,
+      "final_stage": "greeting",
+      "assertions_passed": 0,
+      "assertions_total": 12,
+      "backend_operations": 0,
+      "delegations": 0,
+      "failures": [
+        {
+          "source": "provider",
+          "payload": "%{error: %Parlora.Error{code: :adapter_failed, message: \"Gemini provider failed\", details: %{reason: :socket_closed}}}"
+        }
+      ],
+      "interpretation": {
+        "calls": 0,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 0,
+        "stale": 0,
+        "last_ms": 0,
+        "hits": 0,
+        "skipped": 0
+      },
+      "trace_duration_ms": 674
+    },
+    {
+      "artifact": "investigation-gemini-fixed-4.json",
+      "provider": "gemini",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 7,
+      "failures": [],
+      "interpretation": {
+        "calls": 13,
+        "errors": 0,
+        "deferred": 32,
+        "uncertain": 3,
+        "stale": 0,
+        "last_ms": 318,
+        "hits": 4,
+        "skipped": 6
+      },
+      "trace_duration_ms": 109511
+    },
+    {
+      "artifact": "investigation-grok-fixed-1.json",
+      "provider": "grok",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 7,
+      "failures": [],
+      "interpretation": {
+        "calls": 13,
+        "errors": 0,
+        "deferred": 5,
+        "uncertain": 0,
+        "stale": 3,
+        "last_ms": 358,
+        "hits": 3,
+        "skipped": 11
+      },
+      "trace_duration_ms": null
+    },
+    {
+      "artifact": "investigation-grok-fixed-2.json",
+      "provider": "grok",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 7,
+      "failures": [],
+      "interpretation": {
+        "calls": 14,
+        "errors": 0,
+        "deferred": 4,
+        "uncertain": 0,
+        "stale": 5,
+        "last_ms": 388,
+        "hits": 3,
+        "skipped": 10
+      },
+      "trace_duration_ms": 105477
+    },
+    {
+      "artifact": "investigation-openai-fixed-1.json",
+      "provider": "openai",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 5,
+      "failures": [],
+      "interpretation": {
+        "calls": 37,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 8,
+        "stale": 12,
+        "last_ms": 342,
+        "hits": 4,
+        "skipped": 32
+      },
+      "trace_duration_ms": null
+    },
+    {
+      "artifact": "investigation-openai-fixed-2.json",
+      "provider": "openai",
+      "variant": "unchanged adapter; corrected clarification harness",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 5,
+      "failures": [],
+      "interpretation": {
+        "calls": 41,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 8,
+        "stale": 8,
+        "last_ms": 325,
+        "hits": 6,
+        "skipped": 31
+      },
+      "trace_duration_ms": 111861
+    },
+    {
+      "artifact": "investigation-phonic-baseline-1.json",
+      "provider": "phonic",
+      "variant": "app baseline 53474ca; original adapter",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 6,
+      "failures": [],
+      "interpretation": {
+        "calls": 91,
+        "last_ms": 355,
+        "hits": 13,
+        "failures": 12
+      },
+      "trace_duration_ms": 141743
+    },
+    {
+      "artifact": "investigation-phonic-current-1.json",
+      "provider": "phonic",
+      "variant": "7616fa5, before fixes",
+      "result": "timeout",
+      "passed": false,
+      "final_stage": "correction",
+      "assertions_passed": 5,
+      "assertions_total": 12,
+      "backend_operations": 2,
+      "delegations": 3,
+      "failures": [],
+      "interpretation": {
+        "calls": 6,
+        "errors": 0,
+        "deferred": 36,
+        "uncertain": 4,
+        "stale": 5,
+        "last_ms": 350,
+        "hits": 2,
+        "skipped": 7
+      },
+      "trace_duration_ms": 25674
+    },
+    {
+      "artifact": "investigation-phonic-fixed-1.json",
+      "provider": "phonic",
+      "variant": "late-association fix only (initial guard)",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 6,
+      "failures": [],
+      "interpretation": {
+        "calls": 42,
+        "errors": 0,
+        "deferred": 215,
+        "uncertain": 9,
+        "stale": 19,
+        "last_ms": 321,
+        "hits": 8,
+        "skipped": 15
+      },
+      "trace_duration_ms": 135635
+    },
+    {
+      "artifact": "investigation-phonic-fixed-2.json",
+      "provider": "phonic",
+      "variant": "late-association fix only; no tool-turn progress fix",
+      "result": "failed",
+      "passed": false,
+      "final_stage": "correction",
+      "assertions_passed": 4,
+      "assertions_total": 12,
+      "backend_operations": 2,
+      "delegations": 2,
+      "failures": [
+        {
+          "source": "provider",
+          "payload": "%{error: %Parlora.Error{code: :adapter_failed, message: \"Phonic provider failed\", details: %{reason: :response_timeout}}}"
+        }
+      ],
+      "interpretation": {
+        "calls": 6,
+        "errors": 0,
+        "deferred": 28,
+        "uncertain": 3,
+        "stale": 4,
+        "last_ms": 335,
+        "hits": 1,
+        "skipped": 1
+      },
+      "trace_duration_ms": 38614
+    },
+    {
+      "artifact": "investigation-phonic-fixed-3.json",
+      "provider": "phonic",
+      "variant": "both Phonic fixes",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 8,
+      "failures": [],
+      "interpretation": {
+        "calls": 39,
+        "errors": 0,
+        "deferred": 147,
+        "uncertain": 10,
+        "stale": 17,
+        "last_ms": 346,
+        "hits": 12,
+        "skipped": 13
+      },
+      "trace_duration_ms": 123485
+    },
+    {
+      "artifact": "investigation-phonic-fixed-4.json",
+      "provider": "phonic",
+      "variant": "both Phonic fixes",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 7,
+      "failures": [],
+      "interpretation": {
+        "calls": 41,
+        "errors": 0,
+        "deferred": 191,
+        "uncertain": 10,
+        "stale": 19,
+        "last_ms": 332,
+        "hits": 10,
+        "skipped": 13
+      },
+      "trace_duration_ms": 129244
+    },
+    {
+      "artifact": "investigation-phonic-fixed-5.json",
+      "provider": "phonic",
+      "variant": "both Phonic fixes",
+      "result": "completed",
+      "passed": true,
+      "final_stage": "save",
+      "assertions_passed": 12,
+      "assertions_total": 12,
+      "backend_operations": 6,
+      "delegations": 5,
+      "failures": [],
+      "interpretation": {
+        "calls": 41,
+        "errors": 0,
+        "deferred": 204,
+        "uncertain": 9,
+        "stale": 20,
+        "last_ms": 345,
+        "hits": 8,
+        "skipped": 17
+      },
+      "trace_duration_ms": 137929
+    }
+  ],
+  "final_workflow_passes": {
+    "phonic": 3,
+    "gemini": 3,
+    "grok": 2,
+    "openai": 2
+  },
+  "additional_final_gemini_startup_failures": 1,
+  "static_checks": {
+    "compile_warnings_as_errors": "passed",
+    "format": "passed",
+    "credo_strict": "passed",
+    "compile_connected_cycles": "none",
+    "ex_dna_clone_budget": "0/0",
+    "credence": "no findings",
+    "dialyzer": "zero errors"
+  }
+}

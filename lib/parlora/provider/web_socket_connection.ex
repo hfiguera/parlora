@@ -47,6 +47,30 @@ defmodule Parlora.Provider.WebSocketConnection do
   def close(nil), do: :ok
   def close(socket), do: HTTP.close(socket.conn)
 
+  def consume(state, message, frame, fail) do
+    case __MODULE__.receive(state.socket, message) do
+      {:ok, socket, frames} -> Enum.reduce(frames, %{state | socket: socket}, frame)
+      {:error, reason} -> fail.(state, reason)
+    end
+  end
+
+  def json(state, bytes, event, fail) do
+    case JSON.decode(bytes) do
+      {:ok, message} when is_map(message) -> event.(message, state)
+      _invalid -> fail.(state, :invalid_json)
+    end
+  end
+
+  def command(%{status: :closed} = state, _command, _fail), do: state
+  def command(state, command, fail), do: write(state, {:text, JSON.encode!(command)}, fail)
+
+  def write(state, frame, fail) do
+    case __MODULE__.send(state.socket, frame) do
+      {:ok, socket} -> %{state | socket: socket}
+      {:error, reason} -> fail.(state, reason)
+    end
+  end
+
   defp decode(socket, [], frames), do: {:ok, socket, Enum.reverse(frames)}
 
   defp decode(socket, [response | rest], frames) do

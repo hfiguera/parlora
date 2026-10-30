@@ -45,7 +45,7 @@ defmodule OrderDesk.AppPolicy do
     end
   end
 
-  defp do_interpret(snapshot, _trigger, opts) do
+  defp do_interpret(snapshot, trigger, opts) do
     active =
       Enum.max_by(
         snapshot.tasks,
@@ -101,6 +101,21 @@ defmodule OrderDesk.AppPolicy do
       partial = Clarification.number_reply(recovery, current_input(snapshot, active)) ->
         {:ok, Recovery.decide(recovery, Clarification.question(partial), partial)}
 
+      defer_assistant?(snapshot, trigger) ->
+        OrderDesk.Interpretation.defer(snapshot.session_id)
+        delay = 200
+
+        # Speech-idle updates revise the snapshot but do not trigger policy execution.
+        # A single renewable recheck keeps deferred caller work from being stranded.
+        wait = %{
+          recovery.target
+          | kind: :wait_for_context,
+            recheck_after_ms: delay,
+            recheck_key: "interpret:#{revision}:#{System.monotonic_time(:millisecond)}"
+        }
+
+        {:ok, [wait]}
+
       true ->
         active_input =
           if active, do: describe_task(elem(active, 1)), else: nil
@@ -141,9 +156,20 @@ defmodule OrderDesk.AppPolicy do
             )
           end)
 
-        {:ok, decisions(classify.(state), snapshot, active, pending, text, revision, recovery)}
+        case classify.(state) do
+          {:error, :superseded} -> {:ok, []}
+          result -> {:ok, decisions(result, snapshot, active, pending, text, revision, recovery)}
+        end
     end
   end
+
+  defp defer_assistant?(
+         %{provider_speech: :speaking, transcripts: [%{speaker: :assistant} | _]},
+         %{kind: kind}
+       )
+       when kind in [:transcript_updated, :context_wait_expired], do: true
+
+  defp defer_assistant?(_snapshot, _trigger), do: false
 
   defp decisions(
          {:ok, %{intent: "presence"}},

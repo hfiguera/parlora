@@ -1,0 +1,232 @@
+{
+  "observed_date_local": "2026-10-29",
+  "source_before": "70abe2b",
+  "scope": "Normal Phonic shutdown only; no TwiML or other provider changes.",
+  "final_source_sha256": {
+    "lib/parlora/providers/phonic.ex": "ee21e08b6ae6219b642157b1201bace2af95bdec907e048bd77495d1531efec8",
+    "lib/parlora/providers/phonic/connection.ex": "7ba2af14761f1f9a46113958c89cf22c0338334e968951732e684766581e9a03",
+    "test/phonic_shutdown_test.exs": "6126161199705d6e6dfb4fb5b28cb185d4b4a1c9b3eef71de31b64d3cb1a67ed",
+    "validation/phonic/shutdown_live.exs": "2136d7676cee2d768b87e9b5aedad6d8f3019ee88e0b3110f799253cce35a0dc",
+    "validation/phonic/check_shutdown_live.py": "a0478aecf80cd864964a0f0d832115e4fe65cc112d8b7011c95442e6e30b5d64"
+  },
+  "before_live_control": [
+    {
+      "mode": "abrupt",
+      "conversation_id": "conv_085efebd-db3f-4647-8f5e-0adfab6c75ad",
+      "client_closed_at_ms": 1793331666579,
+      "ended_at": "2026-10-30T03:41:36.808Z",
+      "ended_by": "error",
+      "duration_ms": 30381,
+      "server_end_delay_ms": 30229
+    },
+    {
+      "mode": "normal",
+      "conversation_id": "conv_c90f266b-8c75-4149-bad8-bd63da942fb1",
+      "client_closed_at_ms": 1793331667830,
+      "ended_at": "2026-10-30T03:41:07.859Z",
+      "ended_by": "user",
+      "duration_ms": 181,
+      "server_end_delay_ms": 29
+    }
+  ],
+  "final_live": {
+    "passed": true,
+    "runs": [
+      {
+        "conversation_id": "conv_451d9f03-6185-44ad-8a55-58703a7e6094",
+        "codec": "pcm",
+        "client_closed_at_ms": 1793332684238,
+        "close_call_ms": 100,
+        "ended_at": "2026-10-30T03:58:04.280Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 42,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_273b70e3-6015-4121-b417-bda7c5a03d85",
+        "codec": "pcmu",
+        "client_closed_at_ms": 1793332685534,
+        "close_call_ms": 95,
+        "ended_at": "2026-10-30T03:58:05.574Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 40,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_082ca440-fe9b-44ae-a078-0d227ae6df4b",
+        "codec": "pcm",
+        "client_closed_at_ms": 1793332686822,
+        "close_call_ms": 93,
+        "ended_at": "2026-10-30T03:58:06.854Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 32,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_55eb1dd3-cf4b-4a16-aab3-4f967441d27d",
+        "codec": "pcmu",
+        "client_closed_at_ms": 1793332688250,
+        "close_call_ms": 106,
+        "ended_at": "2026-10-30T03:58:08.290Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 40,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_a2db3ac9-fc73-405c-9220-89a753707f07",
+        "codec": "pcm",
+        "client_closed_at_ms": 1793332689399,
+        "close_call_ms": 94,
+        "ended_at": "2026-10-30T03:58:09.440Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 41,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_d2726cbd-f258-4308-a8a5-99aef8e059bf",
+        "codec": "pcmu",
+        "client_closed_at_ms": 1793332690837,
+        "close_call_ms": 78,
+        "ended_at": "2026-10-30T03:58:10.868Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 31,
+        "passed": true
+      }
+    ]
+  },
+  "earlier_live_before_type_preserving_refactor": {
+    "passed": true,
+    "runs": [
+      {
+        "conversation_id": "conv_25145e83-54e0-4e49-8c7d-15dc98aa513f",
+        "codec": "pcm",
+        "client_closed_at_ms": 1793332445078,
+        "close_call_ms": 110,
+        "ended_at": "2026-10-30T03:54:05.119Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 41,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_9443e75a-209b-4b97-a670-9731bd3e15ef",
+        "codec": "pcmu",
+        "client_closed_at_ms": 1793332446382,
+        "close_call_ms": 89,
+        "ended_at": "2026-10-30T03:54:06.412Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 30,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_b92756b1-b679-415a-953d-684a5c4e569a",
+        "codec": "pcm",
+        "client_closed_at_ms": 1793332448117,
+        "close_call_ms": 101,
+        "ended_at": "2026-10-30T03:54:08.151Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 34,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_fec58d55-b09f-4782-9838-fd6a4d9488d0",
+        "codec": "pcmu",
+        "client_closed_at_ms": 1793332449583,
+        "close_call_ms": 135,
+        "ended_at": "2026-10-30T03:54:09.649Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 66,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_b52b72df-08db-432b-b669-9a52ddd72330",
+        "codec": "pcm",
+        "client_closed_at_ms": 1793332451061,
+        "close_call_ms": 97,
+        "ended_at": "2026-10-30T03:54:11.100Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 39,
+        "passed": true
+      },
+      {
+        "conversation_id": "conv_7e000e6d-d67e-4b76-9975-97c20500ccec",
+        "codec": "pcmu",
+        "client_closed_at_ms": 1793332452662,
+        "close_call_ms": 101,
+        "ended_at": "2026-10-30T03:54:12.695Z",
+        "ended_by": "user",
+        "server_end_delay_ms": 33,
+        "passed": true
+      }
+    ]
+  },
+  "synthetic_phone_pipeline_before_type_preserving_refactor": {
+    "synthetic_twilio_stream": true,
+    "through_public_tunnel": true,
+    "received_greeting_media": true,
+    "ended_by": "user",
+    "provider_end_after_stop_ms": 113,
+    "conversation_id": "conv_f08cb9c1-f702-4981-89c6-6c6db3f693b7",
+    "passed": true
+  },
+  "deterministic_tests": {
+    "historical_adapter": {
+      "passed": 2,
+      "failed": 6
+    },
+    "current_shutdown": {
+      "passed": 8
+    },
+    "current_focused_phonic": {
+      "passed": 48
+    },
+    "full_library": {
+      "passed": 603,
+      "properties": 6,
+      "tests": 597,
+      "excluded_hardware_live_stability": 3
+    },
+    "order_desk_updated_vendor": {
+      "passed": 248
+    }
+  },
+  "static_checks": {
+    "compile_warnings_as_errors": "passed",
+    "format": "passed",
+    "credo_strict": "passed",
+    "dialyzer": "zero errors",
+    "credence": "no findings",
+    "ex_dna": "0/0 clones",
+    "compile_connected_cycles": "none"
+  },
+  "intermediate_validation": [
+    {
+      "stage": "Initial live harness",
+      "outcome": "Stopped before close because ready can precede conversation_created. Harness now waits for the ID with a finite deadline and cleans up in an after block."
+    },
+    {
+      "stage": "WebSocket close plus generic TLS close",
+      "outcome": "Two live public close API attempts timed out. A longer diagnostic call measured 85 ms WebSocket acknowledgment plus 5003 ms transport closure."
+    },
+    {
+      "stage": "Explicit ssl:close/2 timeout without bidirectional shutdown",
+      "outcome": "Public close API still timed out. Diagnostic measured 105 ms acknowledgment plus 5002 ms transport closure on this OTP runtime."
+    },
+    {
+      "stage": "TLS fixture setup",
+      "outcome": "Initial generated certificates were unsuitable for TLS 1.3. Fixture now explicitly generates SHA-256/RSA-2048 certificates locally."
+    },
+    {
+      "stage": "Synthetic phone result metadata",
+      "outcome": "First REST response had ended_at but null ended_by. Re-query returned user. REST validator now waits for both fields."
+    }
+  ],
+  "limits": [
+    "All six final-source live probes use the public Phonic adapter close API, not a manually injected close frame.",
+    "Synthetic phone probe traverses the public tunnel and real OrderDesk Twilio/socket/session/provider path; it is not a second human PSTN call.",
+    "Phone probe and earlier six successful runs precede only a type-preserving transport dispatch refactor; six further live probes exercise the exact final source.",
+    "There is no new caller audio, backend work, or order mutation in these probes. No keys or audio URLs are included.",
+    "Cloud end delay uses service/client wall clocks, with limited clock-skew allowance in the validator.",
+    "A successful close frame does not prove cloud finalization during an actual network outage. Local events still report finalized?: false.",
+    "Three hardware/live/stability library cases remain excluded; finite tests do not establish general production readiness."
+  ]
+}

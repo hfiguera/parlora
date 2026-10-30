@@ -3,6 +3,31 @@ defmodule OrderDesk.Interpretation do
   use GenServer
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   def stats, do: GenServer.call(__MODULE__, :stats)
+  def stats(actor), do: GenServer.call(__MODULE__, {:stats, actor})
+
+  def attach(session, actor) do
+    %{session_id: id} = Parlora.snapshot(session)
+    GenServer.call(__MODULE__, {:attach, id, session, actor})
+  end
+
+  def current?(id, revision) do
+    case GenServer.call(__MODULE__, {:session, id}) do
+      nil ->
+        true
+
+      pid when is_pid(pid) ->
+        case Parlora.snapshot(pid) do
+          %{revision: ^revision} -> true
+          _other -> false
+        end
+
+      :closed ->
+        false
+    end
+  catch
+    :exit, _closed -> false
+  end
+
   @doc "Private development evidence; contains caller text, never expose on a public route."
   def evidence, do: GenServer.call(__MODULE__, :evidence)
   def trace(record), do: GenServer.cast(__MODULE__, {:trace, record})
@@ -10,6 +35,8 @@ defmodule OrderDesk.Interpretation do
   def clarification(state, options \\ []) do
     cached(:clarification, state, options, 0, &OrderDesk.ClarificationCoverage.evaluate/1)
   end
+
+  def defer(id), do: GenServer.call(__MODULE__, {:metric, id, :deferred})
 
   def coordination_window(key, server \\ __MODULE__),
     do: GenServer.call(server, {:coordination_window, key})
@@ -19,47 +46,63 @@ defmodule OrderDesk.Interpretation do
   end
 
   defp cached(kind, state, options, coalesce_ms, evaluate) do
-    key = :crypto.hash(:sha256, :erlang.term_to_binary({kind, state}))
+    id = options[:session_id]
+    current? = Keyword.get(options, :current?, fn -> current?(id, options[:context_revision]) end)
 
-    case GenServer.call(__MODULE__, {:lookup, key, Keyword.get(options, :fresh?, false)}) do
-      {:cached, result} ->
-        result
+    if current?.() do
+      key = :crypto.hash(:sha256, :erlang.term_to_binary({id, kind, state}))
 
-      :run ->
-        started = System.monotonic_time(:millisecond)
-        # New fragments can obsolete this snapshot while the existing runner is busy.
-        if coalesce_ms > 0, do: Process.sleep(coalesce_ms)
-
-        request_started = System.monotonic_time(:millisecond)
-
-        {result, answers} =
-          if Process.whereis(OrderDesk.TypeSafe),
-            do: evaluate.(state),
-            else: {{:error, :unavailable}, %{}}
-
-        finished = System.monotonic_time(:millisecond)
-
-        trace(%{
-          kind: if(kind == :intent, do: "judgment", else: "clarification_judgment"),
-          timing_ms: %{
-            coalesce: request_started - started,
-            evaluation: finished - request_started,
-            total: finished - started
-          },
-          session_id: options[:session_id],
-          context_revision: options[:context_revision],
-          input: state,
-          answers: answers,
-          result: inspect(result)
-        })
-
-        GenServer.call(
-          __MODULE__,
-          {:store, key, result, finished - started}
-        )
-
-        result
+      case GenServer.call(__MODULE__, {:lookup, id, key, Keyword.get(options, :fresh?, false)}) do
+        {:cached, result} -> result
+        :run -> evaluate_current(kind, state, options, coalesce_ms, evaluate, key, current?)
+      end
+    else
+      skipped(id)
     end
+  end
+
+  defp evaluate_current(kind, state, options, coalesce_ms, evaluate, key, current?) do
+    started = System.monotonic_time(:millisecond)
+    if coalesce_ms > 0, do: Process.sleep(coalesce_ms)
+
+    if current?.() do
+      id = options[:session_id]
+      GenServer.call(__MODULE__, {:metric, id, :calls})
+      request_started = System.monotonic_time(:millisecond)
+
+      {result, answers} =
+        if Process.whereis(OrderDesk.TypeSafe),
+          do: evaluate.(state),
+          else: {{:error, :unavailable}, %{}}
+
+      finished = System.monotonic_time(:millisecond)
+      stale? = not current?.()
+
+      trace(%{
+        kind: if(kind == :intent, do: "judgment", else: "clarification_judgment"),
+        timing_ms: %{
+          coalesce: request_started - started,
+          evaluation: finished - request_started,
+          total: finished - started
+        },
+        session_id: id,
+        context_revision: options[:context_revision],
+        stale?: stale?,
+        input: state,
+        answers: answers,
+        result: inspect(result)
+      })
+
+      GenServer.call(__MODULE__, {:store, id, key, result, finished - started, stale?})
+      if stale?, do: {:error, :superseded}, else: result
+    else
+      skipped(options[:session_id])
+    end
+  end
+
+  defp skipped(id) do
+    GenServer.call(__MODULE__, {:metric, id, :skipped})
+    {:error, :superseded}
   end
 
   defp evaluate(state) do
@@ -662,12 +705,11 @@ defmodule OrderDesk.Interpretation do
 
   @impl true
   def init(_opts),
-    do:
-      {:ok, %{cache: %{}, windows: %{}, calls: 0, hits: 0, failures: 0, last_ms: 0, evidence: []}}
+    do: {:ok, %{cache: %{}, windows: %{}, metrics: empty_metrics(), sessions: %{}, evidence: []}}
 
   @impl true
   def handle_call(:stats, _from, state),
-    do: {:reply, Map.drop(state, [:cache, :evidence, :windows]), state}
+    do: {:reply, state.metrics, state}
 
   def handle_call({:coordination_window, key}, _from, state) do
     now = System.monotonic_time(:millisecond)
@@ -690,33 +732,114 @@ defmodule OrderDesk.Interpretation do
 
   def handle_call(:evidence, _from, state), do: {:reply, Enum.reverse(state.evidence), state}
 
-  def handle_call({:lookup, _key, true}, _from, state),
-    do: {:reply, :run, %{state | calls: state.calls + 1}}
+  def handle_call({:stats, actor}, _from, state) do
+    sessions =
+      for {id, session} <- state.sessions, session.actor == actor do
+        %{
+          session_id: id,
+          closed: session.pid == :closed,
+          started_at: session.started_at,
+          metrics: session.metrics
+        }
+      end
 
-  def handle_call({:lookup, key, false}, _from, state) do
-    case state.cache[key] do
-      {expires, result} when is_integer(expires) ->
-        if expires > System.monotonic_time(:millisecond),
-          do: {:reply, {:cached, result}, %{state | hits: state.hits + 1}},
-          else: {:reply, :run, %{state | calls: state.calls + 1}}
+    {:reply, %{application: state.metrics, sessions: Enum.sort_by(sessions, & &1.started_at)},
+     state}
+  end
 
-      _missing ->
-        {:reply, :run, %{state | calls: state.calls + 1}}
+  def handle_call({:attach, id, pid, actor}, _from, state) do
+    retained =
+      state.sessions
+      |> Enum.filter(fn {_, s} -> s.pid == :closed end)
+      |> Enum.sort_by(fn {_, s} -> s.started_at end, :desc)
+      |> Enum.take(7)
+      |> Map.new()
+
+    active = Map.reject(state.sessions, fn {_, s} -> s.pid == :closed end)
+
+    if map_size(active) < 128 do
+      session = %{
+        pid: pid,
+        monitor: Process.monitor(pid),
+        actor: actor,
+        started_at: System.monotonic_time(:millisecond),
+        metrics: empty_metrics()
+      }
+
+      {:reply, :ok, %{state | sessions: Map.put(Map.merge(retained, active), id, session)}}
+    else
+      {:reply, :untracked, state}
     end
   end
 
-  def handle_call({:store, key, result, elapsed}, _from, state) do
+  def handle_call({:session, id}, _from, state),
+    do: {:reply, get_in(state.sessions, [id, :pid]), state}
+
+  def handle_call({:metric, id, name}, _from, state), do: {:reply, :ok, metric(state, id, name)}
+
+  def handle_call({:lookup, _id, _key, true}, _from, state), do: {:reply, :run, state}
+
+  def handle_call({:lookup, id, key, false}, _from, state) do
+    case state.cache[key] do
+      {expires, result} when is_integer(expires) ->
+        if expires > System.monotonic_time(:millisecond),
+          do: {:reply, {:cached, result}, metric(state, id, :hits)},
+          else: {:reply, :run, state}
+
+      _missing ->
+        {:reply, :run, state}
+    end
+  end
+
+  def handle_call({:store, id, key, result, elapsed, stale?}, _from, state) do
     cache = if map_size(state.cache) >= 128, do: %{}, else: state.cache
     ttl = if match?({:ok, _}, result), do: 60_000, else: 500
-    cache = Map.put(cache, key, {System.monotonic_time(:millisecond) + ttl, result})
 
-    {:reply, :ok,
-     %{
-       state
-       | cache: cache,
-         last_ms: elapsed,
-         failures: state.failures + if(match?({:error, _}, result), do: 1, else: 0)
-     }}
+    state = %{
+      state
+      | cache: Map.put(cache, key, {System.monotonic_time(:millisecond) + ttl, result})
+    }
+
+    state =
+      case result do
+        {:error, {:uncertain, _}} -> metric(state, id, :uncertain)
+        {:error, :uncertain} -> metric(state, id, :uncertain)
+        {:error, _error} -> metric(state, id, :errors)
+        _success -> state
+      end
+
+    state = if stale?, do: metric(state, id, :stale), else: state
+    {:reply, :ok, metric(state, id, :last_ms, fn _ -> elapsed end)}
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+    sessions =
+      Map.new(state.sessions, fn {id, s} ->
+        {id, if(s.monitor == ref, do: %{s | pid: :closed}, else: s)}
+      end)
+
+    {:noreply, %{state | sessions: sessions}}
+  end
+
+  defp empty_metrics,
+    do: %{
+      calls: 0,
+      hits: 0,
+      errors: 0,
+      uncertain: 0,
+      deferred: 0,
+      skipped: 0,
+      stale: 0,
+      last_ms: 0
+    }
+
+  defp metric(state, id, name, update \\ &(&1 + 1)) do
+    state = update_in(state.metrics[name], update)
+
+    if Map.has_key?(state.sessions, id),
+      do: update_in(state.sessions[id].metrics[name], update),
+      else: state
   end
 
   @impl true

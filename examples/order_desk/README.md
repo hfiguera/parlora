@@ -34,6 +34,7 @@ one API key for the voice provider and, for browser/phone workflows, a TypeSafe 
 | `OPENAI_API_KEY` | Default OpenAI voice provider |
 | `GEMINI_API_KEY` | Voice when `PARLORA_PROVIDER=gemini` |
 | `XAI_API_KEY` | Voice when `PARLORA_PROVIDER=grok` |
+| `PHONIC_API_KEY` | Voice when `PARLORA_PROVIDER=phonic` |
 | `TYPESAFE_API_KEY` | Browser/phone intent and order interpretation |
 | `SAGENTS_API_KEY` | Backend model when `PARLORA_BACKEND=sagents` |
 | `LEGION_API_KEY` | Backend model when `PARLORA_BACKEND=legion` |
@@ -66,15 +67,41 @@ four concurrent sessions. Before public deployment, add account authentication,
 HTTPS, and the network's ICE/STUN/TURN configuration. The example has no account
 login and is intended for local use.
 
+## Interpretation diagnostics
+
+OrderDesk checks snapshot freshness before starting a TypeSafe evaluation and
+again after its 200 ms coalescing window. Obsolete snapshots are skipped; results
+that become stale during inference are discarded. Assistant caption updates defer
+expensive interpretation while a provider reports speaking, with a scheduled
+recheck after speech ends. New caller input, explicit delegations, and backend clarification events remain
+eligible immediately. Providers
+with unknown speech state keep the existing interpretation path.
+
+The review dashboard separates your latest session from application totals.
+Evaluations, uncertain judgments, errors, skipped obsolete work, results stale at
+return, and deferrals have separate counters. Uncertainty is not an API error;
+deferrals and skips do not make a TypeSafe request. Session statistics are scoped
+to the browser actor and retained for a bounded number of recent closed sessions.
+These controls belong to this example application; provider adapters and Parlora's
+core decision validation are unchanged.
+
 ## Select a voice provider or backend
 
 ```sh
 PARLORA_PROVIDER=gemini scripts/browser.sh
 PARLORA_PROVIDER=grok GROK_REASONING_EFFORT=high scripts/browser.sh
+PARLORA_PROVIDER=phonic scripts/browser.sh
 ```
 
 OpenAI uses `gpt-live-1`; Gemini uses `gemini-3.8-live`; Grok uses `grok-voice-3.0`.
 Grok reasoning accepts `high` (default) or `none`.
+Phonic uses the supported `phonic-1` provider. On macOS, the launcher reads
+`parlora-phonic-development` from Keychain when `PHONIC_API_KEY` is absent.
+Refresh the vendored Parlora package first if it predates Phonic support.
+Phonic uses PCM24 internally, including conversion for phone audio. A lost
+provider connection ends the session; reconnect manually to start a new one.
+The provider uses your Phonic workspace retention defaults. See the
+[Phonic provider guide](../../docs/phonic-provider.md) for current limitations.
 
 To select an optional backend, use the same selection when fetching dependencies
 and launching:

@@ -82,6 +82,23 @@ defmodule OrderDesk.SaveAnnouncementsTest do
     refute_receive {:context, _retry_or_duplicate}, 150
   end
 
+  test "Phonic coordinates a save announcement without retrying an unconfirmed submission" do
+    {session, worker} = start(provider: Parlora.Providers.Phonic, deadline_ms: 400)
+    SaveAnnouncements.saved(worker, result())
+    assert_receive {:application_context, %{save_announcement_until_ms: deadline}}
+    assert deadline > System.monotonic_time(:millisecond)
+    assert_receive {:context, %{kind: :speakable, id: id}}, 500
+    send(worker, {:parlora_event, %Event{type: :context_submitted, command_id: id}})
+
+    assert %{evidence: %{"124" => %{stage: :submission_unconfirmed}}} =
+             SaveAnnouncements.status(worker)
+
+    refute_receive {:context, _retry}, 450
+    assert_receive {:application_context, %{save_announcement_until_ms: nil}}
+    assert Parlora.snapshot(session).application_context.actor == "test"
+    assert SaveAnnouncements.status(worker).evidence["124"].stage == :unconfirmed
+  end
+
   test "a newer Gemini save cannot be retired by a late confirmation of its previous destination" do
     {_session, worker} = start(provider: Parlora.Providers.Gemini, deadline_ms: 600)
     SaveAnnouncements.saved(worker, result())

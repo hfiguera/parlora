@@ -55,6 +55,28 @@ defmodule OrderDesk.GreetingTest do
     refute_received {:resolved, ^id, :completed}
   end
 
+  test "a Phonic speakable greeting does not require an acknowledgment or send a duplicate" do
+    session = start_supervised!({Session, self()})
+    task = Task.async(fn -> OrderDesk.Greeting.run(session, kind: :speakable) end)
+    assert_receive {:subscriber, subscriber}, 1_000
+    assert_receive {:context, %{id: id, kind: :speakable, content: content}}, 1_000
+    assert content =~ "immediately without waiting"
+    send(subscriber, {:parlora_event, %Event{type: :context_submitted, command_id: id}})
+    Task.await(task)
+    refute_receive {:context, _duplicate}, 30
+    refute_received {:resolved, ^id, :completed}
+  end
+
+  test "a processed speakable greeting does not schedule a second opening" do
+    session = start_supervised!({Session, self()})
+    task = Task.async(fn -> OrderDesk.Greeting.run(session, kind: :speakable) end)
+    assert_receive {:subscriber, subscriber}, 1_000
+    assert_receive {:context, %{id: id, kind: :speakable}}, 1_000
+    send(subscriber, {:parlora_event, %Event{type: :context_acknowledged, command_id: id}})
+    Task.await(task)
+    refute_receive {:context, _duplicate}, 30
+  end
+
   test "missing acknowledgment is bounded and does not send commentary" do
     session = start_supervised!({Session, self()})
 

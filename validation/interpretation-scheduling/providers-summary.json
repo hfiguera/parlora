@@ -1,0 +1,278 @@
+{
+  "date": "2026-10-29",
+  "synthetic_speech": true,
+  "database": ":memory:",
+  "deterministic_checks": {
+    "order_desk": 248,
+    "library_provider_tests": 123,
+    "browser_javascript": 3
+  },
+  "conclusion": "Targeted scheduling regressions pass; Phonic three-operation scenario passes. Longer live stress qualification remains mixed. Do not infer compatibility certification or a proven root cause for the stalled live scenarios.",
+  "reports": [
+    {
+      "report": "qualified-openai",
+      "code": "final",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "interpretation": {
+        "calls": 44,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 12,
+        "stale": 11,
+        "last_ms": 317,
+        "hits": 4,
+        "skipped": 32
+      },
+      "failures": [],
+      "backend_operations": [
+        "status:123",
+        "status:124",
+        "items:124",
+        "delivery:124",
+        "refuse:124",
+        "delivery:124"
+      ]
+    },
+    {
+      "report": "qualified-grok",
+      "code": "final",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "interpretation": {
+        "calls": 11,
+        "errors": 0,
+        "deferred": 5,
+        "uncertain": 0,
+        "stale": 2,
+        "last_ms": 326,
+        "hits": 3,
+        "skipped": 14
+      },
+      "failures": [],
+      "backend_operations": [
+        "status:123",
+        "status:124",
+        "items:124",
+        "delivery:124",
+        "refuse:124",
+        "delivery:124"
+      ]
+    },
+    {
+      "report": "qualified-gemini",
+      "code": "final",
+      "result": "timeout",
+      "passed": false,
+      "checks": {
+        "completed": false,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": false,
+        "followup_items": true,
+        "clarified_delivery": false,
+        "refusal_executed": false,
+        "one_explicit_save": false,
+        "rejected_draft": false,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "interpretation": {
+        "calls": 3,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 0,
+        "stale": 0,
+        "last_ms": 323,
+        "hits": 0,
+        "skipped": 1
+      },
+      "failures": [],
+      "backend_operations": [
+        "status:123",
+        "status:124",
+        "items:124"
+      ]
+    },
+    {
+      "report": "qualified-phonic",
+      "code": "final",
+      "result": "timeout",
+      "passed": false,
+      "checks": {
+        "completed": false,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": false,
+        "followup_items": false,
+        "clarified_delivery": false,
+        "refusal_executed": false,
+        "one_explicit_save": false,
+        "rejected_draft": false,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "interpretation": {
+        "calls": 7,
+        "errors": 0,
+        "deferred": 64,
+        "uncertain": 3,
+        "stale": 5,
+        "last_ms": 350,
+        "hits": 1,
+        "skipped": 6
+      },
+      "failures": [],
+      "backend_operations": [
+        "status:123",
+        "status:124"
+      ]
+    },
+    {
+      "report": "baseline-phonic",
+      "code": "HEAD baseline",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "interpretation": {
+        "calls": 111,
+        "last_ms": 330,
+        "hits": 6,
+        "failures": 12
+      },
+      "failures": [],
+      "backend_operations": [
+        "status:123",
+        "status:124",
+        "items:124",
+        "delivery:124",
+        "refuse:124",
+        "delivery:124"
+      ]
+    },
+    {
+      "report": "after-phonic",
+      "code": "development: broader speech deferral",
+      "result": "failed",
+      "passed": false,
+      "checks": {
+        "completed": false,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": false,
+        "followup_items": true,
+        "clarified_delivery": false,
+        "refusal_executed": true,
+        "one_explicit_save": false,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": false
+      },
+      "interpretation": {
+        "calls": 34,
+        "errors": 0,
+        "deferred": 190,
+        "uncertain": 9,
+        "stale": 15,
+        "last_ms": 352,
+        "hits": 4,
+        "skipped": 11
+      },
+      "failures": [
+        {
+          "source": "provider",
+          "payload": "%{error: %Parlora.Error{code: :adapter_failed, message: \"Phonic provider failed\", details: %{reason: :response_timeout}}}"
+        }
+      ],
+      "backend_operations": [
+        "status:123",
+        "status:124",
+        "items:124",
+        "delivery:124",
+        "refuse:124"
+      ]
+    },
+    {
+      "report": "final-gemini",
+      "code": "development: broader speech deferral",
+      "result": "timeout",
+      "passed": false,
+      "checks": {
+        "completed": false,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": false,
+        "followup_items": true,
+        "clarified_delivery": false,
+        "refusal_executed": true,
+        "one_explicit_save": false,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "interpretation": {
+        "calls": 13,
+        "errors": 0,
+        "deferred": 19,
+        "uncertain": 1,
+        "stale": 0,
+        "last_ms": 82,
+        "hits": 5,
+        "skipped": 4
+      },
+      "failures": [],
+      "backend_operations": [
+        "status:123",
+        "status:124",
+        "items:124",
+        "delivery:124",
+        "refuse:124"
+      ]
+    }
+  ]
+}

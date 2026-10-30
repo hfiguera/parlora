@@ -22,9 +22,10 @@ credentials = {
     "openai": ("OPENAI_API_KEY", "-l", "keel-openai-development"),
     "gemini": ("GEMINI_API_KEY", "-s", "parlora-gemini-development"),
     "grok": ("XAI_API_KEY", "-s", "parlora-grok-development"),
+    "phonic": ("PHONIC_API_KEY", "-s", "parlora-phonic-development"),
 }
 if provider not in credentials:
-    sys.exit("PARLORA_PROVIDER must be openai, gemini, or grok")
+    sys.exit("PARLORA_PROVIDER must be openai, gemini, grok, or phonic")
 variable, selector, item = credentials[provider]
 if not environment.get(variable):
     credential = subprocess.run(

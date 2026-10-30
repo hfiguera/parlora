@@ -23,7 +23,11 @@ defmodule OrderDesk.SaveAnnouncements do
        pending: [],
        awaiting_evidence: %{},
        coordinate?:
-         Keyword.get(options, :provider) in [Parlora.Providers.Gemini, Parlora.Providers.Grok],
+         Keyword.get(options, :provider) in [
+           Parlora.Providers.Gemini,
+           Parlora.Providers.Grok,
+           Parlora.Providers.Phonic
+         ],
        published_hold: nil,
        versions: %{},
        evidence: %{},

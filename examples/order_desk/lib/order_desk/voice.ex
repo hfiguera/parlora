@@ -159,7 +159,7 @@ defmodule OrderDesk.Voice do
       {:parlora_event, %Event{source: :session, type: :ready}} ->
         OrderDesk.Provider.append_context(session, %ContextUpdate{
           id: ID.new(),
-          kind: :instruction,
+          kind: OrderDesk.Provider.greeting_kind(),
           provider_generation: 0,
           content: "Speak first in English. Briefly greet the caller and offer to check an order."
         })

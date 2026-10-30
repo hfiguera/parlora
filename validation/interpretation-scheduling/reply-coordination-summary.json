@@ -1,0 +1,860 @@
+{
+  "observed_date_local": "2026-10-29",
+  "scope": "Phonic duplicate-result reply coordination; OrderDesk is an example application.",
+  "source_before": "6d174ad",
+  "final_source_sha256": {
+    "lib/parlora/providers/phonic.ex": "2e4b3d3c95612b03a29f570356786c88238e11c348a4be1474c6d6a0d0e94164",
+    "lib/parlora/providers/phonic/protocol.ex": "e884c111e952a23e2593660518f8fdd2d23a5f0c440922471c89b1ba9420acba",
+    "validation/interpretation-scheduling/order_desk_live.exs": "450959dc6a3f47406040a63a76432b3890c0c22ab6f91ace90245cb88659a4f8",
+    "validation/interpretation-scheduling/audit_phonic_replies.py": "3d4d21ea42548f0ce45f1d0f27974612b15537ad81a4c93c305e96ab6c440ffb"
+  },
+  "configured_models": {
+    "phonic": "phonic-1",
+    "gemini": "gemini-3.8-live",
+    "openai": "gpt-live-1",
+    "grok": "grok-voice-3.0",
+    "interpreter": "jev-1.13.0"
+  },
+  "pcm_sha256": {
+    "clarify.pcm": "874deb2271b907f059538223ce5e58a8298365e259f8860de657b9d8aeb7590a",
+    "correction.pcm": "7a6e97a55c07a614b4c465587c5e74a205b64b730140227e7107b6345226bddf",
+    "draft.pcm": "3bb3bfd6c36e11562ea0dc7dea5e6a456fdc3316e028d083a24bd75d3cbbd03f",
+    "items.pcm": "aad76584ce119de6ab69c55aed612b1a4868ebc4e3957359b64a949e0a17ca81",
+    "lookup.pcm": "528d7c9af32ac20cc430e7aa08f113da05eed96c8a930b54e436185ef611de94",
+    "newdraft.pcm": "c0ca6f69ab081def68a28a99af4de88f363921c7d2d7922de15e59183e4da1bc",
+    "refusal.pcm": "e5eb652e51ff54809e40a18800fa9f335bc58f2d80f35b0a8266a7f93778ec24"
+  },
+  "deterministic_proof": {
+    "pre_fix_adapter_current_regressions": {
+      "passed": 0,
+      "failed": 6,
+      "excluded": 24
+    },
+    "current_regressions": {
+      "passed": 6,
+      "failed": 0
+    },
+    "focused_phonic_suite": {
+      "passed": 40
+    },
+    "full_library": {
+      "passed": 595,
+      "properties": 6,
+      "tests": 589,
+      "excluded": 3
+    },
+    "order_desk": {
+      "passed": 248
+    },
+    "browser_javascript": {
+      "passed": 3
+    },
+    "historical_stall_replay": {
+      "passed": 23,
+      "failed": 3,
+      "historical_test_source": "6d174ad",
+      "historical_adapter_source": "7616fa5"
+    }
+  },
+  "static_checks": {
+    "compile_warnings_as_errors": "passed",
+    "format": "passed",
+    "credo_strict": "passed",
+    "dialyzer": "zero errors",
+    "credence": "no findings",
+    "compile_connected_cycles": "none",
+    "ex_dna_clone_budget": "0/0"
+  },
+  "old_wire_negative_control": {
+    "completed_status_or_items_answers": 3,
+    "extra_reply_requests": [
+      {
+        "at_ms": 32528,
+        "context_epoch": 4
+      }
+    ]
+  },
+  "runs": [
+    {
+      "artifact": "reply-coordination-phonic-1.json",
+      "report_sha256": "b54a537ece458e0ed389ff2f1cdbfafbf1577ed4fe62aacd90b5ff433d396f0a",
+      "variant": "before empty-yield recovery",
+      "provider": "phonic",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "calls": {
+        "lookup": 1,
+        "correction": 1,
+        "newdraft": 1,
+        "clarify": 1,
+        "draft": 1,
+        "refusal": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 33,
+        "errors": 0,
+        "deferred": 80,
+        "uncertain": 13,
+        "stale": 11,
+        "last_ms": 320,
+        "hits": 8,
+        "skipped": 18
+      },
+      "extra_result_replies": null,
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 3935040,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "355dc058e5daf4877139af886e12803f6012222a57f6b1005830bae453bc4938",
+      "wire_audit": {
+        "completed_status_or_items_answers": 3,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": true,
+      "note": "Preliminary implementation; original 12 business checks only. Status repeated after a fresh application clarification at 35.279s; no dangling adapter request. Not a strict duplicate-response qualification pass."
+    },
+    {
+      "artifact": "reply-coordination-phonic-2.json",
+      "report_sha256": "8f6a7f07052097a27aff484a4478228815e60ebe97f14d21b00f688e72382a03",
+      "variant": "earlier coordination iteration; strict 13 assertions",
+      "provider": "phonic",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true,
+        "no_reply_after_answer_without_new_context": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 39,
+        "errors": 0,
+        "deferred": 113,
+        "uncertain": 11,
+        "stale": 15,
+        "last_ms": 319,
+        "hits": 8,
+        "skipped": 16
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 2832960,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "880524d9be69e11dc8a7d9e90124ac03487c2d44e52d7b0b899bdc6c014c8629",
+      "wire_audit": {
+        "completed_status_or_items_answers": 2,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": true
+    },
+    {
+      "artifact": "reply-coordination-phonic-3.json",
+      "report_sha256": "b64806b7c7038a80f6df11e47876736e828abab3568b6846e4d2fb4d07192628",
+      "variant": "before empty-yield recovery",
+      "provider": "phonic",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true,
+        "no_reply_after_answer_without_new_context": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1,
+        "clarify": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 36,
+        "errors": 0,
+        "deferred": 80,
+        "uncertain": 14,
+        "stale": 13,
+        "last_ms": 340,
+        "hits": 8,
+        "skipped": 17
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 2725440,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "4ca5b464f4270fc88989d10476829ad4593be8f7db781634d4555be1bff5d352",
+      "wire_audit": {
+        "completed_status_or_items_answers": 2,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": true,
+      "runtime_sha256": {
+        "lib/parlora/providers/phonic.ex": "2054f576d4fbb01f28e0bb0e18c543cec0aebdf22cf96a94ef20e561e46705a0",
+        "lib/parlora/providers/phonic/protocol.ex": "e884c111e952a23e2593660518f8fdd2d23a5f0c440922471c89b1ba9420acba"
+      }
+    },
+    {
+      "artifact": "reply-coordination-phonic-4.json",
+      "report_sha256": "410be023e6bfe436b2a0a5ed70fbd5240d0d9a506a9757c3a40e0941224c5b51",
+      "variant": "before empty-yield recovery",
+      "provider": "phonic",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true,
+        "no_reply_after_answer_without_new_context": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 40,
+        "errors": 0,
+        "deferred": 114,
+        "uncertain": 15,
+        "stale": 15,
+        "last_ms": 331,
+        "hits": 8,
+        "skipped": 13
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 2693760,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "90f82fb495d7f55b087f44c216b715c2b9a974df6e2a66c084de161e1dd14939",
+      "wire_audit": {
+        "completed_status_or_items_answers": 2,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": true,
+      "runtime_sha256": {
+        "lib/parlora/providers/phonic.ex": "2054f576d4fbb01f28e0bb0e18c543cec0aebdf22cf96a94ef20e561e46705a0",
+        "lib/parlora/providers/phonic/protocol.ex": "e884c111e952a23e2593660518f8fdd2d23a5f0c440922471c89b1ba9420acba"
+      }
+    },
+    {
+      "artifact": "reply-coordination-phonic-5.json",
+      "report_sha256": "d76f27e338a9c756dacce97f1ead3021b828a4fb953dfb786b0f246c877abf0d",
+      "variant": "before empty-yield recovery",
+      "provider": "phonic",
+      "result": "timeout",
+      "passed": false,
+      "checks": {
+        "completed": false,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": false,
+        "followup_items": false,
+        "clarified_delivery": false,
+        "refusal_executed": false,
+        "one_explicit_save": false,
+        "rejected_draft": false,
+        "output_audio_received": true,
+        "no_adapter_failure": true,
+        "no_reply_after_answer_without_new_context": true
+      },
+      "calls": {
+        "lookup": 1,
+        "correction": 2
+      },
+      "backend_completions": 2,
+      "interpretation": {
+        "calls": 6,
+        "errors": 0,
+        "deferred": 10,
+        "uncertain": 3,
+        "stale": 4,
+        "last_ms": 343,
+        "hits": 1,
+        "skipped": 4
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "correction",
+      "final_speech": "idle",
+      "audio_bytes": 279360,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "5b36b713e28af1b47bb069beecdd3b10cda117eaf142c1952f9cb467646707a3",
+      "wire_audit": {
+        "completed_status_or_items_answers": 0,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": false,
+      "note": "Failed at correction: assistant_started_speaking, then tool call before output, no speech-end event. Queued association blocked on abandoned speaking state. Sixth regression and settle_yielded_reply address this exact sequence. Zero answers means wire audit cannot qualify this attempt."
+    },
+    {
+      "artifact": "reply-coordination-phonic-6.json",
+      "report_sha256": "819e7f69ba018f3efb91a1072d11a8efb9b10432015cd291133b2d19ac362461",
+      "variant": "final with empty-yield recovery",
+      "provider": "phonic",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true,
+        "no_reply_after_answer_without_new_context": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 37,
+        "errors": 0,
+        "deferred": 119,
+        "uncertain": 9,
+        "stale": 14,
+        "last_ms": 337,
+        "hits": 8,
+        "skipped": 14
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 2809920,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "88b1dafae0cc49e38ac19666ecfffa8a47e490ebfdca238ee90748883888b1af",
+      "wire_audit": {
+        "completed_status_or_items_answers": 2,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": true,
+      "runtime_sha256": {
+        "lib/parlora/providers/phonic.ex": "2e4b3d3c95612b03a29f570356786c88238e11c348a4be1474c6d6a0d0e94164",
+        "lib/parlora/providers/phonic/protocol.ex": "e884c111e952a23e2593660518f8fdd2d23a5f0c440922471c89b1ba9420acba"
+      }
+    },
+    {
+      "artifact": "reply-coordination-phonic-7.json",
+      "report_sha256": "afa263090ca16c6da059ee56f9517d66d7912aade37504a05dfa30566bcaa545",
+      "variant": "final with empty-yield recovery",
+      "provider": "phonic",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true,
+        "no_reply_after_answer_without_new_context": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 37,
+        "errors": 0,
+        "deferred": 126,
+        "uncertain": 10,
+        "stale": 12,
+        "last_ms": 352,
+        "hits": 9,
+        "skipped": 13
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 3009600,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "8a9a46e9c0cf5b3c5e1dfa73480875955410d3f4e863392eb14144e66a0d81b5",
+      "wire_audit": {
+        "completed_status_or_items_answers": 2,
+        "extra_reply_requests": []
+      },
+      "wire_audit_complete": true,
+      "runtime_sha256": {
+        "lib/parlora/providers/phonic.ex": "2e4b3d3c95612b03a29f570356786c88238e11c348a4be1474c6d6a0d0e94164",
+        "lib/parlora/providers/phonic/protocol.ex": "e884c111e952a23e2593660518f8fdd2d23a5f0c440922471c89b1ba9420acba"
+      }
+    },
+    {
+      "artifact": "reply-coordination-gemini-2.json",
+      "report_sha256": "28c07f34b79e0aa57c8cfe92f9c39443c2d2e76308492f20e48da0a2da6fbcf5",
+      "variant": "unchanged provider adapter",
+      "provider": "gemini",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1,
+        "clarify": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 9,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 0,
+        "stale": 1,
+        "last_ms": 321,
+        "hits": 5,
+        "skipped": 5
+      },
+      "extra_result_replies": [
+        "correction"
+      ],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 1904174,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "20e1e2d2d31194072d63eb626b679f635e300f0687b67fce7cb49e4c4a7114da",
+      "note": "Original 12 business assertions passed. Strict reply assertion not enabled. Observer recorded an additional correction-stage speech start; no Phonic wire audit or cause attribution applies to this unchanged adapter."
+    },
+    {
+      "artifact": "reply-coordination-openai-2.json",
+      "report_sha256": "eeb144fae12e17322f413faeb5ff5d7ed515a1be5fc4f968279fdbf63b95cbad",
+      "variant": "unchanged provider adapter",
+      "provider": "openai",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "draft": 1,
+        "newdraft": 1,
+        "clarify": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 51,
+        "errors": 0,
+        "deferred": 0,
+        "uncertain": 14,
+        "stale": 15,
+        "last_ms": 346,
+        "hits": 5,
+        "skipped": 31
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "unknown",
+      "audio_bytes": 5741760,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "312b80bd6029b77f06ff4452753021e4b4a5cbf633de3fd453296c6c0ba18983"
+    },
+    {
+      "artifact": "reply-coordination-grok-2.json",
+      "report_sha256": "baec098564bd3deca1a9b802ef374e2389e95db0539cc43c8978814c493ef920",
+      "variant": "unchanged provider adapter",
+      "provider": "grok",
+      "result": "completed",
+      "passed": true,
+      "checks": {
+        "completed": true,
+        "correction_during_pending_work": true,
+        "corrected_order": true,
+        "stale_original_discarded": true,
+        "no_duplicate_backend_operations": true,
+        "followup_items": true,
+        "clarified_delivery": true,
+        "refusal_executed": true,
+        "one_explicit_save": true,
+        "rejected_draft": true,
+        "output_audio_received": true,
+        "no_adapter_failure": true
+      },
+      "calls": {
+        "lookup": 1,
+        "items": 1,
+        "correction": 1,
+        "draft": 1,
+        "refusal": 1,
+        "newdraft": 1,
+        "clarify": 1
+      },
+      "backend_completions": 6,
+      "interpretation": {
+        "calls": 13,
+        "errors": 0,
+        "deferred": 4,
+        "uncertain": 0,
+        "stale": 4,
+        "last_ms": 306,
+        "hits": 3,
+        "skipped": 11
+      },
+      "extra_result_replies": [],
+      "failures": [],
+      "final_stage": "save",
+      "final_speech": "idle",
+      "audio_bytes": 2977288,
+      "operations": [
+        {
+          "operation": "status",
+          "order": "123"
+        },
+        {
+          "operation": "status",
+          "order": "124"
+        },
+        {
+          "operation": "items",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        },
+        {
+          "operation": "refuse",
+          "order": "124"
+        },
+        {
+          "operation": "delivery",
+          "order": "124"
+        }
+      ],
+      "trace_sha256": "5931eecc42843078a0c00cc1fcdc1eaeded29b1f5bf25b6507eb5fb1cc7b2a4b"
+    }
+  ],
+  "limits": [
+    "Original manual call lacked a provider wire trace; exact caption fragment and physical audibility remain unproven.",
+    "Synthetic PCM uses real provider and interpreter APIs, isolated in-memory OrderDesk data, and browser-confirmation notification, not a human microphone/speaker test.",
+    "Three excluded library cases are hardware/live/stability checks. Finite regression and live checks do not establish universal production readiness.",
+    "New application updates can legitimately generate more speech; model wording/response quality is separate from a dangling adapter continuation.",
+    "All attempts are retained, including failed Phonic attempt 5 and the preliminary fresh-clarification repeat."
+  ]
+}

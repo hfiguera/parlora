@@ -5,7 +5,8 @@ import Config
     "openai" -> {Parlora.Providers.OpenAI, "OPENAI_API_KEY"}
     "gemini" -> {Parlora.Providers.Gemini, "GEMINI_API_KEY"}
     "grok" -> {Parlora.Providers.Grok, "XAI_API_KEY"}
-    _invalid -> raise "PARLORA_PROVIDER must be openai, gemini, or grok"
+    "phonic" -> {Parlora.Providers.Phonic, "PHONIC_API_KEY"}
+    _invalid -> raise "PARLORA_PROVIDER must be openai, gemini, grok, or phonic"
   end
 
 config :parlora, :example_provider, provider
