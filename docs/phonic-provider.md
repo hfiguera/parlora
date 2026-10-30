@@ -13,12 +13,12 @@ and a successful manual OrderDesk workflow. OrderDesk is a separate example
 application used to exercise the integration.
 
 The longer automated OrderDesk workflow now passes repeated live runs after
-Phonic continuation and reply-coordination fixes. The [stall investigation](../validation/interpretation-scheduling/stall-investigation.md)
-and [reply-coordination follow-up](../validation/interpretation-scheduling/reply-coordination.md)
+Phonic continuation and reply-coordination fixes. The [stall investigation](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/interpretation-scheduling/stall-investigation.md)
+and [reply-coordination follow-up](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/interpretation-scheduling/reply-coordination.md)
 record the reproduced causes, regressions, cross-provider checks, and evidence
 limits. This qualifies that workflow; experimental acceptance does not establish
 general production readiness. See also the
-[acceptance evidence](../validation/phonic/README.md#acceptance-decision).
+[acceptance evidence](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/phonic/README.md#acceptance-decision).
 
 ## Usage
 
@@ -177,7 +177,7 @@ The shared WebSocket helper and other providers are unchanged.
 
 Transport closure still emits `finalized?: false`: a WebSocket acknowledgment
 does not establish that Phonic saved its conversation record. The
-[shutdown validation](../validation/phonic/shutdown.md) independently checks the
+[shutdown validation](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/phonic/shutdown.md) independently checks the
 saved provider records for PCM and mu-law sessions.
 
 ## Credentials and validation
@@ -192,7 +192,7 @@ Keep `-w` last to receive a password prompt. `scripts/with_keychain.py` supports
 `PARLORA_PROVIDER=phonic` and injects `PHONIC_API_KEY` only into the child process
 environment.
 
-See [Phonic validation](../validation/phonic/README.md) for bounded synthetic
+See [Phonic validation](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/phonic/README.md) for bounded synthetic
 wire probes, real-adapter smoke commands, and the intentional limitations of
 that evidence. The offline suite covers configuration, codec conversion,
 correction and stale-result handling through real session coordination,
