@@ -62,13 +62,17 @@ Jido action.
 Install Parlora from [Hex](https://hex.pm/packages/parlora):
 
 ```elixir
-{:parlora, "~> 0.2.0"}
+{:parlora, "~> 0.3.0"}
 ```
 
 You need **Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the
 [native prerequisites](docs/beam-compatibility.md). The tutorial uses your local
 microphone and speakers, builds only the native bindings needed for local audio,
 and includes the context policy, event loop, and session cleanup.
+
+Upgrading from 0.2.x? Custom structs crossing JSON boundaries now need
+`JSON.Encoder` instead of `Jason.Encoder`. See the
+[0.3.0 upgrade notes](CHANGELOG.md#upgrade-notes-custom-json-encoders) before updating.
 
 ## Build your own application
 
@@ -94,7 +98,7 @@ phone calls. Use it to explore these workflows after your first working session.
 - **Channels:** [Browser](docs/browser-channel.md), [Twilio](docs/twilio-channel.md), [Telnyx](docs/telnyx-channel.md). Local audio options are documented in `Parlora.Channels.LocalAudio`.
 - **Providers:** [OpenAI](docs/openai-provider.md), [Gemini](docs/gemini-provider.md), [Grok](docs/grok-provider.md), [Phonic](docs/phonic-provider.md).
 - **Backends:** [Jido](docs/jido-backend.md), [Sagents](docs/sagents-backend.md), [Legion](docs/legion-backend.md).
-- **Reference:** [Adapter contracts and data](docs/public-interfaces.md), [metrics, traces and logs](docs/observability.md).
+- **Reference:** Session API in `Parlora`; [metrics, traces and logs](docs/observability.md).
 
 Sessions live in memory. Your application persists business state and supplies
 history/context when starting a fresh session. Cancellation and corrections do

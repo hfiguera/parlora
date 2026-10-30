@@ -12,8 +12,9 @@ defmodule Parlora.Backend do
   `Parlora.BackendResult`. Cancellation may be advisory and never implies an undo.
 
   Your application owns authorization, service timeouts, operation idempotency,
-  and reconciliation of uncertain external effects. See the
-  [backend contract](public-interfaces.html#6-parlora-backend) for callbacks and events.
+  and reconciliation of uncertain external effects. Adapter callbacks are
+  listed below; request and result fields are documented in `Parlora.BackendRequest`
+  and `Parlora.BackendResult`.
   """
   use Parlora.AdapterBehaviour, capabilities: Parlora.Backend.Capabilities
   @callback submit(pid(), Parlora.BackendRequest.t()) :: :ok | {:error, Parlora.Error.t()}

@@ -75,9 +75,9 @@ The context policy supplies the action input. Implement
 `c:Parlora.ContextPolicy.interpret/3` to inspect caller transcripts, application
 context, and current tasks, then return `Parlora.ContextDecision` values. A new
 `:start_task` claims a pending delegation; a correction uses `:supersede_task`
-with the current task revision. The [policy contract](public-interfaces.md#7-parlora-contextpolicy)
-explains clarification, continuations, and how outdated decisions are handled. Authorize the
-resulting operation in your application even when model text suggests it.
+with the current task revision. `Parlora.ContextDecision` documents decision shapes
+and revision requirements. Authorize the resulting operation in your application
+even when model text suggests it.
 
 ## Lifecycle and cancellation
 

@@ -46,10 +46,18 @@ The `command_ack_timeout_ms:` option defaults to 30,000 ms. If a pending command
 remains unacknowledged, the provider fails and closes; uncertain commands are not
 automatically replayed. This timeout does not apply to ordinary caller silence.
 
+## Output recovery
+
 Output overflow or stale generated audio can trigger bounded replacement of the
-voice transport while retaining the caller channel and backend work. The caller
-may need to repeat speech during that interval. See [output recovery](output-recovery.md)
-for application behavior and failure handling.
+voice transport while retaining the caller channel and backend work. Audio input
+during the unavailable interval is discarded, so the caller may need to repeat
+speech. Backend results wait for fresh caller input to be interpreted before
+being announced; recovery never retries a business operation.
+
+Observe `Parlora.status/1` for `output_recovery` and handle session failure and
+closure. A session can remain ready while its voice connection is being recovered;
+readiness does not promise uninterrupted audio. If replacement fails, the session
+closes. Offer a reconnect path and reconcile uncertain operations before retrying.
 
 ## Credentials and diagnostics
 
