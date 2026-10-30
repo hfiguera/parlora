@@ -22,8 +22,7 @@ Phonic continuation and reply-coordination fixes. The [stall investigation](http
 and [reply-coordination follow-up](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/interpretation-scheduling/reply-coordination.md)
 record the reproduced causes, regressions, cross-provider checks, and evidence
 limits. Support covers the documented adapter capabilities and tested workflows.
-Reliability under sustained production load and varied network conditions remains
-unqualified. See also the
+See also the
 [initial acceptance evidence](https://github.com/hfiguera/parlora/blob/646313a9c92759aad1cb6c527847ddd8648e36c4/validation/phonic/README.md#acceptance-decision).
 
 ## Usage
