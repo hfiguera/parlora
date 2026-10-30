@@ -77,3 +77,43 @@ Session tests connect the real Phonic callback implementation to a local
 WebSocket fixture and exercise coordinator revisions, stale-result suppression,
 provider-result correlation, and whole-session cleanup after socket loss. The
 wire fixture never connects to Phonic and uses no real credential.
+
+## Repeated delegation regression
+
+The adapter disables `allow_tool_chaining` while retaining async execution and
+`wait_for_response: false`. The baseline and pending wire probes require exactly
+one delegation; correction requires exactly two, one for each requested order.
+The actual adapter smoke also requires exactly one call.
+
+`order_desk_delegation.exs` exercises the actual OrderDesk policy, TypeSafe
+interpretation, Jido backend, SQLite store and Phonic adapter through an in-memory
+PCM channel. It requires an isolated `:memory:` database and synthetic PCM16LE,
+mono 24 kHz clips named `items.pcm`, `instructions.pcm`, and `draft.pcm` containing:
+
+1. “What items are in order one two four?”
+2. “What are the saved delivery instructions for order one two four?”
+3. “For order one two four, change the delivery instructions to leave it at reception.”
+
+Generate the clips using macOS `say` and FFmpeg, as in the wire probe. Refresh
+OrderDesk's vendored Parlora package before running from `examples/order_desk`:
+
+```sh
+PARLORA_PROVIDER=phonic ORDER_DESK_TYPESAFE=1 ORDER_DESK_DATABASE=:memory: \
+  python3 scripts/with_keychain.py mix run \
+  ../../validation/phonic/order_desk_delegation.exs /absolute/path/to/clips \
+  ../../validation/phonic/results/no-chaining-orderdesk.json
+```
+
+The run is bounded to 100 seconds. It observes two seconds after each answer,
+requires one delegation per request and three completed backend operations, and
+checks that exactly one review draft exists and voice saved no changes. This
+validates application and adapter behavior; it does not exercise browser WebRTC
+or establish what a human heard. Compact results are recorded in `summary.json`.
+
+Observed on October 29, 2026 (America/Denver): all three wire scenarios passed
+with call counts 1 (baseline), 1 (pending unrelated question), and 2 (original
+request plus correction). The corrected result was announced without the obsolete
+fact. Actual OrderDesk passed all checks: one call each for items, instructions
+and a draft, three backend completions, one review draft, and no voice save.
+Before this change, the same three operations in the manual call each produced
+20 tool calls. These are bounded observations, not a guarantee of all model behavior.

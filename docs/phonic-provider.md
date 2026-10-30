@@ -59,6 +59,10 @@ Neither transcript establishes that the caller heard the audio.
 
 ## Tools, context, and corrections
 
+Tool chaining is disabled (`allow_tool_chaining: false`) to avoid the repeated-call
+bursts observed in validation. This also restricts autonomous sequences of tool
+calls by the voice model.
+
 Phonic tools run asynchronously with `wait_for_response: false`, allowing further
 caller corrections and tool calls while backend work is pending. The alternative
 busy mode suppresses other tools, so the adapter does not select it.

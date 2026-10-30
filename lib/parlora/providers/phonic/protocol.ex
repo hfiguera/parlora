@@ -173,7 +173,7 @@ defmodule Parlora.Providers.Phonic.Protocol do
       require_speech_before_tool_call: false,
       wait_for_speech_before_tool_call: false,
       wait_for_response: false,
-      allow_tool_chaining: true,
+      allow_tool_chaining: false,
       can_run_during_user_speech: early?,
       tool_schema: %{
         type: "function",

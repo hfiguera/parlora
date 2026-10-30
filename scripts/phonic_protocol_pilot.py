@@ -130,6 +130,7 @@ async def probe(args, clips):
                             "tools": [{"type": "custom_websocket", "execution_mode": "async",
                                        "tool_call_output_timeout_ms": 30000,
                                        "wait_for_response": False,
+                                       "allow_tool_chaining": False,
                                        "require_speech_before_tool_call": False,
                                        "tool_schema": {"type": "function", "function": {
                                            "name": FUNCTION, "description": "Ask the application to handle an order lookup or correction.", "strict": True,
@@ -236,6 +237,8 @@ async def probe(args, clips):
                         "no_provider_error": not report.get("provider_error", False)}
     if args.scenario in {"baseline", "pending", "correction"}:
         report["checks"]["tool_called"] = bool(calls)
+        expected_calls = 2 if args.scenario == "correction" else 1
+        report["checks"]["one_delegation_per_request"] = len(report["calls"]) == expected_calls
         report["checks"]["result_announced"] = ("out for delivery" if args.scenario == "correction" else "friday") in spoken
     if args.scenario == "correction":
         report["checks"]["correction_delegated"] = any("124" in c["request"] for c in report["calls"])

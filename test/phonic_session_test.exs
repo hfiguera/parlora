@@ -139,7 +139,12 @@ defmodule Parlora.PhonicSessionTest do
     assert_receive {:phonic_peer, server}
 
     assert_receive {:phonic_command,
-                    %{"type" => "config", "model" => "phonic-1", "input_format" => "pcm_24000"}}
+                    %{
+                      "type" => "config",
+                      "model" => "phonic-1",
+                      "input_format" => "pcm_24000",
+                      "tools" => [%{"allow_tool_chaining" => false, "wait_for_response" => false}]
+                    }}
 
     emit(server, %{"type" => "ready_to_start_conversation"})
     emit(server, %{"type" => "conversation_created", "conversation_id" => "conv-test"})

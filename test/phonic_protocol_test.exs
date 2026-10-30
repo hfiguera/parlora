@@ -13,7 +13,7 @@ defmodule Parlora.PhonicProtocolTest do
       refute Map.has_key?(config, :data_retention_policy)
       assert [tool] = config.tools
       assert tool.execution_mode == "async" and tool.wait_for_response == false
-      assert tool.allow_tool_chaining
+      refute tool.allow_tool_chaining
       assert tool.tool_schema.function.strict
       assert tool.tool_schema.function.name == Protocol.function()
       refute tool.can_run_during_user_speech

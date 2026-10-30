@@ -166,7 +166,8 @@ defmodule Parlora.PhonicLiveProbe do
     GenServer.stop(provider)
 
     passed =
-      reason == :completed and report.audio_bytes > 0 and report.acknowledgments > 0 and
+      reason == :completed and report.calls == 1 and report.audio_bytes > 0 and
+        report.acknowledgments > 0 and
         report.failures == []
 
     report =
