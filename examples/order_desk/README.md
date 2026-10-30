@@ -34,6 +34,7 @@ one API key for the voice provider and, for browser/phone workflows, a TypeSafe 
 | `OPENAI_API_KEY` | Default OpenAI voice provider |
 | `GEMINI_API_KEY` | Voice when `PARLORA_PROVIDER=gemini` |
 | `XAI_API_KEY` | Voice when `PARLORA_PROVIDER=grok` |
+| `PHONIC_API_KEY` | Voice when `PARLORA_PROVIDER=phonic` |
 | `TYPESAFE_API_KEY` | Browser/phone intent and order interpretation |
 | `SAGENTS_API_KEY` | Backend model when `PARLORA_BACKEND=sagents` |
 | `LEGION_API_KEY` | Backend model when `PARLORA_BACKEND=legion` |
@@ -71,10 +72,18 @@ login and is intended for local use.
 ```sh
 PARLORA_PROVIDER=gemini scripts/browser.sh
 PARLORA_PROVIDER=grok GROK_REASONING_EFFORT=high scripts/browser.sh
+PARLORA_PROVIDER=phonic scripts/browser.sh
 ```
 
 OpenAI uses `gpt-live-1`; Gemini uses `gemini-3.8-live`; Grok uses `grok-voice-3.0`.
 Grok reasoning accepts `high` (default) or `none`.
+Phonic uses the experimental `phonic-1` provider. On macOS, the launcher reads
+`parlora-phonic-development` from Keychain when `PHONIC_API_KEY` is absent.
+Refresh the vendored Parlora package first if it predates Phonic support.
+Phonic uses PCM24 internally, including conversion for phone audio. A lost
+provider connection ends the session; reconnect manually to start a new one.
+The provider uses your Phonic workspace retention defaults. See the
+[Phonic provider guide](../../docs/phonic-provider.md) for current limitations.
 
 To select an optional backend, use the same selection when fetching dependencies
 and launching:

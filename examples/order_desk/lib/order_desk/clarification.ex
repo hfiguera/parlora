@@ -11,7 +11,7 @@ defmodule OrderDesk.Clarification do
         %{application_context: %{voice_provider: provider}} = snapshot,
         options
       )
-      when provider in [:gemini, :grok] do
+      when provider in [:gemini, :grok, :phonic] do
     recent = Enum.take_while(snapshot.transcripts, &(&1.speaker == :assistant))
 
     assistant =

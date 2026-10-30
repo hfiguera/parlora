@@ -63,6 +63,22 @@ defmodule OrderDesk.ClarificationCoordinationTest do
     assert {:ok, [^decision]} = OrderDesk.Clarification.coordinate({:ok, [decision]}, snapshot)
   end
 
+  test "Phonic respects pending saves and avoids competing with a captioned clarification" do
+    snapshot = %{context() | application_context: %{voice_provider: :phonic}}
+    assert {:ok, [%{kind: :wait_for_context}]} = interpret(snapshot)
+
+    hold = System.monotonic_time(:millisecond) + 500
+
+    snapshot = %{
+      snapshot
+      | transcripts: Enum.filter(snapshot.transcripts, &(&1.speaker == :user)),
+        application_context: %{voice_provider: :phonic, save_announcement_until_ms: hold}
+    }
+
+    assert {:ok, [%{kind: :wait_for_context, recheck_key: key}]} = interpret(snapshot)
+    assert key == "save-announcement:#{hold}"
+  end
+
   test "already captioned Gemini question suppresses competing application question" do
     assert {:ok, [%{kind: :wait_for_context, recheck_after_ms: nil}]} = interpret(context())
   end

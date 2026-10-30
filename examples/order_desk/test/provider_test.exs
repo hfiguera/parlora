@@ -4,7 +4,7 @@ defmodule OrderDesk.ProviderTest do
   alias Parlora.{AudioFormat, Limits}
 
   test "provider burst profiles scale with the codec and preserve application overrides" do
-    for module <- [Parlora.Providers.Gemini, Parlora.Providers.Grok],
+    for module <- [Parlora.Providers.Gemini, Parlora.Providers.Grok, Parlora.Providers.Phonic],
         format <- [%AudioFormat{}, AudioFormat.pcmu()] do
       options =
         Provider.session_options({module, []},
@@ -13,9 +13,18 @@ defmodule OrderDesk.ProviderTest do
         )
 
       assert {:ok, limits} = Limits.new(options[:limits], format)
-      duration = if module == Parlora.Providers.Grok, do: 20_000, else: 10_000
+      duration = if module == Parlora.Providers.Gemini, do: 10_000, else: 20_000
       assert limits.provider_audio_queue_bytes == AudioFormat.bytes_for_ms(format, duration)
       assert limits.provider_audio_max_age_ms == duration + 1_000
+
+      expected_provider =
+        %{
+          Parlora.Providers.Gemini => :gemini,
+          Parlora.Providers.Grok => :grok,
+          Parlora.Providers.Phonic => :phonic
+        }[module]
+
+      assert options[:context].voice_provider == expected_provider
       assert limits.max_jobs == 2
       assert limits.audio_queue_bytes == AudioFormat.bytes_for_ms(format, 200)
     end
@@ -26,6 +35,13 @@ defmodule OrderDesk.ProviderTest do
       )
 
     assert options[:limits][:provider_audio_max_age_ms] == 5_000
+  end
+
+  test "Phonic explicitly starts a reply for its greeting" do
+    assert Provider.greeting_kind(:phonic) == :speakable
+
+    for provider <- [:openai, :gemini, :grok],
+        do: assert(Provider.greeting_kind(provider) == :instruction)
   end
 
   test "OpenAI session limits are unchanged" do

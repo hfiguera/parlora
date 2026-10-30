@@ -15,6 +15,7 @@ defmodule OrderDesk.Greeting do
 
   def run(session, options \\ []) do
     timeout_ms = Keyword.get(options, :timeout_ms, 5_000)
+    kind = Keyword.get(options, :kind, OrderDesk.Provider.greeting_kind())
     monitor = Process.monitor(session)
     id = ID.new()
 
@@ -34,13 +35,20 @@ defmodule OrderDesk.Greeting do
          :ok <-
            OrderDesk.Provider.append_context(session, %ContextUpdate{
              id: id,
-             kind: :instruction,
+             kind: kind,
              provider_generation: 0,
              content:
                "Speak English. Greet the caller immediately without waiting for them to speak: Hi, I can help check an order. Then pause and listen."
            }) do
-      Logger.info("Greeting instruction submitted; awaiting provider acknowledgment")
-      await_ack(session, monitor, id, false, System.monotonic_time(:millisecond) + timeout_ms)
+      Logger.info("Greeting prompt submitted; awaiting provider acknowledgment")
+
+      await_ack(
+        session,
+        monitor,
+        id,
+        kind == :speakable,
+        System.monotonic_time(:millisecond) + timeout_ms
+      )
     else
       _error ->
         Parlora.resolve_progress(session, id, :cancelled)

@@ -11,6 +11,9 @@ defmodule OrderDesk.Provider do
          api_key: credential(),
          reasoning_effort: Application.get_env(:order_desk, :grok_reasoning_effort, :high)}
 
+      :phonic ->
+        {Parlora.Providers.Phonic, api_key: credential()}
+
       :openai ->
         {Parlora.Providers.OpenAI,
          api_key: credential(),
@@ -25,6 +28,7 @@ defmodule OrderDesk.Provider do
       case Application.get_env(:order_desk, :voice_provider, :openai) do
         :gemini -> :gemini_api_key
         :grok -> :grok_api_key
+        :phonic -> :phonic_api_key
         :openai -> :openai_api_key
       end
 
@@ -32,9 +36,15 @@ defmodule OrderDesk.Provider do
   end
 
   def session_options({module, _settings}, options)
-      when module in [Parlora.Providers.Gemini, Parlora.Providers.Grok] do
+      when module in [Parlora.Providers.Gemini, Parlora.Providers.Grok, Parlora.Providers.Phonic] do
     defaults = module.audio_limits(Keyword.get(options, :audio_format, %Parlora.AudioFormat{}))
-    provider = if module == Parlora.Providers.Gemini, do: :gemini, else: :grok
+
+    provider =
+      case module do
+        Parlora.Providers.Gemini -> :gemini
+        Parlora.Providers.Grok -> :grok
+        Parlora.Providers.Phonic -> :phonic
+      end
 
     options
     |> Keyword.update(:limits, defaults, &Keyword.merge(defaults, &1))
@@ -46,6 +56,10 @@ defmodule OrderDesk.Provider do
   end
 
   def session_options(_provider, options), do: options
+
+  def greeting_kind(provider \\ Application.get_env(:order_desk, :voice_provider, :openai))
+  def greeting_kind(:phonic), do: :speakable
+  def greeting_kind(_provider), do: :instruction
 
   def append_context(session, update) do
     case Parlora.append_context(session, update) do
