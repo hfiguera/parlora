@@ -2,7 +2,7 @@ defmodule Parlora.Backends.Sagents do
   @moduledoc """
   Runs one isolated, bounded Sagents execution per admitted request.
 
-  Install optional `sagents ~> 0.17.1`. Configure `:agent` as a function receiving
+  Install optional `sagents ~> 0.19.2`. Configure `:agent` as a function receiving
   a BackendRequest and returning `{:ok, agent, state}`, `:result` as a function
   mapping a successful terminal tool result to `%{status: ..., facts: ..., summary: ...}`,
   and `:completion_tool` as its name. `:max_runs` defaults to 8 (maximum 100).
