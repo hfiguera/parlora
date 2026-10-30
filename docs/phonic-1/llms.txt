@@ -1,0 +1,128 @@
+# Phonic
+
+## Instructions for AI Agents
+
+- For clean Markdown of any page, append `.md` to the page URL
+- For section-specific indexes, append `/llms.txt` to any section URL
+- For AI client integration (Claude Code, Cursor, etc.), connect to the MCP server at https://docs.phonic.ai/_mcp/server
+
+## Docs
+
+- [Introduction](https://docs.phonic.ai/docs/get-started/overview.md): Phonic is the speech-to-speech model company.
+- [TypeScript SDK](https://docs.phonic.ai/docs/get-started/installation/typescript_sdk.md): Build voice agents with the Phonic TypeScript SDK.
+- [Python SDK](https://docs.phonic.ai/docs/get-started/installation/python_sdk.md): Build voice agents with the Phonic Python SDK.
+- [CLI](https://docs.phonic.ai/docs/get-started/installation/cli.md): Drive the Phonic API from your terminal.
+- [MCP Server](https://docs.phonic.ai/docs/get-started/installation/mcp_server.md): Connect to the Phonic MCP
+- [Agent Skills](https://docs.phonic.ai/docs/get-started/installation/skills.md): Give your coding agent specialized knowledge for building and testing Phonic voice agents.
+- [Build Your First Agent](https://docs.phonic.ai/docs/get-started/build-your-first-agent.md)
+- [Deploy Your First Agent](https://docs.phonic.ai/docs/get-started/deploy-your-first-agent.md): Four ways to run agents on Phonic: the agent builder, webhooks, WebSockets, or LiveKit.
+- [Voices](https://docs.phonic.ai/docs/build/agents/voices.md): The voices available for Phonic agents, with the voice ID to use in the API.
+- [Pronunciation Dictionary](https://docs.phonic.ai/docs/build/agents/pronunciation-dictionary.md): Control how your agent says brand names, product names, and other domain terms.
+- [Multilingual Agents](https://docs.phonic.ai/docs/build/agents/multilingual.md): Configure which languages your agent speaks and how it switches between them.
+- [Supported Languages](https://docs.phonic.ai/docs/build/agents/supported_languages.md): The 51 languages Phonic agents can recognize and speak, with the language code to use in the API.
+- [Template Variables](https://docs.phonic.ai/docs/build/agents/template-variables.md): Fill per-conversation details into your agent's prompt and greeting, and use built-in system variables such as the date, the caller's number, and a recap of the caller's past conversations.
+- [Prompting Guide](https://docs.phonic.ai/docs/build/agents/prompting_guide.md)
+- [Evals Guide](https://docs.phonic.ai/docs/build/agents/evals_guide.md)
+- [Replaying Conversations](https://docs.phonic.ai/docs/build/agents/replay.md): Re-run a recorded turn — or a whole call — to test a prompt change before you deploy it.
+- [Tools Overview](https://docs.phonic.ai/docs/build/tools/tools_overview.md): Learn about the tool types available on Phonic, how they run (sync vs async), and how to configure their behavior — both in the Phonic dashboard and through the API.
+- [Webhook Tools](https://docs.phonic.ai/docs/build/tools/webhook_tools.md): Call your own HTTP endpoint when the agent invokes a tool.
+- [WebSocket Tools](https://docs.phonic.ai/docs/build/tools/websocket_tools.md): Run tools on your own server during a WebSocket conversation.
+- [Context Tools](https://docs.phonic.ai/docs/build/tools/context_tools.md): Inject additional context into the conversation on demand.
+- [Transfer Tools](https://docs.phonic.ai/docs/build/tools/transfer_tools.md): Transfer a call to a phone number or hand it off to another Phonic Agent.
+- [MCP Tools](https://docs.phonic.ai/docs/build/tools/mcp_tools.md): Expose tools from a connected Model Context Protocol server.
+- [Built-in Tools](https://docs.phonic.ai/docs/build/tools/built_in_tools.md): Enable Phonic's built-in tools by adding them to an agent's tools list.
+- [How Tools Execute](https://docs.phonic.ai/docs/build/tools/how_tools_execute.md): A visual guide to how a tool call is sequenced against the agent's speech, using a shared timeline: what the baseline looks like, and how each configuration flag changes it.
+- [Conversations via Webhooks](https://docs.phonic.ai/docs/build/with-webhooks/via-webhooks.md)
+- [Agent Configuration Endpoint](https://docs.phonic.ai/docs/build/with-webhooks/agent-configuration-endpoint.md)
+- [Webhooks](https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks.md): Learn how to use Phonic webhooks
+- [conversation.ended](https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-ended.md)
+- [conversation.analysis](https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-analysis.md)
+- [conversation.transferred](https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-transferred.md)
+- [Conversations via WebSockets](https://docs.phonic.ai/docs/build/with-web-sockets/via-web-sockets.md)
+- [Push to Talk](https://docs.phonic.ai/docs/build/with-web-sockets/push_to_talk.md)
+- [Live Conversation WebSocket (Preview)](https://docs.phonic.ai/docs/build/with-web-sockets/live_websocket.md)
+- [With LiveKit](https://docs.phonic.ai/docs/build/with-livekit.md): Run Phonic agents inside LiveKit Agents with the livekit-plugins-phonic realtime plugin.
+- [SIP Trunk (Twilio, Telnyx)](https://docs.phonic.ai/docs/phone-numbers/using_custom_phone_numbers.md): Learn how to use your Phonic Voice Agent to send and receive calls to custom phone number via SIP trunking
+- [Amazon Connect](https://docs.phonic.ai/docs/phone-numbers/amazon_connect.md): Learn how to use Phonic with Amazon Connect by bridging an Amazon Chime SDK Voice Connector to Phonic over SIP for inbound and outbound calls
+- [Authentication](https://docs.phonic.ai/docs/platform/authentication/overview.md): Choose the right authentication mechanism for your use case.
+- [Session Tokens](https://docs.phonic.ai/docs/platform/authentication/session-tokens.md): Mint short-lived tokens from your API key for use in browser and mobile clients.
+- [Authenticating with JWTs](https://docs.phonic.ai/docs/platform/authentication/jw-ts.md): Mint short-lived JWTs in your own auth system and have Phonic verify them, scoped per user and per conversation.
+- [Audit Logs](https://docs.phonic.ai/docs/platform/audit-logs.md): Pull SIEM-ready audit logs covering identity, configuration, and data-handling events for your workspace.
+- [Data Retention](https://docs.phonic.ai/docs/platform/retention.md): Control how long Phonic retains conversation transcripts, audio, and derived artifacts.
+- [Rate Limits](https://docs.phonic.ai/docs/platform/rate_limits.md)
+
+## API Docs
+
+- API Reference > Agents [List](https://docs.phonic.ai/api-reference/agents/list.md)
+- API Reference > Agents [Create](https://docs.phonic.ai/api-reference/agents/create.md)
+- API Reference > Agents [Upsert](https://docs.phonic.ai/api-reference/agents/upsert.md)
+- API Reference > Agents [Get](https://docs.phonic.ai/api-reference/agents/get.md)
+- API Reference > Agents [Delete](https://docs.phonic.ai/api-reference/agents/delete.md)
+- API Reference > Agents [Update](https://docs.phonic.ai/api-reference/agents/update.md)
+- API Reference > Agents [Add Custom Phone Number](https://docs.phonic.ai/api-reference/agents/add-custom-phone-number.md)
+- API Reference > Agents [Delete Custom Phone Number](https://docs.phonic.ai/api-reference/agents/delete-custom-phone-number.md)
+- API Reference > Agents [Update Phone Number](https://docs.phonic.ai/api-reference/agents/update-phone-number.md)
+- API Reference > Agents [Disable](https://docs.phonic.ai/api-reference/agents/disable.md)
+- API Reference > Agents [Enable](https://docs.phonic.ai/api-reference/agents/enable.md)
+- API Reference > Tools [List](https://docs.phonic.ai/api-reference/tools/list.md)
+- API Reference > Tools [Create](https://docs.phonic.ai/api-reference/tools/create.md)
+- API Reference > Tools [Get](https://docs.phonic.ai/api-reference/tools/get.md)
+- API Reference > Tools [Delete](https://docs.phonic.ai/api-reference/tools/delete.md)
+- API Reference > Tools [Update](https://docs.phonic.ai/api-reference/tools/update.md)
+- API Reference > External Storage Policies [List](https://docs.phonic.ai/api-reference/external-storage-policies/list.md)
+- API Reference > External Storage Policies [Create](https://docs.phonic.ai/api-reference/external-storage-policies/create.md)
+- API Reference > External Storage Policies [Get](https://docs.phonic.ai/api-reference/external-storage-policies/get.md)
+- API Reference > External Storage Policies [Delete](https://docs.phonic.ai/api-reference/external-storage-policies/delete.md)
+- API Reference > External Storage Policies [Update](https://docs.phonic.ai/api-reference/external-storage-policies/update.md)
+- API Reference > Extraction Schemas [List](https://docs.phonic.ai/api-reference/extraction-schemas/list.md)
+- API Reference > Extraction Schemas [Create](https://docs.phonic.ai/api-reference/extraction-schemas/create.md)
+- API Reference > Extraction Schemas [Get](https://docs.phonic.ai/api-reference/extraction-schemas/get.md)
+- API Reference > Extraction Schemas [Delete](https://docs.phonic.ai/api-reference/extraction-schemas/delete.md)
+- API Reference > Extraction Schemas [Update](https://docs.phonic.ai/api-reference/extraction-schemas/update.md)
+- API Reference > Voices [List](https://docs.phonic.ai/api-reference/voices/list.md)
+- API Reference > Voices [Get](https://docs.phonic.ai/api-reference/voices/get.md)
+- API Reference > Voices [Preview](https://docs.phonic.ai/api-reference/voices/preview.md)
+- API Reference > Workspace [Get](https://docs.phonic.ai/api-reference/workspace/get.md)
+- API Reference > Workspace [Update](https://docs.phonic.ai/api-reference/workspace/update.md)
+- API Reference > API Keys [Create](https://docs.phonic.ai/api-reference/api-keys/create.md)
+- API Reference > API Keys [Delete](https://docs.phonic.ai/api-reference/api-keys/delete.md)
+- API Reference > API Keys [Update](https://docs.phonic.ai/api-reference/api-keys/update.md)
+- API Reference > API Keys [Rotate](https://docs.phonic.ai/api-reference/api-keys/rotate.md)
+- API Reference > Conversation Items [Replay](https://docs.phonic.ai/api-reference/conversation-items/replay.md)
+- API Reference > Conversations [List](https://docs.phonic.ai/api-reference/conversations/list.md)
+- API Reference > Conversations [Get](https://docs.phonic.ai/api-reference/conversations/get.md)
+- API Reference > Conversations [Delete](https://docs.phonic.ai/api-reference/conversations/delete.md)
+- API Reference > Conversations [Cancel](https://docs.phonic.ai/api-reference/conversations/cancel.md)
+- API Reference > Conversations [Get Analysis](https://docs.phonic.ai/api-reference/conversations/get-analysis.md)
+- API Reference > Conversations [List Extractions](https://docs.phonic.ai/api-reference/conversations/list-extractions.md)
+- API Reference > Conversations [Extract Data](https://docs.phonic.ai/api-reference/conversations/extract-data.md)
+- API Reference > Conversations [List Evaluations](https://docs.phonic.ai/api-reference/conversations/list-evaluations.md)
+- API Reference > Conversations [Evaluate](https://docs.phonic.ai/api-reference/conversations/evaluate.md)
+- API Reference > Conversations [Outbound Call](https://docs.phonic.ai/api-reference/conversations/outbound-call.md)
+- API Reference > Conversations [Sip Outbound Call](https://docs.phonic.ai/api-reference/conversations/sip-outbound-call.md)
+- API Reference > Conversations [Replay](https://docs.phonic.ai/api-reference/conversations/replay.md)
+- API Reference > Conversations [conversations](https://docs.phonic.ai/api-reference/conversations/conversations.md)
+- API Reference > Auth [Create Session Token](https://docs.phonic.ai/api-reference/auth/create-session-token.md)
+- API Reference > Auth [Create Conversation Token](https://docs.phonic.ai/api-reference/auth/create-conversation-token.md)
+- API Reference > Projects [List](https://docs.phonic.ai/api-reference/projects/list.md)
+- API Reference > Projects [Create](https://docs.phonic.ai/api-reference/projects/create.md)
+- API Reference > Projects [Get](https://docs.phonic.ai/api-reference/projects/get.md)
+- API Reference > Projects [Delete](https://docs.phonic.ai/api-reference/projects/delete.md)
+- API Reference > Projects [Update](https://docs.phonic.ai/api-reference/projects/update.md)
+- API Reference > Projects [List Eval Prompts](https://docs.phonic.ai/api-reference/projects/list-eval-prompts.md)
+- API Reference > Projects [Create Eval Prompt](https://docs.phonic.ai/api-reference/projects/create-eval-prompt.md)
+- API Reference > Projects [List Evals](https://docs.phonic.ai/api-reference/projects/list-evals.md)
+- API Reference > Responses [Create](https://docs.phonic.ai/api-reference/responses/create.md)
+
+## OpenAPI Specification
+
+The raw OpenAPI 3.1 specification for this API is available at:
+- [OpenAPI JSON](https://docs.phonic.ai/openapi.json)
+- [OpenAPI YAML](https://docs.phonic.ai/openapi.yaml)
+
+
+## AsyncAPI Specification
+
+The raw AsyncAPI 2.6.0 specification for the WebSocket channels is available at:
+- [AsyncAPI JSON](https://docs.phonic.ai/asyncapi.json)
+- [AsyncAPI YAML](https://docs.phonic.ai/asyncapi.yaml)

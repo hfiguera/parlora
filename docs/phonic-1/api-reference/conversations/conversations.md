@@ -1,0 +1,2270 @@
+> For clean Markdown of any page, append .md to the page URL.
+> For a complete documentation index, see https://docs.phonic.ai/llms.txt.
+> For AI client integration (Claude Code, Cursor, etc.), connect to the MCP server at https://docs.phonic.ai/_mcp/server.
+
+# conversations
+
+GET /v1/sts/ws
+
+Real-time speech-to-speech (STS) communication WebSocket API for Phonic's AI voice conversation platform.
+
+All connections require authentication using one of the following methods:
+
+#### Option 1: API Key (Server-side)
+Use your Phonic API key in the Authorization header:
+`Authorization: Bearer PHONIC_API_KEY`
+
+#### Option 2: Session Token (Client-side)
+For client-side applications where you don't want to expose your API key, first create a short-lived session token via the REST API: `POST /v1/auth/session_token`
+
+Then connect to the WebSocket with the session token as a query parameter:
+`wss://api.phonic.ai/v1/sts/ws?session_token=ph_session_abc123...`
+
+
+Reference: https://docs.phonic.ai/api-reference/conversations/conversations
+
+## AsyncAPI Specification
+
+```yaml
+asyncapi: 2.6.0
+info:
+  title: conversations
+  version: subpackage_conversations.conversations
+  description: >
+    Real-time speech-to-speech (STS) communication WebSocket API for Phonic's AI
+    voice conversation platform.
+
+
+    All connections require authentication using one of the following methods:
+
+
+    #### Option 1: API Key (Server-side)
+
+    Use your Phonic API key in the Authorization header:
+
+    `Authorization: Bearer PHONIC_API_KEY`
+
+
+    #### Option 2: Session Token (Client-side)
+
+    For client-side applications where you don't want to expose your API key,
+    first create a short-lived session token via the REST API: `POST
+    /v1/auth/session_token`
+
+
+    Then connect to the WebSocket with the session token as a query parameter:
+
+    `wss://api.phonic.ai/v1/sts/ws?session_token=ph_session_abc123...`
+channels:
+  /v1/sts/ws:
+    description: >
+      Real-time speech-to-speech (STS) communication WebSocket API for Phonic's
+      AI voice conversation platform.
+
+
+      All connections require authentication using one of the following methods:
+
+
+      #### Option 1: API Key (Server-side)
+
+      Use your Phonic API key in the Authorization header:
+
+      `Authorization: Bearer PHONIC_API_KEY`
+
+
+      #### Option 2: Session Token (Client-side)
+
+      For client-side applications where you don't want to expose your API key,
+      first create a short-lived session token via the REST API: `POST
+      /v1/auth/session_token`
+
+
+      Then connect to the WebSocket with the session token as a query parameter:
+
+      `wss://api.phonic.ai/v1/sts/ws?session_token=ph_session_abc123...`
+    bindings:
+      ws:
+        headers:
+          type: object
+          properties:
+            Authorization:
+              type: string
+    publish:
+      operationId: conversations-publish
+      summary: Server messages
+      message:
+        oneOf:
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-0-ready_to_start_conversation
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-1-conversation_created
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-2-input_text
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-3-input_cancelled
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-4-audio_chunk 
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-5-user_started_speaking
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-6-user_finished_speaking
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-7-assistant_started_speaking
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-8-assistant_finished_speaking
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-9-interrupted_response
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-10-dtmf
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-11-tool_call
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-12-tool_call_output_processed
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-13-tool_call_interrupted
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-14-assistant_chose_not_to_respond
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-15-assistant_ended_conversation
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-16-error
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-server-17-warning
+    subscribe:
+      operationId: conversations-subscribe
+      summary: Client messages
+      message:
+        oneOf:
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-0-config
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-1-audio_chunk
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-2-update_system_prompt
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-3-add_system_message
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-4-update_tools_subset
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-5-set_external_id
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-6-tool_call_output
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-7-unmute
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-8-mute
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-9-generate_reply
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-10-say
+          - $ref: >-
+              #/components/messages/subpackage_conversations.conversations-client-11-reset
+servers:
+  https://api.phonic.ai/v1:
+    url: wss://api.phonic.ai/
+    protocol: wss
+    x-default: true
+components:
+  messages:
+    subpackage_conversations.conversations-server-0-ready_to_start_conversation:
+      name: ready_to_start_conversation
+      title: ready_to_start_conversation
+      description: Server indicates readiness to start conversation
+      payload:
+        $ref: '#/components/schemas/sts_readyToStartConversation'
+    subpackage_conversations.conversations-server-1-conversation_created:
+      name: conversation_created
+      title: conversation_created
+      description: Conversation has been created in database
+      payload:
+        $ref: '#/components/schemas/sts_conversationCreated'
+    subpackage_conversations.conversations-server-2-input_text:
+      name: input_text
+      title: input_text
+      description: Transcribed user speech text
+      payload:
+        $ref: '#/components/schemas/sts_inputText'
+    subpackage_conversations.conversations-server-3-input_cancelled:
+      name: input_cancelled
+      title: input_cancelled
+      description: User input was cancelled (no speech detected)
+      payload:
+        $ref: '#/components/schemas/sts_inputCancelled'
+    'subpackage_conversations.conversations-server-4-audio_chunk ':
+      name: 'audio_chunk '
+      title: 'audio_chunk '
+      description: AI-generated audio chunk with text
+      payload:
+        $ref: '#/components/schemas/sts_audioChunkResponse'
+    subpackage_conversations.conversations-server-5-user_started_speaking:
+      name: user_started_speaking
+      title: user_started_speaking
+      description: User started speaking
+      payload:
+        $ref: '#/components/schemas/sts_userStartedSpeaking'
+    subpackage_conversations.conversations-server-6-user_finished_speaking:
+      name: user_finished_speaking
+      title: user_finished_speaking
+      description: User finished speaking
+      payload:
+        $ref: '#/components/schemas/sts_userFinishedSpeaking'
+    subpackage_conversations.conversations-server-7-assistant_started_speaking:
+      name: assistant_started_speaking
+      title: assistant_started_speaking
+      description: Assistant started speaking
+      payload:
+        $ref: '#/components/schemas/sts_assistantStartedSpeaking'
+    subpackage_conversations.conversations-server-8-assistant_finished_speaking:
+      name: assistant_finished_speaking
+      title: assistant_finished_speaking
+      description: >-
+        Assistant finished speaking (Not sent if interrupted by
+        `user_started_speaking`)
+      payload:
+        $ref: '#/components/schemas/sts_assistantFinishedSpeaking'
+    subpackage_conversations.conversations-server-9-interrupted_response:
+      name: interrupted_response
+      title: interrupted_response
+      description: Assistant response that was cut short by the user speaking
+      payload:
+        $ref: '#/components/schemas/sts_interruptedResponse'
+    subpackage_conversations.conversations-server-10-dtmf:
+      name: dtmf
+      title: dtmf
+      description: DTMF tone for phone calls
+      payload:
+        $ref: '#/components/schemas/sts_dtmf'
+    subpackage_conversations.conversations-server-11-tool_call:
+      name: tool_call
+      title: tool_call
+      description: WebSocket tool call requiring client-side execution
+      payload:
+        $ref: '#/components/schemas/sts_toolCall'
+    subpackage_conversations.conversations-server-12-tool_call_output_processed:
+      name: tool_call_output_processed
+      title: tool_call_output_processed
+      description: Tool call has been processed and completed
+      payload:
+        $ref: '#/components/schemas/sts_toolCallOutputProcessed'
+    subpackage_conversations.conversations-server-13-tool_call_interrupted:
+      name: tool_call_interrupted
+      title: tool_call_interrupted
+      description: Tool call was interrupted before completion
+      payload:
+        $ref: '#/components/schemas/sts_toolCallInterrupted'
+    subpackage_conversations.conversations-server-14-assistant_chose_not_to_respond:
+      name: assistant_chose_not_to_respond
+      title: assistant_chose_not_to_respond
+      description: AI chose not to respond to user input
+      payload:
+        $ref: '#/components/schemas/sts_assistantChoseNotToRespond'
+    subpackage_conversations.conversations-server-15-assistant_ended_conversation:
+      name: assistant_ended_conversation
+      title: assistant_ended_conversation
+      description: AI ended the conversation
+      payload:
+        $ref: '#/components/schemas/sts_assistantEndedConversation'
+    subpackage_conversations.conversations-server-16-error:
+      name: error
+      title: error
+      description: Error occurred during conversation
+      payload:
+        $ref: '#/components/schemas/sts_error'
+    subpackage_conversations.conversations-server-17-warning:
+      name: warning
+      title: warning
+      description: Non-fatal warning about conversation configuration or state
+      payload:
+        $ref: '#/components/schemas/sts_warning'
+    subpackage_conversations.conversations-client-0-config:
+      name: config
+      title: config
+      description: Initialize conversation with configuration parameters
+      payload:
+        $ref: '#/components/schemas/sts_config'
+    subpackage_conversations.conversations-client-1-audio_chunk:
+      name: audio_chunk
+      title: audio_chunk
+      description: Send audio chunk for real-time voice input
+      payload:
+        $ref: '#/components/schemas/sts_audioChunk'
+    subpackage_conversations.conversations-client-2-update_system_prompt:
+      name: update_system_prompt
+      title: update_system_prompt
+      description: >-
+        Update system prompt mid-conversation. This message is deprecated. Using
+        `add_system_message` is recommended instead.
+      payload:
+        $ref: '#/components/schemas/sts_updateSystemPrompt'
+    subpackage_conversations.conversations-client-3-add_system_message:
+      name: add_system_message
+      title: add_system_message
+      description: Add system message mid-conversation
+      payload:
+        $ref: '#/components/schemas/sts_addSystemMessage'
+    subpackage_conversations.conversations-client-4-update_tools_subset:
+      name: update_tools_subset
+      title: update_tools_subset
+      description: Update the subset of tools available to the assistant mid-conversation
+      payload:
+        $ref: '#/components/schemas/sts_updateToolsSubset'
+    subpackage_conversations.conversations-client-5-set_external_id:
+      name: set_external_id
+      title: set_external_id
+      description: Set external ID for conversation tracking
+      payload:
+        $ref: '#/components/schemas/sts_setExternalId'
+    subpackage_conversations.conversations-client-6-tool_call_output:
+      name: tool_call_output
+      title: tool_call_output
+      description: Respond to WebSocket tool call with output
+      payload:
+        $ref: '#/components/schemas/sts_toolCallOutput'
+    subpackage_conversations.conversations-client-7-unmute:
+      name: unmute
+      title: unmute
+      description: Only for push to talk. Interrupts the assistant and turns on listening
+      payload:
+        $ref: '#/components/schemas/sts_unmute'
+    subpackage_conversations.conversations-client-8-mute:
+      name: mute
+      title: mute
+      description: Only for push to talk. Turns off listening and starts assistant reply
+      payload:
+        $ref: '#/components/schemas/sts_mute'
+    subpackage_conversations.conversations-client-9-generate_reply:
+      name: generate_reply
+      title: generate_reply
+      description: >-
+        Trigger the assistant to generate a reply, optionally with a system
+        message
+      payload:
+        $ref: '#/components/schemas/sts_generateReply'
+    subpackage_conversations.conversations-client-10-say:
+      name: say
+      title: say
+      description: >-
+        Trigger the assistant to say some text, optionally can be configured to
+        make the turn uninterruptible
+      payload:
+        $ref: '#/components/schemas/sts_say'
+    subpackage_conversations.conversations-client-11-reset:
+      name: reset
+      title: reset
+      description: >
+        Soft-reset the conversation mid-stream, clearing the agent's
+        conversation memory and allowing for a new system prompt, tools, etc.
+      payload:
+        $ref: '#/components/schemas/sts_reset'
+  schemas:
+    sts_readyToStartConversation:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - ready_to_start_conversation
+      required:
+        - type
+      title: sts_readyToStartConversation
+    sts_conversationCreated:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - conversation_created
+        conversation_id:
+          type: string
+          description: ID of the created conversation
+      required:
+        - type
+        - conversation_id
+      title: sts_conversationCreated
+    sts_inputText:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - input_text
+        language:
+          type: string
+          description: Detected ISO 639-1 language code of user speech
+        text:
+          type: string
+          description: Transcribed user speech
+      required:
+        - type
+        - language
+        - text
+      title: sts_inputText
+    sts_inputCancelled:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - input_cancelled
+      required:
+        - type
+      title: sts_inputCancelled
+    sts_audioChunkResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - audio_chunk
+        audio:
+          type: string
+          description: Base64-encoded AI audio data
+        text:
+          type: string
+          description: Text corresponding to audio chunk
+        timings:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: >-
+            Optional latency-breakdown metrics for the audio chunk, expressed as
+            named millisecond durations. Only present on the first audio chunk
+            of a turn.
+      required:
+        - type
+        - audio
+        - text
+      title: sts_audioChunkResponse
+    sts_userStartedSpeaking:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - user_started_speaking
+      required:
+        - type
+      title: sts_userStartedSpeaking
+    sts_userFinishedSpeaking:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - user_finished_speaking
+      required:
+        - type
+      title: sts_userFinishedSpeaking
+    sts_assistantStartedSpeaking:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - assistant_started_speaking
+      required:
+        - type
+      title: sts_assistantStartedSpeaking
+    sts_assistantFinishedSpeaking:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - assistant_finished_speaking
+      required:
+        - type
+      title: sts_assistantFinishedSpeaking
+    sts_interruptedResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - interrupted_response
+        text:
+          type: string
+          description: >-
+            The part of the assistant's turn that was spoken before the user
+            interrupted.
+      required:
+        - type
+        - text
+      title: sts_interruptedResponse
+    sts_dtmf:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - dtmf
+        digits:
+          type: string
+          pattern: ^[0-9*#]+$
+          description: DTMF digits to play
+        timings:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: >-
+            Optional latency-breakdown metrics for the message, expressed as
+            named millisecond durations.
+      required:
+        - type
+        - digits
+      title: sts_dtmf
+    sts_toolCall:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - tool_call
+        tool_call_id:
+          type: string
+          description: Unique ID for this tool call
+        tool_name:
+          type: string
+          description: Name of the tool to execute
+        parameters:
+          type: object
+          additionalProperties:
+            description: Any type
+          description: Parameters for tool execution
+      required:
+        - type
+        - tool_call_id
+        - tool_name
+        - parameters
+      title: sts_toolCall
+    ChannelsStsMessagesToolCallOutputProcessedTool:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Tool ID
+        name:
+          type: string
+          description: Human-readable tool name
+      required:
+        - id
+        - name
+      title: ChannelsStsMessagesToolCallOutputProcessedTool
+    ChannelsStsMessagesToolCallOutputProcessedConversationItemRole:
+      type: string
+      enum:
+        - user
+        - assistant
+      description: >-
+        The role of the conversation turn the tool call was attached to. A tool
+        call made while the user is still speaking is attached to the user's
+        turn.
+      title: ChannelsStsMessagesToolCallOutputProcessedConversationItemRole
+    sts_toolCallOutputProcessed:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - tool_call_output_processed
+        tool_call_id:
+          type: string
+          description: ID of the completed tool call
+        tool:
+          $ref: '#/components/schemas/ChannelsStsMessagesToolCallOutputProcessedTool'
+        tool_config:
+          type:
+            - object
+            - 'null'
+          additionalProperties:
+            description: Any type
+          description: Configuration of the tool that was called
+        endpoint_method:
+          type:
+            - string
+            - 'null'
+          description: HTTP method used for webhook endpoint (null for WebSocket tools)
+        endpoint_url:
+          type:
+            - string
+            - 'null'
+          description: >-
+            Webhook endpoint URL as called, with any `url_path` placeholders
+            filled in (null for WebSocket tools)
+        endpoint_timeout_ms:
+          type:
+            - integer
+            - 'null'
+          description: Webhook timeout in milliseconds (null for WebSocket tools)
+        endpoint_called_at:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: When webhook was called (null for WebSocket tools)
+        query_params:
+          type:
+            - object
+            - 'null'
+          additionalProperties:
+            type: string
+          description: >-
+            Query string parameters sent to webhook endpoint (null for WebSocket
+            tools)
+        request_body:
+          type:
+            - object
+            - 'null'
+          additionalProperties:
+            description: Any type
+          description: Webhook request body (null for WebSocket tools)
+        response_body:
+          oneOf:
+            - description: Any type
+            - type: 'null'
+          description: Webhook response body (null for WebSocket tools)
+        parameters:
+          type:
+            - object
+            - 'null'
+          additionalProperties:
+            description: Any type
+          description: WebSocket tool parameters (null for webhook tools)
+        output:
+          oneOf:
+            - description: Any type
+            - type: 'null'
+          description: WebSocket tool output (null for webhook tools)
+        response_status_code:
+          type:
+            - integer
+            - 'null'
+          description: Webhook HTTP status code (null for WebSocket tools)
+        duration_ms:
+          type:
+            - number
+            - 'null'
+          format: double
+          description: Duration of the tool call in milliseconds
+        timed_out:
+          type:
+            - boolean
+            - 'null'
+          description: Whether the tool call timed out
+        error_message:
+          type:
+            - string
+            - 'null'
+          description: Error message if tool call failed
+        conversation_item_role:
+          $ref: >-
+            #/components/schemas/ChannelsStsMessagesToolCallOutputProcessedConversationItemRole
+          description: >-
+            The role of the conversation turn the tool call was attached to. A
+            tool call made while the user is still speaking is attached to the
+            user's turn.
+      required:
+        - type
+        - tool_call_id
+        - tool
+        - conversation_item_role
+      title: sts_toolCallOutputProcessed
+    sts_toolCallInterrupted:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - tool_call_interrupted
+        tool_call_id:
+          type: string
+          description: ID of the interrupted tool call
+        tool_name:
+          type: string
+          description: Name of the interrupted tool
+      required:
+        - type
+        - tool_call_id
+        - tool_name
+      title: sts_toolCallInterrupted
+    sts_assistantChoseNotToRespond:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - assistant_chose_not_to_respond
+      required:
+        - type
+      title: sts_assistantChoseNotToRespond
+    sts_assistantEndedConversation:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - assistant_ended_conversation
+      required:
+        - type
+      title: sts_assistantEndedConversation
+    ChannelsStsMessagesErrorError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+      required:
+        - message
+      title: ChannelsStsMessagesErrorError
+    sts_error:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - error
+        error:
+          $ref: '#/components/schemas/ChannelsStsMessagesErrorError'
+        param_errors:
+          type: object
+          additionalProperties:
+            type: string
+          description: Parameter-specific validation errors
+      required:
+        - type
+        - error
+      title: sts_error
+    ChannelsStsMessagesWarningWarning:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Warning message
+        code:
+          type: string
+          description: Warning code
+      required:
+        - message
+      title: ChannelsStsMessagesWarningWarning
+    sts_warning:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - warning
+        warning:
+          $ref: '#/components/schemas/ChannelsStsMessagesWarningWarning'
+      required:
+        - type
+        - warning
+      title: sts_warning
+    ChannelsStsMessagesConfigModel0:
+      type: string
+      enum:
+        - phonic-0.5
+        - phonic-1
+      title: ChannelsStsMessagesConfigModel0
+    ChannelsStsMessagesConfigModel:
+      oneOf:
+        - $ref: '#/components/schemas/ChannelsStsMessagesConfigModel0'
+        - type: string
+      description: >-
+        The Phonic speech-to-speech model to generate with. Omit it to use the
+        current default model.
+      title: ChannelsStsMessagesConfigModel
+    ChannelsStsMessagesConfigBackgroundNoise:
+      type: string
+      enum:
+        - office
+        - call-center
+        - coffee-shop
+      description: Background noise type for the conversation
+      title: ChannelsStsMessagesConfigBackgroundNoise
+    ChannelsStsMessagesConfigInputFormat:
+      type: string
+      enum:
+        - pcm_44100
+        - pcm_24000
+        - pcm_16000
+        - pcm_8000
+        - mulaw_8000
+      default: pcm_44100
+      description: Audio input format
+      title: ChannelsStsMessagesConfigInputFormat
+    ChannelsStsMessagesConfigOutputFormat:
+      type: string
+      enum:
+        - pcm_44100
+        - pcm_24000
+        - pcm_16000
+        - pcm_8000
+        - mulaw_8000
+      default: pcm_44100
+      description: Audio output format
+      title: ChannelsStsMessagesConfigOutputFormat
+    ChannelsStsMessagesConfigMultilingualMode:
+      type: string
+      enum:
+        - auto
+        - request
+        - initial
+      default: request
+      description: >-
+        If `"auto"`, each user audio is automatically identified for the
+        language to respond in. If `"request"`, user must request to change
+        language (recommended). If `"initial"` the first turn user audio
+        determines the language for the rest of the conversation.
+      title: ChannelsStsMessagesConfigMultilingualMode
+    ChannelsStsMessagesConfigIntelligenceLevel:
+      type: string
+      enum:
+        - standard
+        - high
+      default: standard
+      description: >-
+        The intelligence level of the agent. `high` uses a more capable model
+        for more complex reasoning, while `standard` is optimized for lower
+        latency.
+      title: ChannelsStsMessagesConfigIntelligenceLevel
+    ChannelsStsMessagesConfigPhonicModel0:
+      type: string
+      enum:
+        - phonic-0.5
+        - phonic-1
+      title: ChannelsStsMessagesConfigPhonicModel0
+    ChannelsStsMessagesConfigPhonicModel:
+      oneOf:
+        - $ref: '#/components/schemas/ChannelsStsMessagesConfigPhonicModel0'
+        - type: string
+      description: >-
+        The Phonic speech-to-speech model to generate with. This field is
+        deprecated. Use `model` instead.
+      title: ChannelsStsMessagesConfigPhonicModel
+      deprecated: true
+    ChannelsStsMessagesConfigPronunciationDictionaryItems:
+      type: object
+      properties:
+        word:
+          type: string
+          maxLength: 30
+        pronunciation:
+          type: string
+          maxLength: 50
+      required:
+        - word
+        - pronunciation
+      title: ChannelsStsMessagesConfigPronunciationDictionaryItems
+    ToolName:
+      type: string
+      description: Name of a pre-defined tool or built-in tool available to the assistant.
+      title: ToolName
+    BuiltInToolDefinitionName:
+      type: string
+      enum:
+        - keypad_input
+        - natural_conversation_ending
+        - choose_not_to_respond
+        - web_search
+      description: The name of the built-in tool.
+      title: BuiltInToolDefinitionName
+    BuiltInToolConfigSpeechBeforeToolCall:
+      type: string
+      enum:
+        - required
+        - optional
+        - suppressed
+      description: >-
+        Controls whether the assistant speaks before the tool is called.
+        `required`: the assistant must speak first. `optional`: the model
+        decides. `suppressed`: the assistant is strongly instructed to stay
+        silent before the call (best effort).
+      title: BuiltInToolConfigSpeechBeforeToolCall
+    BuiltInToolConfig:
+      type: object
+      properties:
+        speech_before_tool_call:
+          $ref: '#/components/schemas/BuiltInToolConfigSpeechBeforeToolCall'
+          description: >-
+            Controls whether the assistant speaks before the tool is called.
+            `required`: the assistant must speak first. `optional`: the model
+            decides. `suppressed`: the assistant is strongly instructed to stay
+            silent before the call (best effort).
+      required:
+        - speech_before_tool_call
+      description: >-
+        Configuration for a simple built-in tool (`keypad_input`,
+        `natural_conversation_ending`, or `web_search`).
+      title: BuiltInToolConfig
+    ChooseNotToRespondToolConfig:
+      type: object
+      properties:
+        respond_after_sec:
+          type:
+            - number
+            - 'null'
+          format: double
+          minimum: 1
+          maximum: 30
+          description: >-
+            Number of seconds to wait after the tool fires before the assistant
+            speaks a follow-up if the user stays silent. When null, the
+            assistant stays silent (default).
+      description: Configuration for the `choose_not_to_respond` built-in tool.
+      title: ChooseNotToRespondToolConfig
+    BuiltInToolDefinitionToolConfig:
+      oneOf:
+        - $ref: '#/components/schemas/BuiltInToolConfig'
+        - $ref: '#/components/schemas/ChooseNotToRespondToolConfig'
+      description: >-
+        The tool's configuration. Use `BuiltInToolConfig` for `keypad_input`,
+        `natural_conversation_ending`, and `web_search`, or
+        `ChooseNotToRespondToolConfig` for `choose_not_to_respond`.
+      title: BuiltInToolDefinitionToolConfig
+    BuiltInToolDefinition:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - built_in
+        name:
+          $ref: '#/components/schemas/BuiltInToolDefinitionName'
+          description: The name of the built-in tool.
+        tool_config:
+          $ref: '#/components/schemas/BuiltInToolDefinitionToolConfig'
+          description: >-
+            The tool's configuration. Use `BuiltInToolConfig` for
+            `keypad_input`, `natural_conversation_ending`, and `web_search`, or
+            `ChooseNotToRespondToolConfig` for `choose_not_to_respond`.
+      required:
+        - type
+        - name
+        - tool_config
+      description: >-
+        A built-in tool with an explicit configuration, as an alternative to
+        referencing it by bare name (which uses the tool's default
+        configuration). `keypad_input`, `natural_conversation_ending`, and
+        `web_search` take a `speech_before_tool_call` config;
+        `choose_not_to_respond` takes a `respond_after_sec` config.
+      title: BuiltInToolDefinition
+    OpenAIFunctionParameters:
+      type: object
+      additionalProperties:
+        description: Any type
+      description: >-
+        JSON Schema object describing the tool parameters. This follows OpenAI's
+        function tool `parameters` field.
+      title: OpenAIFunctionParameters
+    OpenAIFunction:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Function name the assistant will use in `tool_call.tool_name`.
+        description:
+          type: string
+          description: Description of what the tool does and when to call it.
+        parameters:
+          $ref: '#/components/schemas/OpenAIFunctionParameters'
+        strict:
+          type: boolean
+          enum:
+            - true
+          description: Inline tools require strict function calling.
+      required:
+        - name
+        - description
+        - parameters
+        - strict
+      title: OpenAIFunction
+    OpenAITool:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - function
+        function:
+          $ref: '#/components/schemas/OpenAIFunction'
+      required:
+        - type
+        - function
+      description: OpenAI-compatible function tool schema.
+      title: OpenAITool
+    InlineWebSocketToolExecutionMode:
+      type: string
+      enum:
+        - sync
+        - async
+      default: sync
+      description: Whether the assistant waits for the tool output before continuing.
+      title: InlineWebSocketToolExecutionMode
+    InlineWebSocketTool:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - custom_websocket
+        tool_schema:
+          $ref: '#/components/schemas/OpenAITool'
+        execution_mode:
+          $ref: '#/components/schemas/InlineWebSocketToolExecutionMode'
+          default: sync
+          description: Whether the assistant waits for the tool output before continuing.
+        tool_call_output_timeout_ms:
+          type: integer
+          minimum: 1000
+          maximum: 180000
+          default: 5000
+          description: >-
+            Timeout in milliseconds for the client to send a `tool_call_output`
+            message.
+        require_speech_before_tool_call:
+          type: boolean
+          default: false
+          description: When true, forces the assistant to speak before executing the tool.
+        wait_for_speech_before_tool_call:
+          type: boolean
+          default: false
+          description: >-
+            When true, waits for the assistant's speech to finish before sending
+            the tool call.
+        forbid_speech_after_tool_call:
+          type: boolean
+          default: false
+          description: >-
+            When true, prevents the assistant from speaking after executing the
+            tool.
+        forbid_tool_call_after_speech:
+          type: boolean
+          default: false
+          description: >-
+            When true, prevents the assistant from calling the tool right after
+            it has spoken.
+        allow_tool_chaining:
+          type: boolean
+          default: true
+          description: >-
+            When true, allows the assistant to call another tool after this
+            tool.
+        wait_for_response:
+          type: boolean
+          default: false
+          description: >-
+            For async tools, when true, the assistant waits for the response and
+            speaks when it arrives.
+        uninterruptible:
+          type: boolean
+          default: false
+          description: >-
+            For sync tools, when true, the user cannot interrupt the assistant
+            while the tool call is in flight; the assistant's turn is held open
+            until the tool returns.
+        can_run_during_user_speech:
+          type: boolean
+          default: false
+          description: >-
+            When true, the assistant can call the tool while the user is still
+            speaking. Setting it to true requires the feature to be enabled for
+            your organization; contact Phonic to get access.
+      required:
+        - type
+        - tool_schema
+      description: >-
+        Inline WebSocket tool definition for this conversation. Inline tools are
+        not persisted to your workspace; they are executed by your connected
+        WebSocket application when Phonic sends a `tool_call` message.
+      title: InlineWebSocketTool
+    ToolDefinition:
+      oneOf:
+        - $ref: '#/components/schemas/ToolName'
+        - $ref: '#/components/schemas/BuiltInToolDefinition'
+        - $ref: '#/components/schemas/InlineWebSocketTool'
+      title: ToolDefinition
+    ChannelsStsMessagesConfigObservabilityIntegrationsItems:
+      type: string
+      enum:
+        - braintrust
+      title: ChannelsStsMessagesConfigObservabilityIntegrationsItems
+    ChannelsStsMessagesConfigTasksItems:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the task.
+        description:
+          type: string
+          description: Description of the task.
+      required:
+        - name
+        - description
+      title: ChannelsStsMessagesConfigTasksItems
+    ChannelsStsMessagesConfigOutboundNumberPool:
+      type: object
+      properties:
+        active:
+          type: array
+          items:
+            type: string
+          description: >-
+            Active E.164 phone numbers to use for outbound calls. Numbers must
+            be unique.
+        blocked:
+          type: array
+          items:
+            type: string
+          description: >-
+            Blocked E.164 phone numbers that should not be used for outbound
+            calls.
+      required:
+        - active
+        - blocked
+      description: Pool of phone numbers to use as the caller ID for outbound calls.
+      title: ChannelsStsMessagesConfigOutboundNumberPool
+    ChannelsStsMessagesConfigConfigurationEndpoint:
+      type: object
+      properties:
+        url:
+          type: string
+          description: >-
+            URL to call. Must be a publicly routable HTTPS URL without embedded
+            credentials.
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Object of key-value pairs sent as headers when calling the endpoint.
+        timeout_ms:
+          type: integer
+          minimum: 1000
+          maximum: 20000
+          default: 3000
+          description: Timeout in milliseconds for the endpoint call.
+      required:
+        - url
+      description: >-
+        When not `null`, the agent will call this endpoint to get configuration
+        options for the conversation.
+      title: ChannelsStsMessagesConfigConfigurationEndpoint
+    ChannelsStsMessagesConfigDataRetentionPolicy0:
+      type: object
+      properties:
+        zero_data_retention:
+          type: boolean
+          description: When `true`, no transcripts or audio recordings are retained.
+      required:
+        - zero_data_retention
+      description: >-
+        Zero data retention mode. No transcripts or audio recordings are
+        retained.
+      title: ChannelsStsMessagesConfigDataRetentionPolicy0
+    ChannelsStsMessagesConfigDataRetentionPolicyOneOf1Transcripts:
+      type: object
+      properties:
+        delete_after_hours:
+          type:
+            - integer
+            - 'null'
+          description: >-
+            Number of hours after which transcripts are deleted. When `null`,
+            transcripts are retained indefinitely.
+      required:
+        - delete_after_hours
+      title: ChannelsStsMessagesConfigDataRetentionPolicyOneOf1Transcripts
+    ChannelsStsMessagesConfigDataRetentionPolicyOneOf1AudioRecordings:
+      type: object
+      properties:
+        delete_after_hours:
+          type:
+            - integer
+            - 'null'
+          description: >-
+            Number of hours after which audio recordings are deleted. When
+            `null`, audio recordings are retained indefinitely.
+      required:
+        - delete_after_hours
+      title: ChannelsStsMessagesConfigDataRetentionPolicyOneOf1AudioRecordings
+    ChannelsStsMessagesConfigDataRetentionPolicy1:
+      type: object
+      properties:
+        zero_data_retention:
+          type: boolean
+          description: Must be `false` for standard data retention.
+        transcripts:
+          $ref: >-
+            #/components/schemas/ChannelsStsMessagesConfigDataRetentionPolicyOneOf1Transcripts
+        audio_recordings:
+          $ref: >-
+            #/components/schemas/ChannelsStsMessagesConfigDataRetentionPolicyOneOf1AudioRecordings
+      required:
+        - zero_data_retention
+        - transcripts
+        - audio_recordings
+      description: Standard data retention with configurable deletion windows.
+      title: ChannelsStsMessagesConfigDataRetentionPolicy1
+    ChannelsStsMessagesConfigDataRetentionPolicy:
+      oneOf:
+        - $ref: '#/components/schemas/ChannelsStsMessagesConfigDataRetentionPolicy0'
+        - $ref: '#/components/schemas/ChannelsStsMessagesConfigDataRetentionPolicy1'
+      description: >
+        Policy controlling how long transcripts and audio recordings are
+        retained before being deleted.
+
+        When `zero_data_retention` is `true`, nothing is retained and
+        `transcripts`/`audio_recordings` are omitted.
+      title: ChannelsStsMessagesConfigDataRetentionPolicy
+    sts_config:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - config
+        agent:
+          type: string
+          description: Agent name to use for conversation
+        project:
+          type: string
+          default: main
+          description: Project name
+        model:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigModel'
+          description: >-
+            The Phonic speech-to-speech model to generate with. Omit it to use
+            the current default model.
+        system_prompt:
+          type: string
+          maxLength: 1000000
+          default: Respond in 1-2 sentences.
+          description: System prompt for AI assistant
+        audio_speed:
+          type: number
+          format: double
+          minimum: 0.5
+          maximum: 1.5
+          default: 1
+          description: Audio playback speed
+        background_noise_level:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 0.25
+          default: 0
+          description: Background noise level for the conversation
+        background_noise:
+          oneOf:
+            - $ref: '#/components/schemas/ChannelsStsMessagesConfigBackgroundNoise'
+            - type: 'null'
+          description: Background noise type for the conversation
+        generate_welcome_message:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, the welcome message will be automatically generated and
+            the `welcome_message` field will be ignored.
+        is_welcome_message_interruptible:
+          type: boolean
+          default: true
+          description: >-
+            When `false`, the welcome message will not be interruptible by the
+            user.
+        websocket_timeout_sec:
+          type: integer
+          minimum: 1
+          maximum: 300
+          default: 60
+          description: >-
+            Number of seconds of inactivity before the conversation WebSocket is
+            closed.
+        welcome_message:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+          description: >-
+            Message to play when conversation starts. Ignored when
+            `generate_welcome_message` is `true`.
+        voice_id:
+          type: string
+          default: sabrina
+          description: Voice ID to use for speech synthesis
+        additional_voice_ids:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          default: []
+          description: >-
+            Additional voice IDs that, together with `voice_id`, form a voice
+            set. Each conversation is assigned one voice from the set, chosen at
+            random with equal probability. Must not include `voice_id` and must
+            not contain duplicates.
+        input_format:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigInputFormat'
+          default: pcm_44100
+          description: Audio input format
+        output_format:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigOutputFormat'
+          default: pcm_44100
+          description: Audio output format
+        vad_prebuffer_duration_ms:
+          type: integer
+          minimum: 0
+          maximum: 2000
+          default: 500
+          description: Voice activity detection prebuffer duration
+        vad_min_speech_duration_ms:
+          type: integer
+          minimum: 0
+          maximum: 1500
+          default: 50
+          description: Minimum speech duration for VAD
+        vad_min_silence_duration_ms:
+          type: integer
+          minimum: 0
+          maximum: 1500
+          default: 800
+          description: Minimum silence duration for VAD
+        vad_threshold:
+          type: number
+          format: double
+          minimum: 0.2
+          maximum: 0.8
+          default: 0.38
+          description: Voice activity detection threshold
+        min_words_to_interrupt:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: Minimum number of words required to interrupt the assistant.
+        generate_no_input_poke_text:
+          type: boolean
+          default: false
+          description: Whether to have the no-input poke text be generated by AI
+        no_input_poke_sec:
+          type:
+            - integer
+            - 'null'
+          minimum: 1
+          maximum: 120
+          description: Seconds of silence before poke message
+        no_input_poke_text:
+          type: string
+          default: Are you still there?
+          description: Poke message text. Ignored when generate_no_input_poke_text is true.
+        no_input_end_conversation_sec:
+          type: integer
+          minimum: 30
+          maximum: 600
+          default: 180
+          description: Seconds of silence before ending conversation
+        default_language:
+          type: string
+          default: en
+          description: >-
+            ISO 639-1 language code that sets the agent's default language to
+            recognize and speak. Welcome message and no input poke text should
+            be in this language.
+        additional_languages:
+          type: array
+          items:
+            type: string
+          default: []
+          description: >-
+            Array of additional ISO 639-1 language codes that the agent should
+            be able to recognize and speak. Should not include
+            `default_language`. When `multilingual_mode` is `"auto"`, a maximum
+            of 2 additional languages is allowed.
+        multilingual_mode:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigMultilingualMode'
+          default: request
+          description: >-
+            If `"auto"`, each user audio is automatically identified for the
+            language to respond in. If `"request"`, user must request to change
+            language (recommended). If `"initial"` the first turn user audio
+            determines the language for the rest of the conversation.
+        push_to_talk:
+          type: boolean
+          default: false
+          description: >-
+            Push to talk mode. User must send mute/unmute messages to turn
+            on/off listening to audio. Defaults to false.
+        stream_ahead_of_real_time:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, assistant audio is streamed to the client as fast as it
+            is generated, rather than paced to real time. Defaults to false.
+        intelligence_level:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigIntelligenceLevel'
+          default: standard
+          description: >-
+            The intelligence level of the agent. `high` uses a more capable
+            model for more complex reasoning, while `standard` is optimized for
+            lower latency.
+        phonic_model:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigPhonicModel'
+          description: >-
+            The Phonic speech-to-speech model to generate with. This field is
+            deprecated. Use `model` instead.
+          deprecated: true
+        boosted_keywords:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          description: Keywords to boost in speech recognition
+        pronunciation_dictionary:
+          type: array
+          items:
+            $ref: >-
+              #/components/schemas/ChannelsStsMessagesConfigPronunciationDictionaryItems
+          description: Array of `{ word, pronunciation }` entries. Words must be unique.
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolDefinition'
+          description: >-
+            Tools available to the assistant. Use a string to reference a
+            pre-defined tool by name, provide a built-in tool object to override
+            its default configuration, or define an inline WebSocket tool for
+            this conversation.
+        template_variables:
+          type: object
+          additionalProperties:
+            type: string
+          description: Template variables for system prompt and welcome message
+        enable_redaction:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, PII and PHI are redacted from text transcripts (e.g.
+            replaced with tags like `[PHONE]`) and bleeped from audio recordings
+            after the conversation ends.
+        enable_watermarking:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, an inaudible watermark is embedded in the audio the
+            assistant generates.
+        mcp_servers:
+          type: array
+          items:
+            type: string
+          default: []
+          description: >-
+            Names of pre-configured MCP servers to make available to the
+            assistant. Names must be unique.
+        observability_integrations:
+          type: array
+          items:
+            $ref: >-
+              #/components/schemas/ChannelsStsMessagesConfigObservabilityIntegrationsItems
+          default: []
+          description: >-
+            Names of observability integrations to enable for the conversation.
+            Each must be one of the supported providers.
+        external_storage_policy:
+          type:
+            - string
+            - 'null'
+          description: >-
+            Name of an external storage policy in the same project that
+            conversation artifacts are delivered to. Requires
+            `data_retention_policy.zero_data_retention` to be `true` and cannot
+            be combined with `enable_redaction`. Set to `null` to disable
+            external delivery.
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelsStsMessagesConfigTasksItems'
+          description: Tasks the assistant should accomplish during the conversation.
+        outbound_number_pool:
+          oneOf:
+            - $ref: '#/components/schemas/ChannelsStsMessagesConfigOutboundNumberPool'
+            - type: 'null'
+          description: Pool of phone numbers to use as the caller ID for outbound calls.
+        enable_assistant_backchannel:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, the assistant will produce backchannel responses (e.g.
+            "mm-hmm", "yeah") while the user is speaking.
+        assistant_backchannel_aggressiveness:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          default: 0.1
+          description: >-
+            How aggressively the assistant produces backchannel responses. Only
+            applies when `enable_assistant_backchannel` is `true`.
+        configuration_endpoint:
+          oneOf:
+            - $ref: >-
+                #/components/schemas/ChannelsStsMessagesConfigConfigurationEndpoint
+            - type: 'null'
+          description: >-
+            When not `null`, the agent will call this endpoint to get
+            configuration options for the conversation.
+        additional_params:
+          type: object
+          additionalProperties:
+            description: Any type
+          description: Additional runtime parameters.
+        data_retention_policy:
+          $ref: '#/components/schemas/ChannelsStsMessagesConfigDataRetentionPolicy'
+          description: >
+            Policy controlling how long transcripts and audio recordings are
+            retained before being deleted.
+
+            When `zero_data_retention` is `true`, nothing is retained and
+            `transcripts`/`audio_recordings` are omitted.
+        external_id:
+          type:
+            - string
+            - 'null'
+          minLength: 1
+          description: >-
+            External ID to associate with the conversation. Surrounding
+            whitespace is trimmed and the value must not be empty. An external
+            ID set earlier via `set_external_id` takes precedence.
+      required:
+        - type
+      description: |
+        Configuration fields for the initial `config` message.
+      title: sts_config
+    sts_audioChunk:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - audio_chunk
+        audio:
+          type: string
+          minLength: 1
+          description: >-
+            Base64-encoded audio data (Int16Array for PCM, Uint8Array for
+            mulaw). Each chunk may contain at most 40 ms of audio — longer
+            chunks are rejected with an error. Batch ~20 ms frames for headroom.
+        iso_date_time:
+          type: string
+          format: date-time
+          description: >-
+            Optional ISO 8601 UTC timestamp for when the audio was captured,
+            used to align the caller's audio in the call recording. Only useful
+            if you buffer audio and send it later than it was captured. If
+            omitted, the server uses the time it received the chunk. If set, it
+            must be real wall-clock time, not a simulated clock.
+      required:
+        - type
+        - audio
+      title: sts_audioChunk
+    sts_updateSystemPrompt:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - update_system_prompt
+        system_prompt:
+          type: string
+          minLength: 1
+          description: New system prompt (cannot contain template variables)
+      required:
+        - type
+        - system_prompt
+      title: sts_updateSystemPrompt
+    sts_addSystemMessage:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - add_system_message
+        system_message:
+          type: string
+          minLength: 1
+          description: New system message
+      required:
+        - type
+        - system_message
+      title: sts_addSystemMessage
+    sts_updateToolsSubset:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - update_tools_subset
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolDefinition'
+          description: >-
+            Tools available to the assistant. Use a string to reference a
+            pre-defined tool by name, or define an inline WebSocket tool for
+            this conversation. Tool names must be unique.
+      required:
+        - type
+        - tools
+      title: sts_updateToolsSubset
+    sts_setExternalId:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_external_id
+        external_id:
+          type: string
+          minLength: 1
+          description: External ID to associate with conversation
+      required:
+        - type
+        - external_id
+      title: sts_setExternalId
+    sts_toolCallOutput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - tool_call_output
+        tool_call_id:
+          type: string
+          description: ID of the tool call being responded to
+        output:
+          description: Result of tool execution
+      required:
+        - type
+        - tool_call_id
+        - output
+      title: sts_toolCallOutput
+    sts_unmute:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - unmute
+      required:
+        - type
+      title: sts_unmute
+    sts_mute:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - mute
+      required:
+        - type
+      title: sts_mute
+    sts_generateReply:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - generate_reply
+        system_message:
+          type:
+            - string
+            - 'null'
+          description: Optional system message to guide the assistant's reply
+        user_message:
+          type:
+            - string
+            - 'null'
+          description: Optional user message for the assistant to reply to
+      required:
+        - type
+      title: sts_generateReply
+    sts_say:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - say
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: The text for the assistant to say
+        interruptible:
+          type: boolean
+          default: true
+          description: >-
+            Optional configuration to make the turn interruptible or not
+            interruptible
+      required:
+        - type
+        - text
+      title: sts_say
+    ConfigOptionsModel0:
+      type: string
+      enum:
+        - phonic-0.5
+        - phonic-1
+      title: ConfigOptionsModel0
+    ConfigOptionsModel:
+      oneOf:
+        - $ref: '#/components/schemas/ConfigOptionsModel0'
+        - type: string
+      description: >-
+        The Phonic speech-to-speech model to generate with. Omit it to use the
+        current default model.
+      title: ConfigOptionsModel
+    ConfigOptionsBackgroundNoise:
+      type: string
+      enum:
+        - office
+        - call-center
+        - coffee-shop
+      description: Background noise type for the conversation
+      title: ConfigOptionsBackgroundNoise
+    ConfigOptionsInputFormat:
+      type: string
+      enum:
+        - pcm_44100
+        - pcm_24000
+        - pcm_16000
+        - pcm_8000
+        - mulaw_8000
+      default: pcm_44100
+      description: Audio input format
+      title: ConfigOptionsInputFormat
+    ConfigOptionsOutputFormat:
+      type: string
+      enum:
+        - pcm_44100
+        - pcm_24000
+        - pcm_16000
+        - pcm_8000
+        - mulaw_8000
+      default: pcm_44100
+      description: Audio output format
+      title: ConfigOptionsOutputFormat
+    ConfigOptionsMultilingualMode:
+      type: string
+      enum:
+        - auto
+        - request
+        - initial
+      default: request
+      description: >-
+        If `"auto"`, each user audio is automatically identified for the
+        language to respond in. If `"request"`, user must request to change
+        language (recommended). If `"initial"` the first turn user audio
+        determines the language for the rest of the conversation.
+      title: ConfigOptionsMultilingualMode
+    ConfigOptionsIntelligenceLevel:
+      type: string
+      enum:
+        - standard
+        - high
+      default: standard
+      description: >-
+        The intelligence level of the agent. `high` uses a more capable model
+        for more complex reasoning, while `standard` is optimized for lower
+        latency.
+      title: ConfigOptionsIntelligenceLevel
+    ConfigOptionsPhonicModel0:
+      type: string
+      enum:
+        - phonic-0.5
+        - phonic-1
+      title: ConfigOptionsPhonicModel0
+    ConfigOptionsPhonicModel:
+      oneOf:
+        - $ref: '#/components/schemas/ConfigOptionsPhonicModel0'
+        - type: string
+      description: >-
+        The Phonic speech-to-speech model to generate with. This field is
+        deprecated. Use `model` instead.
+      title: ConfigOptionsPhonicModel
+      deprecated: true
+    ConfigOptionsPronunciationDictionaryItems:
+      type: object
+      properties:
+        word:
+          type: string
+          maxLength: 30
+        pronunciation:
+          type: string
+          maxLength: 50
+      required:
+        - word
+        - pronunciation
+      title: ConfigOptionsPronunciationDictionaryItems
+    ConfigOptionsObservabilityIntegrationsItems:
+      type: string
+      enum:
+        - braintrust
+      title: ConfigOptionsObservabilityIntegrationsItems
+    ConfigOptionsTasksItems:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the task.
+        description:
+          type: string
+          description: Description of the task.
+      required:
+        - name
+        - description
+      title: ConfigOptionsTasksItems
+    ConfigOptionsOutboundNumberPool:
+      type: object
+      properties:
+        active:
+          type: array
+          items:
+            type: string
+          description: >-
+            Active E.164 phone numbers to use for outbound calls. Numbers must
+            be unique.
+        blocked:
+          type: array
+          items:
+            type: string
+          description: >-
+            Blocked E.164 phone numbers that should not be used for outbound
+            calls.
+      required:
+        - active
+        - blocked
+      description: Pool of phone numbers to use as the caller ID for outbound calls.
+      title: ConfigOptionsOutboundNumberPool
+    ConfigOptionsConfigurationEndpoint:
+      type: object
+      properties:
+        url:
+          type: string
+          description: >-
+            URL to call. Must be a publicly routable HTTPS URL without embedded
+            credentials.
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Object of key-value pairs sent as headers when calling the endpoint.
+        timeout_ms:
+          type: integer
+          minimum: 1000
+          maximum: 20000
+          default: 3000
+          description: Timeout in milliseconds for the endpoint call.
+      required:
+        - url
+      description: >-
+        When not `null`, the agent will call this endpoint to get configuration
+        options for the conversation.
+      title: ConfigOptionsConfigurationEndpoint
+    ConfigOptionsDataRetentionPolicy0:
+      type: object
+      properties:
+        zero_data_retention:
+          type: boolean
+          description: When `true`, no transcripts or audio recordings are retained.
+      required:
+        - zero_data_retention
+      description: >-
+        Zero data retention mode. No transcripts or audio recordings are
+        retained.
+      title: ConfigOptionsDataRetentionPolicy0
+    ConfigOptionsDataRetentionPolicyOneOf1Transcripts:
+      type: object
+      properties:
+        delete_after_hours:
+          type:
+            - integer
+            - 'null'
+          description: >-
+            Number of hours after which transcripts are deleted. When `null`,
+            transcripts are retained indefinitely.
+      required:
+        - delete_after_hours
+      title: ConfigOptionsDataRetentionPolicyOneOf1Transcripts
+    ConfigOptionsDataRetentionPolicyOneOf1AudioRecordings:
+      type: object
+      properties:
+        delete_after_hours:
+          type:
+            - integer
+            - 'null'
+          description: >-
+            Number of hours after which audio recordings are deleted. When
+            `null`, audio recordings are retained indefinitely.
+      required:
+        - delete_after_hours
+      title: ConfigOptionsDataRetentionPolicyOneOf1AudioRecordings
+    ConfigOptionsDataRetentionPolicy1:
+      type: object
+      properties:
+        zero_data_retention:
+          type: boolean
+          description: Must be `false` for standard data retention.
+        transcripts:
+          $ref: >-
+            #/components/schemas/ConfigOptionsDataRetentionPolicyOneOf1Transcripts
+        audio_recordings:
+          $ref: >-
+            #/components/schemas/ConfigOptionsDataRetentionPolicyOneOf1AudioRecordings
+      required:
+        - zero_data_retention
+        - transcripts
+        - audio_recordings
+      description: Standard data retention with configurable deletion windows.
+      title: ConfigOptionsDataRetentionPolicy1
+    ConfigOptionsDataRetentionPolicy:
+      oneOf:
+        - $ref: '#/components/schemas/ConfigOptionsDataRetentionPolicy0'
+        - $ref: '#/components/schemas/ConfigOptionsDataRetentionPolicy1'
+      description: >
+        Policy controlling how long transcripts and audio recordings are
+        retained before being deleted.
+
+        When `zero_data_retention` is `true`, nothing is retained and
+        `transcripts`/`audio_recordings` are omitted.
+      title: ConfigOptionsDataRetentionPolicy
+    ConfigOptions:
+      type: object
+      properties:
+        agent:
+          type: string
+          description: Agent name to use for conversation
+        project:
+          type: string
+          default: main
+          description: Project name
+        model:
+          $ref: '#/components/schemas/ConfigOptionsModel'
+          description: >-
+            The Phonic speech-to-speech model to generate with. Omit it to use
+            the current default model.
+        system_prompt:
+          type: string
+          maxLength: 1000000
+          default: Respond in 1-2 sentences.
+          description: System prompt for AI assistant
+        audio_speed:
+          type: number
+          format: double
+          minimum: 0.5
+          maximum: 1.5
+          default: 1
+          description: Audio playback speed
+        background_noise_level:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 0.25
+          default: 0
+          description: Background noise level for the conversation
+        background_noise:
+          oneOf:
+            - $ref: '#/components/schemas/ConfigOptionsBackgroundNoise'
+            - type: 'null'
+          description: Background noise type for the conversation
+        generate_welcome_message:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, the welcome message will be automatically generated and
+            the `welcome_message` field will be ignored.
+        is_welcome_message_interruptible:
+          type: boolean
+          default: true
+          description: >-
+            When `false`, the welcome message will not be interruptible by the
+            user.
+        websocket_timeout_sec:
+          type: integer
+          minimum: 1
+          maximum: 300
+          default: 60
+          description: >-
+            Number of seconds of inactivity before the conversation WebSocket is
+            closed.
+        welcome_message:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+          description: >-
+            Message to play when conversation starts. Ignored when
+            `generate_welcome_message` is `true`.
+        voice_id:
+          type: string
+          default: sabrina
+          description: Voice ID to use for speech synthesis
+        additional_voice_ids:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          default: []
+          description: >-
+            Additional voice IDs that, together with `voice_id`, form a voice
+            set. Each conversation is assigned one voice from the set, chosen at
+            random with equal probability. Must not include `voice_id` and must
+            not contain duplicates.
+        input_format:
+          $ref: '#/components/schemas/ConfigOptionsInputFormat'
+          default: pcm_44100
+          description: Audio input format
+        output_format:
+          $ref: '#/components/schemas/ConfigOptionsOutputFormat'
+          default: pcm_44100
+          description: Audio output format
+        vad_prebuffer_duration_ms:
+          type: integer
+          minimum: 0
+          maximum: 2000
+          default: 500
+          description: Voice activity detection prebuffer duration
+        vad_min_speech_duration_ms:
+          type: integer
+          minimum: 0
+          maximum: 1500
+          default: 50
+          description: Minimum speech duration for VAD
+        vad_min_silence_duration_ms:
+          type: integer
+          minimum: 0
+          maximum: 1500
+          default: 800
+          description: Minimum silence duration for VAD
+        vad_threshold:
+          type: number
+          format: double
+          minimum: 0.2
+          maximum: 0.8
+          default: 0.38
+          description: Voice activity detection threshold
+        min_words_to_interrupt:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: Minimum number of words required to interrupt the assistant.
+        generate_no_input_poke_text:
+          type: boolean
+          default: false
+          description: Whether to have the no-input poke text be generated by AI
+        no_input_poke_sec:
+          type:
+            - integer
+            - 'null'
+          minimum: 1
+          maximum: 120
+          description: Seconds of silence before poke message
+        no_input_poke_text:
+          type: string
+          default: Are you still there?
+          description: Poke message text. Ignored when generate_no_input_poke_text is true.
+        no_input_end_conversation_sec:
+          type: integer
+          minimum: 30
+          maximum: 600
+          default: 180
+          description: Seconds of silence before ending conversation
+        default_language:
+          type: string
+          default: en
+          description: >-
+            ISO 639-1 language code that sets the agent's default language to
+            recognize and speak. Welcome message and no input poke text should
+            be in this language.
+        additional_languages:
+          type: array
+          items:
+            type: string
+          default: []
+          description: >-
+            Array of additional ISO 639-1 language codes that the agent should
+            be able to recognize and speak. Should not include
+            `default_language`. When `multilingual_mode` is `"auto"`, a maximum
+            of 2 additional languages is allowed.
+        multilingual_mode:
+          $ref: '#/components/schemas/ConfigOptionsMultilingualMode'
+          default: request
+          description: >-
+            If `"auto"`, each user audio is automatically identified for the
+            language to respond in. If `"request"`, user must request to change
+            language (recommended). If `"initial"` the first turn user audio
+            determines the language for the rest of the conversation.
+        push_to_talk:
+          type: boolean
+          default: false
+          description: >-
+            Push to talk mode. User must send mute/unmute messages to turn
+            on/off listening to audio. Defaults to false.
+        stream_ahead_of_real_time:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, assistant audio is streamed to the client as fast as it
+            is generated, rather than paced to real time. Defaults to false.
+        intelligence_level:
+          $ref: '#/components/schemas/ConfigOptionsIntelligenceLevel'
+          default: standard
+          description: >-
+            The intelligence level of the agent. `high` uses a more capable
+            model for more complex reasoning, while `standard` is optimized for
+            lower latency.
+        phonic_model:
+          $ref: '#/components/schemas/ConfigOptionsPhonicModel'
+          description: >-
+            The Phonic speech-to-speech model to generate with. This field is
+            deprecated. Use `model` instead.
+          deprecated: true
+        boosted_keywords:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          description: Keywords to boost in speech recognition
+        pronunciation_dictionary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigOptionsPronunciationDictionaryItems'
+          description: Array of `{ word, pronunciation }` entries. Words must be unique.
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolDefinition'
+          description: >-
+            Tools available to the assistant. Use a string to reference a
+            pre-defined tool by name, provide a built-in tool object to override
+            its default configuration, or define an inline WebSocket tool for
+            this conversation.
+        template_variables:
+          type: object
+          additionalProperties:
+            type: string
+          description: Template variables for system prompt and welcome message
+        enable_redaction:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, PII and PHI are redacted from text transcripts (e.g.
+            replaced with tags like `[PHONE]`) and bleeped from audio recordings
+            after the conversation ends.
+        enable_watermarking:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, an inaudible watermark is embedded in the audio the
+            assistant generates.
+        mcp_servers:
+          type: array
+          items:
+            type: string
+          default: []
+          description: >-
+            Names of pre-configured MCP servers to make available to the
+            assistant. Names must be unique.
+        observability_integrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigOptionsObservabilityIntegrationsItems'
+          default: []
+          description: >-
+            Names of observability integrations to enable for the conversation.
+            Each must be one of the supported providers.
+        external_storage_policy:
+          type:
+            - string
+            - 'null'
+          description: >-
+            Name of an external storage policy in the same project that
+            conversation artifacts are delivered to. Requires
+            `data_retention_policy.zero_data_retention` to be `true` and cannot
+            be combined with `enable_redaction`. Set to `null` to disable
+            external delivery.
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigOptionsTasksItems'
+          description: Tasks the assistant should accomplish during the conversation.
+        outbound_number_pool:
+          oneOf:
+            - $ref: '#/components/schemas/ConfigOptionsOutboundNumberPool'
+            - type: 'null'
+          description: Pool of phone numbers to use as the caller ID for outbound calls.
+        enable_assistant_backchannel:
+          type: boolean
+          default: false
+          description: >-
+            When `true`, the assistant will produce backchannel responses (e.g.
+            "mm-hmm", "yeah") while the user is speaking.
+        assistant_backchannel_aggressiveness:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          default: 0.1
+          description: >-
+            How aggressively the assistant produces backchannel responses. Only
+            applies when `enable_assistant_backchannel` is `true`.
+        configuration_endpoint:
+          oneOf:
+            - $ref: '#/components/schemas/ConfigOptionsConfigurationEndpoint'
+            - type: 'null'
+          description: >-
+            When not `null`, the agent will call this endpoint to get
+            configuration options for the conversation.
+        additional_params:
+          type: object
+          additionalProperties:
+            description: Any type
+          description: Additional runtime parameters.
+        data_retention_policy:
+          $ref: '#/components/schemas/ConfigOptionsDataRetentionPolicy'
+          description: >
+            Policy controlling how long transcripts and audio recordings are
+            retained before being deleted.
+
+            When `zero_data_retention` is `true`, nothing is retained and
+            `transcripts`/`audio_recordings` are omitted.
+        external_id:
+          type:
+            - string
+            - 'null'
+          minLength: 1
+          description: >-
+            External ID to associate with the conversation. Surrounding
+            whitespace is trimmed and the value must not be empty. An external
+            ID set earlier via `set_external_id` takes precedence.
+      description: |
+        Configuration fields for the initial `config` message.
+      title: ConfigOptions
+    sts_reset:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - reset
+        config:
+          $ref: '#/components/schemas/ConfigOptions'
+      required:
+        - type
+        - config
+      title: sts_reset
+
+```
