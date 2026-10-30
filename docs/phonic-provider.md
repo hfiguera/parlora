@@ -5,6 +5,20 @@ It connects directly to `wss://api.phonic.ai/v1/sts/ws`; applications continue
 to own their channels, context policies, backend execution, and task revisions.
 No Phonic SDK or persistent hosted agent is required.
 
+## Integration status
+
+Phonic-1 is accepted into Parlora as an **experimental speech-to-speech provider**.
+The adapter has offline regression coverage, successful live-service probes,
+and a successful manual OrderDesk workflow. OrderDesk is a separate example
+application used to exercise the integration.
+
+Production qualification remains pending while longer automated stress-test
+stalls are investigated. The [acceptance evidence](../validation/phonic/README.md#acceptance-decision)
+and [longer-workflow results](../validation/interpretation-scheduling/README.md#observed-results-2026-10-29)
+record the successful checks and unresolved scenarios.
+
+## Usage
+
 ```elixir
 provider =
   {Parlora.Providers.Phonic,

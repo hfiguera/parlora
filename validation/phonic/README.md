@@ -6,6 +6,21 @@ PSTN quality, production latency, or broad reliability. No credentials or raw
 audio are written into reports. Generated detailed reports remain ignored by
 Git; `summary.json` is the compact checked-in evidence.
 
+## Acceptance decision
+
+Phonic-1 is accepted into Parlora as an **experimental provider**. This decision
+is supported by the implemented adapter, offline regression coverage, live wire
+and real-adapter probes, and a successful manual OrderDesk call on October 29,
+2026. That call handled an order correction, status and item lookups, delivery
+instructions, a draft, and a separately confirmed save. Four backend requests
+completed; the session recorded 29 interpretation evaluations and zero errors.
+
+Longer automated stress runs remain partially qualified: OpenAI and Grok
+completed the workflow, while Gemini and Phonic had unresolved stalls. See the
+[recorded results](../interpretation-scheduling/README.md#observed-results-2026-10-29).
+The experimental acceptance decision does not establish production readiness or
+reliability across all conversations and channels.
+
 ## Wire probes
 
 Requires macOS `say`, FFmpeg, and `websockets==15.0.1` (the command below uses

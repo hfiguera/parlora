@@ -42,6 +42,10 @@ explains these terms in more detail.
 | --- | --- | --- |
 | Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0, Phonic-1 (experimental) | Jido, Sagents, Legion, or your own `Parlora.Backend` |
 
+Phonic-1 is accepted into Parlora as an experimental speech-to-speech provider.
+See the [Phonic guide](docs/phonic-provider.md#integration-status) for validation
+evidence and remaining qualification limits.
+
 Jido, Sagents, and Legion are optional. Install only the framework you use.
 The voice provider handles the spoken conversation and delegates application
 work to the backend, which can run deterministic actions or use a separate text

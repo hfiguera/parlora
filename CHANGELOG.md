@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add Phonic-1 as an accepted experimental speech-to-speech provider, with
+  asynchronous client delegation and PCM24 streaming, including conversion for
+  mu-law channels. See the [Phonic guide](docs/phonic-provider.md) for capabilities
+  and remaining qualification limits.
+
 - Use Elixir's built-in `JSON` module and remove the direct Jason dependency.
   Minimum runtime requirements remain Elixir 1.18 and OTP 27. Dependencies may
   still install Jason for their own use. Custom structs passed across JSON

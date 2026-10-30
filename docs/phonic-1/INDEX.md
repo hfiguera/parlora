@@ -1,6 +1,6 @@
 # Phonic-1 documentation snapshot
 
-Official Phonic documentation selected for evaluating a provider adapter in the Parlora library. Downloaded pages and API specifications are preserved unmodified, using the source website’s path structure.
+Official Phonic documentation retained as references for Parlora's accepted experimental Phonic-1 provider. Downloaded pages and API specifications are preserved unmodified, using the source website’s path structure. See the [provider guide](../phonic-provider.md#integration-status) for the integration status and qualification limits.
 
 The snapshot contains 43 Markdown pages, the official `llms.txt` discovery index, and OpenAPI and AsyncAPI JSON specifications. Retrieval time, source URLs, byte counts, and SHA-256 hashes are recorded in [manifest.json](manifest.json).
 
