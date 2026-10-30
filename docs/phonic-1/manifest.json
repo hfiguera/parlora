@@ -14,69 +14,6 @@
       "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
     },
     {
-      "path": "api-reference/agents/delete.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/delete.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/delete.md",
-      "bytes": 4422,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "663db5ca4c4fbbd7417a9c50f8beaad61b18480be4553f8f5aec2a9dbdafb3b9",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/agents/disable.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/disable.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/disable.md",
-      "bytes": 4525,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "95bbc63b8f18d6ec441f9c68061331866ad86f3b7b46b5ef86db6962e31a27c0",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/agents/enable.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/enable.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/enable.md",
-      "bytes": 4498,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "a63ae2b69b62311536d338f34835d9f431a8b36e5554b0e33ab9ee9a9d343b71",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/agents/get.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/get.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/get.md",
-      "bytes": 20808,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "695ccc1b3aacc84f72428450b5adc96083450c69ebbbc1cfaaec708283e1372e",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/agents/list.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/list.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/list.md",
-      "bytes": 20622,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "1c0922bfc12fd63c4c8d8e3b2427fe2e26e72c9d878418f67a06a5d7a4fb694c",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/agents/update.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/update.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/update.md",
-      "bytes": 51325,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "8e574fb6d7610d867f0b6183cb91d8718e31a9ea73e22d1008ae0fc5375a3452",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/agents/upsert.md",
-      "url": "https://docs.phonic.ai/api-reference/agents/upsert.md",
-      "final_url": "https://docs.phonic.ai/api-reference/agents/upsert.md",
-      "bytes": 51887,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "7493932110e7a46cbe2b75490276e670beb9b392d5481c506e3a37dfa142cc29",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
       "path": "api-reference/auth/create-conversation-token.md",
       "url": "https://docs.phonic.ai/api-reference/auth/create-conversation-token.md",
       "final_url": "https://docs.phonic.ai/api-reference/auth/create-conversation-token.md",
@@ -185,33 +122,6 @@
       "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
     },
     {
-      "path": "api-reference/external-storage-policies/create.md",
-      "url": "https://docs.phonic.ai/api-reference/external-storage-policies/create.md",
-      "final_url": "https://docs.phonic.ai/api-reference/external-storage-policies/create.md",
-      "bytes": 13855,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "9d42ce603b1f44fa3a7092a73513db7ecb9a69c2f6f6729c34285a8e3081787b",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/external-storage-policies/get.md",
-      "url": "https://docs.phonic.ai/api-reference/external-storage-policies/get.md",
-      "final_url": "https://docs.phonic.ai/api-reference/external-storage-policies/get.md",
-      "bytes": 6257,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "20dffdda3a32afd86c9a50bdfd5f657634958526e4c9b4bfe3f6d4d736776763",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/external-storage-policies/update.md",
-      "url": "https://docs.phonic.ai/api-reference/external-storage-policies/update.md",
-      "final_url": "https://docs.phonic.ai/api-reference/external-storage-policies/update.md",
-      "bytes": 11748,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "f4f55e055289d101acd50f3dcbbdcbc5c30575c95183183575d6ef94ba0a7fb0",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
       "path": "api-reference/projects/create-eval-prompt.md",
       "url": "https://docs.phonic.ai/api-reference/projects/create-eval-prompt.md",
       "final_url": "https://docs.phonic.ai/api-reference/projects/create-eval-prompt.md",
@@ -248,51 +158,6 @@
       "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
     },
     {
-      "path": "api-reference/tools/create.md",
-      "url": "https://docs.phonic.ai/api-reference/tools/create.md",
-      "final_url": "https://docs.phonic.ai/api-reference/tools/create.md",
-      "bytes": 79041,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "be333bbc6112e0ac1c095ebb028f33866d6369e6792d50f276db5cacf4dc4511",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/tools/delete.md",
-      "url": "https://docs.phonic.ai/api-reference/tools/delete.md",
-      "final_url": "https://docs.phonic.ai/api-reference/tools/delete.md",
-      "bytes": 4604,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "e8946950ada370c48a32ec4e03f5163b3af3129495ca6889c8f43316b29bc6a7",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/tools/get.md",
-      "url": "https://docs.phonic.ai/api-reference/tools/get.md",
-      "final_url": "https://docs.phonic.ai/api-reference/tools/get.md",
-      "bytes": 32079,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "ce664ff70a182b4abe29021d3e332c19c71f63ec846b6bfa5bd5eaf2fec34200",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/tools/list.md",
-      "url": "https://docs.phonic.ai/api-reference/tools/list.md",
-      "final_url": "https://docs.phonic.ai/api-reference/tools/list.md",
-      "bytes": 19622,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "a57c62d3a59cc3b000b3416dcf8c4424bfecbe8c04b2f488b7ed24d7b798a225",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/tools/update.md",
-      "url": "https://docs.phonic.ai/api-reference/tools/update.md",
-      "final_url": "https://docs.phonic.ai/api-reference/tools/update.md",
-      "bytes": 23035,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "3387134cccf8fb79f9c9d0a14ba8a6cb1fe26405b46e45268ad13f243969213e",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
       "path": "api-reference/voices/get.md",
       "url": "https://docs.phonic.ai/api-reference/voices/get.md",
       "final_url": "https://docs.phonic.ai/api-reference/voices/get.md",
@@ -317,24 +182,6 @@
       "bytes": 7307,
       "content_type": "text/markdown; charset=utf-8",
       "sha256": "507a9062741050e3fdca7cca8361955deb8768a4f34a3893cb9c54d3d52e11cc",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/workspace/get.md",
-      "url": "https://docs.phonic.ai/api-reference/workspace/get.md",
-      "final_url": "https://docs.phonic.ai/api-reference/workspace/get.md",
-      "bytes": 4546,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "8b4516ff558baf7774df8a346928a12b95dfac5a09f22d56ac0256a6428e2d5d",
-      "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
-    },
-    {
-      "path": "api-reference/workspace/update.md",
-      "url": "https://docs.phonic.ai/api-reference/workspace/update.md",
-      "final_url": "https://docs.phonic.ai/api-reference/workspace/update.md",
-      "bytes": 6901,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "22b2288a1af6144ce7c04c776a3760cc818388f305059a64822b7f6939192e2b",
       "selection_reason": "API reference for provider setup, streaming, tool calls, lifecycle, voice, retention, or validation."
     },
     {
@@ -446,15 +293,6 @@
       "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
     },
     {
-      "path": "docs/build/tools/mcp_tools.md",
-      "url": "https://docs.phonic.ai/docs/build/tools/mcp_tools.md",
-      "final_url": "https://docs.phonic.ai/docs/build/tools/mcp_tools.md",
-      "bytes": 1010,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "66d2f99c81d93cc826e0cc47a7a8ed3b3820828026d974237d4c7f496f96d947",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
       "path": "docs/build/tools/tools_overview.md",
       "url": "https://docs.phonic.ai/docs/build/tools/tools_overview.md",
       "final_url": "https://docs.phonic.ai/docs/build/tools/tools_overview.md",
@@ -464,39 +302,12 @@
       "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
     },
     {
-      "path": "docs/build/tools/transfer_tools.md",
-      "url": "https://docs.phonic.ai/docs/build/tools/transfer_tools.md",
-      "final_url": "https://docs.phonic.ai/docs/build/tools/transfer_tools.md",
-      "bytes": 6298,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "854e503a04ac19681dff2da8c73301ae5702be7f6f9a170f286ce7f101a0fe34",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/tools/webhook_tools.md",
-      "url": "https://docs.phonic.ai/docs/build/tools/webhook_tools.md",
-      "final_url": "https://docs.phonic.ai/docs/build/tools/webhook_tools.md",
-      "bytes": 5351,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "362ad5daa68c4a6aec0af3fc802cbb52c4732c868db1bbfac081452f7436ad31",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
       "path": "docs/build/tools/websocket_tools.md",
       "url": "https://docs.phonic.ai/docs/build/tools/websocket_tools.md",
       "final_url": "https://docs.phonic.ai/docs/build/tools/websocket_tools.md",
       "bytes": 8308,
       "content_type": "text/markdown; charset=utf-8",
       "sha256": "152949e97d7fe63a39a5a043b174565779f65e5e532395e7653f91834686f5c3",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/with-livekit.md",
-      "url": "https://docs.phonic.ai/docs/build/with-livekit.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-livekit.md",
-      "bytes": 7153,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "65f7cd51493674cdd088e5424052dbae20dbfc18d1bd5fa5e72db3a203a0e2ea",
       "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
     },
     {
@@ -527,60 +338,6 @@
       "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
     },
     {
-      "path": "docs/build/with-webhooks/agent-configuration-endpoint.md",
-      "url": "https://docs.phonic.ai/docs/build/with-webhooks/agent-configuration-endpoint.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-webhooks/agent-configuration-endpoint.md",
-      "bytes": 8157,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "db014bb8ff2ba9253fc303248fae106c5f8096cc76148eb6f43085154db5132e",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/with-webhooks/post-call-webhooks.md",
-      "url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks.md",
-      "bytes": 1021,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "602531f5cf75f687280feb7e45a64c79d93e769752ae4d03aea3af23f2453065",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/with-webhooks/post-call-webhooks/conversation-analysis.md",
-      "url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-analysis.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-analysis.md",
-      "bytes": 3744,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "0e95267faaceb996dabea7816888d5419a7073ad98c2bc6a8958842e3f66725c",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/with-webhooks/post-call-webhooks/conversation-ended.md",
-      "url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-ended.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-ended.md",
-      "bytes": 4944,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "c268f609bca322fbffd2cb95e08881c80978f8ecbd6dcbfb24b6c5931cab1285",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/with-webhooks/post-call-webhooks/conversation-transferred.md",
-      "url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-transferred.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-webhooks/post-call-webhooks/conversation-transferred.md",
-      "bytes": 3942,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "46608cee948fbf2c1232237d7e653b1243e0242d8ab405bf4535b160f8bc4371",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/build/with-webhooks/via-webhooks.md",
-      "url": "https://docs.phonic.ai/docs/build/with-webhooks/via-webhooks.md",
-      "final_url": "https://docs.phonic.ai/docs/build/with-webhooks/via-webhooks.md",
-      "bytes": 5808,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "78adf42c2849b64bceaa79de89ccf0b56a11c3776b005873bcc8c3e1aa9532d4",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
       "path": "docs/get-started/build-your-first-agent.md",
       "url": "https://docs.phonic.ai/docs/get-started/build-your-first-agent.md",
       "final_url": "https://docs.phonic.ai/docs/get-started/build-your-first-agent.md",
@@ -590,48 +347,12 @@
       "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
     },
     {
-      "path": "docs/get-started/deploy-your-first-agent.md",
-      "url": "https://docs.phonic.ai/docs/get-started/deploy-your-first-agent.md",
-      "final_url": "https://docs.phonic.ai/docs/get-started/deploy-your-first-agent.md",
-      "bytes": 5394,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "95020c787b8727e461716422ca0eb25179c8fda02bc38c5660981db5d67cde00",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/get-started/installation/python_sdk.md",
-      "url": "https://docs.phonic.ai/docs/get-started/installation/python_sdk.md",
-      "final_url": "https://docs.phonic.ai/docs/get-started/installation/python_sdk.md",
-      "bytes": 1115,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "e0571df83a91182c1e862157ad442205c1788374c86797ff8177bb9294705ee9",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/get-started/installation/typescript_sdk.md",
-      "url": "https://docs.phonic.ai/docs/get-started/installation/typescript_sdk.md",
-      "final_url": "https://docs.phonic.ai/docs/get-started/installation/typescript_sdk.md",
-      "bytes": 1115,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "94ac7d601e39bfe4452e59112b7f423fcdadca3085f2d34ec3280692de1bca46",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
       "path": "docs/get-started/overview.md",
       "url": "https://docs.phonic.ai/docs/get-started/overview.md",
       "final_url": "https://docs.phonic.ai/docs/get-started/overview.md",
       "bytes": 3836,
       "content_type": "text/markdown; charset=utf-8",
       "sha256": "eb858d429257ab911bc3ac18e6ab10e9d0a42660ab24be42cce3da9147ecf2db",
-      "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
-    },
-    {
-      "path": "docs/phone-numbers/using_custom_phone_numbers.md",
-      "url": "https://docs.phonic.ai/docs/phone-numbers/using_custom_phone_numbers.md",
-      "final_url": "https://docs.phonic.ai/docs/phone-numbers/using_custom_phone_numbers.md",
-      "bytes": 7057,
-      "content_type": "text/markdown; charset=utf-8",
-      "sha256": "05865a0b20bcc2bbe732962d22815d8ef1219566c223fa732eed5418e5a7cee2",
       "selection_reason": "Official guide relevant to provider capabilities, integration, deployment, or validation."
     },
     {
@@ -705,5 +426,39 @@
     "docs/get-started/installation/skills.md",
     "docs/phone-numbers/amazon_connect.md",
     "docs/platform/audit-logs.md"
-  ]
+  ],
+  "pruned_paths": [
+    "api-reference/agents/delete.md",
+    "api-reference/agents/disable.md",
+    "api-reference/agents/enable.md",
+    "api-reference/agents/get.md",
+    "api-reference/agents/list.md",
+    "api-reference/agents/update.md",
+    "api-reference/agents/upsert.md",
+    "api-reference/external-storage-policies/create.md",
+    "api-reference/external-storage-policies/get.md",
+    "api-reference/external-storage-policies/update.md",
+    "api-reference/tools/create.md",
+    "api-reference/tools/delete.md",
+    "api-reference/tools/get.md",
+    "api-reference/tools/list.md",
+    "api-reference/tools/update.md",
+    "api-reference/workspace/get.md",
+    "api-reference/workspace/update.md",
+    "docs/build/tools/mcp_tools.md",
+    "docs/build/tools/transfer_tools.md",
+    "docs/build/tools/webhook_tools.md",
+    "docs/build/with-livekit.md",
+    "docs/build/with-webhooks/agent-configuration-endpoint.md",
+    "docs/build/with-webhooks/post-call-webhooks.md",
+    "docs/build/with-webhooks/post-call-webhooks/conversation-analysis.md",
+    "docs/build/with-webhooks/post-call-webhooks/conversation-ended.md",
+    "docs/build/with-webhooks/post-call-webhooks/conversation-transferred.md",
+    "docs/build/with-webhooks/via-webhooks.md",
+    "docs/get-started/deploy-your-first-agent.md",
+    "docs/get-started/installation/python_sdk.md",
+    "docs/get-started/installation/typescript_sdk.md",
+    "docs/phone-numbers/using_custom_phone_numbers.md"
+  ],
+  "pruning_reason": "Outside the current Parlora direct speech WebSocket integration; configuration schemas and optional evaluation, diagnostic, authentication, and future-capability references are retained."
 }
