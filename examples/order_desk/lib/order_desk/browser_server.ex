@@ -140,7 +140,7 @@ defmodule OrderDesk.BrowserServer do
       200,
       Map.merge(dashboard, %{
         csrf: get_session(conn, :csrf),
-        interpretation: OrderDesk.Interpretation.stats()
+        interpretation: OrderDesk.Interpretation.stats(get_session(conn, :actor))
       })
     )
   end

@@ -67,6 +67,24 @@ four concurrent sessions. Before public deployment, add account authentication,
 HTTPS, and the network's ICE/STUN/TURN configuration. The example has no account
 login and is intended for local use.
 
+## Interpretation diagnostics
+
+OrderDesk checks snapshot freshness before starting a TypeSafe evaluation and
+again after its 200 ms coalescing window. Obsolete snapshots are skipped; results
+that become stale during inference are discarded. Assistant caption updates defer
+expensive interpretation while a provider reports speaking, with a scheduled
+recheck after speech ends. New caller input, explicit delegations, and backend clarification events remain
+eligible immediately. Providers
+with unknown speech state keep the existing interpretation path.
+
+The review dashboard separates your latest session from application totals.
+Evaluations, uncertain judgments, errors, skipped obsolete work, results stale at
+return, and deferrals have separate counters. Uncertainty is not an API error;
+deferrals and skips do not make a TypeSafe request. Session statistics are scoped
+to the browser actor and retained for a bounded number of recent closed sessions.
+These controls belong to this example application; provider adapters and Parlora's
+core decision validation are unchanged.
+
 ## Select a voice provider or backend
 
 ```sh

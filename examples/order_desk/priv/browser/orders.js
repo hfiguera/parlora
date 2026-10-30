@@ -123,7 +123,9 @@
         el('changes').replaceChildren(...data.changes.map(c => node('p', `Order ${c.order} · version ${c.version} · ${c.instructions}`)));
         if (!data.changes.length) el('changes').append(node('p', 'No saved changes yet. Confirmed delivery updates will appear here.', 'empty'));
       }
-      el('interpreter').textContent = `Interpretation calls: ${data.interpretation.calls}; cache hits: ${data.interpretation.hits}; last request: ${data.interpretation.last_ms} ms; failures/uncertain: ${data.interpretation.failures}`;
+      const metrics = m => `evaluations ${m.calls}, cache hits ${m.hits}, uncertain ${m.uncertain}, errors ${m.errors}, skipped obsolete ${m.skipped}, stale at return ${m.stale}, deferred ${m.deferred}`;
+      const latest = data.interpretation.sessions.at(-1);
+      el('interpreter').textContent = `${latest ? `Your latest session (${latest.closed ? 'closed' : 'active'}): ${metrics(latest.metrics)}. ` : ''}Application totals: ${metrics(data.interpretation.application)}.`;
       if (el('order-notice').textContent) notice(el('order-notice'), '');
       el('retry-orders').hidden = true;
     } catch (_) {

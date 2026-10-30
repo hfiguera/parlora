@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-29",
+  "baseline_commit": "53474caa482ae3d5d71bf3a54b8718978cfc7482",
+  "scope": "OrderDesk example only; provider adapters and core unchanged",
+  "scenario": "same three synthetic requests: items for 124, current instructions, reception draft",
+  "fixture": "validation/phonic/order_desk_delegation.exs",
+  "models": {
+    "voice": "phonic-1",
+    "interpretation": "jev-1.13.0"
+  },
+  "limitation": "One successful live before/after observation, not a guaranteed reduction for every conversation. A preceding final-code attempt asked for number confirmation and did not complete. Stale-at-return counts may differ from final core discards.",
+  "measurements": [
+    {
+      "version": "before",
+      "metrics": {
+        "calls": 33,
+        "failures": 16,
+        "last_ms": 337,
+        "hits": 2
+      },
+      "evaluations": 33,
+      "core_discarded_evaluations": 21,
+      "mean_timing_ms": {
+        "coalesce": 201,
+        "evaluation": 136.1,
+        "total": 337.1
+      },
+      "judgment_outcomes": {
+        "superseded": 21,
+        "ok": 12
+      }
+    },
+    {
+      "version": "after",
+      "metrics": {
+        "calls": 18,
+        "errors": 0,
+        "deferred": 48,
+        "uncertain": 8,
+        "stale": 10,
+        "last_ms": 358,
+        "hits": 4,
+        "skipped": 11
+      },
+      "evaluations": 18,
+      "core_discarded_evaluations": 11,
+      "mean_timing_ms": {
+        "coalesce": 201,
+        "evaluation": 176.6,
+        "total": 377.6
+      },
+      "judgment_outcomes": {
+        "ok": 7,
+        "superseded": 11
+      }
+    }
+  ],
+  "after_workflow": {
+    "passed": true,
+    "result": "completed",
+    "checks": {
+      "completed": true,
+      "one_call_per_request": true,
+      "three_backend_completions": true,
+      "one_review_draft": true,
+      "draft_has_requested_text": true,
+      "voice_did_not_save": true,
+      "output_audio_received": true,
+      "no_adapter_failure": true
+    },
+    "calls": {
+      "instructions": 1,
+      "items": 1,
+      "greeting": 0,
+      "draft": 1
+    },
+    "backend_completions": 3,
+    "audio_bytes": 1817280
+  },
+  "source_sha256": {
+    "examples/order_desk/lib/order_desk/app_policy.ex": "f6d2fe08c7655df2079c8ccf83fe3ac185c0fb0e4d676271743e9a79ca6430ac",
+    "examples/order_desk/lib/order_desk/interpretation.ex": "8f054a776a2fa464703cb9060eaf0d18915fd69fe6a746f7fdccced3ada6114d"
+  }
+}
