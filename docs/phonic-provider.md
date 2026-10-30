@@ -13,8 +13,9 @@ and a successful manual OrderDesk workflow. OrderDesk is a separate example
 application used to exercise the integration.
 
 The longer automated OrderDesk workflow now passes repeated live runs after
-two Phonic continuation fixes. The [stall investigation](../validation/interpretation-scheduling/stall-investigation.md)
-records the reproduced causes, regressions, cross-provider checks, and evidence
+Phonic continuation and reply-coordination fixes. The [stall investigation](../validation/interpretation-scheduling/stall-investigation.md)
+and [reply-coordination follow-up](../validation/interpretation-scheduling/reply-coordination.md)
+record the reproduced causes, regressions, cross-provider checks, and evidence
 limits. This qualifies that workflow; experimental acceptance does not establish
 general production readiness. See also the
 [acceptance evidence](../validation/phonic/README.md#acceptance-decision).
@@ -82,23 +83,32 @@ calls by the voice model.
 Phonic tools run asynchronously with `wait_for_response: false`, allowing further
 caller corrections and tool calls while backend work is pending. The alternative
 busy mode suppresses other tools, so the adapter does not select it.
+`forbid_speech_after_tool_call: true` suppresses automatic post-tool speech;
+the adapter requests the result reply explicitly. Pre-tool acknowledgments remain
+optional, and new caller input can still initiate unrelated work or corrections.
 
 The adapter exposes client calls as `delegation_requested`; the normal Parlora
 context policy decides whether and how to admit work. Provider arguments are
 context, not execution authority. Call and command IDs have bounded, retained
 deduplication records. Conflicting duplicates and superseded results are rejected.
 
-- `:speakable` context completes a pending tool call or injects a new system
-  message. The adapter schedules `generate_reply` after caller speech, the
-  automatic response, and the current receive queue settle. Multiple pending
-  updates can share a continuation. This does not wait for physical playback.
+- `:speakable` context is admitted to a bounded local queue. Once caller speech,
+  the automatic/current response, and the receive queue settle, the adapter
+  completes the tool call or injects a system message and requests one explicit
+  reply. Keeping the facts out of the earlier turn avoids an automatic answer
+  followed by a second announcement. Multiple pending updates can share a reply.
+  `context_submitted` is emitted only when the queued command is actually written
+  to the socket. This does not wait for physical playback.
 - `:quiet` and `:instruction` inject a system message without scheduling speech.
   A delegation ID is supported only for speakable context.
 - If a clarification already completed a call, later verified results use a new
   system message. Expired calls also use new context; their old tool outputs are
   never resent.
 - `resolve_delegation/3` closes associated or superseded calls without scheduling
-  a duplicate response. Cancellation events preserve backend-outcome uncertainty.
+  a duplicate response for an already covered result. A result reply that yields
+  to a new tool call before producing output can resume once on association.
+  Cancellation removes queued correlated updates, and newer queued task revisions
+  replace obsolete ones. Cancellation events preserve backend-outcome uncertainty.
 
 Tool outputs are limited to 16,000 **JSON-encoded bytes**, conservatively below
 the service's 16,000-character truncation boundary. The adapter rejects oversized

@@ -10,6 +10,9 @@
 - Resume Phonic result announcements after completed late tool associations,
   suppress duplicate association continuations, and treat tool-only automatic
   turns as progress so they cannot strand a queued result behind a speech wait.
+- Hold Phonic speakable updates until their explicit result reply can begin,
+  preventing an automatic answer followed by a duplicate continuation. Preserve
+  tool-only recovery, corrections, cancellation, and bounded context admission.
 
 - Use Elixir's built-in `JSON` module and remove the direct Jason dependency.
   Minimum runtime requirements remain Elixir 1.18 and OTP 27. Dependencies may

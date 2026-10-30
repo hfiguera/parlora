@@ -41,7 +41,9 @@ defmodule Parlora.OrderDeskInterpretationLive do
       completed: 0,
       audio_bytes: 0,
       captions: [],
-      failures: []
+      failures: [],
+      answered_stage?: false,
+      extra_result_replies: []
     }
 
     try do
@@ -100,9 +102,28 @@ defmodule Parlora.OrderDeskInterpretationLive do
             captions: [%{stage: state.stage, text: text} | state.captions]
         })
 
+      {:parlora_event, %Event{source: :provider, type: :context_submitted}} ->
+        # A fresh application update can legitimately request another response.
+        # Correlation-only association closures emit no context submission.
+        loop(%{state | answered_stage?: false})
+
       {:parlora_event,
        %Event{source: :provider, type: :provider_speech, payload: %{state: speech}}} ->
+        extra? =
+          speech == :speaking and state.answered_stage? and
+            state.stage in [:correction, :items, :draft, :refusal, :newdraft, :save]
+
+        state =
+          if extra?,
+            do: %{state | extra_result_replies: [state.stage | state.extra_result_replies]},
+            else: state
+
         state = %{state | speech: speech}
+
+        state =
+          if speech == :idle and answered?(state),
+            do: %{state | answered_stage?: true},
+            else: state
 
         if not state.advancing? and ready_to_advance?(state) do
           Process.send_after(self(), :advance, 2_000)
@@ -165,7 +186,7 @@ defmodule Parlora.OrderDeskInterpretationLive do
           })
 
         OrderDesk.BrowserGate.notify("synthetic-scheduling", result)
-        loop(%{state | stage: :save, text: "", advancing?: false})
+        loop(%{state | stage: :save, text: "", advancing?: false, answered_stage?: false})
 
       previous ->
         stage =
@@ -224,6 +245,7 @@ defmodule Parlora.OrderDeskInterpretationLive do
       | stage: stage,
         pending: File.read!(Path.join(state.directory, "#{stage}.pcm")),
         text: "",
+        answered_stage?: false,
         advancing?: false
     }
   end
@@ -298,6 +320,16 @@ defmodule Parlora.OrderDeskInterpretationLive do
       no_adapter_failure: state.failures == []
     }
 
+    checks =
+      if System.get_env("ORDER_DESK_ASSERT_SINGLE_REPLY") == "1",
+        do:
+          Map.put(
+            checks,
+            :no_reply_after_answer_without_new_context,
+            state.extra_result_replies == []
+          ),
+        else: checks
+
     report = %{
       provider: Application.fetch_env!(:order_desk, :voice_provider),
       synthetic_speech: true,
@@ -313,6 +345,7 @@ defmodule Parlora.OrderDeskInterpretationLive do
       operations: operations,
       interpretation: OrderDesk.Interpretation.stats(),
       failures: state.failures,
+      extra_result_replies: Enum.reverse(state.extra_result_replies),
       final_status:
         inspect(Parlora.status(state.session), limit: :infinity, printable_limit: :infinity),
       final_snapshot:

@@ -161,8 +161,7 @@ defmodule Parlora.PhonicSessionTest do
     assert_receive {:phonic_command, %{"type" => "generate_reply"}}
     emit(server, %{"type" => "tool_call_output_processed", "tool_call_id" => "original"})
     assert_receive {:parlora_event, %Event{type: :result_delivery, payload: %{stage: :accepted}}}
-    emit(server, %{"type" => "assistant_started_speaking"})
-    emit(server, %{"type" => "assistant_finished_speaking"})
+    # The result reply yielded to a late tool call before producing speech.
     emit(server, call("late"))
 
     assert_receive {:phonic_command,

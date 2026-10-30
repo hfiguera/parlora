@@ -124,10 +124,11 @@ defmodule Parlora.PhonicAdapterTest do
     state = deliver(context, state, started())
     state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 480), "old"))
     {:reply, :ok, state} = Phonic.handle_call({:append, update("result", nil)}, nil, state)
-    assert_receive {:phonic_command, %{"type" => "add_system_message"}}
+    refute_receive {:phonic_command, %{"type" => "add_system_message"}}, 10
     state = deliver(context, state, finished())
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
     {:reply, {:ok, _frames}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "add_system_message"}}
     assert_receive {:phonic_command, %{"type" => "generate_reply"}}
     assert state.response_watch != nil
     {:reply, :ok, _} = Phonic.handle_call({:append, update("result", nil)}, nil, state)
@@ -165,6 +166,155 @@ defmodule Parlora.PhonicAdapterTest do
     refute_receive {:parlora_event, %Event{type: :playback_observed}}, 10
   end
 
+  @tag :reply_coordination
+  test "caller-time results stay private until the automatic acknowledgment ends, then reply once",
+       context do
+    state = ready(context)
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", nil)}, nil, state)
+    refute_receive {:phonic_command, %{"type" => "add_system_message"}}, 20
+    refute_receive {:parlora_event, %Event{type: :context_submitted, command_id: "result"}}, 10
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 480), "Let me check."))
+    state = deliver(context, state, finished())
+    refute_receive {:phonic_command, %{"type" => "add_system_message"}}, 10
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "add_system_message", "system_message" => "Verified result"}}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply", "system_message" => prompt}}
+    assert prompt =~ "Verified result"
+    state = deliver(context, state, started())
+    # Wording is irrelevant to scheduling; no summary/caption matching is used.
+    state =
+      deliver(
+        context,
+        state,
+        audio(:binary.copy(<<2, 0>>, 480), "Here is your answer, paraphrased.")
+      )
+
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, _state} = Phonic.handle_call({:read, 960}, nil, state)
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 30
+  end
+
+  @tag :reply_coordination
+  test "a completed association during the owned result reply closes quietly without another announcement",
+       context do
+    state = ready(context)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", nil)}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "add_system_message"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 480), "The verified answer."))
+    state = deliver(context, state, call("late", "same request"))
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :unconfirmed,
+      result: "Verified result"
+    }
+
+    {:reply, :ok, state} = Phonic.handle_call({:resolve_delegation, "late", outcome}, nil, state)
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "late"}}
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 30
+    assert state.pending_contexts == []
+  end
+
+  @tag :reply_coordination
+  test "a newer queued revision replaces obsolete facts before either becomes model context",
+       context do
+    state = ready(context)
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    old = %{update("old", nil) | task_id: "task", task_revision: 1, content: "Obsolete order 123"}
+    current = %{old | id: "current", task_revision: 2, content: "Current order 124"}
+    {:reply, :ok, state} = Phonic.handle_call({:append, old}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, current}, nil, state)
+    assert_receive {:parlora_event, %Event{type: :context_rejected, command_id: "old"}}
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    _state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+
+    assert_receive {:phonic_command,
+                    %{"type" => "add_system_message", "system_message" => "Current order 124"}}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    refute_receive {:phonic_command, %{"system_message" => "Obsolete order 123"}}, 30
+  end
+
+  @tag :reply_coordination
+  test "a cancelled queued tool result never reaches context or requests speech", context do
+    state = ready(context)
+    state = deliver(context, state, call("cancel", "order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "cancel")}, nil, state)
+
+    state =
+      deliver(context, state, %{"type" => "tool_call_interrupted", "tool_call_id" => "cancel"})
+
+    assert_receive {:parlora_event, %Event{type: :context_rejected, command_id: "result"}}
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    _state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 20
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 20
+  end
+
+  @tag :reply_coordination
+  test "early tool turns release queued results on caller end without waiting for forbidden speech",
+       context do
+    {:ok, config} =
+      Protocol.start(
+        [api_key: "private-test", early_delegation: true],
+        context.state.init.audio_format
+      )
+
+    assert hd(config.tools).can_run_during_user_speech
+    state = ready(context, %{context.state | config: config})
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    state = deliver(context, state, call("early", "order"))
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "early")}, nil, state)
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    _state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+  end
+
+  @tag :reply_coordination
+  test "an empty started reply yielding to a tool resumes without a speech-end event", context do
+    state = ready(context)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", nil)}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "add_system_message"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, call("yielded", "get current result"))
+    assert state.speech == :idle
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :accepted,
+      result: "Verified result"
+    }
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:resolve_delegation, "yielded", outcome}, nil, state)
+
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "yielded"}}
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(<<>>, "Current verified answer."))
+    _state = deliver(context, state, finished())
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 20
+  end
+
   test "a completed late association resumes after a reply consumed the original continuation",
        context do
     state = ready(context)
@@ -175,11 +325,12 @@ defmodule Parlora.PhonicAdapterTest do
     {:reply, :ok, state} =
       Phonic.handle_call({:append, update("corrected", "original")}, nil, state)
 
-    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
     state = deliver(context, state, %{"type" => "user_finished_speaking"})
     state = deliver(context, state, call("corrected-call", "order 124"))
     state = deliver(context, state, started())
     state = deliver(context, state, finished())
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
     assert_receive {:phonic_command, %{"type" => "generate_reply"}}
     state = deliver(context, state, call("late", "get the result"))
     state = deliver(context, state, started())
@@ -278,7 +429,7 @@ defmodule Parlora.PhonicAdapterTest do
     {:reply, :ok, state} =
       Phonic.handle_call({:append, update("corrected", "original")}, nil, state)
 
-    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
     state = deliver(context, state, %{"type" => "user_finished_speaking"})
     old_watch = state.response_watch.token
     state = deliver(context, state, call("corrected-call", "order 124"))
@@ -312,6 +463,42 @@ defmodule Parlora.PhonicAdapterTest do
 
     assert {:noreply, %{status: :closed}} =
              Phonic.handle_info({:phonic_response_timeout, token}, state)
+  end
+
+  test "queued tool expiry falls back to current context without replaying an expired output",
+       context do
+    state = ready(context)
+    state = deliver(context, state, call("expire", "order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "expire")}, nil, state)
+    token = state.tool_timers["expire"].token
+    {:noreply, state} = Phonic.handle_info({:phonic_tool_timeout, "expire", token}, state)
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    _state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+
+    assert_receive {:phonic_command,
+                    %{"type" => "add_system_message", "system_message" => "Verified result"}}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 20
+  end
+
+  test "pending context capacity and close have explicit outcomes for admitted commands",
+       context do
+    state = ready(context)
+    state = %{state | init: %{state.init | limits: %{state.init.limits | max_records: 1}}}
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("first", nil)}, nil, state)
+
+    {:reply, {:error, %{code: :backpressure}}, state} =
+      Phonic.handle_call({:append, update("second", nil)}, nil, state)
+
+    {:reply, :ok, closed} = Phonic.handle_call({:close, "close", :cancel}, nil, state)
+    assert_receive {:parlora_event, %Event{type: :context_rejected, command_id: "first"}}
+    refute_receive {:parlora_event, %Event{type: :context_submitted}}, 20
+    assert closed.pending_contexts == []
   end
 
   test "acknowledgment timeout is uncertain, and provider cancellation suppresses late correlated results",

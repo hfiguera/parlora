@@ -14,6 +14,7 @@ defmodule Parlora.PhonicProtocolTest do
       assert [tool] = config.tools
       assert tool.execution_mode == "async" and tool.wait_for_response == false
       refute tool.allow_tool_chaining
+      assert tool.forbid_speech_after_tool_call
       assert tool.tool_schema.function.strict
       assert tool.tool_schema.function.name == Protocol.function()
       refute tool.can_run_during_user_speech

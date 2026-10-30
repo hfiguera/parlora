@@ -6,6 +6,10 @@ two Phonic continuation defects and corrects a harness wording assumption. Other
 adapters, session validation, JEV model, confidence thresholds, number normalization,
 and database confirmation rules remain unchanged.
 
+The subsequent [Phonic reply-coordination fix](reply-coordination.md) addresses
+duplicate spoken continuations missed by the original business-workflow checks.
+It adds a thirteenth live assertion and an independent provider-message audit.
+
 ## Deterministic regressions
 
 From `examples/order_desk`:

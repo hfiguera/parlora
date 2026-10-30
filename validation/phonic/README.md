@@ -23,6 +23,10 @@ timeout. See also the [original results](../interpretation-scheduling/README.md#
 The experimental acceptance decision does not establish production readiness or
 reliability across all conversations and channels.
 
+The [reply-coordination follow-up](../interpretation-scheduling/reply-coordination.md)
+adds coverage for duplicate announcements as well as workflow completion, and
+records the Phonic-only scheduling change and stronger live checks.
+
 ## Wire probes
 
 Requires macOS `say`, FFmpeg, and `websockets==15.0.1` (the command below uses

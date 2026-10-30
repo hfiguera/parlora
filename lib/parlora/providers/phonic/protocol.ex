@@ -125,13 +125,14 @@ defmodule Parlora.Providers.Phonic.Protocol do
   def text(content), do: %{type: "add_system_message", system_message: content}
   def result(id, output), do: %{type: "tool_call_output", tool_call_id: id, output: output}
 
-  def respond do
+  def respond(content \\ nil) do
     %{
       type: "generate_reply",
       system_message:
         "Announce only current verified application results that have not already been announced. " <>
           "A caller correction supersedes obsolete results. Do not repeat backend work. " <>
-          "If a clarification is pending, ask that question instead. Keep the response brief."
+          "If a clarification is pending, ask that question instead. Keep the response brief." <>
+          if(content, do: "\nCurrent application update:\n" <> content, else: "")
     }
   end
 
@@ -173,6 +174,7 @@ defmodule Parlora.Providers.Phonic.Protocol do
       require_speech_before_tool_call: false,
       wait_for_speech_before_tool_call: false,
       wait_for_response: false,
+      forbid_speech_after_tool_call: true,
       allow_tool_chaining: false,
       can_run_during_user_speech: early?,
       tool_schema: %{

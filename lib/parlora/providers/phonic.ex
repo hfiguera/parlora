@@ -4,7 +4,9 @@ defmodule Parlora.Providers.Phonic do
 
   Caller transcripts are word fragments with unavailable timestamps. Speech
   boundaries delimit assistant captions and interruption epochs. Speakable
-  updates schedule a reply after the current generation and receive queue drain.
+  updates wait locally for the current turn and receive queue drain, then publish
+  their context with one explicit reply. Duplicate association routes do not
+  schedule another announcement of a result covered by that reply.
   Tool outputs may receive provider-processing acknowledgments; other context
   writes remain unconfirmed. Neither observation establishes physical playback.
 
@@ -45,6 +47,11 @@ defmodule Parlora.Providers.Phonic do
       commands: %CommandLog{limit: init.limits.max_records},
       calls: Calls.new(init.limits.max_records),
       associated_results: MapSet.new(),
+      covered_results: MapSet.new(),
+      pending_contexts: [],
+      reply_active?: false,
+      reply_spoke?: false,
+      turn_delegated?: false,
       tool_timers: %{},
       acknowledgments: %{},
       tool_timeout_ms: config.tools |> hd() |> Map.fetch!(:tool_call_output_timeout_ms),
@@ -131,10 +138,7 @@ defmodule Parlora.Providers.Phonic do
   def handle_call({:resolve_delegation, id, outcome}, _from, state) when is_map(outcome) do
     case Calls.complete(state.calls, id, outcome) do
       {:ok, command, calls} ->
-        next = state |> cancel_timer(:tool_timers, id) |> Map.put(:calls, calls)
-        next = transmit(next, command)
-        next = association_continuation(next, outcome)
-        {:reply, submission_reply(next), continue_response(next)}
+        resolve_output(state, id, outcome, command, calls)
 
       {terminal, _calls} when terminal in [:duplicate, :expired] ->
         {:reply, :ok, state}
@@ -236,28 +240,149 @@ defmodule Parlora.Providers.Phonic do
   defp submit_context(state, id, {:context, update}) do
     case Calls.context(state.calls, update.delegation_id, update.content) do
       {:ok, command, calls} ->
-        next = %{
-          state
-          | calls: calls,
-            continuation?: state.continuation? or update.kind == :speakable
-        }
-
-        next = transmit(next, command)
-
-        next =
-          if next.status == :ready do
-            emit(next, :context_submitted, %{outcome: :unconfirmed, evidence: :socket_write}, id)
-            arm_acknowledgment(next, command, id)
-          else
-            next
-          end
-
-        {:reply, submission_reply(next), continue_response(next)}
+        if update.kind == :speakable do
+          entry = %{command: command, id: id, update: update, content: update.content}
+          enqueue_context(state, calls, entry, true)
+        else
+          next = %{state | calls: calls} |> transmit(command) |> submitted(id, command)
+          {:reply, submission_reply(next), continue_response(next)}
+        end
 
       error ->
         {:reply, error, state}
     end
   end
+
+  defp submitted(%{status: :ready} = state, id, command) when not is_nil(id) do
+    emit(state, :context_submitted, %{outcome: :unconfirmed, evidence: :socket_write}, id)
+    arm_acknowledgment(state, command, id)
+  end
+
+  defp submitted(state, _id, _command), do: state
+
+  defp resolve_output(
+         state,
+         id,
+         %{
+           status: :associated,
+           task_status: :completed,
+           result_delivery: delivery,
+           result: content
+         } = outcome,
+         command,
+         calls
+       )
+       when delivery in [:awaiting_provider, :accepted, :unconfirmed, :unknown] and
+              is_binary(content) and content != "" do
+    speak? = association_speaks?(state, id, content)
+    # Closing a duplicate route must not reintroduce its facts into a later
+    # generation. The queued/original update already owns that result.
+    command =
+      if speak?,
+        do: command,
+        else: %{
+          command
+          | output:
+              outcome
+              |> Map.delete(:result)
+              |> Map.put(
+                :instruction,
+                "Use the current application update. Do not repeat completed work or an already announced result."
+              )
+        }
+
+    entry = %{command: command, id: nil, update: nil, content: if(speak?, do: content)}
+
+    case enqueue_context(state, calls, entry, speak?) do
+      {:reply, :ok, next} ->
+        next =
+          if speak?,
+            do: %{next | associated_results: MapSet.put(next.associated_results, content)},
+            else: next
+
+        {:reply, :ok, cancel_timer(next, :tool_timers, id)}
+
+      error ->
+        error
+    end
+  end
+
+  defp resolve_output(state, id, outcome, command, calls),
+    do: resolve_terminal_output(state, id, outcome, command, calls)
+
+  defp association_speaks?(state, id, content) do
+    not MapSet.member?(state.covered_results, content) or
+      (state.calls.records[id][:reply_yielded?] and
+         not MapSet.member?(state.associated_results, content))
+  end
+
+  defp resolve_terminal_output(state, id, %{status: :rejected} = outcome, command, calls) do
+    entry = %{
+      command: command,
+      id: nil,
+      update: nil,
+      content: "Application delegation rejected: " <> JSON.encode!(outcome)
+    }
+
+    case enqueue_context(state, calls, entry, true) do
+      {:reply, :ok, next} -> {:reply, :ok, cancel_timer(next, :tool_timers, id)}
+      error -> error
+    end
+  end
+
+  defp resolve_terminal_output(state, id, _outcome, command, calls) do
+    next =
+      state |> cancel_timer(:tool_timers, id) |> Map.put(:calls, calls) |> transmit(command)
+
+    {:reply, submission_reply(next), continue_response(next)}
+  end
+
+  # Keep speakable facts out of an automatic/in-flight turn. Publish them only
+  # with the explicit reply that owns them, rather than guess what speech meant.
+  defp enqueue_context(state, calls, entry, speak?) do
+    if length(state.pending_contexts) >= state.init.limits.max_records do
+      {:reply, Error.tuple(:backpressure, "Pending Phonic context capacity exhausted"), state}
+    else
+      state = supersede_pending(state, entry.update)
+
+      next = %{
+        state
+        | calls: calls,
+          pending_contexts: state.pending_contexts ++ [entry],
+          continuation?: state.continuation? or speak?,
+          covered_results:
+            if(entry.content,
+              do: MapSet.put(state.covered_results, entry.content),
+              else: state.covered_results
+            )
+      }
+
+      {:reply, submission_reply(next), continue_response(next)}
+    end
+  end
+
+  defp supersede_pending(state, %{task_id: task, task_revision: revision})
+       when is_binary(task) and is_integer(revision) do
+    {obsolete, keep} =
+      Enum.split_with(state.pending_contexts, fn
+        %{update: %{task_id: ^task, task_revision: old}} when is_integer(old) -> old < revision
+        _ -> false
+      end)
+
+    Enum.reduce(obsolete, %{state | pending_contexts: keep}, fn entry, acc ->
+      emit(acc, :context_rejected, %{outcome: :unknown, reason: :superseded}, entry.id)
+
+      case entry.command do
+        %{type: "tool_call_output", tool_call_id: call} ->
+          transmit(acc, Protocol.result(call, %{status: :superseded}))
+
+        _ ->
+          acc
+      end
+    end)
+  end
+
+  defp supersede_pending(state, _update), do: state
 
   defp arm_acknowledgment(state, %{type: "tool_call_output", tool_call_id: call}, command) do
     state
@@ -274,42 +399,9 @@ defmodule Parlora.Providers.Phonic do
 
   defp submission_reply(_state), do: :ok
 
-  # Async tool output only adds context; it does not request speech. A result
-  # can arrive through a late association after an earlier reply consumed the
-  # speakable continuation. Resume once per result in this caller turn. The
-  # retained call limit also bounds this set; duplicate associations must not
-  # create a generate_reply/delegation feedback loop.
-  defp association_continuation(
-         state,
-         %{
-           status: :associated,
-           task_status: :completed,
-           result_delivery: delivery,
-           result: result
-         }
-       )
-       when delivery in [:awaiting_provider, :accepted, :unconfirmed, :unknown] and
-              is_binary(result) and result != "" do
-    if MapSet.member?(state.associated_results, result) do
-      state
-    else
-      %{
-        state
-        | continuation?: true,
-          associated_results: MapSet.put(state.associated_results, result)
-      }
-    end
-  end
-
-  defp association_continuation(state, %{status: :rejected}),
-    do: %{state | continuation?: true}
-
-  defp association_continuation(state, _outcome), do: state
-
   defp continue_response(
          %{
            status: :ready,
-           continuation?: true,
            response_watch: nil,
            caller_speaking: false,
            auto_response_pending: false,
@@ -318,18 +410,65 @@ defmodule Parlora.Providers.Phonic do
            output_blocked: false
          } = state
        ) do
+    flush_context(state)
+  end
+
+  defp continue_response(state), do: state
+
+  defp flush_context(state) do
+    entries = state.pending_contexts
+
+    state =
+      Enum.reduce_while(entries, state, fn entry, acc ->
+        command = pending_command(acc, entry)
+        next = transmit(acc, command)
+
+        if next.status == :ready do
+          next = %{next | pending_contexts: tl(next.pending_contexts)}
+          {:cont, submitted(next, entry.id, command)}
+        else
+          {:halt, next}
+        end
+      end)
+
+    if state.continuation? and state.status == :ready do
+      contents = entries |> Enum.map(& &1.content) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+      request_reply(
+        %{state | reply_active?: true, reply_spoke?: false},
+        contents
+      )
+    else
+      state
+    end
+  end
+
+  defp pending_command(state, %{command: %{type: "tool_call_output", tool_call_id: id}} = entry) do
+    if state.calls.records[id].status == :expired and entry.content,
+      do: Protocol.text(entry.content),
+      else: entry.command
+  end
+
+  defp pending_command(_state, entry), do: entry.command
+
+  defp finish_reply(state), do: %{state | reply_active?: false, reply_spoke?: false}
+
+  defp request_reply(state, contents) do
     token = make_ref()
 
     timer =
       Process.send_after(self(), {:phonic_response_timeout, token}, state.response_timeout_ms)
 
+    content = Enum.join(contents, "\n\n")
+    # Every update is already present in context. Keep the optional per-reply
+    # hint bounded when several independent updates are released together.
+    hint = if content != "" and byte_size(content) <= 16_000, do: content
+
     transmit(
       %{state | continuation?: false, response_watch: %{token: token, timer: timer}},
-      Protocol.respond()
+      Protocol.respond(hint)
     )
   end
-
-  defp continue_response(state), do: state
 
   defp frame(_frame, %{status: :closed} = state), do: state
   defp frame(:open, state), do: transmit(%{state | status: :starting}, state.config)
@@ -366,7 +505,10 @@ defmodule Parlora.Providers.Phonic do
       state
       | caller_speaking: true,
         auto_response_pending: true,
-        associated_results: MapSet.new()
+        associated_results: MapSet.new(),
+        covered_results:
+          MapSet.new(Enum.map(state.pending_contexts, & &1.content) |> Enum.reject(&is_nil/1)),
+        turn_delegated?: false
     }
 
     interrupt(state)
@@ -376,7 +518,17 @@ defmodule Parlora.Providers.Phonic do
 
   defp event(%{"type" => "user_finished_speaking"}, state) do
     state = %{state | caller_speaking: false}
-    if state.auto_response_pending, do: watch_response(state), else: state
+
+    cond do
+      state.turn_delegated? ->
+        continue_response(clear_response_watch(%{state | auto_response_pending: false}))
+
+      state.auto_response_pending ->
+        watch_response(state)
+
+      true ->
+        continue_response(state)
+    end
   end
 
   defp event(%{"type" => "input_text", "text" => text}, state)
@@ -415,6 +567,7 @@ defmodule Parlora.Providers.Phonic do
        when type in ["assistant_finished_speaking", "assistant_chose_not_to_respond"] do
     state
     |> clear_response_watch()
+    |> finish_reply()
     |> Map.merge(%{accepting_output?: false, auto_response_pending: false, caption_id: nil})
     |> speech(:idle)
     |> continue_response()
@@ -442,6 +595,10 @@ defmodule Parlora.Providers.Phonic do
       end
 
       OutputBuffer.notify(%{state | inbound: queue, sequence: sequence, audio: audio})
+      |> Map.update!(
+        :reply_spoke?,
+        &(&1 or (state.reply_active? and (text != "" or pcm != <<>>)))
+      )
     else
       {:error, %Error{} = error} -> fail(state, error.code)
       _invalid -> fail(state, :invalid_audio)
@@ -460,7 +617,14 @@ defmodule Parlora.Providers.Phonic do
           arguments: args
         })
 
-        state = %{state | calls: calls}
+        calls =
+          put_in(
+            calls.records[id][:reply_yielded?],
+            state.reply_active? and not state.reply_spoke?
+          )
+
+        state = settle_yielded_reply(state, calls.records[id][:reply_yielded?])
+        state = %{state | calls: calls, turn_delegated?: true}
         # An automatic turn can consist solely of this tool call, with no
         # assistant speech boundary. It is progress, not an outstanding speech
         # response. Let the later result/association request its continuation;
@@ -495,7 +659,7 @@ defmodule Parlora.Providers.Phonic do
       do: emit(state, :delegation_cancelled, %{id: id, reason: :provider_cancelled})
 
     state = %{state | calls: calls} |> cancel_timer(:tool_timers, id)
-    reject_acknowledgment(state, id)
+    state |> cancel_pending(id) |> reject_acknowledgment(id)
   end
 
   defp event(%{"type" => "assistant_ended_conversation"}, state),
@@ -505,6 +669,18 @@ defmodule Parlora.Providers.Phonic do
     do: fail(state, :invalid_output)
 
   defp event(_event, state), do: state
+
+  # Phonic can start a reply and delegate before producing output, without a
+  # subsequent speech-end event. Post-tool speech is forbidden in our config;
+  # retire that empty generation so its association can release the result.
+  defp settle_yielded_reply(state, true) do
+    state
+    |> finish_reply()
+    |> Map.merge(%{accepting_output?: false, caption_id: nil})
+    |> speech(:idle)
+  end
+
+  defp settle_yielded_reply(state, _yielded), do: state
 
   defp acknowledge(state, id, event) do
     timed_out? = event["timed_out"] == true
@@ -540,6 +716,26 @@ defmodule Parlora.Providers.Phonic do
     cancel_timer(state, :acknowledgments, id)
   end
 
+  defp cancel_pending(state, id) do
+    {cancelled, keep} =
+      Enum.split_with(state.pending_contexts, fn entry ->
+        entry.command[:tool_call_id] == id or
+          (entry.update != nil and entry.update.delegation_id == id)
+      end)
+
+    for entry <- cancelled,
+        entry.id != nil,
+        do:
+          emit(
+            state,
+            :context_rejected,
+            %{outcome: :unknown, reason: :provider_cancelled},
+            entry.id
+          )
+
+    %{state | pending_contexts: keep, continuation?: Enum.any?(keep, & &1.content)}
+  end
+
   defp interrupt(%{interrupted?: true} = state), do: state
 
   defp interrupt(state) do
@@ -566,6 +762,8 @@ defmodule Parlora.Providers.Phonic do
           inbound: AudioQueue.clear(state.inbound),
           waiter: nil,
           caption_id: nil,
+          reply_active?: false,
+          reply_spoke?: false,
           audio: Audio.reset(state.audio, :output)
       },
       :idle
@@ -667,6 +865,10 @@ defmodule Parlora.Providers.Phonic do
       emit(state, :context_rejected, %{outcome: :unknown}, record.command_id)
     end)
 
+    for entry <- state.pending_contexts,
+        entry.id != nil,
+        do: emit(state, :context_rejected, %{outcome: :unknown}, entry.id)
+
     emit(state, :closed, %{reason: reason, finalized?: false})
 
     %{
@@ -679,6 +881,9 @@ defmodule Parlora.Providers.Phonic do
         waiter: nil,
         tool_timers: %{},
         acknowledgments: %{},
+        pending_contexts: [],
+        covered_results: MapSet.new(),
+        associated_results: MapSet.new(),
         inbound: AudioQueue.clear(state.inbound),
         outbound: AudioQueue.clear(state.outbound)
     }
