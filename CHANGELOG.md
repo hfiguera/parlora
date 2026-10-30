@@ -13,6 +13,8 @@
 - Hold Phonic speakable updates until their explicit result reply can begin,
   preventing an automatic answer followed by a duplicate continuation. Preserve
   tool-only recovery, corrections, cancellation, and bounded context admission.
+- End normal Phonic sessions with WebSocket close code 1000 and bounded TLS
+  cleanup, avoiding the abnormal-disconnect recovery delay after callers hang up.
 
 - Use Elixir's built-in `JSON` module and remove the direct Jason dependency.
   Minimum runtime requirements remain Elixir 1.18 and OTP 27. Dependencies may

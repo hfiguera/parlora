@@ -165,6 +165,21 @@ does not provide the delivery guarantees needed for automatic Parlora resumption
 Provider silence policies also apply: the adapter requests the documented
 600-second no-input conversation limit.
 
+## Shutdown
+
+Application close and normal adapter termination send WebSocket close code 1000.
+The adapter waits at most 250 ms (or the smaller configured session shutdown
+budget) for the peer, then shuts down the transport and releases TLS state.
+Writes share that short timeout. This avoids both Phonic's approximately
+30-second abnormal-disconnect recovery window and OTP's default TLS close wait.
+Failure paths preserve their failure classification and immediate abort behavior.
+The shared WebSocket helper and other providers are unchanged.
+
+Transport closure still emits `finalized?: false`: a WebSocket acknowledgment
+does not establish that Phonic saved its conversation record. The
+[shutdown validation](../validation/phonic/shutdown.md) independently checks the
+saved provider records for PCM and mu-law sessions.
+
 ## Credentials and validation
 
 On macOS, save the development credential without placing it in shell history:

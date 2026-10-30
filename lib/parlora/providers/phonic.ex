@@ -30,7 +30,7 @@ defmodule Parlora.Providers.Phonic do
   }
 
   alias Parlora.Provider.{OutputBuffer, WebSocketConnection}
-  alias Parlora.Providers.Phonic.{Audio, Calls, Protocol}
+  alias Parlora.Providers.Phonic.{Audio, Calls, Connection, Protocol}
 
   @impl true
   def audio_limits(format \\ %AudioFormat{}), do: OutputBuffer.burst_limits(format, 20_000)
@@ -96,7 +96,8 @@ defmodule Parlora.Providers.Phonic do
   end
 
   @impl true
-  def handle_call({:close, _id, reason}, _from, state), do: {:reply, :ok, close(state, reason)}
+  def handle_call({:close, _id, reason}, _from, state),
+    do: {:reply, :ok, close_state(state, reason, true)}
 
   def handle_call(_command, _from, %{status: :closed} = state),
     do: {:reply, Error.tuple(:closed, "Phonic provider is closed"), state}
@@ -231,10 +232,10 @@ defmodule Parlora.Providers.Phonic do
   def handle_info(_message, state), do: {:noreply, state}
 
   @impl true
-  def terminate(_reason, state) do
+  def terminate(reason, state) do
     cancel_timers(state)
     Audio.close(state.audio)
-    WebSocketConnection.close(state.socket)
+    close_socket(state, reason in [:normal, :shutdown] or match?({:shutdown, _}, reason))
   end
 
   defp submit_context(state, id, {:context, update}) do
@@ -663,7 +664,7 @@ defmodule Parlora.Providers.Phonic do
   end
 
   defp event(%{"type" => "assistant_ended_conversation"}, state),
-    do: close(state, :provider_ended)
+    do: close_state(state, :provider_ended)
 
   defp event(%{"type" => type}, state) when type in ["audio_chunk", "input_text"],
     do: fail(state, :invalid_output)
@@ -851,14 +852,16 @@ defmodule Parlora.Providers.Phonic do
       error: Error.new(:adapter_failed, "Phonic provider failed", %{reason: reason})
     })
 
-    close(state, reason)
+    close_state(state, reason)
   end
 
-  defp close(%{status: :closed} = state, _reason), do: state
+  defp close_state(state, reason, graceful? \\ false)
 
-  defp close(state, reason) do
+  defp close_state(%{status: :closed} = state, _reason, _graceful?), do: state
+
+  defp close_state(state, reason, graceful?) do
     state = cancel_timers(state)
-    WebSocketConnection.close(state.socket)
+    close_socket(state, graceful?)
     Audio.close(state.audio)
 
     Enum.each(state.acknowledgments, fn {_id, record} ->
@@ -888,6 +891,11 @@ defmodule Parlora.Providers.Phonic do
         outbound: AudioQueue.clear(state.outbound)
     }
   end
+
+  defp close_socket(state, true),
+    do: Connection.close(state.socket, state.init.limits.shutdown_timeout_ms)
+
+  defp close_socket(state, false), do: WebSocketConnection.close(state.socket)
 
   defp emit(state, type, payload, id \\ nil),
     do: Event.emit(state.init, :provider, type, payload, command_id: id)

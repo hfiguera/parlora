@@ -6,6 +6,9 @@ PSTN quality, production latency, or broad reliability. No credentials or raw
 audio are written into reports. Generated detailed reports remain ignored by
 Git; `summary.json` is the compact checked-in evidence.
 
+Normal session closure has a separate [shutdown regression and live-service proof](shutdown.md),
+including PCM, mu-law, bounded TLS cleanup, and a synthetic Twilio stream.
+
 ## Acceptance decision
 
 Phonic-1 is accepted into Parlora as an **experimental provider**. This decision
