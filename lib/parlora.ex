@@ -55,8 +55,8 @@ defmodule Parlora do
 
   Provider audio limits are applied automatically, with explicit `:limits`
   overriding them. Returning `{:ok, pid}` does not establish readiness; observe
-  the session `:ready` event. See the [adapter reference](public-interfaces.html)
-  for option, history, and capability requirements.
+  the session `:ready` event. See [Getting started](using-parlora.html)
+  for session configuration and the provider guides for adapter-specific options.
   """
   @spec start_session(keyword()) :: {:ok, pid()} | {:error, term()}
   def start_session(options) do

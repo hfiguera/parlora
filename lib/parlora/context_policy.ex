@@ -14,8 +14,8 @@ defmodule Parlora.ContextPolicy do
 
   The policy is application code; it may use deterministic rules or an
   interpretation service. Its decisions do not authorize business side effects.
-  Validate permissions and confirmations in application operations too. See the
-  [policy reference](public-interfaces.html#7-parlora-contextpolicy) for decision shapes.
+  Validate permissions and confirmations in application operations too. See
+  `Parlora.ContextDecision` for decision shapes and revision requirements.
   """
   @callback interpret(Parlora.ContextSnapshot.t(), Parlora.ContextTrigger.t(), keyword()) ::
               {:ok, [Parlora.ContextDecision.t()]} | {:error, Parlora.Error.t()}

@@ -20,7 +20,7 @@ In the new application's `mix.exs`, replace `deps/0` with:
 ```elixir
 defp deps do
   [
-    {:parlora, "~> 0.2.0"},
+    {:parlora, "~> 0.3.0"},
     {:jido, "~> 2.4.0"}
   ]
 end
@@ -184,8 +184,8 @@ The policy has exactly one allowed operation. Every pending delegation maps to
 that same lookup of opening hours; claimed or cancelled delegations do not start work
 again. This demo handles just this one operation; it does not interpret general requests.
 For orders, corrections, or multiple operations, implement a policy that checks
-caller context, task revisions, and permissions; see the [policy contract](public-interfaces.md#7-parlora-contextpolicy)
-and [OrderDesk workflows](../examples/order_desk/APPLICATION.md).
+caller context, task revisions, and permissions; see `Parlora.ContextPolicy`,
+`Parlora.ContextDecision`, and [OrderDesk workflows](../examples/order_desk/APPLICATION.md).
 
 The Jido instance belongs to the demo supervisor. The calling process stays alive
 as the event receiver, waits for readiness, closes after two minutes, waits for

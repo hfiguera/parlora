@@ -41,7 +41,7 @@ Add Parlora to your application's dependencies:
 ```elixir
 defp deps do
   [
-    {:parlora, "~> 0.2.0"},
+    {:parlora, "~> 0.3.0"},
     {:jido, "~> 2.4.0"}
   ]
 end
@@ -148,7 +148,7 @@ tuple and keep `event_sink: self()` in its session factory. Phone sessions use
 | Close after allowing work to finish within the shutdown deadline | `Parlora.close(session, :finish)` |
 
 Controls depend on the selected adapters' capabilities. Inspect
-`Parlora.Status` and the [API contract](public-interfaces.md) for exact outcomes.
+`Parlora.Status` for operational observations and `Parlora` for API outcomes.
 `status/1` omits transcript history and full task/result contents, but optional
 clarification data may contain application content. Treat snapshots and events
 as application data, not automatically redacted telemetry.
@@ -171,8 +171,7 @@ Channel playback buffering is separate from provider receive storage.
 Use `Parlora.expect_progress/4` when your application expects an event within a
 finite interval. Ordinary caller silence has no deadline. A provider accepting
 context, generating speech, and the caller hearing it are separate observations.
-See [session health](public-interfaces.md#15-session-health-and-opt-in-progress-deadlines)
-and [OpenAI output recovery](output-recovery.md).
+See `Parlora.SessionHealth` and [OpenAI output recovery](openai-provider.md#output-recovery).
 
 Sessions are in memory. Persist business data in your application and supply
 bounded `history:` and `context:` when starting a fresh session. Reconnection is
