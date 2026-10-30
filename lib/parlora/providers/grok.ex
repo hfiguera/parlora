@@ -8,20 +8,14 @@ defmodule Parlora.Providers.Grok do
   advertised. Input mute gates local audio while sending codec silence.
   """
   use GenServer
-  use Parlora.ProviderClient, protocol: Parlora.Providers.Grok.Protocol
-  alias Parlora.{Adapter, AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, Pacer}
+  use Parlora.ProviderClient, protocol: Parlora.Providers.Grok.Protocol, client_tools: true
+  alias Parlora.{AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, Pacer}
   alias Parlora.Provider.{OutputBuffer, WebSocketConnection}
   alias Parlora.Providers.Grok.{Calls, Protocol, Transcripts}
 
   @doc "Finite receive limits for generated speech bursts, in the selected pipeline format."
   @impl true
   def audio_limits(format \\ %AudioFormat{}), do: OutputBuffer.burst_limits(format, 20_000)
-
-  @impl true
-  def resume_output(pid, token), do: Adapter.call(pid, {:resume_output, token})
-  @impl true
-  def resolve_delegation(pid, id, outcome),
-    do: Adapter.call(pid, {:resolve_delegation, id, outcome})
 
   @impl true
   def init({init, options, config}) do
@@ -78,10 +72,8 @@ defmodule Parlora.Providers.Grok do
   def handle_call(:capabilities, _from, %{status: :ready} = state),
     do: {:reply, {:ok, Protocol.capabilities()}, state}
 
-  def handle_call({:resume_output, token}, _from, state) do
-    next = if token == state.interruption, do: %{state | output_blocked: false}, else: state
-    {:reply, :ok, next |> continue_response() |> notify()}
-  end
+  def handle_call({:resume_output, token}, _from, state),
+    do: OutputBuffer.resume(state, token, &continue_response/1)
 
   def handle_call(:output_buffer_status, _from, state),
     do:
@@ -90,24 +82,13 @@ defmodule Parlora.Providers.Grok do
 
   def handle_call({:arm_output_ready, reader, reference}, _from, state)
       when is_pid(reader) and is_reference(reference),
-      do: {:reply, :ok, notify(%{state | waiter: {reader, reference}})}
+      do: {:reply, :ok, OutputBuffer.notify(%{state | waiter: {reader, reference}})}
 
   def handle_call({:read, _budget}, _from, %{output_blocked: true} = state),
     do: {:reply, {:ok, []}, state}
 
-  def handle_call({:read, budget}, _from, state) do
-    case OutputBuffer.read(state.inbound, budget, state.init.limits, now(), state.init) do
-      {:ok, frames, queue} ->
-        next = %{state | inbound: queue, waiter: if(frames == [], do: state.waiter)}
-        {:reply, {:ok, frames}, continue_response(next)}
-
-      {:error, %Error{code: :output_stale} = error} ->
-        {:reply, {:error, error}, fail(state, :output_stale)}
-
-      error ->
-        {:reply, error, state}
-    end
-  end
+  def handle_call({:read, budget}, _from, state),
+    do: OutputBuffer.reply_read(state, budget, &continue_response/1, &fail/2)
 
   def handle_call({:write, frame}, _from, %{status: :ready, muted: false} = state) do
     with :ok <- AudioFrame.validate(frame, state.init.audio_format, state.init.limits),
@@ -125,12 +106,8 @@ defmodule Parlora.Providers.Grok do
     do:
       {:reply, Error.tuple(:not_ready, "Grok session has not acknowledged configuration"), state}
 
-  def handle_call({:append, update}, _from, state) do
-    case Protocol.validate(update, state.init.generation) do
-      :ok -> CommandLog.run(state, update.id, {:context, update}, &submit_context/3)
-      error -> {:reply, error, state}
-    end
-  end
+  def handle_call({:append, update}, _from, state),
+    do: Parlora.ProviderClient.context(state, update, &Protocol.validate/2, &submit_context/3)
 
   def handle_call({:resolve_delegation, id, outcome}, _from, state) when is_map(outcome) do
     case Calls.complete(state.calls, id, outcome) do
@@ -192,15 +169,8 @@ defmodule Parlora.Providers.Grok do
     {:noreply, %{next | deadline: deadline}}
   end
 
-  def handle_info(message, %{socket: socket} = state) when not is_nil(socket) do
-    case WebSocketConnection.receive(socket, message) do
-      {:ok, socket, frames} ->
-        {:noreply, Enum.reduce(frames, %{state | socket: socket}, &frame/2)}
-
-      {:error, reason} ->
-        {:noreply, fail(state, reason)}
-    end
-  end
+  def handle_info(message, %{socket: socket} = state) when not is_nil(socket),
+    do: {:noreply, WebSocketConnection.consume(state, message, &frame/2, &fail/2)}
 
   def handle_info(_message, state), do: {:noreply, state}
 
@@ -284,12 +254,8 @@ defmodule Parlora.Providers.Grok do
   defp frame(_frame, %{status: :closed} = state), do: state
   defp frame(:open, state), do: transmit(%{state | status: :starting}, state.config.setup)
 
-  defp frame({kind, json}, state) when kind in [:text, :binary] do
-    case JSON.decode(json) do
-      {:ok, event} when is_map(event) -> event(event, state)
-      _invalid -> fail(state, :invalid_json)
-    end
-  end
+  defp frame({kind, json}, state) when kind in [:text, :binary],
+    do: WebSocketConnection.json(state, json, &event/2, &fail/2)
 
   defp frame({:ping, bytes}, state), do: wire(state, {:pong, bytes})
   defp frame({:close, _code, _reason}, state), do: fail(state, :socket_closed)
@@ -438,7 +404,7 @@ defmodule Parlora.Providers.Grok do
          {:ok, {queue, sequence}} <-
            OutputBuffer.push(state.inbound, audio, state.init, state.sequence, now()) do
       emit(state, :provider_speech, %{state: :speaking})
-      notify(%{state | inbound: queue, sequence: sequence})
+      OutputBuffer.notify(%{state | inbound: queue, sequence: sequence})
     else
       {:error, %Error{} = error} -> fail(state, error.code)
       _invalid -> fail(state, :invalid_audio)
@@ -513,17 +479,8 @@ defmodule Parlora.Providers.Grok do
 
   defp input_tick(state), do: state
 
-  defp notify(state), do: OutputBuffer.notify(state)
-
-  defp transmit(%{status: :closed} = state, _command), do: state
-  defp transmit(state, command), do: wire(state, {:text, JSON.encode!(command)})
-
-  defp wire(state, frame) do
-    case WebSocketConnection.send(state.socket, frame) do
-      {:ok, socket} -> %{state | socket: socket}
-      {:error, reason} -> fail(state, reason)
-    end
-  end
+  defp transmit(state, command), do: WebSocketConnection.command(state, command, &fail/2)
+  defp wire(state, frame), do: WebSocketConnection.write(state, frame, &fail/2)
 
   defp fail(%{status: :closed} = state, _reason), do: state
 

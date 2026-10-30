@@ -4,7 +4,7 @@ For a complete runnable application, follow [Your first working session](first-s
 This guide covers integration choices and the session API. A session combines:
 
 - A **channel** for caller audio: browser, local devices, Twilio, or Telnyx.
-- A **provider** for full-duplex speech: OpenAI, Gemini, or Grok.
+- A **provider** for full-duplex speech: OpenAI, Gemini, Grok, or Phonic.
 - A **backend** for application work: Jido, Sagents, Legion, or your own adapter.
 - A **context policy** that turns conversation and application state into work.
 
@@ -163,8 +163,8 @@ For runtime metrics, distributed traces and logging integration, see
 
 ## Provider selection and reliability
 
-Use [OpenAI](openai-provider.md), [Gemini](gemini-provider.md), or
-[Grok](grok-provider.md) in the provider tuple. `start_session/1` applies each
+Use [OpenAI](openai-provider.md), [Gemini](gemini-provider.md),
+[Grok](grok-provider.md), or [Phonic](phonic-provider.md) in the provider tuple. `start_session/1` applies each
 provider's audio storage defaults automatically; explicit `limits:` override them.
 Channel playback buffering is separate from provider receive storage.
 

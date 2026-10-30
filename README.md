@@ -40,7 +40,7 @@ explains these terms in more detail.
 
 | Audio channels | Voice providers | Backend integrations |
 | --- | --- | --- |
-| Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0 | Jido, Sagents, Legion, or your own `Parlora.Backend` |
+| Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0, Phonic-1 (experimental) | Jido, Sagents, Legion, or your own `Parlora.Backend` |
 
 Jido, Sagents, and Legion are optional. Install only the framework you use.
 The voice provider handles the spoken conversation and delegates application
@@ -88,7 +88,7 @@ phone calls. Use it to explore these workflows after your first working session.
 
 - **Start here:** [First working session](docs/first-session.md), [Use Parlora](docs/using-parlora.md), [requirements and native builds](docs/beam-compatibility.md).
 - **Channels:** [Browser](docs/browser-channel.md), [Twilio](docs/twilio-channel.md), [Telnyx](docs/telnyx-channel.md). Local audio options are documented in `Parlora.Channels.LocalAudio`.
-- **Providers:** [OpenAI](docs/openai-provider.md), [Gemini](docs/gemini-provider.md), [Grok](docs/grok-provider.md).
+- **Providers:** [OpenAI](docs/openai-provider.md), [Gemini](docs/gemini-provider.md), [Grok](docs/grok-provider.md), [Phonic](docs/phonic-provider.md).
 - **Backends:** [Jido](docs/jido-backend.md), [Sagents](docs/sagents-backend.md), [Legion](docs/legion-backend.md).
 - **Reference:** [Adapter contracts and data](docs/public-interfaces.md), [metrics, traces and logs](docs/observability.md).
 

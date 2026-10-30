@@ -153,8 +153,8 @@ Initial channel events:
 
 This interface supports a **continuous full-duplex voice provider with client
 delegation and speakable context injection**. Built-in providers are
-[OpenAI GPT-Live-1](openai-provider.md), [Gemini 3.8 Live](gemini-provider.md), and
-[Grok Voice 3.0](grok-provider.md). Callback compatibility is necessary but does
+[OpenAI GPT-Live-1](openai-provider.md), [Gemini 3.8 Live](gemini-provider.md),
+[Grok Voice 3.0](grok-provider.md), and experimental [Phonic-1](phonic-provider.md). Callback compatibility is necessary but does
 not make arbitrary voice architectures interchangeable.
 
 Before starting either audio pipeline, the coordinator requires:
@@ -1100,3 +1100,16 @@ invent timing. Generated response IDs identify discarded interrupted audio and
 captions independently of backend call IDs. Function calls remain the responsibility of the application
 and can outlive a spoken acknowledgment. See [Grok delivery semantics](grok-provider.md)
 for configuration and delivery semantics.
+
+
+## Phonic contract additions
+
+Phonic uses asynchronous client tools with explicit reply continuation. It
+supports PCM24 pipelines and converts PCMU8 internally over a PCM24 connection.
+Caller word fragments and assistant utterance captions have unavailable timing.
+Quiet/instruction updates submit context; speakable updates schedule a response.
+Only correlated tool-output processing can acknowledge a result; arbitrary
+context remains unconfirmed, so the overall acknowledgment capability is false.
+Interruption events use the existing clear/resume barrier. Network loss closes
+explicitly; initial history, usage reporting and transparent resumption are not
+implemented. See the [Phonic guide](phonic-provider.md) for limits and retention.

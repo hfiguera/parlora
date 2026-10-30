@@ -10,6 +10,27 @@ defmodule Parlora.Provider.OutputBuffer do
       provider_audio_max_age_ms: duration_ms + 1_000
     ]
 
+  def reply_read(state, budget, continue, fail) do
+    now = System.monotonic_time(:microsecond)
+
+    case read(state.inbound, budget, state.init.limits, now, state.init) do
+      {:ok, frames, queue} ->
+        next = %{state | inbound: queue, waiter: if(frames == [], do: state.waiter)}
+        {:reply, {:ok, frames}, continue.(next)}
+
+      {:error, %Error{code: :output_stale} = error} ->
+        {:reply, {:error, error}, fail.(state, :output_stale)}
+
+      error ->
+        {:reply, error, state}
+    end
+  end
+
+  def resume(state, token, continue) do
+    next = if token == state.interruption, do: %{state | output_blocked: false}, else: state
+    {:reply, :ok, next |> continue.() |> notify()}
+  end
+
   def notify(%{waiter: {reader, ref}, inbound: %{bytes: bytes}, output_blocked: false} = state)
       when bytes > 0 do
     send(reader, {:parlora_audio_ready, self(), ref})

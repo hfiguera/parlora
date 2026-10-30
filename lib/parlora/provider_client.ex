@@ -3,6 +3,7 @@ defmodule Parlora.ProviderClient do
 
   defmacro __using__(options) do
     protocol = Keyword.fetch!(options, :protocol)
+    client_tools? = Keyword.get(options, :client_tools, false)
 
     quote do
       use Parlora.AdapterClient
@@ -24,6 +25,21 @@ defmodule Parlora.ProviderClient do
       @impl true
       def arm_output_ready(pid, reader, reference),
         do: Parlora.Adapter.call(pid, {:arm_output_ready, reader, reference})
+
+      if unquote(client_tools?) do
+        @impl true
+        def resume_output(pid, token), do: Parlora.Adapter.call(pid, {:resume_output, token})
+        @impl true
+        def resolve_delegation(pid, id, outcome),
+          do: Parlora.Adapter.call(pid, {:resolve_delegation, id, outcome})
+      end
+    end
+  end
+
+  def context(state, update, validate, submit) do
+    case validate.(update, state.init.generation) do
+      :ok -> Parlora.CommandLog.run(state, update.id, {:context, update}, submit)
+      error -> {:reply, error, state}
     end
   end
 end

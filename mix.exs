@@ -22,7 +22,7 @@ defmodule Parlora.MixProject do
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/hfiguera/parlora"},
         files:
-          ~w(lib native/*/src native/*/Cargo.toml native/*/Cargo.lock native/*/build.rs mix.exs mix.lock README.md CHANGELOG.md LICENSE docs/public-interfaces.md docs/observability.md docs/first-session.md docs/using-parlora.md docs/beam-compatibility.md docs/output-recovery.md docs/openai-provider.md docs/gemini-provider.md docs/grok-provider.md docs/jido-backend.md docs/sagents-backend.md docs/legion-backend.md docs/browser-channel.md docs/twilio-channel.md docs/telnyx-channel.md examples/order_desk/README.md examples/order_desk/APPLICATION.md scripts/install_opus.sh rust-toolchain.toml)
+          ~w(lib native/*/src native/*/Cargo.toml native/*/Cargo.lock native/*/build.rs mix.exs mix.lock README.md CHANGELOG.md LICENSE docs/public-interfaces.md docs/observability.md docs/first-session.md docs/using-parlora.md docs/beam-compatibility.md docs/output-recovery.md docs/openai-provider.md docs/gemini-provider.md docs/grok-provider.md docs/phonic-provider.md docs/jido-backend.md docs/sagents-backend.md docs/legion-backend.md docs/browser-channel.md docs/twilio-channel.md docs/telnyx-channel.md examples/order_desk/README.md examples/order_desk/APPLICATION.md scripts/install_opus.sh rust-toolchain.toml)
       ],
       dialyzer: [
         plt_add_apps:
@@ -85,6 +85,7 @@ defmodule Parlora.MixProject do
         "docs/openai-provider.md",
         "docs/gemini-provider.md",
         "docs/grok-provider.md",
+        "docs/phonic-provider.md",
         "docs/jido-backend.md",
         "docs/sagents-backend.md",
         "docs/legion-backend.md",
@@ -97,7 +98,7 @@ defmodule Parlora.MixProject do
         "Getting started":
           ~r/(README|first-session|using-parlora|beam-compatibility|APPLICATION)/,
         Channels: ~r/(browser|twilio|telnyx)-channel/,
-        Providers: ~r/(openai|gemini|grok)-provider/,
+        Providers: ~r/(openai|gemini|grok|phonic)-provider/,
         Backends: ~r/(jido|sagents|legion)-backend/,
         Reference: ~r/(output-recovery|public-interfaces|observability|CHANGELOG|LICENSE)/
       ],
