@@ -62,7 +62,7 @@ Jido action.
 Install Parlora from [Hex](https://hex.pm/packages/parlora):
 
 ```elixir
-{:parlora, "~> 0.3.0"}
+{:parlora, "~> 0.4.0"}
 ```
 
 You need **Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the
@@ -91,6 +91,15 @@ default backend.
 Its setup guide covers installation, credentials for the example, provider and
 backend selection, and launch commands for browser, local audio, and incoming
 phone calls. Use it to explore these workflows after your first working session.
+
+## Explore the BookingDesk example
+
+[BookingDesk](https://github.com/hfiguera/parlora/tree/v0.4.0/examples/booking_desk)
+is a fictional clinic receptionist with microphone and scripted replay modes.
+It demonstrates conversation during Jido work, date corrections, patient record
+matching, insurance review, explicit booking approval, and simulated text reminders.
+The [recorded walkthrough](https://hfiguera.github.io/parlora/blog/keep-talking-while-we-book-it/)
+follows the conversation and backend activity across four speech providers.
 
 ## Guides
 
