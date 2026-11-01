@@ -389,12 +389,18 @@ defmodule Parlora.GrokAdapterTest do
   test "independent results continue while another response's backend call remains pending",
        context do
     state = ready(context)
+    state = deliver(context, state, created("slow-turn"))
 
     state =
       deliver(context, state, Map.put(call("slow", "order 123"), "response_id", "slow-turn"))
 
+    state = deliver(context, state, done("slow-turn"))
+    state = deliver(context, state, created("fast-turn"))
+
     state =
       deliver(context, state, Map.put(call("fast", "order 124"), "response_id", "fast-turn"))
+
+    state = deliver(context, state, done("fast-turn"))
 
     {:reply, :ok, state} = Grok.handle_call({:append, update("fast-result", "fast")}, nil, state)
     assert state.calls.records["slow"].status == :pending
@@ -405,14 +411,51 @@ defmodule Parlora.GrokAdapterTest do
   test "parallel calls in one response receive all outputs before a single continuation",
        context do
     state = ready(context)
+    state = deliver(context, state, created("parallel"))
     state = deliver(context, state, Map.put(call("one", "order 123"), "response_id", "parallel"))
     state = deliver(context, state, Map.put(call("two", "order 124"), "response_id", "parallel"))
+    state = deliver(context, state, done("parallel"))
     {:reply, :ok, state} = Grok.handle_call({:append, update("one-result", "one")}, nil, state)
     refute_receive {:grok_command, %{"type" => "response.create"}}, 10
     {:reply, :ok, state} = Grok.handle_call({:append, update("two-result", "two")}, nil, state)
     assert state.response == :requested
     assert_receive {:grok_command, %{"type" => "response.create"}}
     refute_receive {:grok_command, %{"type" => "response.create"}}, 10
+  end
+
+  test "a queued clarification cannot resume a newer turn before its tool result", context do
+    state = ready(context)
+    state = deliver(context, state, created("slow-turn"))
+
+    state =
+      deliver(context, state, Map.put(call("slow", "Wednesday"), "response_id", "slow-turn"))
+
+    state = deliver(context, state, done("slow-turn"))
+
+    state = deliver(context, state, %{"type" => "input_audio_buffer.speech_started"})
+    {:reply, :ok, state} = Grok.handle_call({:resume_output, state.interruption}, nil, state)
+    {:reply, :ok, state} = Grok.handle_call({:append, update("clarification", nil)}, nil, state)
+    state = deliver(context, state, %{"type" => "input_audio_buffer.speech_stopped"})
+    state = deliver(context, state, created("corrected-turn"))
+
+    state =
+      deliver(context, state, Map.put(call("fast", "Thursday"), "response_id", "corrected-turn"))
+
+    state = deliver(context, state, done("corrected-turn"))
+
+    refute_receive {:grok_command, %{"type" => "response.create"}}, 10
+    assert state.response == nil and state.request_timer == nil
+
+    {:reply, :ok, state} = Grok.handle_call({:append, update("fast-result", "fast")}, nil, state)
+
+    assert_receive {:grok_command,
+                    %{"item" => %{"type" => "function_call_output", "call_id" => "fast"}}}
+
+    assert_receive {:grok_command, %{"type" => "response.create"}}
+    refute_receive {:grok_command, %{"type" => "response.create"}}, 10
+    assert state.response == :requested
+    assert state.calls.records["slow"].status == :pending
+    assert state.want_response == MapSet.new()
   end
 
   defp ready(context, state \\ nil),

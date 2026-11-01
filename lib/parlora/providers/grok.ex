@@ -36,6 +36,7 @@ defmodule Parlora.Providers.Grok do
       interruption: 0,
       output_blocked: false,
       response: nil,
+      last_response_id: nil,
       request_timer: nil,
       discarded: MapSet.new(),
       caller_speaking: false,
@@ -223,7 +224,14 @@ defmodule Parlora.Providers.Grok do
            output_blocked: false
          } = state
        ) do
-    ready = Enum.reject(state.want_response, &Calls.group_pending?(state.calls, &1))
+    # A clarification queued during interrupted caller speech may belong to no
+    # tool call. It must still wait for all tool outputs from the latest turn:
+    # sending response.create first can leave Grok without a response.created
+    # acknowledgment, stranding the result that arrives just afterward.
+    ready =
+      if Calls.response_pending?(state.calls, state.last_response_id),
+        do: [],
+        else: Enum.reject(state.want_response, &Calls.group_pending?(state.calls, &1))
 
     if ready == [] do
       state
@@ -374,7 +382,7 @@ defmodule Parlora.Providers.Grok do
       true ->
         state = clear_request_timer(state)
         emit(state, :provider_activity, %{state: :in_progress})
-        %{state | response: id, auto_response_pending: false}
+        %{state | response: id, last_response_id: id, auto_response_pending: false}
     end
   end
 

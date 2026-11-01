@@ -48,6 +48,9 @@ still install Jason for their own use; Parlora no longer depends on it directly.
 
 ### Fixed
 
+- Close superseded Gemini function calls silently without sending internal
+  control outcomes to the model. Reject late context for those obsolete calls
+  and preserve existing reply monitoring and provider activity.
 - Resume Phonic result announcements after completed late tool associations,
   suppress duplicate association continuations, and treat tool-only automatic
   turns as progress so they cannot strand a queued result behind a speech wait.

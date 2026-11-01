@@ -5,7 +5,7 @@ defmodule Parlora.LocalAudioTest do
   alias Parlora.Channels.LocalAudio
   alias Parlora.Native.{Device, Resampler}
 
-  defp open do
+  defp open(options \\ []) do
     init = %AdapterInit{
       session_id: ID.new(),
       adapter_id: ID.new(),
@@ -20,7 +20,7 @@ defmodule Parlora.LocalAudioTest do
     pid =
       start_supervised!(%{
         id: {LocalAudio, make_ref()},
-        start: {LocalAudio, :start_link, [init, [device: :synthetic]]},
+        start: {LocalAudio, :start_link, [init, Keyword.merge([device: :synthetic], options)]},
         restart: :temporary
       })
 
@@ -43,6 +43,19 @@ defmodule Parlora.LocalAudioTest do
 
     assert_receive {:parlora_event,
                     %Event{type: :playback_observed, payload: %{stage: :handed_off}}}
+  end
+
+  test "opt-in recording observes microphone and post-buffer playout without blocking the device" do
+    credits = :atomics.new(2, [])
+    pid = open(audio_observer: %{pid: self(), credits: credits}, playback_buffer_ms: 0)
+    assert_receive {:parlora_audio, :input, input_at, input_pcm}, 1_000
+    assert is_integer(input_at) and byte_size(input_pcm) > 0
+    pcm = :binary.copy(<<0, 16>>, 240)
+    frame = AudioFrame.pcm(pcm, "recording", 0, playback_epoch: 0)
+    assert :ok = LocalAudio.write_audio(pid, frame)
+    assert_receive {:parlora_audio, :output, output_at, ^pcm}, 1_000
+    assert is_integer(output_at)
+    assert {:ok, _} = LocalAudio.capabilities(pid)
   end
 
   test "clear adopts a native epoch and old writes are rejected, capture continues on suppression" do

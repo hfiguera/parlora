@@ -285,6 +285,47 @@ defmodule Parlora.GeminiAdapterTest do
     assert state.response_watch == nil
   end
 
+  test "supersession is an empty silent socket response and preserves an outstanding reply watch",
+       context do
+    state = %{context.state | status: :ready}
+    state = deliver(context, state, %{"toolCall" => %{"functionCalls" => [call("obsolete")]}})
+    state = deliver(context, state, %{"serverContent" => %{"turnComplete" => true}})
+    assert state.activity == :idle
+    outcome = %{status: :superseded, instruction: "Do not announce the obsolete result."}
+
+    {:reply, :ok, state} =
+      Gemini.handle_call({:resolve_delegation, "obsolete", outcome}, nil, state)
+
+    assert_receive {:command, %{"toolResponse" => %{"functionResponses" => [response]}}}
+    assert response["id"] == "obsolete"
+    assert response["scheduling"] == "SILENT"
+    assert response["response"] == %{}
+    assert state.response_watch == nil
+    assert state.activity == :idle
+
+    state = deliver(context, state, %{"toolCall" => %{"functionCalls" => [call("current")]}})
+
+    update = %ContextUpdate{
+      id: "current-result",
+      kind: :speakable,
+      content: "Thursday has 10:15 AM",
+      delegation_id: "current",
+      provider_generation: 0
+    }
+
+    {:reply, :ok, state} = Gemini.handle_call({:append, update}, nil, state)
+    watch = state.response_watch
+    assert watch != nil
+    state = deliver(context, state, %{"toolCall" => %{"functionCalls" => [call("old-second")]}})
+
+    {:reply, :ok, state} =
+      Gemini.handle_call({:resolve_delegation, "old-second", outcome}, nil, state)
+
+    assert state.response_watch == watch
+    assert state.activity == :in_progress
+    {:reply, :ok, _} = Gemini.handle_call({:close, "close", :cancel}, nil, state)
+  end
+
   test "readiness, function response and delivery evidence use the actual socket", context do
     state = deliver(context, context.state, %{"setupComplete" => %{}})
     assert_receive {:parlora_event, %Event{type: :ready}}

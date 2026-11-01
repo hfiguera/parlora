@@ -46,8 +46,12 @@ defmodule Parlora.Providers.Grok.Calls do
   def group_pending?(_calls, nil), do: false
 
   def group_pending?(calls, id) do
-    group = calls.records[id].group
+    response_pending?(calls, calls.records[id].group)
+  end
 
+  def response_pending?(_calls, nil), do: false
+
+  def response_pending?(calls, group) do
     Enum.any?(calls.records, fn {_id, record} ->
       record.group == group and record.status == :pending
     end)

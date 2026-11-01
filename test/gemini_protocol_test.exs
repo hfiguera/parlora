@@ -165,6 +165,30 @@ defmodule Parlora.GeminiProtocolTest do
     end
   end
 
+  test "superseded calls close silently without exposing internal control outcomes" do
+    call = %{
+      "id" => "obsolete",
+      "name" => Protocol.function(),
+      "args" => %{"request" => "Wednesday availability"}
+    }
+
+    {:new, calls} = Calls.admit(Calls.new(4), call)
+    outcome = %{status: :superseded, instruction: "Do not announce the obsolete result."}
+
+    assert {:ok, %{toolResponse: %{functionResponses: [response]}}, closed} =
+             Calls.complete(calls, "obsolete", outcome)
+
+    assert response.id == "obsolete"
+    assert response.scheduling == "SILENT"
+    assert response.response == %{}
+    assert closed.records["obsolete"].status == :superseded
+    refute Calls.pending?(closed)
+    assert {:duplicate, ^closed} = Calls.admit(closed, call)
+    assert {:unchanged, ^closed} = Calls.cancel(closed, "obsolete")
+    assert {:error, _} = Calls.complete(closed, "obsolete", outcome)
+    assert {:error, _} = Calls.context(closed, "obsolete", "Wednesday has an obsolete opening")
+  end
+
   test "instruction updates and stale generations are rejected" do
     update = %ContextUpdate{
       id: "one",

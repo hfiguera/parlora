@@ -51,6 +51,9 @@ defmodule Parlora.Providers.Gemini.Calls do
       %{status: :cancelled} ->
         Error.tuple(:invalid_argument, "Function call was cancelled")
 
+      %{status: :superseded} ->
+        Error.tuple(:invalid_argument, "Function call was superseded")
+
       nil ->
         Error.tuple(:invalid_argument, "Unknown function call")
     end
@@ -58,6 +61,12 @@ defmodule Parlora.Providers.Gemini.Calls do
 
   def complete(calls, id, response) do
     case calls.records[id] do
+      %{status: :pending} = record when response.status == :superseded ->
+        # Closing obsolete work is protocol bookkeeping, not conversational
+        # content. Do not expose its internal outcome or schedule a reply.
+        {:ok, Protocol.tool_result(id, %{}, "SILENT"),
+         put_in(calls.records[id], %{record | status: :superseded})}
+
       %{status: :pending} = record ->
         {:ok, Protocol.tool_result(id, response, scheduling(response)),
          put_in(calls.records[id], %{record | status: :completed})}
