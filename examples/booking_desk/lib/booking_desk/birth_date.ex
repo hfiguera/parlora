@@ -63,28 +63,7 @@ defmodule BookingDesk.BirthDate do
       word in ["twenty", "thirty"] ->
         base = if word == "twenty", do: 20, else: 30
 
-        case rest do
-          [one | tail]
-          when one in [
-                 "first",
-                 "second",
-                 "third",
-                 "fourth",
-                 "fifth",
-                 "sixth",
-                 "seventh",
-                 "eighth",
-                 "ninth"
-               ] ->
-            {:ok, base + Enum.find_index(@ordinals, &(&1 == one)) + 1, tail}
-
-          [one | tail]
-          when one in ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"] ->
-            {:ok, base + Enum.find_index(@ones, &(&1 == one)), tail}
-
-          _ ->
-            {:ok, base, rest}
-        end
+        compound_day(rest, base)
 
       word in ["twentieth", "thirtieth"] ->
         {:ok, if(word == "twentieth", do: 20, else: 30), rest}
@@ -98,6 +77,31 @@ defmodule BookingDesk.BirthDate do
   end
 
   defp day(_), do: :incomplete
+
+  defp compound_day(rest, base) do
+    case rest do
+      [one | tail]
+      when one in [
+             "first",
+             "second",
+             "third",
+             "fourth",
+             "fifth",
+             "sixth",
+             "seventh",
+             "eighth",
+             "ninth"
+           ] ->
+        {:ok, base + Enum.find_index(@ordinals, &(&1 == one)) + 1, tail}
+
+      [one | tail]
+      when one in ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"] ->
+        {:ok, base + Enum.find_index(@ones, &(&1 == one)), tail}
+
+      _ ->
+        {:ok, base, rest}
+    end
+  end
 
   defp year([number]) do
     case Integer.parse(number) do

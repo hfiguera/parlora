@@ -22,12 +22,13 @@ defmodule BookingDesk.Action do
     Process.sleep(delay)
     result = BookingDesk.Store.execute(params.input, params.request_id)
 
-    # The Jido adapter reads terminal status; a business failure is still a completed action with a verified failed result.
+    # Business failure is a completed Jido action carrying a verified failed result.
     {:ok, %{status: :completed, last_answer: result}}
   end
 end
 
 defmodule BookingDesk.Agent do
+  @moduledoc "Jido host for deterministic scheduling actions."
   use Jido.Agent,
     name: "booking_desk",
     schema: [status: [type: :atom, default: :idle], last_answer: [type: :map, default: %{}]],

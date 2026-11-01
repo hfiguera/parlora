@@ -1,4 +1,5 @@
 defmodule BookingDesk.Application do
+  @moduledoc "Supervises the demo store, bounded interpreters and per-call guards."
   use Application
 
   def start(_type, _args) do

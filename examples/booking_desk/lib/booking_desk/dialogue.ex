@@ -7,6 +7,7 @@ defmodule BookingDesk.Dialogue do
 
   def build(transcripts, opts \\ []) do
     cursor = Keyword.get(opts, :after_cursor)
+    limit = Keyword.get(opts, :limit, 10)
 
     transcripts
     |> Enum.reverse()
@@ -17,7 +18,7 @@ defmodule BookingDesk.Dialogue do
     |> Enum.reduce([], &append/2)
     # Assistant acknowledgments after the latest caller cannot change its intent.
     |> Enum.drop_while(&(&1.speaker == :assistant))
-    |> Enum.take(10)
+    |> Enum.take(limit)
     |> Enum.reverse()
     |> Enum.map(&Map.take(&1, [:speaker, :text]))
   end
@@ -28,24 +29,30 @@ defmodule BookingDesk.Dialogue do
   defp request_side(_, _), do: nil
 
   defp run(parts, cursor) do
-    generations = Enum.map(parts, &Map.get(&1, :provider_generation)) |> Enum.uniq()
+    generation =
+      case Enum.map(parts, &Map.get(&1, :provider_generation)) |> Enum.uniq() do
+        [generation] -> generation
+        _ -> nil
+      end
 
     timed? =
-      length(generations) == 1 and hd(generations) != nil and
-        Enum.all?(parts, fn part ->
-          first = Map.get(part, :start_ms)
-          last = Map.get(part, :end_ms)
-          is_number(first) and is_number(last) and first >= 0 and last >= first
-        end)
+      generation != nil and
+        Enum.all?(parts, &valid_interval?/1)
 
     %{
       speaker: hd(parts).speaker,
       request_side: request_side(hd(parts), cursor),
       text: Enum.map_join(parts, & &1.delta),
-      generation: if(timed?, do: hd(generations)),
+      generation: if(timed?, do: generation),
       start_ms: if(timed?, do: Enum.min_by(parts, & &1.start_ms).start_ms),
       end_ms: if(timed?, do: Enum.max_by(parts, & &1.end_ms).end_ms)
     }
+  end
+
+  defp valid_interval?(part) do
+    first = Map.get(part, :start_ms)
+    last = Map.get(part, :end_ms)
+    is_number(first) and is_number(last) and first >= 0 and last >= first
   end
 
   defp append(
@@ -83,13 +90,19 @@ defmodule BookingDesk.Dialogue do
   defp append(next, runs), do: [next | runs]
 
   defp continuation?(previous, overlap, next) do
-    previous.request_side == next.request_side and
-      previous.generation != nil and previous.generation == next.generation and
-      overlap.generation == next.generation and
-      next.start_ms >= previous.end_ms and
-      next.start_ms - previous.end_ms <= @continuation_gap_ms and
+    same_context?(previous, overlap, next) and
+      nearby?(previous, next) and
       overlap.start_ms <= next.start_ms and overlap.end_ms >= next.start_ms and
       not Regex.match?(~r/[.!?]\s*$/, previous.text) and
       not String.contains?(overlap.text, "?")
   end
+
+  defp same_context?(previous, overlap, next),
+    do:
+      previous.request_side == next.request_side and previous.generation != nil and
+        previous.generation == next.generation and overlap.generation == next.generation
+
+  defp nearby?(previous, next),
+    do:
+      next.start_ms >= previous.end_ms and next.start_ms - previous.end_ms <= @continuation_gap_ms
 end

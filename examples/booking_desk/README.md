@@ -26,6 +26,14 @@ Python 3.10+ is only needed for the optional scripted caller and its tests:
 python3 -m unittest discover -s test -p '*_test.py'
 ```
 
+For the complete Elixir quality checks, run `mix ci`. It compiles with warnings
+as errors, checks compile cycles and formatting, runs the tests, and then runs
+Credo, ExDNA, read-only Credence analysis and Dialyzer. These tools are development
+and test dependencies; the same versions are pinned in Parlora. Credence uses
+conservative assumptions and isolates compiler analysis in separate processes.
+No check rewrites source or makes a model call. GitHub Actions runs this suite
+and the Python tests, with a Dialyzer PLT cache keyed by runtime and dependencies.
+
 ## API keys
 
 Live calls require `TYPESAFE_API_KEY` for JEV and `OPENAI_API_KEY` for structured

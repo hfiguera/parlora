@@ -148,8 +148,8 @@ defmodule BookingDesk.StoreTest do
       )
 
     slots = result["facts"]["slots"]
-    assert length(slots) == 4
-    assert slots |> Enum.map(& &1["id"]) |> Enum.uniq() |> length() == 4
+    assert [_, _, _, _] = slots
+    assert MapSet.size(MapSet.new(slots, & &1["id"])) == 4
     assert Enum.count(slots, &(&1["time"] == "10:15")) == 2
 
     assert execute(

@@ -1,4 +1,6 @@
 defmodule BookingDesk.ReminderPolicy do
+  alias BookingDesk.Identity.Extractor
+
   @moduledoc "Read-only semantic reminder decisions, bound to a verified booking and exact destination."
 
   def current(snapshot) do
@@ -6,19 +8,17 @@ defmodule BookingDesk.ReminderPolicy do
     |> Map.values()
     |> Enum.filter(&(&1.input.operation == "confirm" and &1.status == :completed))
     |> Enum.sort_by(& &1.input.cursor, :desc)
-    |> Enum.find_value(fn task ->
-      case task.request_ids do
-        [id | _] ->
-          case BookingDesk.Store.reminder(id, task.input.lookup_request, snapshot.session_id) do
-            %{status: status} when status in ["scheduled", "declined"] -> nil
-            state -> state
-          end
-
-        _ ->
-          nil
-      end
-    end)
+    |> Enum.find_value(&reminder_for_task(&1, snapshot))
   end
+
+  defp reminder_for_task(%{request_ids: [id | _]} = task, snapshot) do
+    case BookingDesk.Store.reminder(id, task.input.lookup_request, snapshot.session_id) do
+      %{status: status} when status in ["scheduled", "declined"] -> nil
+      state -> state
+    end
+  end
+
+  defp reminder_for_task(_, _), do: nil
 
   def interpret(snapshot, current, opts) do
     dialogue = BookingDesk.Dialogue.build(snapshot.transcripts)
@@ -45,23 +45,10 @@ defmodule BookingDesk.ReminderPolicy do
 
     case classify.(state) do
       {:ok, "number"} ->
-        extract =
-          Keyword.get(opts, :phone_extractor, fn state ->
-            BookingDesk.Identity.Extractor.check(state, BookingDesk.PhoneExtractor)
-          end)
-
-        case extract.(state) do
-          {:ok, %{phone: phone}} -> {:input, %{operation: "reminder_number", phone: phone}}
-          :pending -> :wait
-          _ -> {:clarify, "What cell number should we use? Please include all ten digits."}
-        end
+        extract_number(state, opts)
 
       {:ok, "opt_in"} when current.status == "offered" ->
-        question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
-
-        if question && BookingDesk.Run.reminder_offer?(question.text),
-          do: {:input, %{operation: "reminder_opt_in"}},
-          else: :associate
+        accept_offer(dialogue)
 
       {:ok, "decline"} ->
         {:input, %{operation: "reminder_decline"}}
@@ -70,23 +57,7 @@ defmodule BookingDesk.ReminderPolicy do
         {:input, %{operation: "reminder_change"}}
 
       {:ok, "confirm_number"} when current.status in ["verify_existing", "verify_new"] ->
-        question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
-
-        expected =
-          if current.status == "verify_existing",
-            do: String.slice(current.destination, -4, 4),
-            else: current.destination
-
-        if question && BookingDesk.Reminders.readback?(question.text, expected),
-          do:
-            {:input,
-             %{
-               operation: "reminder_confirm",
-               destination: current.destination,
-               readback_verified: true
-             }},
-          else:
-            {:clarify, "Can we send the reminder to #{BookingDesk.Reminders.spoken(expected)}?"}
+        confirm_destination(current, dialogue)
 
       {:ok, "none"} ->
         :associate
@@ -95,6 +66,46 @@ defmodule BookingDesk.ReminderPolicy do
         {:clarify,
          "I couldn't confirm your reminder preference. Would you like a text reminder? Your appointment remains booked."}
     end
+  end
+
+  defp accept_offer(dialogue) do
+    question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+
+    if question && BookingDesk.Run.reminder_offer?(question.text),
+      do: {:input, %{operation: "reminder_opt_in"}},
+      else: :associate
+  end
+
+  defp extract_number(state, opts) do
+    extract =
+      Keyword.get(opts, :phone_extractor, fn state ->
+        Extractor.check(state, BookingDesk.PhoneExtractor)
+      end)
+
+    case extract.(state) do
+      {:ok, %{phone: phone}} -> {:input, %{operation: "reminder_number", phone: phone}}
+      :pending -> :wait
+      _ -> {:clarify, "What cell number should we use? Please include all ten digits."}
+    end
+  end
+
+  defp confirm_destination(current, dialogue) do
+    question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+
+    expected =
+      if current.status == "verify_existing",
+        do: String.slice(current.destination, -4, 4),
+        else: current.destination
+
+    if question && BookingDesk.Reminders.readback?(question.text, expected),
+      do:
+        {:input,
+         %{
+           operation: "reminder_confirm",
+           destination: current.destination,
+           readback_verified: true
+         }},
+      else: {:clarify, "Can we send the reminder to #{BookingDesk.Reminders.spoken(expected)}?"}
   end
 
   def classify(state), do: BookingDesk.Judgment.classify(state, evaluator: &evaluate/1)
@@ -123,21 +134,25 @@ defmodule BookingDesk.ReminderPolicy do
           }
         )
 
-      case TypeSafe.system_one(BookingDesk.TypeSafe,
-             state: Map.delete(state, :interpretation_binding),
-             questions: %{"reply" => question},
-             retry: [max_attempts: 1]
-           ) do
-        {:ok, %{answers: %{"reply" => %{choice: choice, probabilities: probabilities}}}} ->
-          if Map.get(probabilities, choice, 0) >= 0.85,
-            do: {:ok, choice},
-            else: {:error, :uncertain}
-
-        _ ->
-          {:error, :unavailable}
-      end
+      evaluate_reply(state, question)
     else
       {:error, :unavailable}
+    end
+  end
+
+  defp evaluate_reply(state, question) do
+    case TypeSafe.system_one(BookingDesk.TypeSafe,
+           state: Map.delete(state, :interpretation_binding),
+           questions: %{"reply" => question},
+           retry: [max_attempts: 1]
+         ) do
+      {:ok, %{answers: %{"reply" => %{choice: choice, probabilities: probabilities}}}} ->
+        if Map.get(probabilities, choice, 0) >= 0.85,
+          do: {:ok, choice},
+          else: {:error, :uncertain}
+
+      _ ->
+        {:error, :unavailable}
     end
   end
 end

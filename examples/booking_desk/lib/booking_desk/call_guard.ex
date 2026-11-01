@@ -1,4 +1,5 @@
 defmodule BookingDesk.CallGuard do
+  alias BookingDesk.CallGuard.Classifier
   @moduledoc "Per-call, fail-closed task gate, scope redirects and caller-conduct lifecycle."
   use GenServer, restart: :temporary
   alias Parlora.ContextUpdate
@@ -19,7 +20,7 @@ defmodule BookingDesk.CallGuard do
        reported_drops: 0,
        transport: Keyword.get(opts, :transport, Parlora),
        instruction_updates: Keyword.get(opts, :instruction_updates, false),
-       evaluator: Keyword.get(opts, :evaluator, &BookingDesk.CallGuard.Classifier.classify/1),
+       evaluator: Keyword.get(opts, :evaluator, &Classifier.classify/1),
        debounce_ms: Keyword.get(opts, :debounce_ms, 650),
        timeout_ms: Keyword.get(opts, :timeout_ms, 2_500),
        quiet_ms: Keyword.get(opts, :quiet_ms, 1_500),
@@ -75,22 +76,7 @@ defmodule BookingDesk.CallGuard do
         {:reply, gate(s), s}
 
       true ->
-        s = cancel_job(s)
-        dialogue = BookingDesk.Dialogue.build(snapshot.transcripts) |> Enum.take(-6)
-
-        source = %{
-          dialogue: dialogue,
-          latest_user: List.last(Enum.filter(dialogue, &(&1.speaker == :user))).text
-        }
-
-        if byte_size(JSON.encode!(source)) > 6_000 do
-          s = %{s | key: key, verdict: :blocked}
-          {:reply, :blocked, announce(s, :unavailable, true)}
-        else
-          token = make_ref()
-          timer = Process.send_after(self(), {:classify, token}, s.debounce_ms)
-          {:reply, :wait, %{s | key: key, source: source, verdict: nil, timer: {token, timer}}}
-        end
+        schedule_check(s, snapshot, key)
     end
   end
 
@@ -105,18 +91,7 @@ defmodule BookingDesk.CallGuard do
         %{type: :transcript_delta, payload: %{speaker: :assistant}} when s.announcement != nil ->
           text = String.slice(s.announcement.text <> event.payload.delta, -2_000, 2_000)
 
-          caption =
-            cond do
-              s.closing != nil ->
-                Regex.match?(~r/\bgoodbye\b/i, text)
-
-              s.announcement.reason == :abuse_warning ->
-                String.contains?(String.downcase(text), "abusive") and
-                  String.contains?(String.downcase(text), "end")
-
-              true ->
-                true
-            end
+          caption = caption_complete?(s, text)
 
           %{s | announcement: %{s.announcement | caption: caption, text: text}}
 
@@ -208,39 +183,19 @@ defmodule BookingDesk.CallGuard do
   def handle_info({:DOWN, _, :process, pid, _}, %{session: pid} = s), do: {:stop, :normal, s}
 
   def handle_info({:guard_tick, token}, %{announcement: %{token: token} = a} = s) do
-    drained =
-      a.heard and a.caption and s.speech != :speaking and
-        now() - a.last_voice >= s.quiet_ms and now() - a.started >= s.quiet_ms
+    drained = playout_drained?(s, a)
 
     timed_out = now() - a.started >= s.delivery_ms
     settled = s.job == nil and s.timer == nil
     hard_deadline = now() - a.started >= s.delivery_ms + s.debounce_ms + s.timeout_ms + 1_000
 
-    cond do
-      ((drained or timed_out) and settled) or hard_deadline ->
-        emit(s, if(drained, do: :software_playout_quiet, else: :message_unconfirmed))
+    if ((drained or timed_out) and settled) or hard_deadline do
+      emit(s, if(drained, do: :software_playout_quiet, else: :message_unconfirmed))
 
-        if s.closing != nil do
-          async(s, fn -> s.transport.close(s.session, :finish) end)
-          {:noreply, %{s | announcement: nil}}
-        else
-          s =
-            if not drained do
-              case a.reason do
-                :abuse_warning -> %{s | abuse: max(0, s.abuse - 1)}
-                :scope_redirect -> %{s | off_topic: max(0, s.off_topic - 1)}
-                _ -> s
-              end
-            else
-              s
-            end
-
-          {:noreply, %{s | announcement: nil}}
-        end
-
-      true ->
-        Process.send_after(self(), {:guard_tick, token}, 100)
-        {:noreply, s}
+      finish_announcement(s, a, drained)
+    else
+      Process.send_after(self(), {:guard_tick, token}, 100)
+      {:noreply, s}
     end
   end
 
@@ -251,6 +206,54 @@ defmodule BookingDesk.CallGuard do
     cancel_job(s)
     :ok
   end
+
+  defp schedule_check(s, snapshot, key) do
+    s = cancel_job(s)
+    dialogue = BookingDesk.Dialogue.build(snapshot.transcripts, limit: 6)
+
+    source = %{
+      dialogue: dialogue,
+      latest_user: List.last(Enum.filter(dialogue, &(&1.speaker == :user))).text
+    }
+
+    if byte_size(JSON.encode!(source)) > 6_000 do
+      s = %{s | key: key, verdict: :blocked}
+      {:reply, :blocked, announce(s, :unavailable, true)}
+    else
+      token = make_ref()
+      timer = Process.send_after(self(), {:classify, token}, s.debounce_ms)
+      {:reply, :wait, %{s | key: key, source: source, verdict: nil, timer: {token, timer}}}
+    end
+  end
+
+  defp caption_complete?(%{closing: reason}, text) when not is_nil(reason),
+    do: Regex.match?(~r/\bgoodbye\b/i, text)
+
+  defp caption_complete?(%{announcement: %{reason: :abuse_warning}}, text),
+    do:
+      String.contains?(String.downcase(text), "abusive") and
+        String.contains?(String.downcase(text), "end")
+
+  defp caption_complete?(_, _), do: true
+
+  defp playout_drained?(s, a),
+    do:
+      a.heard and a.caption and s.speech != :speaking and
+        now() - a.last_voice >= s.quiet_ms and now() - a.started >= s.quiet_ms
+
+  defp finish_announcement(%{closing: reason} = s, _a, _drained) when not is_nil(reason) do
+    async(s, fn -> s.transport.close(s.session, :finish) end)
+    {:noreply, %{s | announcement: nil}}
+  end
+
+  defp finish_announcement(s, a, drained) do
+    s = if drained, do: s, else: undo_warning(s, a)
+    {:noreply, %{s | announcement: nil}}
+  end
+
+  defp undo_warning(s, %{reason: :abuse_warning}), do: %{s | abuse: max(0, s.abuse - 1)}
+  defp undo_warning(s, %{reason: :scope_redirect}), do: %{s | off_topic: max(0, s.off_topic - 1)}
+  defp undo_warning(s, _), do: s
 
   defp gate(%{closing: reason}) when reason != nil, do: :blocked
   defp gate(%{verdict: :allowed}), do: :allow
@@ -336,12 +339,7 @@ defmodule BookingDesk.CallGuard do
 
   defp announce(s, reason, close?) do
     # Replacing an unfinished lower-priority message does not make it a delivered warning.
-    s =
-      case s.announcement do
-        %{reason: :abuse_warning} -> %{s | abuse: max(0, s.abuse - 1)}
-        %{reason: :scope_redirect} -> %{s | off_topic: max(0, s.off_topic - 1)}
-        _ -> s
-      end
+    s = undo_warning(s, s.announcement)
 
     emit(s, reason)
     token = make_ref()
@@ -350,16 +348,7 @@ defmodule BookingDesk.CallGuard do
     transport = s.transport
     generation = elem(s.key, 0)
 
-    state_instruction =
-      if s.emergency do
-        "EMERGENCY CLOSING MODE. This is a clinic scheduling call, not a 911 connection. " <>
-          "All new scheduling and patient lookups are blocked for the rest of this call. " <>
-          "Do not collect name/DOB or insurance, offer appointments, or say you are pulling a file, checking records or booking. " <>
-          "No emergency services have been called or connected. Give the emergency instruction, end with Goodbye, " <>
-          "and do not resume ordinary conversation while the application closes the line. "
-      else
-        ""
-      end
+    state_instruction = emergency_instruction(s)
 
     update = %ContextUpdate{
       id: "call-guard-#{System.unique_integer([:positive])}",
@@ -371,49 +360,7 @@ defmodule BookingDesk.CallGuard do
           message(reason)
     }
 
-    async(s, fn ->
-      current = transport.snapshot(session)
-
-      if s.emergency or key(current) == s.key do
-        update = %{update | provider_generation: current.provider_generation}
-        transport.control(session, {:clear_output, :next})
-
-        if s.emergency do
-          # Terminal emergency mode has no further interview or scheduling input.
-          # Policy admission stays blocked even if a provider rejects muting.
-          if transport.control(session, {:input_muted, true}) != :ok do
-            emit(s, :input_mute_rejected)
-          end
-
-          if s.instruction_updates do
-            instruction = %{
-              update
-              | id: update.id <> "-mode",
-                kind: :instruction,
-                content: state_instruction
-            }
-
-            if transport.append_context(session, instruction) != :ok do
-              emit(s, :instruction_rejected)
-            end
-          end
-        end
-
-        case transport.append_context(session, update) do
-          :ok ->
-            :ok
-
-          _ ->
-            :telemetry.execute([:booking_desk, :guard, :stop], %{count: 1}, %{
-              outcome: :message_rejected
-            })
-        end
-      else
-        :telemetry.execute([:booking_desk, :guard, :stop], %{count: 1}, %{
-          outcome: :stale_boundary_action
-        })
-      end
-    end)
+    async(s, fn -> deliver_announcement(s, session, transport, update, state_instruction) end)
 
     Process.send_after(self(), {:guard_tick, token}, 100)
 
@@ -430,6 +377,48 @@ defmodule BookingDesk.CallGuard do
           caption: false
         }
     }
+  end
+
+  defp emergency_instruction(%{emergency: true}) do
+    "EMERGENCY CLOSING MODE. This is a clinic scheduling call, not a 911 connection. " <>
+      "All new scheduling and patient lookups are blocked for the rest of this call. " <>
+      "Do not collect name/DOB or insurance, offer appointments, or say you are pulling a file, checking records or booking. " <>
+      "No emergency services have been called or connected. Give the emergency instruction, end with Goodbye, " <>
+      "and do not resume ordinary conversation while the application closes the line. "
+  end
+
+  defp emergency_instruction(_), do: ""
+
+  defp deliver_announcement(s, session, transport, update, state_instruction) do
+    current = transport.snapshot(session)
+
+    if s.emergency or key(current) == s.key do
+      update = %{update | provider_generation: current.provider_generation}
+      transport.control(session, {:clear_output, :next})
+      prepare_emergency_output(s, session, transport, update, state_instruction)
+
+      case transport.append_context(session, update) do
+        :ok -> :ok
+        _ -> emit(s, :message_rejected)
+      end
+    else
+      emit(s, :stale_boundary_action)
+    end
+  end
+
+  defp prepare_emergency_output(%{emergency: false}, _, _, _, _), do: :ok
+
+  defp prepare_emergency_output(s, session, transport, update, instruction) do
+    # Admission remains blocked even if the provider rejects a control update.
+    if transport.control(session, {:input_muted, true}) != :ok, do: emit(s, :input_mute_rejected)
+    set_emergency_instruction(s, session, transport, update, instruction)
+  end
+
+  defp set_emergency_instruction(%{instruction_updates: false}, _, _, _, _), do: :ok
+
+  defp set_emergency_instruction(s, session, transport, update, instruction) do
+    update = %{update | id: update.id <> "-mode", kind: :instruction, content: instruction}
+    if transport.append_context(session, update) != :ok, do: emit(s, :instruction_rejected)
   end
 
   defp async(_s, function), do: Task.Supervisor.start_child(BookingDesk.GuardTasks, function)

@@ -27,8 +27,8 @@ defmodule BookingDesk.AmbienceTest do
       info: %{}
     }
 
-    {pcm, state} = Ambience.mix(state, <<32000::signed-little-16, -32000::signed-little-16>>)
-    assert pcm == <<32767::signed-little-16, -32768::signed-little-16>>
+    {pcm, state} = Ambience.mix(state, <<32_000::signed-little-16, -32_000::signed-little-16>>)
+    assert pcm == <<32_767::signed-little-16, -32_768::signed-little-16>>
     assert state.clipped_samples == 2
   end
 
@@ -45,7 +45,7 @@ defmodule BookingDesk.AmbienceTest do
       JSON.encode!(%{
         pcm_file: "noise.pcm",
         pcm_sha256: "wrong",
-        sample_rate: 24000,
+        sample_rate: 24_000,
         channels: 1,
         encoding: "pcm_s16le"
       })
@@ -90,7 +90,7 @@ defmodule BookingDesk.AmbienceTest do
     assert ReplayChannel.play(channel, voice, "search") == :ok
     # Read after a few real 10ms ticks so both idle ambience and the caller reach the input queue.
     Process.sleep(35)
-    assert {:ok, frames} = ReplayChannel.read_audio(channel, 48000)
+    assert {:ok, frames} = ReplayChannel.read_audio(channel, 48_000)
     values = for frame <- frames, <<sample::signed-little-16 <- frame.data>>, do: sample
     assert 600 in values
     assert 100 in values

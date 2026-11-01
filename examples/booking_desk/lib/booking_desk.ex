@@ -1,4 +1,5 @@
 defmodule BookingDesk do
+  alias Parlora.Provider.OutputBuffer
   @moduledoc "Fictional clinic scheduling through Parlora, JEV and deterministic Jido actions."
   def start(channel, opts \\ []) do
     provider = Keyword.get(opts, :provider, System.get_env("PARLORA_PROVIDER", "openai"))
@@ -52,7 +53,7 @@ defmodule BookingDesk do
     do:
       Keyword.merge(
         limits("default"),
-        Parlora.Provider.OutputBuffer.burst_limits(%Parlora.AudioFormat{}, 20_000)
+        OutputBuffer.burst_limits(%Parlora.AudioFormat{}, 20_000)
       )
 
   def limits(_), do: [job_timeout_ms: 35_000, policy_timeout_ms: 5_000]

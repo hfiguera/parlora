@@ -17,15 +17,18 @@ defmodule BookingDesk.Readback do
         input: %{operation: "propose", patient: ^patient, revision: revision, slot: slot},
         request_ids: [id | _]
       } ->
-        case BookingDesk.Store.readback_proposal(patient, id, revision, store) do
-          %{slot: ^slot} = proposal ->
-            if proposal.lookup_request ==
-                 BookingDesk.Policy.identity(snapshot, store).lookup_request,
-               do: proposal
+        verified_proposal(snapshot, store, patient, id, revision, slot)
 
-          _ ->
-            nil
-        end
+      _ ->
+        nil
+    end
+  end
+
+  defp verified_proposal(snapshot, store, patient, id, revision, slot) do
+    case BookingDesk.Store.readback_proposal(patient, id, revision, store) do
+      %{slot: ^slot} = proposal ->
+        if proposal.lookup_request == BookingDesk.Policy.identity(snapshot, store).lookup_request,
+          do: proposal
 
       _ ->
         nil
@@ -53,29 +56,33 @@ defmodule BookingDesk.Readback do
       key = :crypto.hash(:sha256, :erlang.term_to_binary(snapshot))
       s = if s.key == key, do: s, else: %{cancel(s) | key: key, accepted: false}
 
-      cond do
-        s.accepted ->
-          {:reply, {:ready, evidence(snapshot)}, s}
-
-        s.job != nil or MapSet.member?(s.attempted, key) or
-            MapSet.size(s.attempted) >= s.max_evaluations ->
-          {:reply, :waiting, s}
-
-        true ->
-          input = judgment_state(snapshot)
-          judge = s.judge
-          task = Task.Supervisor.async_nolink(BookingDesk.ReadbackTasks, fn -> judge.(input) end)
-          timer = Process.send_after(self(), {:deadline, task.ref}, s.timeout_ms)
-
-          {:reply, :waiting,
-           %{
-             s
-             | attempted: MapSet.put(s.attempted, key),
-               job: %{task: task, timer: timer, started: System.monotonic_time(:microsecond)}
-           }}
-      end
+      check_eligible(s, key, snapshot)
     else
       {:reply, :waiting, %{cancel(s) | key: nil, accepted: false}}
+    end
+  end
+
+  defp check_eligible(s, key, snapshot) do
+    cond do
+      s.accepted ->
+        {:reply, {:ready, evidence(snapshot)}, s}
+
+      s.job != nil or MapSet.member?(s.attempted, key) or
+          MapSet.size(s.attempted) >= s.max_evaluations ->
+        {:reply, :waiting, s}
+
+      true ->
+        input = judgment_state(snapshot)
+        judge = s.judge
+        task = Task.Supervisor.async_nolink(BookingDesk.ReadbackTasks, fn -> judge.(input) end)
+        timer = Process.send_after(self(), {:deadline, task.ref}, s.timeout_ms)
+
+        {:reply, :waiting,
+         %{
+           s
+           | attempted: MapSet.put(s.attempted, key),
+             job: %{task: task, timer: timer, started: System.monotonic_time(:microsecond)}
+         }}
     end
   end
 
@@ -224,16 +231,17 @@ defmodule BookingDesk.Readback do
     required = Map.put(expected, :permission, "approval") |> Map.delete(:operation)
 
     if Enum.all?(required, fn {key, choice} ->
-         case answers[to_string(key)] do
-           %{choice: ^choice, probabilities: probabilities} when is_map(probabilities) ->
-             probability = probabilities[choice]
-             is_number(probability) and probability >= 0.85 and probability <= 1
-
-           _ ->
-             false
-         end
+         matches_answer?(answers[to_string(key)], choice)
        end), do: {:ok, :ready}, else: {:error, :uncertain}
   end
+
+  defp matches_answer?(%{choice: choice, probabilities: probabilities}, choice)
+       when is_map(probabilities) do
+    probability = probabilities[choice]
+    is_number(probability) and probability >= 0.85 and probability <= 1
+  end
+
+  defp matches_answer?(_, _), do: false
 
   defp observe(job, outcome) do
     :telemetry.execute(

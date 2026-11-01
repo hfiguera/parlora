@@ -1,6 +1,6 @@
 defmodule BookingDesk.RemindersTest do
   use ExUnit.Case, async: false
-  alias BookingDesk.{Store, Reminders, Phone}
+  alias BookingDesk.{Phone, Reminders, Store}
 
   setup do
     store = start_supervised!({Store, path: ":memory:", name: :reminder_test_store})

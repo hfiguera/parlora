@@ -17,6 +17,24 @@ defmodule BookingDesk.DialogueTest do
     |> Dialogue.build()
   end
 
+  test "a smaller history limit keeps the newest turns in conversational order" do
+    transcripts =
+      for order <- 1..13 do
+        %{
+          speaker: if(rem(order, 2) == 1, do: :user, else: :assistant),
+          delta: "turn #{order}",
+          arrival_order: order
+        }
+      end
+      |> Enum.reverse()
+
+    assert Dialogue.build(transcripts, limit: 6) |> Enum.map(& &1.text) ==
+             Enum.map(8..13, &"turn #{&1}")
+
+    assert Dialogue.build(transcripts) |> Enum.map(& &1.text) ==
+             Enum.map(4..13, &"turn #{&1}")
+  end
+
   test "overlapping fragments preserve both speakers' words and earlier context" do
     assert build([
              {:assistant, "What can I help with?", 0, 200, 0},

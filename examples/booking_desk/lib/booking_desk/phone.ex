@@ -14,8 +14,6 @@ defmodule BookingDesk.Phone do
   end
 
   def extract(state, opts \\ []) do
-    generate = Keyword.get(opts, :generate, &ReqLLM.generate_object/4)
-
     messages = [
       %{
         role: :system,
@@ -35,21 +33,8 @@ defmodule BookingDesk.Phone do
       %{role: :user, content: JSON.encode!(Map.take(state, [:dialogue, :latest_user]))}
     ]
 
-    case generate.(Application.fetch_env!(:booking_desk, :identity_model), messages, schema(),
-           reasoning_effort: :none,
-           max_completion_tokens: 256,
-           receive_timeout: 4_000,
-           total_timeout: 4_000,
-           output_validation: :strict,
-           openai_structured_output_mode: :json_schema,
-           req_http_options: [retry: false],
-           provider_options: [openai_json_schema_strict: true, store: false]
-         ) do
-      {:ok, %ReqLLM.Response{finish_reason: :stop} = response} ->
-        validate(ReqLLM.Response.object(response), state.latest_user)
-
-      _ ->
-        {:error, :unavailable}
+    with {:ok, object} <- BookingDesk.StructuredExtraction.request(messages, schema(), opts) do
+      validate(object, state.latest_user)
     end
   rescue
     _ -> {:error, :unavailable}

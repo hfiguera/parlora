@@ -1,4 +1,6 @@
 defmodule BookingDesk.Identity.Extractor do
+  alias BookingDesk.Identity.LLM
+
   @moduledoc "Debounced, bounded extraction outside the session/audio loop; stale caller revisions are inert."
   use GenServer
 
@@ -14,7 +16,7 @@ defmodule BookingDesk.Identity.Extractor do
      %{
        entries: %{},
        field: Keyword.get(opts, :field, :identity),
-       evaluator: Keyword.get(opts, :evaluator, &BookingDesk.Identity.LLM.extract/1),
+       evaluator: Keyword.get(opts, :evaluator, &LLM.extract/1),
        debounce_ms: Keyword.get(opts, :debounce_ms, 600),
        timeout_ms: Keyword.get(opts, :timeout_ms, 4_500),
        max_evaluations: Keyword.get(opts, :max_evaluations, 12)
@@ -25,17 +27,19 @@ defmodule BookingDesk.Identity.Extractor do
     do:
       Map.merge(status, %{state: %{requests: map_size(status.state.entries)}, message: :redacted})
 
-  def handle_call({:check, state}, _from, s) do
-    case state do
-      %{interpretation_binding: %{session_id: session, provider_generation: generation}} ->
-        if Enum.any?(s.entries, fn {{id, gen}, _} -> id == session and gen > generation end),
-          do: {:reply, {:error, :stale}, s},
-          else: check_current(state, s)
-
-      _ ->
-        {:reply, {:error, :invalid_extraction}, s}
-    end
+  def handle_call(
+        {:check,
+         %{interpretation_binding: %{session_id: session, provider_generation: generation}} =
+           state},
+        _from,
+        s
+      ) do
+    if Enum.any?(s.entries, fn {{id, gen}, _} -> id == session and gen > generation end),
+      do: {:reply, {:error, :stale}, s},
+      else: check_current(state, s)
   end
+
+  def handle_call({:check, _}, _from, s), do: {:reply, {:error, :invalid_extraction}, s}
 
   defp check_current(state, s) do
     case input(state) do

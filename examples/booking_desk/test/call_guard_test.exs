@@ -305,8 +305,8 @@ defmodule BookingDesk.CallGuardTest do
     {g, _} = start(fn _ -> {:ok, :allowed} end, audio_observer: outer)
     observer = CallGuard.observer(g)
     :atomics.add(observer.credits, 1, 1)
-    send(g, {:parlora_audio, :input, 12345, <<1, 0, 2, 0>>})
-    assert_receive {:parlora_audio, :input, 12345, <<1, 0, 2, 0>>}
+    send(g, {:parlora_audio, :input, 12_345, <<1, 0, 2, 0>>})
+    assert_receive {:parlora_audio, :input, 12_345, <<1, 0, 2, 0>>}
     :atomics.sub(outer.credits, 1, 1)
     assert :atomics.get(observer.credits, 1) == 0
   end

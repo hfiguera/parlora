@@ -75,6 +75,13 @@ defmodule BookingDesk.CallGuard.Classifier do
       not confident?(emergency, "no", 0.80) ->
         {:error, :uncertain}
 
+      true ->
+        decode_conduct(conduct)
+    end
+  end
+
+  defp decode_conduct(conduct) do
+    cond do
       confident?(conduct, "allowed", 0.85) ->
         {:ok, :allowed}
 

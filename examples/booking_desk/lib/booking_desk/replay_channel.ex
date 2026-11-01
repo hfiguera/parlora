@@ -1,4 +1,5 @@
 defmodule BookingDesk.ReplayChannel do
+  alias Parlora.Channel.Capabilities
   @moduledoc "Paced caller PCM and software playout; no microphone or physical device is implied."
   use GenServer
   use Parlora.AdapterClient
@@ -154,7 +155,7 @@ defmodule BookingDesk.ReplayChannel do
     {:reply, :ok, %{s | closed: true}}
   end
 
-  def capabilities, do: Parlora.Channel.Capabilities.buffered_pcm()
+  def capabilities, do: Capabilities.buffered_pcm()
 
   defp audible?(pcm) do
     for <<sample::signed-little-16 <- pcm>>, reduce: false do

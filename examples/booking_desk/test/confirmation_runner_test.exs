@@ -64,7 +64,7 @@ defmodule BookingDesk.ConfirmationRunnerTest do
     s = %{
       mode: :replay,
       stage: :progress,
-      stage_at: now - 10000,
+      stage_at: now - 10_000,
       stage_due: 0,
       speech: :idle,
       last_audio_at: now - 2000,
@@ -118,7 +118,7 @@ defmodule BookingDesk.ConfirmationRunnerTest do
     s = %{
       mode: :replay,
       stage: :identity,
-      stage_at: now - 10000,
+      stage_at: now - 10_000,
       stage_due: 0,
       speech: :idle,
       last_audio_at: now - 2000,

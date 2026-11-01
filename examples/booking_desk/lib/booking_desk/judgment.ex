@@ -19,24 +19,12 @@ defmodule BookingDesk.Judgment do
         evaluator = Keyword.get(opts, :evaluator, &evaluate/1)
         result = evaluator.(Map.delete(state, :interpretation_binding))
 
+        {outcome, reason} = observation(result)
+
         :telemetry.execute(
           [:booking_desk, :judgment, :stop],
           %{duration_us: System.monotonic_time(:microsecond) - started},
-          %{
-            outcome:
-              case result do
-                {:ok, _} -> :ok
-                {:incomplete, _, _} -> :incomplete
-                _ -> :uncertain
-              end,
-            reason:
-              case result do
-                {:ok, _} -> :accepted
-                {:incomplete, _, _} -> :missing_fields
-                {:error, :unavailable} -> :unavailable
-                _ -> :low_confidence
-              end
-          }
+          %{outcome: outcome, reason: reason}
         )
 
         # A low-confidence answer is still the answer for this exact caller and
@@ -49,6 +37,11 @@ defmodule BookingDesk.Judgment do
         result
     end
   end
+
+  defp observation({:ok, _}), do: {:ok, :accepted}
+  defp observation({:incomplete, _, _}), do: {:incomplete, :missing_fields}
+  defp observation({:error, :unavailable}), do: {:uncertain, :unavailable}
+  defp observation(_), do: {:uncertain, :low_confidence}
 
   def evaluate(state) do
     if Process.whereis(BookingDesk.TypeSafe) do

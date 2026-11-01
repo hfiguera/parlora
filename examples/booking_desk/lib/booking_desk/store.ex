@@ -286,49 +286,7 @@ defmodule BookingDesk.Store do
         failure("Ask for the insurance company or plan name. No insurance details were changed.")
 
       true ->
-        changed = response in ["changed", "updated"]
-        next_revision = revision + if(changed, do: 1, else: 0)
-        next_carrier = if response == "updated", do: carrier, else: current.carrier
-        needs_update = response == "changed"
-
-        if changed do
-          query(
-            db,
-            "UPDATE patients SET insurance_carrier=?,insurance_revision=?,insurance_needs_update=? WHERE id=?",
-            [next_carrier, next_revision, if(needs_update, do: 1, else: 0), input.patient]
-          )
-        end
-
-        query(db, "INSERT OR REPLACE INTO insurance_reviews VALUES(?,?,?,?,?,?,?)", [
-          input.lookup_request,
-          input.session,
-          input.patient,
-          next_carrier,
-          next_revision,
-          if(needs_update, do: "needs_update", else: "confirmed"),
-          id
-        ])
-
-        insurance = %{
-          carrier: next_carrier,
-          revision: next_revision,
-          needs_update: needs_update,
-          confirmed: not needs_update,
-          insurance_request: if(needs_update, do: nil, else: id)
-        }
-
-        summary =
-          if needs_update,
-            do:
-              "The caller says their insurance changed. Ask which insurance company or plan they have now. Wait before searching appointments.",
-            else:
-              "The caller confirmed their insurance information on file. Continue with their requested appointment; do not ask about insurance again. This does not verify eligibility, network participation or coverage."
-
-        success(summary, %{
-          patient: input.patient,
-          insurance: insurance,
-          eligibility_verified: false
-        })
+        save_insurance_review(db, input, id, current)
     end
   end
 
@@ -365,20 +323,7 @@ defmodule BookingDesk.Store do
         ])
       end
 
-      summary =
-        if slots == [] do
-          "There are no appointments available for the requested clinician preference on #{date_label(date)}."
-        else
-          options =
-            slots
-            |> Enum.group_by(& &1.clinician_name)
-            |> Enum.sort()
-            |> Enum.map_join("; ", fn {name, items} ->
-              "#{name} has #{Enum.map_join(items, " or ", &time_label(&1.id))}"
-            end)
-
-          "Verified availability for #{date_label(date)}: #{options}. Offer the actual returned doctors and times and ask which the caller prefers. No booking has been made."
-        end
+      summary = availability_summary(date, slots)
 
       success(summary, %{date: date, clinician: clinician, slots: slots})
     end
@@ -386,7 +331,7 @@ defmodule BookingDesk.Store do
 
   defp perform_verified(
          db,
-         %{operation: "propose", patient: patient, slot: slot, revision: revision} = input,
+         %{operation: "propose", patient: patient, slot: slot, revision: _revision} = input,
          id
        ) do
     operation = Map.get(input, :change, "book")
@@ -399,16 +344,12 @@ defmodule BookingDesk.Store do
         patient
       ]) != []
 
-    clinician_name =
-      case query(db, "SELECT provider FROM slots WHERE id=?", [slot]) do
-        [[name]] -> name
-        _ -> nil
-      end
+    clinician_name = slot_clinician_name(db, slot)
 
     slot_exists = clinician_name != nil
 
     clinician =
-      Enum.find_value(clinicians(), fn {key, name} -> if name == clinician_name, do: key end)
+      clinician_id(clinician_name)
 
     offered =
       query(
@@ -436,51 +377,11 @@ defmodule BookingDesk.Store do
         )
 
       operation != "cancel" and
-          (not slot_exists or not offered or Map.get(input, :clinician) != clinician) ->
+          not verified_slot?(slot_exists, offered, input, clinician) ->
         failure("That slot is not in the verified calendar.")
 
       true ->
-        query(
-          db,
-          "UPDATE proposals SET status='superseded' WHERE patient=? AND status='pending'",
-          [patient]
-        )
-
-        query(
-          db,
-          "INSERT INTO proposals(id,patient,operation,slot,appointment,revision,status,expires,lookup_request) VALUES(?,?,?,?,?,?,'pending',?,?)",
-          [
-            id,
-            patient,
-            operation,
-            slot,
-            appointment,
-            revision,
-            System.system_time(:second) + 300,
-            input.lookup_request
-          ]
-        )
-
-        description =
-          case operation do
-            "cancel" ->
-              "cancel the existing appointment on Tuesday November 3 at 9 AM with Dr. Patel"
-
-            "reschedule" ->
-              "move the existing November 3 appointment to #{slot_label(slot)} with #{clinician_name}"
-
-            _ ->
-              "book #{slot_label(slot)} with #{clinician_name}"
-          end
-
-        success("Shall I #{description}? Nothing has been changed yet.", %{
-          proposal: id,
-          slot: slot,
-          change: operation,
-          revision: revision,
-          clinician: clinician,
-          clinician_name: clinician_name
-        })
+        save_proposal(db, input, id, operation, appointment, clinician, clinician_name)
     end
   end
 
@@ -589,7 +490,7 @@ defmodule BookingDesk.Store do
         [[clinician_name]] = query(db, "SELECT provider FROM slots WHERE id=?", [slot])
 
         clinician =
-          Enum.find_value(clinicians(), fn {key, name} -> if name == clinician_name, do: key end)
+          clinician_id(clinician_name)
 
         success(
           "#{if operation == "reschedule", do: "Rescheduled", else: "Booked"}: #{slot_label(slot)}, #{clinician_name}. Confirmation #{confirmation}. Ask whether they would like a text reminder 24 hours before the appointment. Wait for their answer; do not assume consent or a mobile number.",
@@ -604,6 +505,142 @@ defmodule BookingDesk.Store do
         )
     end
   end
+
+  defp save_insurance_review(
+         db,
+         %{response: response, insurance_revision: revision, carrier: carrier} = input,
+         id,
+         current
+       ) do
+    changed = response in ["changed", "updated"]
+    next_revision = revision + if(changed, do: 1, else: 0)
+    next_carrier = if response == "updated", do: carrier, else: current.carrier
+    needs_update = response == "changed"
+
+    if changed do
+      query(
+        db,
+        "UPDATE patients SET insurance_carrier=?,insurance_revision=?,insurance_needs_update=? WHERE id=?",
+        [next_carrier, next_revision, if(needs_update, do: 1, else: 0), input.patient]
+      )
+    end
+
+    query(db, "INSERT OR REPLACE INTO insurance_reviews VALUES(?,?,?,?,?,?,?)", [
+      input.lookup_request,
+      input.session,
+      input.patient,
+      next_carrier,
+      next_revision,
+      if(needs_update, do: "needs_update", else: "confirmed"),
+      id
+    ])
+
+    insurance = %{
+      carrier: next_carrier,
+      revision: next_revision,
+      needs_update: needs_update,
+      confirmed: not needs_update,
+      insurance_request: if(needs_update, do: nil, else: id)
+    }
+
+    summary =
+      if needs_update,
+        do:
+          "The caller says their insurance changed. Ask which insurance company or plan they have now. Wait before searching appointments.",
+        else:
+          "The caller confirmed their insurance information on file. Continue with their requested appointment; do not ask about insurance again. This does not verify eligibility, network participation or coverage."
+
+    success(summary, %{
+      patient: input.patient,
+      insurance: insurance,
+      eligibility_verified: false
+    })
+  end
+
+  defp availability_summary(date, slots) do
+    if slots == [] do
+      "There are no appointments available for the requested clinician preference on #{date_label(date)}."
+    else
+      options =
+        slots
+        |> Enum.group_by(& &1.clinician_name)
+        |> Enum.sort()
+        |> Enum.map_join("; ", fn {name, items} ->
+          "#{name} has #{Enum.map_join(items, " or ", &time_label(&1.id))}"
+        end)
+
+      "Verified availability for #{date_label(date)}: #{options}. Offer the actual returned doctors and times and ask which the caller prefers. No booking has been made."
+    end
+  end
+
+  defp slot_clinician_name(db, slot) do
+    case query(db, "SELECT provider FROM slots WHERE id=?", [slot]) do
+      [[name]] -> name
+      _ -> nil
+    end
+  end
+
+  defp clinician_id(name) do
+    Enum.find_value(clinicians(), fn
+      {key, ^name} -> key
+      _ -> nil
+    end)
+  end
+
+  defp save_proposal(
+         db,
+         %{patient: patient, slot: slot, revision: revision} = input,
+         id,
+         operation,
+         appointment,
+         clinician,
+         clinician_name
+       ) do
+    query(
+      db,
+      "UPDATE proposals SET status='superseded' WHERE patient=? AND status='pending'",
+      [patient]
+    )
+
+    query(
+      db,
+      "INSERT INTO proposals(id,patient,operation,slot,appointment,revision,status,expires,lookup_request) VALUES(?,?,?,?,?,?,'pending',?,?)",
+      [
+        id,
+        patient,
+        operation,
+        slot,
+        appointment,
+        revision,
+        System.system_time(:second) + 300,
+        input.lookup_request
+      ]
+    )
+
+    description =
+      case operation do
+        "cancel" ->
+          "cancel the existing appointment on Tuesday November 3 at 9 AM with Dr. Patel"
+
+        "reschedule" ->
+          "move the existing November 3 appointment to #{slot_label(slot)} with #{clinician_name}"
+
+        _ ->
+          "book #{slot_label(slot)} with #{clinician_name}"
+      end
+
+    success("Shall I #{description}? Nothing has been changed yet.", %{
+      proposal: id,
+      slot: slot,
+      change: operation,
+      revision: revision,
+      clinician: clinician,
+      clinician_name: clinician_name
+    })
+  end
+
+  defp verified_slot?(exists, offered, input, clinician),
+    do: exists and offered and Map.get(input, :clinician) == clinician
 
   defp patient_insurance(db, patient) do
     case query(

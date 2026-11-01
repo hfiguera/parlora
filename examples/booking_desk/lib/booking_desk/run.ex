@@ -29,15 +29,7 @@ defmodule BookingDesk.Run do
     {:ok, readback} = BookingDesk.Readback.start_link()
     Process.send_after(self(), :deadline, 210_000)
 
-    if mode == :microphone do
-      IO.puts("Demo records: Jamie Rivera — March 12, 1990; Alex Morgan — July 24, 1985.")
-      owner = self()
-
-      spawn(fn ->
-        IO.gets("Recording enabled. Use headphones. Press Enter to stop.\n")
-        send(owner, :stop)
-      end)
-    end
+    start_microphone(mode)
 
     Process.send_after(self(), :poll, 200)
 
@@ -89,6 +81,18 @@ defmodule BookingDesk.Run do
       if Process.alive?(session), do: Parlora.close(session)
     end
   end
+
+  defp start_microphone(:microphone) do
+    IO.puts("Demo records: Jamie Rivera — March 12, 1990; Alex Morgan — July 24, 1985.")
+    owner = self()
+
+    spawn(fn ->
+      IO.gets("Recording enabled. Use headphones. Press Enter to stop.\n")
+      send(owner, :stop)
+    end)
+  end
+
+  defp start_microphone(_), do: :ok
 
   defp loop(s) do
     receive do
@@ -191,15 +195,15 @@ defmodule BookingDesk.Run do
          request_id: id,
          payload: %{facts: facts}
        }) do
-    insurance = Map.get(facts, :insurance) || Map.get(facts, "insurance")
+    insurance = fact(facts, :insurance)
 
     s =
       if insurance && s.insurance == nil do
         %{
           s
           | insurance: %{
-              carrier: Map.get(insurance, :carrier) || Map.get(insurance, "carrier"),
-              revision: Map.get(insurance, :revision) || Map.get(insurance, "revision")
+              carrier: fact(insurance, :carrier),
+              revision: fact(insurance, :revision)
             },
             identity_request: id
         }
@@ -207,13 +211,13 @@ defmodule BookingDesk.Run do
         s
       end
 
-    reminder = Map.get(facts, :reminder) || Map.get(facts, "reminder")
+    reminder = fact(facts, :reminder)
     s = if reminder, do: %{s | reminder: reminder}, else: s
 
     if id == s.booking_request do
       %{
         s
-        | expected_confirmation: Map.get(facts, :confirmation) || Map.get(facts, "confirmation")
+        | expected_confirmation: fact(facts, :confirmation)
       }
     else
       s
@@ -226,15 +230,12 @@ defmodule BookingDesk.Run do
     combined = s.text <> text
 
     pending =
-      if s.stage == :preparation do
+      s.stage == :preparation and
         Parlora.snapshot(s.session).tasks
         |> Enum.any?(fn {_, task} ->
           task.status == :submitted and task.input.operation == "availability" and
             task.input.date == "2026-11-04"
         end)
-      else
-        false
-      end
 
     %{
       s
@@ -265,6 +266,8 @@ defmodule BookingDesk.Run do
 
   defp event(s, %{source: :session, type: :closed}), do: %{s | stage: :done}
   defp event(s, _), do: s
+  defp fact(facts, key), do: Map.get(facts, key) || Map.get(facts, Atom.to_string(key))
+
   @doc false
   def advance(%{mode: :microphone} = s), do: s
 
@@ -275,66 +278,107 @@ defmodule BookingDesk.Run do
       age >= s.stage_due && s.speech != :speaking && age > 2_000 &&
         System.monotonic_time(:millisecond) - s.last_audio_at > 1_000
 
-    cond do
-      s.stage == :greeting ->
-        advance_greeting(s)
+    advance_stage(s, settled, age)
+  end
 
-      s.stage == :search && settled && BookingDesk.Identity.requested?(s.text) ->
-        play(s, "identity", %{
-          transcript_sha256: :crypto.hash(:sha256, s.text) |> Base.encode16(case: :lower)
-        })
+  defp advance_stage(%{stage: :greeting} = s, _settled, _age) do
+    advance_greeting(s)
+  end
 
-      s.stage == :identity && s.insurance != nil && settled &&
-        BookingDesk.Insurance.requested?(s.text, s.insurance.carrier) &&
-        s.channel != nil && ReplayChannel.output_drained?(s.channel) ->
-        play(s, "insurance", %{
-          transcript_sha256: :crypto.hash(:sha256, s.text) |> Base.encode16(case: :lower),
-          carrier: s.insurance.carrier,
-          insurance_revision: s.insurance.revision,
-          lookup_request: s.identity_request
-        })
-
-      s.stage == :preparation && settled &&
-          Regex.match?(~r/bring|insurance|identification|photo|early/i, s.text) ->
-        play(s, "correction")
-
-      s.stage == :correction && settled &&
-          Regex.match?(~r/10.?15|ten.?fifteen|two|2.?00|available|openings/i, s.text) ->
-        play(s, "choose")
-
-      s.stage == :choose ->
-        advance_readback(s, settled)
-
-      s.stage in [:confirm, :progress] && settled && confirmation_ready?(s) && booked?() &&
-        s.booking_result_at != nil && s.last_audio_at > s.booking_result_at &&
-          reminder_offer?(s.text) ->
-        play(s, "reminder", %{booking_request: s.booking_request, output_drained: true})
-
-      s.stage == :reminder && settled && s.reminder != nil &&
-        Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "verify_existing" &&
-        BookingDesk.Reminders.readback?(
-          s.text,
-          Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four))
-        ) &&
-        s.channel != nil && ReplayChannel.output_drained?(s.channel) ->
-        play(s, "phone_confirm", %{
-          last_four: Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four)),
-          output_drained: true
-        })
-
-      s.stage == :phone_confirm && settled && s.reminder != nil &&
-        Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "scheduled" &&
-        Regex.match?(~r/reminder|text/i, s.text) && Regex.match?(~r/scheduled|set|send/i, s.text) &&
-        s.channel != nil && ReplayChannel.output_drained?(s.channel) ->
-        play(s, "goodbye")
-
-      s.stage == :goodbye && settled && age > s.stage_due + 3_000 ->
-        %{s | stage: :done}
-
-      true ->
-        s
+  defp advance_stage(%{stage: :search} = s, settled, _age) do
+    if settled && BookingDesk.Identity.requested?(s.text) do
+      play(s, "identity", %{
+        transcript_sha256: :crypto.hash(:sha256, s.text) |> Base.encode16(case: :lower)
+      })
+    else
+      s
     end
   end
+
+  defp advance_stage(%{stage: :identity} = s, settled, _age) do
+    if s.insurance != nil && settled &&
+         BookingDesk.Insurance.requested?(s.text, s.insurance.carrier) &&
+         s.channel != nil && ReplayChannel.output_drained?(s.channel) do
+      play(s, "insurance", %{
+        transcript_sha256: :crypto.hash(:sha256, s.text) |> Base.encode16(case: :lower),
+        carrier: s.insurance.carrier,
+        insurance_revision: s.insurance.revision,
+        lookup_request: s.identity_request
+      })
+    else
+      s
+    end
+  end
+
+  defp advance_stage(%{stage: :preparation} = s, settled, _age) do
+    if settled &&
+         Regex.match?(~r/bring|insurance|identification|photo|early/i, s.text) do
+      play(s, "correction")
+    else
+      s
+    end
+  end
+
+  defp advance_stage(%{stage: :correction} = s, settled, _age) do
+    if settled &&
+         Regex.match?(~r/10.?15|ten.?fifteen|two|2.?00|available|openings/i, s.text) do
+      play(s, "choose")
+    else
+      s
+    end
+  end
+
+  defp advance_stage(%{stage: :choose} = s, settled, _age) do
+    advance_readback(s, settled)
+  end
+
+  defp advance_stage(%{stage: stage} = s, settled, _age) when stage in [:confirm, :progress] do
+    if settled && confirmation_ready?(s) && booked?() &&
+         s.booking_result_at != nil && s.last_audio_at > s.booking_result_at &&
+         reminder_offer?(s.text) do
+      play(s, "reminder", %{booking_request: s.booking_request, output_drained: true})
+    else
+      s
+    end
+  end
+
+  defp advance_stage(%{stage: :reminder} = s, settled, _age) do
+    if settled && s.reminder != nil &&
+         Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "verify_existing" &&
+         BookingDesk.Reminders.readback?(
+           s.text,
+           Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four))
+         ) &&
+         s.channel != nil && ReplayChannel.output_drained?(s.channel) do
+      play(s, "phone_confirm", %{
+        last_four: Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four)),
+        output_drained: true
+      })
+    else
+      s
+    end
+  end
+
+  defp advance_stage(%{stage: :phone_confirm} = s, settled, _age) do
+    if settled && s.reminder != nil &&
+         Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "scheduled" &&
+         Regex.match?(~r/reminder|text/i, s.text) && Regex.match?(~r/scheduled|set|send/i, s.text) &&
+         s.channel != nil && ReplayChannel.output_drained?(s.channel) do
+      play(s, "goodbye")
+    else
+      s
+    end
+  end
+
+  defp advance_stage(%{stage: :goodbye} = s, settled, age) do
+    if settled && age > s.stage_due + 3_000 do
+      %{s | stage: :done}
+    else
+      s
+    end
+  end
+
+  defp advance_stage(s, _settled, _age), do: s
 
   @doc false
   def reminder_offer?(text),
@@ -352,12 +396,7 @@ defmodule BookingDesk.Run do
   defp play(s, "identity", nil), do: s
 
   defp play(s, id, milestone) do
-    clip =
-      case {id, Map.get(s, :any_doctor, false)} do
-        {"search", true} -> "search_any"
-        {"choose", true} -> "choose_patel"
-        _ -> id
-      end
+    clip = caller_clip(s, id)
 
     pcm = File.read!(Path.join(s.clips, clip <> ".pcm"))
 
@@ -365,59 +404,75 @@ defmodule BookingDesk.Run do
       :ok ->
         BookingDesk.Readback.check(s.readback, %{settled: false})
 
-        if id == "identity",
-          do: Recorder.mark(s.recorder, "assistant:identity_requested", milestone)
-
-        if id == "insurance",
-          do: Recorder.mark(s.recorder, "assistant:insurance_requested", milestone)
-
-        if id in ["reminder", "phone_confirm"],
-          do: Recorder.mark(s.recorder, "assistant:" <> id <> "_requested", milestone)
-
-        if id == "confirm",
-          do: Recorder.mark(s.recorder, "assistant:proposal_readback", milestone)
-
-        if id == "search" and s.stage == :greeting,
-          do: Recorder.mark(s.recorder, "assistant:greeting_completed", milestone)
+        mark_milestone(s, id, milestone)
 
         Recorder.mark(s.recorder, "caller:" <> id, %{duration_ms: byte_size(pcm) / 48, clip: clip})
 
         IO.puts("Caller: #{id}")
         # IDs are a fixed application allowlist, never atoms created from provider text.
-        stage =
-          %{
-            "search" => :search,
-            "identity" => :identity,
-            "insurance" => :insurance,
-            "preparation" => :preparation,
-            "correction" => :correction,
-            "choose" => :choose,
-            "confirm" => :confirm,
-            "progress" => :progress,
-            "reminder" => :reminder,
-            "phone_confirm" => :phone_confirm,
-            "goodbye" => :goodbye
-          }[id]
-
-        %{
-          s
-          | stage: stage,
-            text: "",
-            readback_revision: s.readback_revision + 1,
-            confirmation_readback: s.confirmation_readback or id == "confirm",
-            greeting_completed: s.greeting_completed or (id == "search" and s.stage == :greeting),
-            stage_at: System.monotonic_time(:millisecond),
-            stage_due: trunc(byte_size(pcm) / 48) + 1_500
-        }
+        played_state(s, id, pcm)
 
       {:error, :busy} ->
-        # Approval retries must pass the fresh proposal/transcript gate again.
-        if id not in ["confirm", "identity", "insurance", "reminder", "phone_confirm"] and
-             not (id == "search" and s.stage == :greeting),
-           do: Process.send_after(self(), {:play, id}, 100)
-
-        s
+        retry_play(s, id)
     end
+  end
+
+  defp caller_clip(%{any_doctor: true}, "search"), do: "search_any"
+  defp caller_clip(%{any_doctor: true}, "choose"), do: "choose_patel"
+  defp caller_clip(_, id), do: id
+
+  defp mark_milestone(s, "identity", milestone),
+    do: Recorder.mark(s.recorder, "assistant:identity_requested", milestone)
+
+  defp mark_milestone(s, "insurance", milestone),
+    do: Recorder.mark(s.recorder, "assistant:insurance_requested", milestone)
+
+  defp mark_milestone(s, id, milestone) when id in ["reminder", "phone_confirm"],
+    do: Recorder.mark(s.recorder, "assistant:" <> id <> "_requested", milestone)
+
+  defp mark_milestone(s, "confirm", milestone),
+    do: Recorder.mark(s.recorder, "assistant:proposal_readback", milestone)
+
+  defp mark_milestone(%{stage: :greeting} = s, "search", milestone),
+    do: Recorder.mark(s.recorder, "assistant:greeting_completed", milestone)
+
+  defp mark_milestone(_, _, _), do: :ok
+
+  defp played_state(s, id, pcm) do
+    stage =
+      %{
+        "search" => :search,
+        "identity" => :identity,
+        "insurance" => :insurance,
+        "preparation" => :preparation,
+        "correction" => :correction,
+        "choose" => :choose,
+        "confirm" => :confirm,
+        "progress" => :progress,
+        "reminder" => :reminder,
+        "phone_confirm" => :phone_confirm,
+        "goodbye" => :goodbye
+      }[id]
+
+    %{
+      s
+      | stage: stage,
+        text: "",
+        readback_revision: s.readback_revision + 1,
+        confirmation_readback: s.confirmation_readback or id == "confirm",
+        greeting_completed: s.greeting_completed or (id == "search" and s.stage == :greeting),
+        stage_at: System.monotonic_time(:millisecond),
+        stage_due: trunc(byte_size(pcm) / 48) + 1_500
+    }
+  end
+
+  defp retry_play(s, id) do
+    # Approval retries must pass the fresh proposal/transcript gate again.
+    if id not in ["confirm", "identity", "insurance", "reminder", "phone_confirm"] and
+         not (id == "search" and s.stage == :greeting),
+       do: Process.send_after(self(), {:play, id}, 100)
+
+    s
   end
 
   defp advance_greeting(s) do
@@ -472,51 +527,7 @@ defmodule BookingDesk.Run do
     appointments = BookingDesk.Store.snapshot()
     submissions = Enum.reverse(s.submitted)
 
-    checks = %{
-      conversation_during_lookup: s.prep_during_work,
-      announced_verified_confirmation: s.announced_confirmation,
-      readback_before_confirmation: s.confirmation_readback,
-      booked_exact_slot:
-        Enum.count(appointments, fn [id, _, slot, status, _] ->
-          id != "appt_existing" &&
-            slot ==
-              BookingDesk.Store.slot_id(
-                "2026-11-05",
-                "10:15",
-                if(s.any_doctor, do: "patel", else: "lee")
-              ) && status == "booked"
-        end) == 1,
-      no_duplicate_availability:
-        Enum.count(submissions, &(&1.operation == "availability" && &1.date == "2026-11-04")) == 1 &&
-          Enum.count(submissions, &(&1.operation == "availability" && &1.date == "2026-11-05")) ==
-            1,
-      single_proposal: Enum.count(submissions, &(&1.operation == "propose")) == 1,
-      single_booking_submission: Enum.count(submissions, &(&1.operation == "confirm")) == 1,
-      correction_revision:
-        Enum.any?(
-          submissions,
-          &(&1.operation == "availability" && Map.get(&1, :date) == "2026-11-05" &&
-              &1.revision > 1)
-        ),
-      stale_result_filtered: s.stale > 0,
-      no_adapter_failure: s.failed == [],
-      simulated_reminder_saved:
-        length(BookingDesk.Store.reminder_jobs()) == 1 &&
-          Enum.all?(BookingDesk.Store.reminder_jobs(), fn [
-                                                            appointment,
-                                                            _,
-                                                            destination,
-                                                            at,
-                                                            status,
-                                                            _
-                                                          ] ->
-            appointment == s.booking_request && destination == "+12025550188" &&
-              at == "2026-11-04T17:15:00Z" && status == "simulated"
-          end),
-      single_reminder_submission:
-        Enum.count(submissions, &(&1.operation == "reminder_confirm")) == 1,
-      scenario_completed: outcome == :completed && s.stage == :done && booked?()
-    }
+    checks = workflow_checks(s, outcome, appointments, submissions)
 
     checks =
       if s.mode == :replay,
@@ -587,16 +598,7 @@ defmodule BookingDesk.Run do
             stale_results: s.stale,
             source_sha256: s.source_sha256,
             library_source_sha256: s.library_source_sha256,
-            caller:
-              if(s.mode == :replay,
-                do:
-                  s.clips
-                  |> Path.join("manifest.json")
-                  |> File.read!()
-                  |> JSON.decode!()
-                  |> Map.take(["model", "voice_id", "voice", "sample_rate", "utterances"]),
-                else: nil
-              ),
+            caller: caller_metadata(s),
             ambience: ambience,
             synthetic_caller: s.mode == :replay
           },
@@ -612,6 +614,16 @@ defmodule BookingDesk.Run do
     IO.puts(JSON.encode!(Map.take(report, fields)))
     report
   end
+
+  defp caller_metadata(%{mode: :replay} = s) do
+    s.clips
+    |> Path.join("manifest.json")
+    |> File.read!()
+    |> JSON.decode!()
+    |> Map.take(["model", "voice_id", "voice", "sample_rate", "utterances"])
+  end
+
+  defp caller_metadata(_), do: nil
 
   defp flush(recorder) do
     receive do
@@ -631,4 +643,66 @@ defmodule BookingDesk.Run do
         "grok" => "grok-voice-3.0",
         "phonic" => "phonic-1"
       }[System.get_env("PARLORA_PROVIDER", "openai")]
+
+  defp check_booked_exact_slot(s, appointments) do
+    Enum.count(appointments, fn [id, _, slot, status, _] ->
+      id != "appt_existing" &&
+        slot ==
+          BookingDesk.Store.slot_id(
+            "2026-11-05",
+            "10:15",
+            if(s.any_doctor, do: "patel", else: "lee")
+          ) && status == "booked"
+    end) == 1
+  end
+
+  defp check_no_duplicate_availability(submissions) do
+    Enum.count(submissions, &(&1.operation == "availability" && &1.date == "2026-11-04")) == 1 &&
+      Enum.count(submissions, &(&1.operation == "availability" && &1.date == "2026-11-05")) ==
+        1
+  end
+
+  defp check_correction_revision(submissions) do
+    Enum.any?(
+      submissions,
+      &(&1.operation == "availability" && Map.get(&1, :date) == "2026-11-05" &&
+          &1.revision > 1)
+    )
+  end
+
+  defp check_scenario_completed(s, outcome) do
+    outcome == :completed && s.stage == :done && booked?()
+  end
+
+  defp workflow_checks(s, outcome, appointments, submissions) do
+    %{
+      conversation_during_lookup: s.prep_during_work,
+      announced_verified_confirmation: s.announced_confirmation,
+      readback_before_confirmation: s.confirmation_readback,
+      booked_exact_slot: check_booked_exact_slot(s, appointments),
+      no_duplicate_availability: check_no_duplicate_availability(submissions),
+      single_proposal: single_operation?(submissions, "propose"),
+      single_booking_submission: single_operation?(submissions, "confirm"),
+      correction_revision: check_correction_revision(submissions),
+      stale_result_filtered: s.stale > 0,
+      no_adapter_failure: s.failed == [],
+      simulated_reminder_saved: reminder_saved?(s),
+      single_reminder_submission: single_operation?(submissions, "reminder_confirm"),
+      scenario_completed: check_scenario_completed(s, outcome)
+    }
+  end
+
+  defp single_operation?(submissions, operation),
+    do: Enum.count(submissions, &(&1.operation == operation)) == 1
+
+  defp reminder_saved?(s) do
+    case BookingDesk.Store.reminder_jobs() do
+      [[appointment, _, destination, at, status, _]] ->
+        appointment == s.booking_request and destination == "+12025550188" and
+          at == "2026-11-04T17:15:00Z" and status == "simulated"
+
+      _ ->
+        false
+    end
+  end
 end
