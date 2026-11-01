@@ -1,0 +1,62 @@
+{
+  "checked_at": "2026-11-01",
+  "scope": "Exact speech models selected by Parlora; local transcript entries and encoded bytes are not provider tokens. Unknown means not established by the consulted official pages, not unlimited.",
+  "providers": [
+    {
+      "provider": "OpenAI",
+      "model": "gpt-live-1",
+      "default_context_tokens": 128000,
+      "engine_replacement_trigger_fraction": 0.9,
+      "replacement_history_tokens_max": 8192,
+      "primary_websocket_duration_seconds": null,
+      "notes": "GPT-Live summarizes older history and replaces its voice engine within the session. The documented 2-hour connected-call limit applies to SIP; do not substitute the older Realtime API's limits for this model or infer a WebSocket duration.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-live-1",
+        "https://developers.openai.com/api/docs/guides/live-conversations#manage-longer-conversations",
+        "https://developers.openai.com/api/docs/guides/voice-sip"
+      ]
+    },
+    {
+      "provider": "Google",
+      "model": "gemini-3.8-live",
+      "input_token_limit": 131072,
+      "output_token_limit": 65536,
+      "audio_only_without_compression_seconds": 900,
+      "audio_video_without_compression_seconds": 120,
+      "approximate_connection_lifetime_seconds": 600,
+      "notes": "The session-management guide describes unlimited duration with context compression and multiple connections via resumption. Parlora already requests compression and resumption; local compaction does not implement or extend remote connection lifetime.",
+      "sources": [
+        "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live",
+        "https://ai.google.dev/gemini-api/docs/live-api/session-management"
+      ]
+    },
+    {
+      "provider": "xAI",
+      "model": "grok-voice-3.0",
+      "context_token_limit": null,
+      "session_duration_seconds": null,
+      "opt_in_resumption_history_inactivity_expiry_seconds": 1800,
+      "notes": "The model and voice API pages do not establish a numeric context window or live-session duration. The 30-minute value is cached resumption-history inactivity expiry, not maximum call duration. Parlora's current adapter does not enable that resumption feature. Grok transcript item IDs, call records and command IDs retain separate local lifetime caps.",
+      "sources": [
+        "https://docs.x.ai/developers/models/grok-voice-3.0",
+        "https://docs.x.ai/developers/model-capabilities/audio/speech-to-speech#session-resumption"
+      ]
+    },
+    {
+      "provider": "Phonic",
+      "model": "phonic-1",
+      "context_token_limit": null,
+      "session_duration_seconds": null,
+      "agent_websocket_inactivity_seconds": {"default": 60, "minimum": 1, "maximum": 300},
+      "agent_silence_end_seconds": {"default": 180, "minimum": 30, "maximum": 600},
+      "sts_connection_requests_per_second_per_organization": 500,
+      "notes": "No token window or maximum conversation duration was established in the consulted model introduction and WebSocket/configuration pages. Agent inactivity settings and organization request-rate limits are distinct from history capacity. Parlora configures no_input_end_conversation_sec to 600; it does not implement the provider's conversation reset API.",
+      "sources": [
+        "https://docs.phonic.ai/docs/get-started/overview",
+        "https://docs.phonic.ai/api-reference/conversations/conversations",
+        "https://docs.phonic.ai/api-reference/agents/create",
+        "https://docs.phonic.ai/docs/platform/rate_limits"
+      ]
+    }
+  ]
+}

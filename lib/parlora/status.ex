@@ -11,6 +11,15 @@ defmodule Parlora.Status do
   replied (`:settled`). These labels do not establish that backend work started;
   `started_at_us` and `:request_started` report that separate observation.
 
+  `retention.transcripts` reports the current transcript window's limits and
+  cumulative drops. `retention.records` reports coordinator identity counts and
+  the lifetime `max_records` budget; counts apply separately, not as a sum. Adapter
+  command logs and provider-specific records enforce their own independent caps
+  and are not included in these coordinator counts. A full command log returns
+  `:backpressure` with `resource: :command_records`, `retention: :session`, its
+  retained count and limit. Records are retained to prevent duplicate execution;
+  transcript compaction does not extend a provider's token or duration limits.
+
   Status omits transcript history, full task inputs and backend results. Retained
   clarification data can contain question text and application-defined input.
   Treat it as application data, not automatically safe public telemetry.
@@ -78,6 +87,19 @@ defmodule Parlora.Status do
           context_acknowledgment?: boolean(),
           observed_at_us: integer(),
           interpretation: interpretation(),
+          retention: %{
+            transcripts: map(),
+            records: %{
+              retention: :session,
+              limit: pos_integer(),
+              jobs: non_neg_integer(),
+              tasks: non_neg_integer(),
+              delegations: non_neg_integer(),
+              cancellations: non_neg_integer(),
+              clarifications: non_neg_integer(),
+              progress_commands: non_neg_integer()
+            }
+          },
           delegations: %{optional(String.t()) => delegation()},
           jobs: %{optional(String.t()) => job()},
           health: Parlora.SessionHealth.t(),

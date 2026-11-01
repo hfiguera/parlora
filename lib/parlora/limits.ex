@@ -1,5 +1,19 @@
 defmodule Parlora.Limits do
-  @moduledoc "Finite per-session bounds. Audio capacities are bytes of the agreed pipeline format."
+  @moduledoc """
+  Finite per-session bounds. Audio capacities are bytes of the agreed pipeline format.
+
+  `max_transcripts` bounds the current snapshot's retained entry count.
+  `max_transcript_bytes` bounds the sum of encoded enriched entry sizes, measured
+  with `:erlang.external_size/1`. Neither represents a provider token window.
+  Default rolling retention compacts older transcripts; `transcript_retention:
+  :close` on the session preserves fail-at-capacity behavior.
+
+  `max_records` remains a lifetime identity budget for jobs, delegations and
+  adapter command logs. Capacity rejection does not evict IDs or reset retry
+  identity. Configure this budget for expected work and persist/reconcile business
+  operations before starting a replacement session. Provider connection, token,
+  context and duration limits are independent of these local settings.
+  """
   alias Parlora.{AudioFormat, Error}
 
   @type t :: %__MODULE__{
@@ -16,6 +30,7 @@ defmodule Parlora.Limits do
           max_subscribers: pos_integer(),
           max_subscriber_queue: pos_integer(),
           max_transcripts: pos_integer(),
+          max_transcript_bytes: pos_integer(),
           startup_timeout_ms: pos_integer(),
           policy_timeout_ms: pos_integer(),
           cancellation_timeout_ms: pos_integer(),
@@ -35,6 +50,7 @@ defmodule Parlora.Limits do
             max_subscribers: 32,
             max_subscriber_queue: 2_048,
             max_transcripts: 8_192,
+            max_transcript_bytes: 1_048_576,
             startup_timeout_ms: 15_000,
             policy_timeout_ms: 5_000,
             cancellation_timeout_ms: 2_000,

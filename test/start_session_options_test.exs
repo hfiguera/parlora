@@ -48,6 +48,16 @@ defmodule Parlora.StartSessionOptionsTest do
     refute_received {:adapter, _role, _pid}
   end
 
+  test "invalid transcript retention is rejected before provider callbacks", %{options: options} do
+    for mode <- [:invalid, nil, true, "rolling", []] do
+      assert {:error, %Error{code: :invalid_argument}} =
+               Parlora.start_session(Keyword.put(options, :transcript_retention, mode))
+    end
+
+    refute_received {:audio_limits, _format}
+    refute_received {:adapter, _role, _pid}
+  end
+
   test "malformed limits are rejected before provider defaults or adapters run", %{
     options: options
   } do

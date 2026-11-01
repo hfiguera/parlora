@@ -3,7 +3,21 @@ defmodule Parlora.ContextSnapshot do
   Immutable context supplied to the application policy, not a persistence format.
 
   Transcript entries are newest-arrival-first. `arrival_order` is a context
-  revision, not a turn identifier; timestamps may overlap. Delegations include
+  revision, not a turn identifier; timestamps may overlap. With the default
+  rolling retention, entries form a recent suffix, not the entire conversation.
+  `transcript_retention` reports retained entries/encoded bytes, cumulative drops,
+  and the latest removed arrival revision. Byte counts use `:erlang.external_size/1`
+  per enriched entry and are not model tokens or process memory measurements.
+  Compaction leaves approximately 25% headroom, preserving at least the newest
+  entry when it fits the full byte budget. An entry larger than that budget fails
+  admission instead of being cut mid-caption. `:close` retention fails at either
+  bound. Session `:transcripts_compacted` events report the same counters.
+
+  Application context and task/delegation identity survive transcript compaction.
+  Historical snapshots held by jobs or the application remain immutable and can
+  retain older entries. This bound covers the current snapshot, not all references
+  to historical snapshots. Provider-managed conversation memory is independent.
+  Delegations include
   both pending and claimed entries. Task request IDs are newest-first and include
   older revisions, not just running work. Inspect `Parlora.status/1` for job state.
 
@@ -78,12 +92,21 @@ defmodule Parlora.ContextSnapshot do
           optional(:clarification) => clarification(),
           optional(:progress) => progress()
         }
+  @type transcript_retention :: %{
+          mode: :rolling | :close,
+          retained: non_neg_integer(),
+          retained_bytes: non_neg_integer(),
+          dropped: non_neg_integer(),
+          dropped_bytes: non_neg_integer(),
+          dropped_through_revision: non_neg_integer() | nil
+        }
   @type t :: %__MODULE__{
           session_id: String.t(),
           provider_generation: non_neg_integer(),
           revision: non_neg_integer(),
           provider_speech: :unknown | :speaking | :idle,
           transcripts: [transcript()],
+          transcript_retention: transcript_retention(),
           application_context: map(),
           pending_delegations: %{optional(String.t()) => delegation()},
           tasks: %{optional(String.t()) => task()}
@@ -94,6 +117,14 @@ defmodule Parlora.ContextSnapshot do
     revision: 0,
     provider_speech: :unknown,
     transcripts: [],
+    transcript_retention: %{
+      mode: :rolling,
+      retained: 0,
+      retained_bytes: 0,
+      dropped: 0,
+      dropped_bytes: 0,
+      dropped_through_revision: nil
+    },
     application_context: %{},
     pending_delegations: %{},
     tasks: %{}

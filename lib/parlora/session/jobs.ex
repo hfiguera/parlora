@@ -1,7 +1,7 @@
 defmodule Parlora.Session.Jobs do
   @moduledoc false
   alias Parlora.{BackendResult, ContextUpdate, Error, ID, Telemetry}
-  alias Parlora.Session.{Commands, Decisions, Progress, State, Uncertainty}
+  alias Parlora.Session.{Commands, Decisions, Progress, Retention, State, Uncertainty}
 
   def cancel(state, id, request_id, reason, from) do
     case state.cancellations[id] do
@@ -100,7 +100,13 @@ defmodule Parlora.Session.Jobs do
     if pending? or map_size(state.cancellations) + pending < state.limits.max_records do
       admit_cancel(state, id, request_id, reason, from)
     else
-      {:reply, Error.tuple(:backpressure, "Cancellation record capacity exhausted"), state}
+      {:reply,
+       Retention.record_limit(
+         state,
+         :cancellations,
+         "Cancellation record capacity exhausted",
+         map_size(state.cancellations)
+       ), state}
     end
   end
 

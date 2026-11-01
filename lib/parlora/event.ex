@@ -195,6 +195,7 @@ defmodule Parlora.Event do
               evidence: :local_observation
             })
           | t(:provider_connection, map())
+          | t(:transcripts_compacted, Parlora.ContextSnapshot.transcript_retention())
           | t(:progress_changed, Parlora.SessionHealth.expectation())
           | t(:playback_observed, playback())
           | t(:audio_discontinuity, discontinuity())
