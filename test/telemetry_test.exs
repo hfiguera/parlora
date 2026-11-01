@@ -435,7 +435,7 @@ defmodule Parlora.TelemetryTest do
     ref = Process.monitor(pid)
     assert :ok = Parlora.close(pid)
     closing = Parlora.status(pid)
-    timer = :sys.get_state(pid).shutdown_timer
+    shutdown = :sys.get_state(pid).startup.telemetry_shutdown
     assert closing.status == :closing
     assert closing.output_recovery.stage == :reconnecting
 
@@ -450,7 +450,7 @@ defmodule Parlora.TelemetryTest do
     after_late = Parlora.status(pid)
     assert after_late.status == :closing
     assert after_late.output_recovery == closing.output_recovery
-    assert :sys.get_state(pid).shutdown_timer == timer
+    assert :sys.get_state(pid).startup.telemetry_shutdown == shutdown
     refute_received {:observation, [:parlora, :recovery, :stop], _, %{session_id: ^id}}
 
     Event.emit(channel_init, :channel, :closed)

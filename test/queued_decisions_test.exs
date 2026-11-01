@@ -334,7 +334,7 @@ defmodule Parlora.QueuedDecisionsTest do
   defp release(session, client, owner) do
     send(owner, :release)
     assert :ok = Task.await(client)
-    eventually(fn -> map_size(:sys.get_state(session).startup.commands.records) == 0 end)
+    eventually(fn -> map_size(:sys.get_state(session).commands.records) == 0 end)
   end
 
   defp boot(provider_options \\ []) do

@@ -13,7 +13,6 @@ defmodule Parlora.Session.State do
     :policy_trigger,
     :output_pipeline,
     :input_pipeline,
-    :shutdown_timer,
     :health,
     :output_recovery,
     status: :starting,
@@ -29,9 +28,9 @@ defmodule Parlora.Session.State do
       owners: %{},
       pipeline_token: nil,
       pending_pipelines: MapSet.new(),
-      cleanup: MapSet.new(),
-      commands: Commands.new()
+      cleanup: MapSet.new()
     },
+    commands: Commands.new(),
     ready: %{},
     monitors: %{},
     subscribers: %{},
@@ -47,6 +46,8 @@ defmodule Parlora.Session.State do
     cancellations: %{},
     closing_adapters: MapSet.new()
   ]
+
+  @type t :: %__MODULE__{}
 
   def new(options) do
     id = Keyword.fetch!(options, :id)
@@ -98,6 +99,13 @@ defmodule Parlora.Session.State do
           %{acc | subscribers: Map.delete(acc.subscribers, pid)}
       end
     end)
+  end
+
+  def update_health(state, health) do
+    if state.health.expectation != health.expectation,
+      do: emit(state, :progress_changed, health.expectation)
+
+    %{state | health: health}
   end
 
   def revise(state, context),
