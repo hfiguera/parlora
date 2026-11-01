@@ -12,6 +12,7 @@ defmodule Parlora.Session do
     Error,
     Event,
     ID,
+    ProcessTree,
     Telemetry
   }
 
@@ -1048,6 +1049,7 @@ defmodule Parlora.Session do
   defp interpret(%{status: :ready, policy_task: nil} = state, trigger) do
     {module, options} = state.policy
     snapshot = state.context
+    tasks = GenServer.whereis(SessionSupervisor.via(state.id, :tasks))
 
     telemetry =
       Telemetry.start(:policy, %{
@@ -1057,8 +1059,11 @@ defmodule Parlora.Session do
 
     task =
       Task.Supervisor.async_nolink(
-        SessionSupervisor.via(state.id, :tasks),
-        fn -> module.interpret(snapshot, trigger, options) end,
+        tasks,
+        fn ->
+          ProcessTree.track(tasks)
+          module.interpret(snapshot, trigger, options)
+        end,
         shutdown: :brutal_kill
       )
 

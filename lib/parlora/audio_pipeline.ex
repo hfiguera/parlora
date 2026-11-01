@@ -1,17 +1,22 @@
 defmodule Parlora.AudioPipeline do
   @moduledoc false
   use GenServer
-  alias Parlora.{Adapter, CommandLog, Error, Event, Pacer}
+  alias Parlora.{Adapter, CommandLog, Error, Event, Pacer, ProcessTree}
   alias Parlora.Session.Health
 
   # Channel clocks consume audio independently. Admit a bounded burst per turn
   # instead of adding a timer between each fragment of an already received packet.
   @transfer_burst_frames 20
 
-  def start_link(options), do: GenServer.start_link(__MODULE__, options)
+  def start_link(options), do: GenServer.start_link(__MODULE__, {:tracked, options})
   def control(pid, id, control), do: Adapter.call(pid, {:control, id, control})
 
   @impl true
+  def init({:tracked, options}) do
+    ProcessTree.track()
+    init(options)
+  end
+
   def init(options) do
     state =
       Map.new(options)

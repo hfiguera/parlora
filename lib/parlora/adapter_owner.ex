@@ -1,7 +1,7 @@
 defmodule Parlora.AdapterOwner do
   @moduledoc false
   use GenServer
-  alias Parlora.Error
+  alias Parlora.{Error, ProcessTree}
 
   # A supervisor must never run application startup code in its own process.
   # Acknowledge this owner first; the adapter remains its linked OTP child.
@@ -44,7 +44,13 @@ defmodule Parlora.AdapterOwner do
     {module, init, options, deadline} = startup.()
     timeout = max(0, div(deadline - System.monotonic_time(:microsecond) + 999, 1_000))
     owner = self()
-    watcher = spawn(fn -> watch(owner, init.event_sink, timeout) end)
+    {watcher, monitor} = spawn_monitor(fn -> watch(owner, init.event_sink, timeout) end)
+
+    receive do
+      {:adapter_tree_ready, ^watcher} -> Process.demonitor(monitor, [:flush])
+      {:DOWN, ^monitor, :process, ^watcher, _reason} -> exit(:adapter_watcher_failed)
+    end
+
     send(caller, {:adapter_watcher, reference, watcher})
 
     {:ok,
@@ -126,45 +132,23 @@ defmodule Parlora.AdapterOwner do
     end
   rescue
     ArgumentError -> :ok
+  catch
+    :error, :exited -> :ok
   end
 
   defp abort_tree(pid) do
-    abort(pid)
-    reap_descendants(pid, %{})
-  end
-
-  # Links disappear when a parent crashes. OTP ancestry survives in a blocked
-  # descendant, including one which cannot process its parent's exit signal.
-  # Freeze each discovered process before another sweep so it cannot spawn a
-  # replacement while cleanup is in progress. Never inspect other dictionary keys.
-  defp reap_descendants(root, frozen) do
-    found =
-      Enum.reduce(Process.list(), frozen, fn pid, acc ->
-        if not Map.has_key?(acc, pid) and descendant?(pid, root) and suspend(pid),
-          do: Map.put(acc, pid, true),
-          else: acc
-      end)
-
-    if map_size(found) == map_size(frozen) do
-      Enum.each(found, fn {pid, _owned} -> abort(pid) end)
-    else
-      reap_descendants(root, found)
-    end
-  end
-
-  defp descendant?(pid, root) do
-    case :erlang.process_info(pid, {:dictionary, :"$ancestors"}) do
-      {{:dictionary, :"$ancestors"}, ancestors} when is_list(ancestors) -> root in ancestors
-      _other -> false
-    end
-  rescue
-    ArgumentError -> false
-  end
-
-  defp suspend(pid) do
     :erlang.suspend_process(pid)
+
+    case ProcessTree.lookup(pid) do
+      nil -> :ok
+      tree -> ProcessTree.stop(tree, pid)
+    end
+
+    abort(pid)
   rescue
-    ArgumentError -> false
+    ArgumentError -> :ok
+  catch
+    :error, :exited -> :ok
   end
 
   defp invoke(callback) do
@@ -231,47 +215,49 @@ defmodule Parlora.AdapterOwner do
   end
 
   defp watch(owner, session, timeout) do
+    tree = ProcessTree.register(owner)
     owner_ref = Process.monitor(owner)
     session_ref = Process.monitor(session)
+    send(owner, {:adapter_tree_ready, self()})
 
     receive do
-      {:started, ^owner, adapter} -> watch_running(owner, adapter, owner_ref, session_ref)
-      :cancel -> abort_tree(owner)
-      {:DOWN, ^owner_ref, :process, ^owner, _reason} -> abort_tree(owner)
-      {:DOWN, ^session_ref, :process, ^session, _reason} -> abort_tree(owner)
+      {:started, ^owner, _adapter} -> watch_running(owner, owner_ref, session_ref, tree)
+      :cancel -> ProcessTree.stop(tree)
+      {:DOWN, ^owner_ref, :process, ^owner, _reason} -> ProcessTree.stop(tree)
+      {:DOWN, ^session_ref, :process, ^session, _reason} -> ProcessTree.stop(tree)
     after
       timeout ->
         send(session, {:parlora_adapter_failed, owner, :timeout})
-        abort_tree(owner)
+        ProcessTree.stop(tree)
     end
   end
 
-  defp watch_running(owner, adapter, owner_ref, session_ref) do
+  defp watch_running(owner, owner_ref, session_ref, tree) do
     receive do
       {:close, id, reason, deadline} ->
         send(owner, {:close, id, reason, deadline})
-        watch_closing(owner, adapter, owner_ref, session_ref, deadline)
+        watch_closing(owner, owner_ref, session_ref, deadline, tree)
 
       :cancel ->
-        abort_running(owner, adapter)
+        ProcessTree.stop(tree)
 
       {:DOWN, ^owner_ref, :process, ^owner, _reason} ->
-        abort_running(owner, adapter)
+        ProcessTree.stop(tree)
 
       {:DOWN, ^session_ref, :process, _session, _reason} ->
-        abort_running(owner, adapter)
+        ProcessTree.stop(tree)
     end
   end
 
-  defp watch_closing(owner, adapter, owner_ref, session_ref, deadline) do
+  defp watch_closing(owner, owner_ref, session_ref, deadline, tree) do
     timeout = max(0, div(deadline - System.monotonic_time(:microsecond) + 999, 1_000))
 
     receive do
-      :cancel -> abort_running(owner, adapter)
-      {:DOWN, ^owner_ref, :process, ^owner, _reason} -> abort_running(owner, adapter)
-      {:DOWN, ^session_ref, :process, _session, _reason} -> abort_running(owner, adapter)
+      :cancel -> ProcessTree.stop(tree)
+      {:DOWN, ^owner_ref, :process, ^owner, _reason} -> ProcessTree.stop(tree)
+      {:DOWN, ^session_ref, :process, _session, _reason} -> ProcessTree.stop(tree)
     after
-      timeout -> abort_running(owner, adapter)
+      timeout -> ProcessTree.stop(tree)
     end
   end
 
@@ -281,11 +267,5 @@ defmodule Parlora.AdapterOwner do
     _exception -> :ok
   catch
     _kind, _reason -> :ok
-  end
-
-  defp abort_running(owner, adapter) do
-    abort(owner)
-    abort_tree(adapter)
-    reap_descendants(owner, %{})
   end
 end
