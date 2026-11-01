@@ -1,5 +1,6 @@
 defmodule Parlora.PhonicShutdownTest do
-  use ExUnit.Case, async: true
+  # Wall-clock shutdown bounds must run without unrelated asynchronous load.
+  use ExUnit.Case, async: false
   alias Parlora.{AdapterInit, AudioFormat, Event, Limits}
   alias Parlora.Providers.Phonic
   alias Parlora.Providers.Phonic.Protocol

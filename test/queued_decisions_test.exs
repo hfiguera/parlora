@@ -1,5 +1,6 @@
 defmodule Parlora.QueuedDecisionsTest do
-  use ExUnit.Case, async: true
+  # Deliberately held commands must finish inside the real admission deadline.
+  use ExUnit.Case, async: false
   @startup_timeout 2_000
   alias Parlora.{ContextDecision, Event}
   alias Parlora.Session.Uncertainty
