@@ -131,7 +131,12 @@ defmodule Parlora.Providers.Gemini do
   def handle_call({:resolve_delegation, id, outcome}, _from, state) when is_map(outcome) do
     case Calls.complete(state.calls, id, outcome) do
       {:ok, command, calls} ->
-        next = transmit(%{state | calls: calls, activity: :unknown}, command)
+        activity =
+          if match?(%{toolResponse: %{functionResponses: [%{scheduling: "SILENT"}]}}, command),
+            do: state.activity,
+            else: :unknown
+
+        next = transmit(%{state | calls: calls, activity: activity}, command)
         next = ResponseWatch.submitted(next, command)
 
         {:reply,

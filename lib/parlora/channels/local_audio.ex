@@ -10,6 +10,13 @@ defmodule Parlora.Channels.LocalAudio do
   by queue duration. `:playback_recovery_ms` independently caps recovery waiting
   (default 120, range 0–200), with early release under upstream pressure.
   Zero initial cushion disables buffering.
+  Opt-in `:audio_observer` accepts `%{pid: pid, credits: atomics}` with a two-slot
+  atomics reference. It receives `{:parlora_audio, direction, at_us, pcm}` for
+  converted microphone PCM and software playout PCM before device conversion.
+  The receiver must decrement slot 1 after processing a message. Capacity is
+  256 messages; slot 2 counts dropped diagnostic packets. These taps do not
+  establish physical playback. Raw audio capture must be explicitly enabled.
+
   Queue and callback handoff are observable; neither proves human hearing.
   """
   use GenServer
@@ -203,6 +210,7 @@ defmodule Parlora.Channels.LocalAudio do
 
     Map.merge(state, %{
       device: device,
+      audio_observer: Keyword.get(state.options, :audio_observer),
       input_converter: input_converter,
       output_converter: output_converter,
       status: :ready,
@@ -349,6 +357,7 @@ defmodule Parlora.Channels.LocalAudio do
       |> Native.unwrap!()
 
     {converted, converter} = AudioConverter.convert(state.input_converter, pcm)
+    Parlora.AudioObserver.send_audio(state.audio_observer, :input, converted)
     frame_input(%{state | input_converter: converter, input_pcm: state.input_pcm <> converted})
   end
 
@@ -418,6 +427,7 @@ defmodule Parlora.Channels.LocalAudio do
       %{session_id: state.init.session_id, channel: :local_audio, epoch: state.epoch}
     )
 
+    Parlora.AudioObserver.send_audio(state.audio_observer, :output, pcm)
     {output, converter} = AudioConverter.convert(state.output_converter, pcm)
 
     flush_output(

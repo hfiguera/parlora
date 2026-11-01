@@ -38,6 +38,12 @@ request interpretation; your context policy and backend determine the authorized
 operation and result. Corrections create or supersede task revisions through that
 policy. Cancelling a provider call does not reverse an external business action.
 
+Superseded function calls close with an empty response and `scheduling: "SILENT"`.
+Their internal control status is not conversational content. The adapter retains
+a superseded tombstone to reject late context and duplicate completion, while
+preserving any outstanding reply watch and observed provider activity. Current
+results and caller-facing clarifications still use normal response scheduling.
+
 | Capability | Behavior |
 | --- | --- |
 | Speakable context | Supported |
