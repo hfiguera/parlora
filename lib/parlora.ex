@@ -176,7 +176,7 @@ defmodule Parlora do
            [:channel, :provider, :backend, :context_policy],
            &adapter_option?(Keyword.get(options, &1))
          ) do
-      :ok
+      validate_audio_options(options)
     else
       Error.tuple(
         :invalid_argument,
@@ -187,4 +187,17 @@ defmodule Parlora do
 
   defp validate_options(_options),
     do: Error.tuple(:invalid_argument, "Options must be a keyword list")
+
+  defp validate_audio_options(options) do
+    cond do
+      not AudioFormat.supported?(Keyword.get(options, :audio_format, %AudioFormat{})) ->
+        Error.tuple(:invalid_argument, "Audio format must be a supported Parlora.AudioFormat")
+
+      not Keyword.keyword?(Keyword.get(options, :limits, [])) ->
+        Error.tuple(:invalid_argument, "Limits must be a keyword list")
+
+      true ->
+        :ok
+    end
+  end
 end
