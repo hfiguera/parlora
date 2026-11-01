@@ -1,5 +1,6 @@
 defmodule Parlora.SessionHealthTest do
-  use ExUnit.Case, async: true
+  # Short progress deadlines must not compete with unrelated async fixtures.
+  use ExUnit.Case, async: false
 
   # Observe asynchronous startup/teardown with CI scheduling headroom. The actual
   # session deadlines below stay short and are checked independently.

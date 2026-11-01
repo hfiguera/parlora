@@ -1,5 +1,6 @@
 defmodule Parlora.PhonicShutdownTest do
-  use ExUnit.Case, async: true
+  # Wall-clock shutdown bounds must run without unrelated asynchronous load.
+  use ExUnit.Case, async: false
   alias Parlora.{AdapterInit, AudioFormat, Event, Limits}
   alias Parlora.Providers.Phonic
   alias Parlora.Providers.Phonic.Protocol
@@ -35,7 +36,8 @@ defmodule Parlora.PhonicShutdownTest do
     started = System.monotonic_time(:millisecond)
     {:reply, :ok, closed} = Phonic.handle_call({:close, "close", :cancel}, nil, state)
     elapsed = System.monotonic_time(:millisecond) - started
-    assert elapsed >= 25 and elapsed < 500
+    assert elapsed >= 25
+    assert elapsed < 500
     assert closed.status == :closed
     assert_receive {:peer_close, 1000}
     assert_receive :peer_eof
@@ -57,7 +59,8 @@ defmodule Parlora.PhonicShutdownTest do
     started = System.monotonic_time(:millisecond)
     {:reply, :ok, _closed} = Phonic.handle_call({:close, "close", :cancel}, nil, state)
     elapsed = System.monotonic_time(:millisecond) - started
-    assert elapsed >= 200 and elapsed < 1_000
+    assert elapsed >= 200
+    assert elapsed < 1_000
     assert_receive {:peer_close, 1000}
     assert_receive :peer_eof
   end
