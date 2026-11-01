@@ -1,0 +1,24 @@
+name: BookingDesk
+on:
+  pull_request:
+    paths: ['examples/booking_desk/**', 'lib/**', '.github/workflows/booking-desk.yml']
+  push:
+    branches: [main]
+    paths: ['examples/booking_desk/**', 'lib/**', '.github/workflows/booking-desk.yml']
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          platform: ubuntu-24.04
+          otp: '29.1.2'
+          elixir: '1.20.4-otp-29'
+          library: 'false'
+      - run: mix deps.get --check-locked && mix format --check-formatted && mix test --warnings-as-errors
+        working-directory: examples/booking_desk
+      - run: python3 -m unittest discover -s examples/booking_desk/test -p '*_test.py'

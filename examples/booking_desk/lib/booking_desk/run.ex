@@ -1,0 +1,634 @@
+defmodule BookingDesk.Run do
+  @moduledoc "Bounded live scenarios driven by task and speech milestones, never injected transcripts."
+  alias BookingDesk.{Recorder, ReplayChannel}
+  alias Parlora.Event
+
+  def run(directory, clips, opts \\ []) do
+    if Keyword.get(opts, :observability, false) do
+      {:ok, _} = Application.ensure_all_started(:parlora_observer)
+    end
+
+    unless Process.whereis(BookingDesk.TypeSafe),
+      do: raise("TYPESAFE_API_KEY is required for BookingDesk")
+
+    mode = Keyword.get(opts, :mode, :replay)
+
+    if mode == :microphone and opts[:ambience],
+      do: raise("Ambience is supported only by the replay caller")
+
+    ambience = BookingDesk.Ambience.prepare!(opts[:ambience], directory)
+    {:ok, recorder} = Recorder.start_link(directory: directory)
+    observer = Recorder.observer(recorder)
+
+    channel =
+      if mode == :microphone,
+        do: {Parlora.Channels.LocalAudio, audio_observer: observer},
+        else: {ReplayChannel, owner: self(), audio_observer: observer, ambience: ambience}
+
+    {:ok, session} = BookingDesk.start(channel)
+    {:ok, readback} = BookingDesk.Readback.start_link()
+    Process.send_after(self(), :deadline, 210_000)
+
+    if mode == :microphone do
+      IO.puts("Demo records: Jamie Rivera — March 12, 1990; Alex Morgan — July 24, 1985.")
+      owner = self()
+
+      spawn(fn ->
+        IO.gets("Recording enabled. Use headphones. Press Enter to stop.\n")
+        send(owner, :stop)
+      end)
+    end
+
+    Process.send_after(self(), :poll, 200)
+
+    s = %{
+      session: session,
+      recorder: recorder,
+      readback: readback,
+      readback_revision: 0,
+      channel: nil,
+      clips: clips,
+      mode: mode,
+      any_doctor: Keyword.get(opts, :any_doctor, false),
+      ambience: ambience != nil,
+      stage: :starting,
+      greeting_audio: false,
+      greeting_completed: false,
+      text: "",
+      speech: :unknown,
+      source_sha256:
+        Map.new(Path.wildcard("lib/**/*.ex"), fn path ->
+          {path, :crypto.hash(:sha256, File.read!(path)) |> Base.encode16(case: :lower)}
+        end),
+      library_source_sha256:
+        Map.new(Path.wildcard("../../lib/**/*.ex"), fn path ->
+          {Path.relative_to(path, "../.."),
+           :crypto.hash(:sha256, File.read!(path)) |> Base.encode16(case: :lower)}
+        end),
+      submitted: [],
+      prep_during_work: false,
+      announced_confirmation: false,
+      confirmation_readback: false,
+      booking_request: nil,
+      expected_confirmation: nil,
+      booking_result_at: nil,
+      insurance: nil,
+      reminder: nil,
+      identity_request: nil,
+      stale: 0,
+      failed: [],
+      stage_at: System.monotonic_time(:millisecond),
+      last_audio_at: System.monotonic_time(:millisecond),
+      stage_due: 0
+    }
+
+    try do
+      loop(s)
+    after
+      if Process.alive?(readback), do: GenServer.stop(readback)
+      if Process.alive?(session), do: Parlora.close(session)
+    end
+  end
+
+  defp loop(s) do
+    receive do
+      {:playout_active, at} ->
+        loop(%{
+          s
+          | last_audio_at: at,
+            readback_revision: s.readback_revision + 1,
+            greeting_audio: s.greeting_audio or s.stage == :greeting
+        })
+
+      {:channel, pid} ->
+        loop(%{s | channel: pid})
+
+      {:parlora_event, %Event{} = event} ->
+        Recorder.event(s.recorder, event)
+        next = event(s, event)
+        if next.stage == :done, do: finish(next, :completed), else: loop(next)
+
+      {:play, id} ->
+        loop(play(s, id))
+
+      :poll ->
+        Process.send_after(self(), :poll, 200)
+        next = advance(s)
+        if next.stage == :done, do: finish(next, :completed), else: loop(next)
+
+      :stop ->
+        finish(s, :stopped)
+
+      :deadline ->
+        finish(s, :timeout)
+
+      _ ->
+        loop(s)
+    end
+  end
+
+  defp event(%{stage: :starting} = s, %{source: :session, type: :ready}) do
+    IO.puts("Ready: #{System.get_env("PARLORA_PROVIDER", "openai")} (recording fictional data)")
+    update = BookingDesk.Greeting.update(Parlora.snapshot(s.session).provider_generation)
+    Recorder.mark(s.recorder, "assistant:greeting_requested", %{context_update_id: update.id})
+
+    case Parlora.append_context(s.session, update) do
+      :ok ->
+        %{
+          s
+          | stage: if(s.mode == :replay, do: :greeting, else: :microphone),
+            stage_at: System.monotonic_time(:millisecond),
+            text: ""
+        }
+
+      {:error, _} ->
+        %{s | stage: :done, failed: [:greeting | s.failed]}
+    end
+  end
+
+  defp event(s, %{source: :session, type: :task_submitted, payload: %{request: r}}) do
+    IO.puts("Task: #{r.input.operation} #{Map.get(r.input, :date, "")}")
+
+    s = %{
+      s
+      | submitted: [
+          Map.merge(r.input, %{request_id: r.id, task_id: r.task_id, revision: r.task_revision})
+          | s.submitted
+        ]
+    }
+
+    cond do
+      s.stage == :insurance && r.input.operation == "availability" && r.input.date == "2026-11-04" ->
+        Process.send_after(self(), {:play, "preparation"}, 500)
+        s
+
+      s.stage == :confirm && r.input.operation == "confirm" ->
+        Process.send_after(self(), {:play, "progress"}, 500)
+        %{s | booking_request: r.id}
+
+      true ->
+        s
+    end
+  end
+
+  defp event(s, %{
+         source: :session,
+         type: :result_delivery,
+         request_id: id,
+         payload: %{stage: stage}
+       })
+       when stage in [:accepted, :unconfirmed] do
+    if id == s.booking_request && s.booking_result_at == nil do
+      %{s | booking_result_at: System.monotonic_time(:millisecond), text: ""}
+    else
+      s
+    end
+  end
+
+  defp event(s, %{
+         source: :backend,
+         type: :request_completed,
+         request_id: id,
+         payload: %{facts: facts}
+       }) do
+    insurance = Map.get(facts, :insurance) || Map.get(facts, "insurance")
+
+    s =
+      if insurance && s.insurance == nil do
+        %{
+          s
+          | insurance: %{
+              carrier: Map.get(insurance, :carrier) || Map.get(insurance, "carrier"),
+              revision: Map.get(insurance, :revision) || Map.get(insurance, "revision")
+            },
+            identity_request: id
+        }
+      else
+        s
+      end
+
+    reminder = Map.get(facts, :reminder) || Map.get(facts, "reminder")
+    s = if reminder, do: %{s | reminder: reminder}, else: s
+
+    if id == s.booking_request do
+      %{
+        s
+        | expected_confirmation: Map.get(facts, :confirmation) || Map.get(facts, "confirmation")
+      }
+    else
+      s
+    end
+  end
+
+  defp event(s, %{type: :stale_result}), do: %{s | stale: s.stale + 1}
+
+  defp event(s, %{type: :transcript_delta, payload: %{speaker: :assistant, delta: text}}) do
+    combined = s.text <> text
+
+    pending =
+      if s.stage == :preparation do
+        Parlora.snapshot(s.session).tasks
+        |> Enum.any?(fn {_, task} ->
+          task.status == :submitted and task.input.operation == "availability" and
+            task.input.date == "2026-11-04"
+        end)
+      else
+        false
+      end
+
+    %{
+      s
+      | text: combined,
+        readback_revision: s.readback_revision + 1,
+        prep_during_work:
+          s.prep_during_work or
+            (pending and Regex.match?(~r/bring|insurance|photo|early/i, combined)),
+        announced_confirmation:
+          s.announced_confirmation or
+            (s.booking_result_at != nil and booked?() and
+               Regex.match?(~r/confirmation|B[ .-]?D/i, combined))
+    }
+  end
+
+  defp event(s, %{type: :transcript_delta, payload: %{speaker: :user}}),
+    do: %{s | readback_revision: s.readback_revision + 1}
+
+  defp event(s, %{source: :provider, type: :provider_speech, payload: %{state: speech}}),
+    do: %{
+      s
+      | speech: speech,
+        readback_revision: s.readback_revision + if(s.speech == speech, do: 0, else: 1)
+    }
+
+  defp event(s, %{type: :failed, source: source}),
+    do: %{s | failed: [source | s.failed], stage: :done}
+
+  defp event(s, %{source: :session, type: :closed}), do: %{s | stage: :done}
+  defp event(s, _), do: s
+  @doc false
+  def advance(%{mode: :microphone} = s), do: s
+
+  def advance(s) do
+    age = System.monotonic_time(:millisecond) - s.stage_at
+
+    settled =
+      age >= s.stage_due && s.speech != :speaking && age > 2_000 &&
+        System.monotonic_time(:millisecond) - s.last_audio_at > 1_000
+
+    cond do
+      s.stage == :greeting ->
+        advance_greeting(s)
+
+      s.stage == :search && settled && BookingDesk.Identity.requested?(s.text) ->
+        play(s, "identity", %{
+          transcript_sha256: :crypto.hash(:sha256, s.text) |> Base.encode16(case: :lower)
+        })
+
+      s.stage == :identity && s.insurance != nil && settled &&
+        BookingDesk.Insurance.requested?(s.text, s.insurance.carrier) &&
+        s.channel != nil && ReplayChannel.output_drained?(s.channel) ->
+        play(s, "insurance", %{
+          transcript_sha256: :crypto.hash(:sha256, s.text) |> Base.encode16(case: :lower),
+          carrier: s.insurance.carrier,
+          insurance_revision: s.insurance.revision,
+          lookup_request: s.identity_request
+        })
+
+      s.stage == :preparation && settled &&
+          Regex.match?(~r/bring|insurance|identification|photo|early/i, s.text) ->
+        play(s, "correction")
+
+      s.stage == :correction && settled &&
+          Regex.match?(~r/10.?15|ten.?fifteen|two|2.?00|available|openings/i, s.text) ->
+        play(s, "choose")
+
+      s.stage == :choose ->
+        advance_readback(s, settled)
+
+      s.stage in [:confirm, :progress] && settled && confirmation_ready?(s) && booked?() &&
+        s.booking_result_at != nil && s.last_audio_at > s.booking_result_at &&
+          reminder_offer?(s.text) ->
+        play(s, "reminder", %{booking_request: s.booking_request, output_drained: true})
+
+      s.stage == :reminder && settled && s.reminder != nil &&
+        Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "verify_existing" &&
+        BookingDesk.Reminders.readback?(
+          s.text,
+          Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four))
+        ) &&
+        s.channel != nil && ReplayChannel.output_drained?(s.channel) ->
+        play(s, "phone_confirm", %{
+          last_four: Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four)),
+          output_drained: true
+        })
+
+      s.stage == :phone_confirm && settled && s.reminder != nil &&
+        Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "scheduled" &&
+        Regex.match?(~r/reminder|text/i, s.text) && Regex.match?(~r/scheduled|set|send/i, s.text) &&
+        s.channel != nil && ReplayChannel.output_drained?(s.channel) ->
+        play(s, "goodbye")
+
+      s.stage == :goodbye && settled && age > s.stage_due + 3_000 ->
+        %{s | stage: :done}
+
+      true ->
+        s
+    end
+  end
+
+  @doc false
+  def reminder_offer?(text),
+    do:
+      Regex.match?(~r/text|SMS/i, text) && Regex.match?(~r/remind/i, text) &&
+        String.contains?(text, "?")
+
+  def confirmation_ready?(s) do
+    BookingDesk.Confirmation.complete?(s.text, s.expected_confirmation) and
+      s.channel != nil and ReplayChannel.output_drained?(s.channel)
+  end
+
+  defp play(s, id, milestone \\ nil)
+  defp play(%{stage: :greeting} = s, "search", nil), do: s
+  defp play(s, "identity", nil), do: s
+
+  defp play(s, id, milestone) do
+    clip =
+      case {id, Map.get(s, :any_doctor, false)} do
+        {"search", true} -> "search_any"
+        {"choose", true} -> "choose_patel"
+        _ -> id
+      end
+
+    pcm = File.read!(Path.join(s.clips, clip <> ".pcm"))
+
+    case ReplayChannel.play(s.channel, pcm, id) do
+      :ok ->
+        BookingDesk.Readback.check(s.readback, %{settled: false})
+
+        if id == "identity",
+          do: Recorder.mark(s.recorder, "assistant:identity_requested", milestone)
+
+        if id == "insurance",
+          do: Recorder.mark(s.recorder, "assistant:insurance_requested", milestone)
+
+        if id in ["reminder", "phone_confirm"],
+          do: Recorder.mark(s.recorder, "assistant:" <> id <> "_requested", milestone)
+
+        if id == "confirm",
+          do: Recorder.mark(s.recorder, "assistant:proposal_readback", milestone)
+
+        if id == "search" and s.stage == :greeting,
+          do: Recorder.mark(s.recorder, "assistant:greeting_completed", milestone)
+
+        Recorder.mark(s.recorder, "caller:" <> id, %{duration_ms: byte_size(pcm) / 48, clip: clip})
+
+        IO.puts("Caller: #{id}")
+        # IDs are a fixed application allowlist, never atoms created from provider text.
+        stage =
+          %{
+            "search" => :search,
+            "identity" => :identity,
+            "insurance" => :insurance,
+            "preparation" => :preparation,
+            "correction" => :correction,
+            "choose" => :choose,
+            "confirm" => :confirm,
+            "progress" => :progress,
+            "reminder" => :reminder,
+            "phone_confirm" => :phone_confirm,
+            "goodbye" => :goodbye
+          }[id]
+
+        %{
+          s
+          | stage: stage,
+            text: "",
+            readback_revision: s.readback_revision + 1,
+            confirmation_readback: s.confirmation_readback or id == "confirm",
+            greeting_completed: s.greeting_completed or (id == "search" and s.stage == :greeting),
+            stage_at: System.monotonic_time(:millisecond),
+            stage_due: trunc(byte_size(pcm) / 48) + 1_500
+        }
+
+      {:error, :busy} ->
+        # Approval retries must pass the fresh proposal/transcript gate again.
+        if id not in ["confirm", "identity", "insurance", "reminder", "phone_confirm"] and
+             not (id == "search" and s.stage == :greeting),
+           do: Process.send_after(self(), {:play, id}, 100)
+
+        s
+    end
+  end
+
+  defp advance_greeting(s) do
+    observation = %{
+      text: s.text,
+      speech: s.speech,
+      heard_audio: s.greeting_audio,
+      output_drained: s.channel != nil && ReplayChannel.output_drained?(s.channel),
+      quiet_ms: System.monotonic_time(:millisecond) - s.last_audio_at
+    }
+
+    if BookingDesk.Greeting.ready?(observation) do
+      play(s, "search", Map.take(observation, [:output_drained, :quiet_ms]))
+    else
+      s
+    end
+  end
+
+  defp advance_readback(s, settled) do
+    snapshot = Parlora.snapshot(s.session)
+
+    input = %{
+      settled: settled,
+      text: s.text,
+      revision: s.readback_revision,
+      generation: snapshot.provider_generation,
+      proposal: BookingDesk.Readback.current_proposal(snapshot)
+    }
+
+    case BookingDesk.Readback.check(s.readback, input) do
+      {:ready, evidence} ->
+        play(s, "confirm", evidence)
+
+      :waiting ->
+        s
+    end
+  end
+
+  defp booked?,
+    do:
+      Enum.any?(BookingDesk.Store.snapshot(), fn [id, _, _, status, _] ->
+        id != "appt_existing" && status == "booked"
+      end)
+
+  defp finish(s, outcome) do
+    ambience =
+      if s.ambience and Process.alive?(s.channel), do: ReplayChannel.ambience_info(s.channel)
+
+    if Process.alive?(s.session), do: Parlora.close(s.session, :finish)
+    Process.sleep(500)
+    flush(s.recorder)
+    appointments = BookingDesk.Store.snapshot()
+    submissions = Enum.reverse(s.submitted)
+
+    checks = %{
+      conversation_during_lookup: s.prep_during_work,
+      announced_verified_confirmation: s.announced_confirmation,
+      readback_before_confirmation: s.confirmation_readback,
+      booked_exact_slot:
+        Enum.count(appointments, fn [id, _, slot, status, _] ->
+          id != "appt_existing" &&
+            slot ==
+              BookingDesk.Store.slot_id(
+                "2026-11-05",
+                "10:15",
+                if(s.any_doctor, do: "patel", else: "lee")
+              ) && status == "booked"
+        end) == 1,
+      no_duplicate_availability:
+        Enum.count(submissions, &(&1.operation == "availability" && &1.date == "2026-11-04")) == 1 &&
+          Enum.count(submissions, &(&1.operation == "availability" && &1.date == "2026-11-05")) ==
+            1,
+      single_proposal: Enum.count(submissions, &(&1.operation == "propose")) == 1,
+      single_booking_submission: Enum.count(submissions, &(&1.operation == "confirm")) == 1,
+      correction_revision:
+        Enum.any?(
+          submissions,
+          &(&1.operation == "availability" && Map.get(&1, :date) == "2026-11-05" &&
+              &1.revision > 1)
+        ),
+      stale_result_filtered: s.stale > 0,
+      no_adapter_failure: s.failed == [],
+      simulated_reminder_saved:
+        length(BookingDesk.Store.reminder_jobs()) == 1 &&
+          Enum.all?(BookingDesk.Store.reminder_jobs(), fn [
+                                                            appointment,
+                                                            _,
+                                                            destination,
+                                                            at,
+                                                            status,
+                                                            _
+                                                          ] ->
+            appointment == s.booking_request && destination == "+12025550188" &&
+              at == "2026-11-04T17:15:00Z" && status == "simulated"
+          end),
+      single_reminder_submission:
+        Enum.count(submissions, &(&1.operation == "reminder_confirm")) == 1,
+      scenario_completed: outcome == :completed && s.stage == :done && booked?()
+    }
+
+    checks =
+      if s.mode == :replay,
+        do: Map.put(checks, :assistant_greeted_first, s.greeting_completed),
+        else: checks
+
+    assessment =
+      if s.mode == :microphone do
+        BookingDesk.RunReport.microphone(
+          submissions,
+          appointments,
+          BookingDesk.Store.reminder_jobs(),
+          s.failed
+        )
+      else
+        %{}
+      end
+
+    report =
+      Recorder.finish(
+        s.recorder,
+        Map.merge(
+          %{
+            provider: System.get_env("PARLORA_PROVIDER", "openai"),
+            model: model(),
+            assistant_voice:
+              BookingDesk.assistant_voice(System.get_env("PARLORA_PROVIDER", "openai")),
+            jev_model: Application.fetch_env!(:booking_desk, :jev_model),
+            opening: %{
+              kind: "assistant_first",
+              quiet_ms: 1_000,
+              observation:
+                "nonquiet software playout, assistant captions and drained output queue"
+            },
+            readback_evaluator: %{
+              kind: "jev",
+              model: Application.fetch_env!(:booking_desk, :jev_model),
+              timeout_ms: 2_000,
+              max_evaluations: 8
+            },
+            identity_extractor: %{
+              kind: "structured_llm",
+              library: "req_llm",
+              model: Application.fetch_env!(:booking_desk, :identity_model),
+              timeout_ms: 4_000,
+              evidence:
+                "caller excerpts and deterministic name/date validation; exact database match"
+            },
+            mode: s.mode,
+            scenario: "booking-correction",
+            booking_flow: %{
+              version: 4,
+              reminder: "optional_sms_24h_simulated_existing_cell_confirmation",
+              patient_lookup: "full_name_and_dob",
+              insurance: "confirm_stored_carrier_before_availability",
+              requested_clinician: if(s.any_doctor, do: "any", else: "lee"),
+              expected_clinician: if(s.any_doctor, do: "patel", else: "lee")
+            },
+            outcome: outcome,
+            passed: Enum.all?(checks, fn {_, v} -> v end),
+            checks: checks,
+            delays_ms: Application.fetch_env!(:booking_desk, :delays),
+            timezone: "America/Denver",
+            fictional_today: "2026-11-02",
+            appointments: appointments,
+            reminder_jobs: BookingDesk.Store.reminder_jobs(),
+            submissions: submissions,
+            stale_results: s.stale,
+            source_sha256: s.source_sha256,
+            library_source_sha256: s.library_source_sha256,
+            caller:
+              if(s.mode == :replay,
+                do:
+                  s.clips
+                  |> Path.join("manifest.json")
+                  |> File.read!()
+                  |> JSON.decode!()
+                  |> Map.take(["model", "voice_id", "voice", "sample_rate", "utterances"]),
+                else: nil
+              ),
+            ambience: ambience,
+            synthetic_caller: s.mode == :replay
+          },
+          assessment
+        )
+      )
+
+    fields =
+      if s.mode == :microphone,
+        do: [:provider, :mode, :outcome, :evaluation, :observed],
+        else: [:provider, :outcome, :passed, :checks]
+
+    IO.puts(JSON.encode!(Map.take(report, fields)))
+    report
+  end
+
+  defp flush(recorder) do
+    receive do
+      {:parlora_event, event} ->
+        Recorder.event(recorder, event)
+        flush(recorder)
+    after
+      0 -> :ok
+    end
+  end
+
+  defp model,
+    do:
+      %{
+        "openai" => "gpt-live-1",
+        "gemini" => "gemini-3.8-live",
+        "grok" => "grok-voice-3.0",
+        "phonic" => "phonic-1"
+      }[System.get_env("PARLORA_PROVIDER", "openai")]
+end

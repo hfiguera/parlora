@@ -18,3 +18,11 @@ uses its own Mix project and test/format checks, exercised by `scripts/consumer.
 in CI. Root formatting delegates to OrderDesk's formatter without traversing its
 build or dependency directories. Recorded results and cross-project validation
 harnesses remain in `validation/`.
+
+## BookingDesk
+
+[BookingDesk](booking_desk/README.md) connects fictional appointment scheduling to
+live speech through JEV interpretation, Jido actions, and SQLite. It includes
+local microphone input, repeatable ElevenLabs-generated callers, explicit audio
+recording, and optional café background input. Live calls and caller generation
+use paid services; its offline tests do not.
