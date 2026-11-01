@@ -9,6 +9,7 @@
   subdirectories: [
     "examples/order_desk",
     "examples/observability",
+    "examples/booking_desk",
     "validation/optional-backends/consumer"
   ]
 ]

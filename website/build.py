@@ -7,6 +7,7 @@ from email.utils import format_datetime
 from html import escape
 from html.parser import HTMLParser
 import json
+import hashlib
 import math
 from pathlib import Path
 import re
@@ -55,6 +56,12 @@ class Page(HTMLParser):
 
     def handle_data(self, text):
         self.text.append(text)
+
+
+def reading_minutes(content):
+    # Optional replay transcripts duplicate the spoken recordings, not article prose.
+    narrative = re.sub(r'<ol\b[^>]*\bdata-replay-transcript(?:[\s=>][^>]*)?>.*?</ol>', '', content, flags=re.S | re.I)
+    return str(max(1, math.ceil(len(" ".join(Page(narrative).text).split()) / 200)))
 
 
 def base_path(value):
@@ -135,6 +142,8 @@ def build(output, prefix="/", analytics=False):
             values = {
                 "CONTENT": content,
                 "BASE": prefix,
+                "BOOKING_REPLAY_STYLE_VERSION": hashlib.sha256((stage / "assets/booking-replay.css").read_bytes()).hexdigest()[:12],
+                "BOOKING_REPLAY_VERSION": hashlib.sha256((stage / "assets/booking-replay.js").read_bytes()).hexdigest()[:12],
                 "TITLE": escape(title, quote=True),
                 "DESCRIPTION": escape(description, quote=True),
                 "CANONICAL": url + "/" + ("" if path == "index.html" else path.removesuffix("index.html")),
@@ -159,7 +168,7 @@ def build(output, prefix="/", analytics=False):
             if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
                 raise ValueError(f"Invalid article slug: {slug}")
             content = (SOURCE / "content" / f"{slug}.html").read_text()
-            read_time = str(max(1, math.ceil(len(" ".join(Page(content).text).split()) / 200)))
+            read_time = reading_minutes(content)
             path = f"blog/{slug}/index.html"
             structured = {
                 "@context": "https://schema.org", "@type": "BlogPosting",

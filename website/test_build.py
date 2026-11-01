@@ -2,6 +2,8 @@
 
 from pathlib import Path
 import json
+import hashlib
+import re
 import shutil
 import tempfile
 import unittest
@@ -18,16 +20,51 @@ class PublicationTest(unittest.TestCase):
 
     def test_preview_has_working_links_and_no_analytics_or_development_files(self):
         build(self.output)
-        self.assertEqual(verify(self.output), 5)
+        self.assertEqual(verify(self.output), 6)
         for path in self.output.rglob("*.html"):
             self.assertNotIn(BEACON, path.read_text())
         self.assertFalse((self.output / "site.json").exists())
         self.assertFalse((self.output / "templates").exists())
         self.assertFalse((self.output / "PRODUCT.md").exists())
 
+    def test_booking_assets_are_exactly_the_recordings_and_charts_used_by_the_article(self):
+        article = (SOURCE / "content/keep-talking-while-we-book-it.html").read_text()
+        recordings = re.findall(r'<option value="([^"]+)">', article)
+        self.assertEqual(len(recordings), 8)
+        folder = SOURCE / "assets/booking"
+        expected = {"lookup-correction.svg", "booking-progress.svg"}
+        for name in recordings:
+            metadata = folder / (name + ".json")
+            recording = json.loads(metadata.read_text())
+            audio = metadata.parent / recording["audio"]
+            self.assertEqual(hashlib.sha256(audio.read_bytes()).hexdigest(), recording["audio_sha256"])
+            expected.update([metadata.relative_to(folder).as_posix(), audio.relative_to(folder).as_posix()])
+        self.assertEqual({p.relative_to(folder).as_posix() for p in folder.rglob("*") if p.is_file()}, expected)
+
+    def test_player_script_url_changes_when_its_contents_change(self):
+        source = Path(self.temp.name) / "source"
+        shutil.copytree(SOURCE, source, ignore=shutil.ignore_patterns("_site", "__pycache__"))
+        player = source / "assets/booking-replay.js"
+        style = source / "assets/booking-replay.css"
+        versions = []
+        with patch("build.SOURCE", source):
+            for prefix in ("/", "/parlora/"):
+                version = hashlib.sha256(player.read_bytes()).hexdigest()[:12]
+                style_version = hashlib.sha256(style.read_bytes()).hexdigest()[:12]
+                build(self.output, prefix)
+                article = (self.output / "blog/keep-talking-while-we-book-it/index.html").read_text()
+                self.assertIn(f'src="{prefix}assets/booking-replay.js?v={version}"', article)
+                self.assertIn(f'href="{prefix}assets/booking-replay.css?v={style_version}"', article)
+                if versions:
+                    self.assertNotIn(f'booking-replay.js?v={versions[-1]}"', article)
+                versions.append(version)
+                player.write_text(player.read_text() + "\n// Updated player build\n")
+                style.write_text(style.read_text() + "\n/* Updated style build */\n")
+        self.assertNotEqual(*versions)
+
     def test_github_pages_subpath_and_shared_analytics_property(self):
         build(self.output, "/parlora/", analytics=True)
-        self.assertEqual(verify(self.output, "/parlora/", analytics=True), 5)
+        self.assertEqual(verify(self.output, "/parlora/", analytics=True), 6)
         self.assertIn('href="/parlora/blog/introducing-parlora/"', (self.output / "index.html").read_text())
         # A production build cannot silently become a local preview.
         with self.assertRaisesRegex(ValueError, "analytics beacon count"):
@@ -118,3 +155,9 @@ class PublicationTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class ReadingTimeTest(unittest.TestCase):
+    def test_optional_audio_transcripts_do_not_inflate_article_reading_time(self):
+        from build import reading_minutes
+        self.assertEqual(reading_minutes('<p>Article.</p><ol data-replay-transcript>' + 'caption '*5000 + '</ol>'), '1')
+        self.assertEqual(reading_minutes('<ol><li>'+'narrative '*401+'</li></ol>'), '3')

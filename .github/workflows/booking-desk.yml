@@ -1,0 +1,37 @@
+name: BookingDesk
+on:
+  pull_request:
+    paths: ['examples/booking_desk/**', 'lib/**', '.github/workflows/booking-desk.yml']
+  push:
+    branches: [main]
+    paths: ['examples/booking_desk/**', 'lib/**', '.github/workflows/booking-desk.yml']
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          platform: ubuntu-24.04
+          otp: '29.1.2'
+          elixir: '1.20.4-otp-29'
+          library: 'false'
+      - name: Cache BookingDesk Dialyzer PLT
+        uses: actions/cache@v4
+        with:
+          path: examples/booking_desk/_build/test/*.plt*
+          key: booking-desk-plt-${{ runner.os }}-${{ runner.arch }}-otp29.1.2-elixir1.20.4-${{ hashFiles('examples/booking_desk/mix.lock', 'examples/booking_desk/mix.exs', 'mix.lock') }}
+          restore-keys: |
+            booking-desk-plt-${{ runner.os }}-${{ runner.arch }}-otp29.1.2-elixir1.20.4-
+      - name: Install locked dependencies
+        run: mix deps.get --check-locked
+        working-directory: examples/booking_desk
+      - name: Run BookingDesk quality checks
+        run: mix ci
+        working-directory: examples/booking_desk
+      - run: python3 -m unittest discover -s examples/booking_desk/test -p '*_test.py'

@@ -11,11 +11,13 @@ From the repository root:
 
 ```sh
 python3 website/build.py
-python3 -m http.server 4990 --bind 127.0.0.1 --directory website/_site
+python3 website/serve.py 4990 --bind 127.0.0.1 --directory website/_site
 ```
 
 Open http://localhost:4990/. Rebuild after editing content or assets, then refresh
-the browser. Local previews have analytics disabled.
+the browser. Local previews have analytics disabled. The preview server supports
+byte ranges so native audio seeking works; Python's basic `http.server` does not
+provide that behavior.
 
 ## Add or edit an article
 
@@ -120,3 +122,28 @@ post just because its preview has not updated.
 
 References: https://ogp.me/ and
 https://docs.slack.dev/messaging/unfurling-links-in-messages/.
+
+## Booking conversation replay
+
+`keep-talking-while-we-book-it` uses `assets/booking-replay.js` and its scoped CSS.
+The native audio element owns playback time; recorded captions, separate caller
+and assistant waveforms, task spans and moment links follow it. Clean and café
+players each offer four providers. The backend panel shows only facts available
+at the playhead. Playback pauses when a player leaves view or another starts.
+Reduced motion hides the moving playhead; audio and transcripts also work without
+JavaScript. No API keys or live model calls are used by the page.
+
+`assets/booking/` contains only the eight selected MP3/JSON recording pairs and
+two charts used in the article. Preserve the audio hashes and measured timing in
+that metadata; do not substitute generated assistant speech or invent execution
+spans. The example’s [README](../examples/booking_desk/README.md) explains how to run
+a new microphone or scripted call. Raw recordings and databases stay in ignored
+local directories.
+
+After building and starting the preview, run the browser checks with Playwright
+installed in the existing `validation/browser` project:
+
+```sh
+BOOKING_PREVIEW_URL=http://127.0.0.1:4990/blog/keep-talking-while-we-book-it/ \
+node website/test_booking_replay.cjs
+```

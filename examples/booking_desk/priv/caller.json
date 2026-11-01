@@ -1,0 +1,113 @@
+{
+  "model": "eleven_v4",
+  "voice_id": "AaOhDHYJ1XLZk74lXhdE",
+  "scenario": "booking-correction",
+  "utterances": [
+    {
+      "id": "search",
+      "text": "Hi, I'd like an appointment with Dr. Lee on Wednesday, November fourth.",
+      "speech_text": "[conversational] Hi, I'd like an appointment with Dr. Lee on Wednesday, November fourth."
+    },
+    {
+      "id": "identity",
+      "text": "Sure, it's Jamie Rivera. March twelfth, nineteen ninety.",
+      "speech_text": "[relaxed, conversational] Sure, it's Jamie Rivera. March twelfth, nineteen ninety.",
+      "previous_text": "Of course. Could I have your full name and date of birth?"
+    },
+    {
+      "id": "insurance",
+      "text": "Yep, that's still the same.",
+      "speech_text": "[relaxed, conversational] Yep, that's still the same.",
+      "previous_text": "I have Aetna on file. Is that still your insurance?"
+    },
+    {
+      "id": "preparation",
+      "text": "While you're checking, what should I bring to the appointment?",
+      "speech_text": "[curious] While you're checking, what should I bring to the appointment?"
+    },
+    {
+      "id": "correction",
+      "text": "Actually, could we do Thursday instead?",
+      "speech_text": "[thoughtful] Actually, could we do Thursday instead?"
+    },
+    {
+      "id": "choose",
+      "text": "Ten fifteen, please.",
+      "speech_text": "[conversational] Ten fifteen, please."
+    },
+    {
+      "id": "confirm",
+      "text": "Yeah, go ahead and book it.",
+      "speech_text": "[relaxed, conversational] Yeah, go ahead and book it.",
+      "previous_text": "Thursday, November fifth at ten fifteen AM with Dr. Lee. Shall I book that?"
+    },
+    {
+      "id": "progress",
+      "text": "Is it booked yet?",
+      "speech_text": "[curious] Is it booked yet?"
+    },
+    {
+      "id": "reminder",
+      "text": "Yeah, that'd be helpful.",
+      "speech_text": "[relaxed, conversational] Yeah, that'd be helpful.",
+      "previous_text": "Would you like a text reminder 24 hours before your appointment?"
+    },
+    {
+      "id": "phone_confirm",
+      "text": "Yep, that's my cell.",
+      "speech_text": "[relaxed, conversational] Yep, that's my cell.",
+      "previous_text": "Can we send it to your cell number ending in zero one eight eight?"
+    },
+    {
+      "id": "goodbye",
+      "text": "Great, thanks. See you then!",
+      "speech_text": "[relaxed, conversational] Great, thanks. See you then!",
+      "previous_text": "You're booked for Thursday at ten fifteen with Dr. Lee."
+    },
+    {
+      "id": "unavailable",
+      "text": "Could you check Friday November sixth instead?",
+      "speech_text": "[thoughtful] Could you check Friday, November sixth instead?"
+    },
+    {
+      "id": "failure",
+      "text": "Please check Wednesday November eleventh.",
+      "speech_text": "[conversational] Please check Wednesday, November eleventh."
+    },
+    {
+      "id": "ambiguous",
+      "text": "Could you book something sometime next week?",
+      "speech_text": "[hesitant] Could you book something... [pause] sometime next week?"
+    },
+    {
+      "id": "cancel",
+      "text": "I'd like to cancel my existing appointment on November third at nine AM.",
+      "speech_text": "[measured] I'd like to cancel my existing appointment on November third at nine AM."
+    },
+    {
+      "id": "confirm_cancel",
+      "text": "Yes, please cancel my existing appointment on November third at nine AM.",
+      "speech_text": "[confident] Yes, please cancel my existing appointment on November third at nine AM."
+    },
+    {
+      "id": "reschedule",
+      "text": "Please move my existing appointment to Thursday November fifth at two PM.",
+      "speech_text": "[thoughtful] Please move my existing appointment to Thursday, November fifth, at two PM."
+    },
+    {
+      "id": "confirm_reschedule",
+      "text": "Yes, please reschedule my November third appointment to Thursday November fifth at two PM.",
+      "speech_text": "[confident] Yes, please reschedule my November third appointment to Thursday, November fifth, at two PM."
+    },
+    {
+      "id": "search_any",
+      "text": "Hi, I'd like an appointment on Wednesday, November fourth. Any available doctor is fine.",
+      "speech_text": "[conversational] Hi, I'd like an appointment on Wednesday, November fourth. Any available doctor is fine."
+    },
+    {
+      "id": "choose_patel",
+      "text": "Ten fifteen with Dr. Patel, please.",
+      "speech_text": "[conversational] Ten fifteen with Dr. Patel, please."
+    }
+  ]
+}

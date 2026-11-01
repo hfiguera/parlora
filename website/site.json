@@ -10,6 +10,14 @@
   "cloudflare_token": "f968ea7d6e614cc9a3e2d537ced91a10",
   "articles": [
     {
+      "slug": "keep-talking-while-we-book-it",
+      "title": "Keep talking while we book it",
+      "description": "Hear a live booking conversation and follow JEV interpretation, Jido actions, and Parlora task revisions while backend work runs.",
+      "date": "2026-10-30",
+      "version": "0.3.0",
+      "category": "Conversation and application work"
+    },
+    {
       "slug": "observability-in-parlora",
       "title": "Understanding a voice session with Parlora 0.2.0",
       "description": "Follow the work behind a voice conversation with metrics, traces, and useful logs, using the monitoring tools your application chooses.",

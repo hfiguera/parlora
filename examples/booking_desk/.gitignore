@@ -1,0 +1,6 @@
+/_build/
+/deps
+/data/
+/runs/
+/clips/
+__pycache__/
