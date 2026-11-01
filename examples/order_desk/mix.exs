@@ -10,6 +10,7 @@ defmodule OrderDesk.MixProject do
       deps:
         [
           {:typesafe_ai, "== 0.1.0"},
+          {:finch, "~> 0.24"},
           {:exqlite, "== 0.40.0"},
           {:parlora, path: "vendor/parlora"},
           {:jido, "== 2.4.0"},
