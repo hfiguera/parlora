@@ -140,7 +140,7 @@ defmodule Parlora.SessionShutdownTest do
     refs = owned_monitors(pid, state)
     started = System.monotonic_time(:millisecond)
     assert :ok = Parlora.close(pid, :finish)
-    timer = :sys.get_state(pid).shutdown_timer
+    shutdown = :sys.get_state(pid).startup.telemetry_shutdown
 
     for role <- [:channel, :provider, :backend] do
       assert_receive {:shutdown_callback, ^role, _owner, reason}
@@ -155,7 +155,7 @@ defmodule Parlora.SessionShutdownTest do
 
     Process.sleep(100)
     assert :ok = Parlora.close(pid, :cancel)
-    assert :sys.get_state(pid).shutdown_timer == timer
+    assert :sys.get_state(pid).startup.telemetry_shutdown == shutdown
     assert Parlora.status(pid).status == :closing
     assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 600
     assert System.monotonic_time(:millisecond) - started < 700

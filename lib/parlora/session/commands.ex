@@ -16,7 +16,7 @@ defmodule Parlora.Session.Commands do
   end
 
   def cancel(state, key) do
-    commands = state.startup.commands
+    commands = state.commands
     ref = commands.keys[key]
 
     case commands.records[ref] do
@@ -36,7 +36,7 @@ defmodule Parlora.Session.Commands do
   end
 
   def enqueue(state, role, callback, complete, options \\ []) do
-    commands = state.startup.commands
+    commands = state.commands
     key = Keyword.get(options, :key, make_ref())
 
     case commands.keys[key] do
@@ -46,7 +46,7 @@ defmodule Parlora.Session.Commands do
   end
 
   def result(state, reference, reply) do
-    case state.startup.commands.records[reference] do
+    case state.commands.records[reference] do
       %{started?: true} = record ->
         if System.monotonic_time(:microsecond) < record.deadline do
           state |> finish(reference, record, reply) |> dispatch(record.role)
@@ -61,7 +61,7 @@ defmodule Parlora.Session.Commands do
   end
 
   def timeout(state, reference) do
-    case state.startup.commands.records[reference] do
+    case state.commands.records[reference] do
       nil ->
         {state, false}
 
@@ -82,7 +82,7 @@ defmodule Parlora.Session.Commands do
   end
 
   def close(state) do
-    Enum.reduce(state.startup.commands.records, state, fn {reference, record}, acc ->
+    Enum.reduce(state.commands.records, state, fn {reference, record}, acc ->
       details = if record.started?, do: %{outcome: :unknown}, else: %{execution: :never_submitted}
       finish(acc, reference, record, Error.tuple(:closed, "Session is closing", details))
     end)
@@ -113,7 +113,7 @@ defmodule Parlora.Session.Commands do
       state.status != :ready ->
         Error.tuple(:closed, "Session is closing")
 
-      map_size(state.startup.commands.records) >= limit ->
+      map_size(state.commands.records) >= limit ->
         Error.tuple(:backpressure, "Adapter command capacity exhausted")
 
       true ->
@@ -141,7 +141,7 @@ defmodule Parlora.Session.Commands do
           timer: Process.send_after(self(), {:adapter_command_timeout, ref}, wait)
         }
 
-        commands = state.startup.commands
+        commands = state.commands
         queue = :queue.in(ref, Map.get(commands.queues, role, :queue.new()))
 
         commands = %{
@@ -156,7 +156,7 @@ defmodule Parlora.Session.Commands do
   end
 
   defp duplicate(state, ref, options) do
-    commands = state.startup.commands
+    commands = state.commands
     record = commands.records[ref]
 
     cond do
@@ -173,13 +173,13 @@ defmodule Parlora.Session.Commands do
   end
 
   defp dispatch(%{status: :ready} = state, role) do
-    commands = state.startup.commands
+    commands = state.commands
 
     case {commands.running[role], :queue.out(Map.get(commands.queues, role, :queue.new()))} do
       {nil, {{:value, ref}, queue}} ->
         state = put(state, %{commands | queues: Map.put(commands.queues, role, queue)})
 
-        case state.startup.commands.records[ref] do
+        case state.commands.records[ref] do
           nil -> dispatch(state, role)
           record -> start(state, ref, record)
         end
@@ -196,7 +196,7 @@ defmodule Parlora.Session.Commands do
       state = record.start.(state)
       owner = state.startup.owners[record.role].owner
       AdapterOwner.execute(owner, ref, prepare(record.callback, state), record.deadline)
-      commands = state.startup.commands
+      commands = state.commands
 
       put(state, %{
         commands
@@ -221,7 +221,7 @@ defmodule Parlora.Session.Commands do
   defp finish(state, ref, record, reply) do
     Process.cancel_timer(record.timer)
     Enum.each(record.callers, &GenServer.reply(&1, reply))
-    commands = state.startup.commands
+    commands = state.commands
     queue = :queue.filter(&(&1 != ref), Map.get(commands.queues, record.role, :queue.new()))
 
     running =
@@ -241,5 +241,5 @@ defmodule Parlora.Session.Commands do
     record.complete.(state, reply)
   end
 
-  defp put(state, commands), do: %{state | startup: %{state.startup | commands: commands}}
+  defp put(state, commands), do: %{state | commands: commands}
 end

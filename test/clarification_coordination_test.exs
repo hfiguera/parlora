@@ -42,7 +42,7 @@ defmodule Parlora.ClarificationCoordinationTest do
 
   test "speaking defers without submission or a fictitious clarification boundary" do
     {:ok, state} = Decisions.apply_batch(%{state() | provider_speech: :speaking}, [question()])
-    assert state.startup.commands == Commands.new()
+    assert state.commands == Commands.new()
     refute_received {:update, _}
     refute Map.has_key?(state.context.pending_delegations["call"], :clarification)
     assert MapSet.size(state.clarifications) == 0
@@ -68,7 +68,7 @@ defmodule Parlora.ClarificationCoordinationTest do
 
     # Re-evaluation can discard an obsolete question; no command was queued.
     {:ok, state} = Decisions.apply_batch(%{state | provider_speech: :idle}, [])
-    assert state.startup.commands == Commands.new()
+    assert state.commands == Commands.new()
     refute_received {:update, _}
     assert state.context_waits == %{}
   end

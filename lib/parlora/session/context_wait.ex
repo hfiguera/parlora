@@ -3,6 +3,11 @@ defmodule Parlora.Session.ContextWait do
   alias Parlora.{ContextTrigger, ID}
   alias Parlora.Session.State
 
+  def clarification_key(decision),
+    do:
+      {decision.delegation_id, decision.task_id, decision.expected_task_revision,
+       decision.clarification_key}
+
   def key(%{task_id: id, expected_task_revision: revision}) when is_binary(id),
     do: {:task, id, revision}
 

@@ -130,7 +130,7 @@ defmodule Parlora.RuntimeCommandsTest do
     second = Task.async(fn -> Parlora.cancel(pid, request.id, :caller, "cancel-once") end)
 
     eventually(fn ->
-      commands = :sys.get_state(pid).startup.commands
+      commands = :sys.get_state(pid).commands
       Enum.any?(commands.records, fn {_ref, r} -> match?([_, _], r.callers) end)
     end)
 
@@ -171,7 +171,7 @@ defmodule Parlora.RuntimeCommandsTest do
     send(owner, {:release, :submit})
     assert_receive {:submitted, first}
     assert first.task_revision == 1
-    eventually(fn -> map_size(:sys.get_state(pid).startup.commands.records) == 0 end)
+    eventually(fn -> map_size(:sys.get_state(pid).commands.records) == 0 end)
     refute_received {:invoked, :submit, _owner, %{task_revision: 2}}
     assert :ok = Parlora.close(pid)
     assert_down(state, pid)
@@ -405,7 +405,7 @@ defmodule Parlora.RuntimeCommandsTest do
       for id <- ["queued-1", "queued-2"],
           do: Task.async(fn -> Parlora.append_context(pid, update(id)) end)
 
-    eventually(fn -> map_size(:sys.get_state(pid).startup.commands.records) == 3 end)
+    eventually(fn -> map_size(:sys.get_state(pid).commands.records) == 3 end)
     assert {:error, %{code: :backpressure}} = Parlora.append_context(pid, update("overflow"))
     assert :ok = Parlora.close(pid)
     assert {:error, %{details: %{outcome: :unknown}}} = Task.await(client)
