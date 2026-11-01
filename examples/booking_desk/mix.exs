@@ -17,6 +17,7 @@ defmodule BookingDesk.MixProject do
         {:exqlite, "== 0.40.0"},
         {:typesafe_ai, "== 0.1.0"},
         {:req_llm, "== 1.29.0"},
+        {:finch, "~> 0.24"},
         {:parlora_observer, path: "../observability", runtime: false},
         {:credo, "== 1.7.19", only: [:dev, :test], runtime: false},
         {:ex_dna, "== 1.5.4", only: [:dev, :test], runtime: false},
