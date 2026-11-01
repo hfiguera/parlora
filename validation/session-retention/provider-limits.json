@@ -14,7 +14,31 @@
         "https://developers.openai.com/api/docs/models/gpt-live-1",
         "https://developers.openai.com/api/docs/guides/live-conversations#manage-longer-conversations",
         "https://developers.openai.com/api/docs/guides/voice-sip"
-      ]
+      ],
+      "startup_history_messages_max": 128,
+      "startup_history_default_rendered_tokens_max": 8192,
+      "startup_instruction_tokens_max": 16384,
+      "context_append_tokens_max": {
+        "thinking": 500,
+        "commentary": 500,
+        "instructions": 500
+      },
+      "sdk_evidence": {
+        "distribution": "openai-python",
+        "language": "Python",
+        "version": "3.42.0",
+        "commit": "0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f",
+        "checked_at": "2026-11-01",
+        "findings": "Generated Live schema descriptions specify startup and append token constraints; these are not Python-side tokenizer enforcement. Session expiry is supplied as expires_at Unix seconds, not a fixed SDK duration. Optional context_window.usage_ratio reports provider context use and may fall after compaction. These limits are independent of local transcript entries and encoded bytes.",
+        "sources": [
+          "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/session_config_param.py#L133-L148",
+          "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/thinking_append_event_param.py#L11-L20",
+          "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/commentary_append_event_param.py#L11-L20",
+          "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/instructions_append_event_param.py#L11-L19",
+          "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/session_resource.py#L107-L115",
+          "https://github.com/openai/openai-python/blob/0dcd904bc2fed26c737d9740bca5f6b0ecc4cb7f/src/openai/types/live/session_usage_updated_event.py#L12-L22"
+        ]
+      }
     },
     {
       "provider": "Google",
@@ -28,7 +52,25 @@
       "sources": [
         "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live",
         "https://ai.google.dev/gemini-api/docs/live-api/session-management"
-      ]
+      ],
+      "sdk_documented_compression_target_default": {
+        "fraction_of_trigger": 0.5,
+        "client_field_default": null,
+        "scope": "Provider fallback described by the SDK schema when target_tokens is omitted; no model-specific trigger constant is established by the SDK."
+      },
+      "sdk_evidence": {
+        "distribution": "python-genai",
+        "language": "Python",
+        "version": "2.34.0",
+        "commit": "96f0f5a3106bdb240ce7c05be243754f85b6491e",
+        "checked_at": "2026-11-01",
+        "findings": "Model metadata exposes optional input_token_limit and output_token_limit via models.get. The SDK does not hard-code Gemini 3.8 Live token limits; those numbers remain sourced from the model documentation. Sliding-window compression preserves system instructions/prefix turns and cuts at a user-turn boundary. Its documented target must be below the trigger and defaults to half the trigger; this is provider token compaction, distinct from local delta retention.",
+        "sources": [
+          "https://github.com/googleapis/python-genai/blob/96f0f5a3106bdb240ce7c05be243754f85b6491e/google/genai/types.py#L11080-L11086",
+          "https://github.com/googleapis/python-genai/blob/96f0f5a3106bdb240ce7c05be243754f85b6491e/google/genai/types.py#L21095-L21134",
+          "https://github.com/googleapis/python-genai/blob/96f0f5a3106bdb240ce7c05be243754f85b6491e/google/genai/models.py#L5078-L5084"
+        ]
+      }
     },
     {
       "provider": "xAI",
@@ -40,15 +82,36 @@
       "sources": [
         "https://docs.x.ai/developers/models/grok-voice-3.0",
         "https://docs.x.ai/developers/model-capabilities/audio/speech-to-speech#session-resumption"
-      ]
+      ],
+      "sdk_evidence": {
+        "distribution": "xai-sdk-python",
+        "language": "Python",
+        "version": "1.21.0",
+        "commit": "884ba42c74408c37eddcc8092e0299dbd8dd38ac",
+        "checked_at": "2026-11-01",
+        "findings": "The inspected native SDK client surfaces do not expose realtime speech-to-speech. The official voice guide supplies OpenAI-compatible realtime SDK examples, but compatibility does not establish OpenAI context or duration limits for Grok. No numeric Grok Voice 3.0 context window or session-duration limit was established by this SDK audit.",
+        "sources": [
+          "https://github.com/xai-org/xai-sdk-python/blob/884ba42c74408c37eddcc8092e0299dbd8dd38ac/src/xai_sdk/sync/client.py#L11-L25",
+          "https://github.com/xai-org/xai-sdk-python/blob/884ba42c74408c37eddcc8092e0299dbd8dd38ac/src/xai_sdk/aio/client.py#L16-L30"
+        ],
+        "voice_compatibility_source": "https://docs.x.ai/developers/model-capabilities/audio/speech-to-speech#openai-realtime-api-compatibility"
+      }
     },
     {
       "provider": "Phonic",
       "model": "phonic-1",
       "context_token_limit": null,
       "session_duration_seconds": null,
-      "agent_websocket_inactivity_seconds": {"default": 60, "minimum": 1, "maximum": 300},
-      "agent_silence_end_seconds": {"default": 180, "minimum": 30, "maximum": 600},
+      "agent_websocket_inactivity_seconds": {
+        "default": 60,
+        "minimum": 1,
+        "maximum": 300
+      },
+      "agent_silence_end_seconds": {
+        "default": 180,
+        "minimum": 30,
+        "maximum": 600
+      },
       "sts_connection_requests_per_second_per_organization": 500,
       "notes": "No token window or maximum conversation duration was established in the consulted model introduction and WebSocket/configuration pages. Agent inactivity settings and organization request-rate limits are distinct from history capacity. Parlora configures no_input_end_conversation_sec to 600; it does not implement the provider's conversation reset API.",
       "sources": [
@@ -56,7 +119,23 @@
         "https://docs.phonic.ai/api-reference/conversations/conversations",
         "https://docs.phonic.ai/api-reference/agents/create",
         "https://docs.phonic.ai/docs/platform/rate_limits"
-      ]
+      ],
+      "sdk_evidence": {
+        "distribution": "phonic-python",
+        "language": "Python",
+        "version": "0.32.43",
+        "commit": "f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0",
+        "checked_at": "2026-11-01",
+        "findings": "WebSocket configuration exposes inactivity and silence-end settings as optional integers with no numeric limits in these generated fields. Their ranges/defaults remain sourced from the API docs. conversations.list(duration_max=...) filters recorded conversations; it is not a maximum live-call duration setting. No numeric Phonic-1 context window or maximum live-session duration was established.",
+        "sources": [
+          "https://github.com/Phonic-Co/phonic-python/blob/f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0/src/phonic/types/config_options.py#L23-L45",
+          "https://github.com/Phonic-Co/phonic-python/blob/f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0/src/phonic/types/config_options.py#L73-L76",
+          "https://github.com/Phonic-Co/phonic-python/blob/f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0/src/phonic/types/config_options.py#L143-L146",
+          "https://github.com/Phonic-Co/phonic-python/blob/f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0/src/phonic/conversations/client.py#L53-L83",
+          "https://github.com/Phonic-Co/phonic-python/blob/f71ee3bf80b3bcda6b9a0cd5eb0f87ac6f7867d0/src/phonic/types/config_options_model.py#L1-L5"
+        ]
+      }
     }
-  ]
+  ],
+  "sdk_audit_policy": "SDK sources are pinned to inspected commits. Generated schema descriptions, optional server metadata, client defaults, and hard provider limits are distinct. No SDK or provider API was executed and no account-specific model metadata was fetched."
 }
