@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.4.0
+
+Adds opt-in local audio capture for diagnostics and recording, fixes Gemini and
+Grok continuations during backend work, and adds the BookingDesk example.
+Existing session and adapter APIs remain compatible. Elixir, Erlang/OTP, Rust
+and native library requirements are unchanged; no configuration changes are
+required when upgrading from 0.3.x.
+
+### Added
+
+- An optional `:audio_observer` on `Parlora.Channels.LocalAudio` for converted
+  caller PCM and assistant software playout PCM before device conversion.
+  Delivery is bounded to 256 messages with dropped-packet accounting. Capture is
+  disabled by default; these observations do not establish physical playback.
+- A separate BookingDesk example using Jido, JEV, structured extraction and
+  deterministic record matching and booking approval. It includes microphone
+  and scripted replay modes, insurance review, simulated text reminders,
+  call-boundary guardrails, and offline tests and quality checks.
+- A booking conversation article with clean and café recordings for four
+  providers, synchronized transcripts and waveforms, backend activity, and
+  recorded metrics and traces. The example and publication remain in the
+  repository; their application code and media are not included in the Hex package.
+
+### Fixed
+
+- Close superseded Gemini function calls silently without sending internal
+  control outcomes to the model. Reject late context for those obsolete calls
+  and preserve existing reply monitoring and provider activity.
+- Wait for pending function outputs from Grok's latest response before requesting
+  a queued clarification. This prevents an unacknowledged continuation from
+  stranding a backend result after interrupted caller speech.
+
 ## 0.3.0
 
 Adds Phonic-1 as a supported speech-to-speech provider and uses Elixir's built-in
@@ -48,9 +80,6 @@ still install Jason for their own use; Parlora no longer depends on it directly.
 
 ### Fixed
 
-- Close superseded Gemini function calls silently without sending internal
-  control outcomes to the model. Reject late context for those obsolete calls
-  and preserve existing reply monitoring and provider activity.
 - Resume Phonic result announcements after completed late tool associations,
   suppress duplicate association continuations, and treat tool-only automatic
   turns as progress so they cannot strand a queued result behind a speech wait.
