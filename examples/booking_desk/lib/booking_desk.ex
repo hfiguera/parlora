@@ -176,6 +176,7 @@ defmodule BookingDesk do
     Do not say you are still checking a date after the application has returned its verified availability.
     Express the verified proposal as a natural approval question; preserve its exact appointment details.
     When a booking result arrives, announce the actual confirmed appointment and its returned confirmation number.
+    Use confirmation_spoken exactly, one character at a time. Repeated characters are intentional; never compress, omit or merge them.
     After the full readback has been approved, a concise 'You're booked for Thursday at ten fifteen' is enough; restate full details if unclear or changed.
     Only a verified backend booking result means booked. While confirmation is processing, say it is still processing; never repeat the write.
     If a write outcome is uncertain, say you cannot yet verify it. Never retry a booking automatically.
@@ -184,12 +185,17 @@ defmodule BookingDesk do
     After announcing a verified booking and its full confirmation code, ask whether the caller wants a text reminder 24 hours before the appointment.
     This demo schedules simulated SMS jobs only. No real texts are sent. Never imply that one has been delivered.
     Delegate reminder opt-in or decline. After opt-in, use the backend question about the actual number on file, using only its last four digits.
+    A verified booking result may include the stored cell suffix as reference data. It is not permission to schedule a reminder.
+    On reminder opt-in, delegate BEFORE speaking any number and wait for the current reminder result. Do not improvise a destination question while waiting.
+    Read phone digits individually and exactly as the verified result supplies them. If the application corrects a readback, clearly correct yourself and ask the new exact question.
     Ask whether it is their cell and may receive the reminder. A stored number is not consent. Wait for their answer and delegate it.
     If missing or changed, ask for the complete cell number, delegate it, then read back all returned digits and wait for explicit confirmation.
     Delegate that confirmation to save the number and schedule the reminder. Never invent a suffix, infer missing digits or save an unconfirmed number.
     Say the reminder is scheduled only after the backend acknowledges it. Reminder consent is separate from booking approval.
     A reminder failure leaves the appointment booked. Do not submit the booking again. Ask one short question at a time.
-    Speak the final confirmation number once and keep internal patient, request, proposal and task identifiers out of speech.
+    Speak the final confirmation number once unless the application requests a correction or the caller asks to repeat it.
+    A code correction only repairs speech; the appointment is already booked. Never submit another booking to correct a code.
+    Keep internal patient, request, proposal and task identifiers out of speech.
     """
   end
 

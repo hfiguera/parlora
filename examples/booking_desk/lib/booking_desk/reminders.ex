@@ -17,6 +17,19 @@ defmodule BookingDesk.Reminders do
 
   def phone(_), do: nil
 
+  def offer(db, patient) do
+    [[stored]] = q(db, "SELECT phone FROM patients WHERE id=?", [patient])
+    last_four = if phone(stored), do: String.slice(phone(stored), -4, 4)
+
+    contact =
+      if last_four,
+        do: "Verified contact reference: the cell on file ends in #{spoken(last_four)}.",
+        else: "There is no usable cell number on file; never invent one."
+
+    {"Ask whether they would like a text reminder 24 hours before the appointment. #{contact} This is reference data, not consent. Wait for their answer, delegate opt-in, and use the current backend destination question before asking for separate number confirmation.",
+     %{status: "offered", last_four: last_four}}
+  end
+
   def state(db, booking, lookup, session) do
     with [[encoded, result]] <- q(db, "SELECT input,result FROM receipts WHERE id=?", [booking]),
          %{
@@ -255,6 +268,21 @@ defmodule BookingDesk.Reminders do
       )
 
   def readback?(text, expected) do
+    readback_digits(text) == String.replace_prefix(expected, "+1", "") and
+      String.contains?(text, "?")
+  end
+
+  def destination_question?(text, expected) do
+    question = text |> String.trim() |> String.split(~r/(?<=[.!?])\s+/u) |> List.last()
+
+    readback?(text, expected) and
+      Regex.match?(
+        ~r/^(?:can|could|may) (?:we|I) (?:send (?:it|the reminder|that reminder|the text reminder)|text) to (?:your )?(?:(?:cell|phone)(?: number)?(?: ending in)? )?(?:[0-9+() .-]|zero|oh|one|two|three|four|five|six|seven|eight|nine)+\?$/i,
+        question
+      )
+  end
+
+  def readback_digits(text) do
     words =
       Map.new(
         Enum.zip(
@@ -263,12 +291,9 @@ defmodule BookingDesk.Reminders do
         )
       )
 
-    digits =
-      Regex.scan(~r/\b(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)\b|[0-9]/i, text)
-      |> List.flatten()
-      |> Enum.map_join(&Map.get(words, String.downcase(&1), &1))
-
-    digits == String.replace_prefix(expected, "+1", "") and String.contains?(text, "?")
+    Regex.scan(~r/\b(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)\b|[0-9]/i, text)
+    |> List.flatten()
+    |> Enum.map_join(&Map.get(words, String.downcase(&1), &1))
   end
 
   defp ok(summary, facts), do: %{status: "completed", summary: summary, facts: %{reminder: facts}}

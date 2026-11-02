@@ -56,7 +56,7 @@ defmodule BookingDesk.ReminderPolicy do
     do: :associate
 
   def interpret(snapshot, current, opts) do
-    turns = BookingDesk.Dialogue.build(snapshot.transcripts, with_cursor: true)
+    turns = BookingDesk.ReminderReadback.turns(snapshot, current)
     dialogue = Enum.map(turns, &Map.take(&1, [:speaker, :text]))
 
     caller = turns |> Enum.filter(&(&1.speaker == :user)) |> List.last()
@@ -84,12 +84,38 @@ defmodule BookingDesk.ReminderPolicy do
     classify = Keyword.get(opts, :reminder_judge, &classify/1)
 
     result =
-      if BookingDesk.Recovery.command(latest_user),
-        do: {:ok, "appointment"},
-        else: classify.(state)
+      cond do
+        BookingDesk.Recovery.command(latest_user) -> {:ok, "appointment"}
+        literal_confirmation?(current, state) -> {:ok, "confirm_number"}
+        true -> classify.(state)
+      end
 
     interpret_reply(result, snapshot, current, state, opts)
   end
+
+  defp literal_confirmation?(%{status: status, destination: destination}, state)
+       when status in ["verify_existing", "verify_new"] do
+    text =
+      state.latest_user
+      |> String.downcase()
+      |> String.replace("’", "'")
+      |> String.replace(~r/[.,!]/u, "")
+      |> String.trim()
+
+    accept =
+      BookingDesk.Reply.simple(text) == :accept or
+        text in ["yep that's my cell", "yes that's my cell", "yeah that's my cell"]
+
+    question = state.dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+
+    expected =
+      if status == "verify_existing", do: String.slice(destination, -4, 4), else: destination
+
+    accept and question != nil and
+      BookingDesk.Reminders.destination_question?(question.text, expected)
+  end
+
+  defp literal_confirmation?(_, _), do: false
 
   defp interpret_reply(result, snapshot, current, state, opts) do
     dialogue = state.dialogue

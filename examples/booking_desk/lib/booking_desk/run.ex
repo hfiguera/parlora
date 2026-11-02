@@ -23,7 +23,9 @@ defmodule BookingDesk.Run do
     channel =
       if mode == :microphone,
         do: {Parlora.Channels.LocalAudio, audio_observer: observer},
-        else: {ReplayChannel, owner: self(), audio_observer: observer, ambience: ambience}
+        else:
+          {ReplayChannel,
+           owner: self(), audio_observer: observer, recorder: recorder, ambience: ambience}
 
     {:ok, session} = BookingDesk.start(channel)
     {:ok, readback} = BookingDesk.Readback.start_link()
@@ -345,10 +347,7 @@ defmodule BookingDesk.Run do
   defp advance_stage(%{stage: :reminder} = s, settled, _age) do
     if settled && s.reminder != nil &&
          Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "verify_existing" &&
-         BookingDesk.Reminders.readback?(
-           s.text,
-           Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four))
-         ) &&
+         reminder_readback_verified?(s.session) &&
          s.channel != nil && ReplayChannel.output_drained?(s.channel) do
       play(s, "phone_confirm", %{
         last_four: Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four)),
@@ -379,6 +378,15 @@ defmodule BookingDesk.Run do
   end
 
   defp advance_stage(s, _settled, _age), do: s
+
+  defp reminder_readback_verified?(session) do
+    snapshot = Parlora.snapshot(session)
+
+    BookingDesk.ReminderReadback.verified?(
+      snapshot,
+      BookingDesk.ReminderPolicy.state(snapshot)
+    )
+  end
 
   @doc false
   def reminder_offer?(text),

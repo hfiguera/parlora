@@ -13,6 +13,55 @@ defmodule BookingDesk.ReminderPolicyTest do
     }
   end
 
+  test "a literal cell confirmation to an exact permission question needs no probabilistic judgment" do
+    state = %{
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p",
+      original_phone: "2025550188"
+    }
+
+    opts = [reminder_judge: fn _ -> flunk("a literal verified answer needs no model") end]
+
+    for question <- [
+          "Great. I'll set that up now. Could we send it to your cell ending in zero one eight eight?",
+          "Would you like a text reminder for this appointment? Can we send it to your cell number ending in zero one eight eight?",
+          "Can we send the reminder to 0188?"
+        ],
+        answer <- ["Yep, that's my cell", "Yes, please", "Yep, that’s my cell."] do
+      assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+               ReminderPolicy.interpret(snapshot(question, answer), state, opts)
+    end
+
+    uncertain = [
+      reminder_judge: fn _ -> {:error, :uncertain} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for question <- [
+          "Can we send the reminder to 4289?",
+          "Is 0188 your cell?",
+          "Can we send marketing texts to 0188?",
+          "Can we not send the reminder to 0188?",
+          "The caller asked: Can we send the reminder to 0188?",
+          "Can we send the reminder to 0188 if you pay?"
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(
+                 snapshot(question, "Yep, that's my cell"),
+                 state,
+                 uncertain
+               )
+    end
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(
+               snapshot("Can we send the reminder to 0188?", "Yes, if it is free"),
+               state,
+               uncertain
+             )
+  end
+
   test "only the exact current destination readback can authorize scheduling" do
     state = %{
       status: "verify_existing",

@@ -22,7 +22,9 @@ defmodule BookingDesk.Dialogue do
     |> Enum.map(&run(&1, cursor))
     |> Enum.reduce([], &append/2)
     # Assistant acknowledgments after the latest caller cannot change its intent.
-    |> Enum.drop_while(&(&1.speaker == :assistant))
+    |> Enum.drop_while(
+      &(not Keyword.get(opts, :include_assistant_reply, false) and &1.speaker == :assistant)
+    )
     |> Enum.take(limit)
     |> Enum.reverse()
     |> Enum.map(&Map.take(&1, fields))
