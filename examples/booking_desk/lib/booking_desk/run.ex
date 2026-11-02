@@ -44,6 +44,7 @@ defmodule BookingDesk.Run do
       clips: clips,
       mode: mode,
       any_doctor: Keyword.get(opts, :any_doctor, false),
+      clinician_replies: MapSet.new(),
       ambience: ambience != nil,
       stage: :starting,
       greeting_audio: false,
@@ -164,7 +165,8 @@ defmodule BookingDesk.Run do
     }
 
     cond do
-      s.stage == :insurance && r.input.operation == "availability" && r.input.date == "2026-11-04" ->
+      s.stage in [:insurance, :clinician] && r.input.operation == "availability" &&
+          r.input.date == "2026-11-04" ->
         Process.send_after(self(), {:play, "preparation"}, 500)
         s
 
@@ -321,6 +323,9 @@ defmodule BookingDesk.Run do
     end
   end
 
+  defp advance_stage(%{stage: stage} = s, settled, _age) when stage in [:insurance, :clinician],
+    do: advance_clinician(s, settled)
+
   defp advance_stage(%{stage: :correction} = s, settled, _age) do
     if settled &&
          Regex.match?(~r/10.?15|ten.?fifteen|two|2.?00|available|openings/i, s.text) do
@@ -379,6 +384,39 @@ defmodule BookingDesk.Run do
 
   defp advance_stage(s, _settled, _age), do: s
 
+  defp advance_clinician(s, true) do
+    answered = Map.get(s, :clinician_replies, MapSet.new())
+
+    with true <- MapSet.size(answered) < 2,
+         true <- String.contains?(s.text, "?"),
+         scope when is_map(scope) <- clinician_question(s),
+         false <- MapSet.member?(answered, scope.question_id),
+         true <- s.channel != nil and ReplayChannel.output_drained?(s.channel) do
+      next = play(s, "clinician", scope)
+
+      if next.readback_revision > s.readback_revision,
+        do: Map.put(next, :clinician_replies, MapSet.put(answered, scope.question_id)),
+        else: next
+    else
+      _ -> s
+    end
+  end
+
+  defp advance_clinician(s, _), do: s
+
+  defp clinician_question(%{session: session, identity_request: lookup}) when is_pid(session) do
+    snapshot = Parlora.snapshot(session)
+
+    BookingDesk.ClinicianClarification.pending(
+      snapshot,
+      lookup,
+      BookingDesk.Policy.insurance(snapshot),
+      "2026-11-04"
+    )
+  end
+
+  defp clinician_question(_), do: nil
+
   defp reminder_readback_verified?(session) do
     snapshot = Parlora.snapshot(session)
 
@@ -426,6 +464,8 @@ defmodule BookingDesk.Run do
   end
 
   defp caller_clip(%{any_doctor: true}, "search"), do: "search_any"
+  defp caller_clip(%{any_doctor: true}, "clinician"), do: "search_any"
+  defp caller_clip(_, "clinician"), do: "search"
   defp caller_clip(%{any_doctor: true}, "choose"), do: "choose_patel"
   defp caller_clip(_, id), do: id
 
@@ -435,7 +475,7 @@ defmodule BookingDesk.Run do
   defp mark_milestone(s, "insurance", milestone),
     do: Recorder.mark(s.recorder, "assistant:insurance_requested", milestone)
 
-  defp mark_milestone(s, id, milestone) when id in ["reminder", "phone_confirm"],
+  defp mark_milestone(s, id, milestone) when id in ["clinician", "reminder", "phone_confirm"],
     do: Recorder.mark(s.recorder, "assistant:" <> id <> "_requested", milestone)
 
   defp mark_milestone(s, "confirm", milestone),
@@ -452,6 +492,7 @@ defmodule BookingDesk.Run do
         "search" => :search,
         "identity" => :identity,
         "insurance" => :insurance,
+        "clinician" => :clinician,
         "preparation" => :preparation,
         "correction" => :correction,
         "choose" => :choose,
@@ -476,7 +517,7 @@ defmodule BookingDesk.Run do
 
   defp retry_play(s, id) do
     # Approval retries must pass the fresh proposal/transcript gate again.
-    if id not in ["confirm", "identity", "insurance", "reminder", "phone_confirm"] and
+    if id not in ["confirm", "identity", "insurance", "clinician", "reminder", "phone_confirm"] and
          not (id == "search" and s.stage == :greeting),
        do: Process.send_after(self(), {:play, id}, 100)
 

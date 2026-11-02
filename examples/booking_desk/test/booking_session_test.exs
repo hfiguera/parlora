@@ -103,6 +103,177 @@ defmodule BookingDesk.BookingSessionTest do
     defdelegate cancel(pid, id, request_id, reason), to: Provider
   end
 
+  defmodule ClarificationChannel do
+    use GenServer
+    def start_link(owner), do: GenServer.start_link(__MODULE__, %{owner: owner, drained: false})
+    def init(state), do: {:ok, state}
+    def handle_call(:output_drained, _, state), do: {:reply, state.drained, state}
+    def handle_call({:drained, value}, _, state), do: {:reply, :ok, %{state | drained: value}}
+
+    def handle_call({:play, pcm, label}, _, state) do
+      send(state.owner, {:played, label, pcm})
+      {:reply, :ok, state}
+    end
+  end
+
+  test "Dr. Li survives registration as canonical Dr. Lee and insurance resumes the original search" do
+    {_session, provider, backend, insurance} = register_doctor("li")
+    assert insurance.input.clinician == "lee"
+    Provider.complete(backend, insurance)
+    assert_receive {:context, insurance_result}, 4_000
+    assistant(provider, insurance_result.content, 8_000)
+    assert_receive {:submitted, search}, 4_000
+    assert search.input.operation == "availability"
+    assert search.input.date == "2026-11-04"
+    assert search.input.clinician == "lee"
+    Provider.complete(backend, search)
+    refute_receive {:submitted, _}, 100
+    assert BookingDesk.Store.reminder_jobs() == []
+  end
+
+  test "a real doctor clarification replays the original preference once and cannot approve a booking" do
+    {session, provider, backend, insurance} = register_doctor("unknown")
+    Provider.complete(backend, insurance)
+    assert_receive {:context, insurance_result}, 4_000
+    assert insurance_result.content =~ "confirmed their insurance"
+    assistant(provider, insurance_result.content, 8_000)
+    assert_receive {:context, question}, 4_000
+    assert question.content =~ "doctor"
+    snapshot = Parlora.snapshot(session)
+    task = snapshot.tasks[insurance.task_id]
+    assert task.clarification.input.missing_fields == ["clinician"]
+    assert task.clarification.input.booking_request["date"] == "2026-11-04"
+    assert task.clarification.input.clinician_clarification.task_revision == task.revision
+    refute_receive {:submitted, _}, 50
+
+    {state, pcm, channel} = clarification_runner(session, insurance.input.lookup_request)
+    assert BookingDesk.Run.advance(state).stage == :insurance
+    refute_receive {:played, _, _}, 10
+    :ok = GenServer.call(channel, {:drained, true})
+    next = BookingDesk.Run.advance(state)
+    assert next.stage == :clinician
+    assert_receive {:played, "clinician", ^pcm}
+    assert MapSet.size(next.clinician_replies) == 1
+
+    assert BookingDesk.Run.advance(%{state | clinician_replies: next.clinician_replies}).stage ==
+             :insurance
+
+    refute_receive {:played, _, _}, 10
+
+    capped = %{state | clinician_replies: MapSet.new(["earlier-question", "another-question"])}
+    assert BookingDesk.Run.advance(capped).stage == :insurance
+    refute_receive {:played, _, _}, 10
+
+    before = BookingDesk.Store.snapshot()
+    assistant(provider, question.content, 9_000)
+    caller(provider, "Dr. Li on November fourth, please", 10_000, "doctor-reply")
+    assert_receive {:submitted, search}, 4_000
+    assert search.input.operation == "availability"
+    assert search.input.date == "2026-11-04"
+    assert search.input.clinician == "lee"
+    assert search.input.lookup_request == insurance.input.lookup_request
+    Provider.complete(backend, search)
+    refute_receive {:submitted, _}, 100
+    assert BookingDesk.Store.snapshot() == before
+    assert BookingDesk.Store.reminder_jobs() == []
+  end
+
+  defp register_doctor(initial_doctor) do
+    owner = self()
+
+    judge = fn state ->
+      {intent, date, clinician} =
+        case state.latest_user do
+          "I'd like Dr. Li on November fourth" ->
+            send(owner, :initial_doctor_observed)
+            {"availability", "2026-11-04", initial_doctor}
+
+          "Jamie Rivera, March 12, 1990" ->
+            {"lookup", "unknown", "unknown"}
+
+          "Yep, same insurance" ->
+            {"insurance_same", "unknown", "unknown"}
+
+          "Dr. Li on November fourth, please" ->
+            {"availability", "2026-11-04", "li"}
+        end
+
+      Map.new(%{"intent" => intent, "date" => date, "clinician" => clinician}, fn {key, value} ->
+        {key, %{choice: value, probabilities: %{value => 0.99}}}
+      end)
+      |> BookingDesk.Judgment.decode(state)
+    end
+
+    {session, provider, backend} =
+      start_session(
+        judge,
+        [identity_extractor: fn _ -> {:ok, %{name: "jamie rivera", dob: "1990-03-12"}} end],
+        false
+      )
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "I'd like Dr. Li on November fourth",
+      start_ms: 1_000,
+      end_ms: 2_000
+    })
+
+    assert_receive :initial_doctor_observed, 4_000
+    assistant(provider, "May I have your full name and date of birth?", 3_000)
+    caller(provider, "Jamie Rivera, March 12, 1990", 4_000, "identity")
+    assert_receive {:submitted, lookup}, 4_000
+    assert lookup.input.operation == "lookup"
+    assert lookup.input.date == "2026-11-04"
+    assert lookup.input.clinician == if(initial_doctor == "li", do: "lee", else: nil)
+    Provider.complete(backend, lookup)
+    assert_receive {:context, insurance_question}, 4_000
+    assert insurance_question.content =~ "Aetna"
+    assistant(provider, insurance_question.content, 6_000)
+    caller(provider, "Yep, same insurance", 7_000, "insurance")
+    assert_receive {:submitted, insurance}, 4_000
+    assert insurance.input.operation == "insurance"
+    assert insurance.input.date == "2026-11-04"
+    {session, provider, backend, insurance}
+  end
+
+  defp clarification_runner(session, lookup) do
+    directory =
+      Path.join(System.tmp_dir!(), "booking-doctor-#{System.unique_integer([:positive])}")
+
+    File.mkdir_p!(directory)
+    on_exit(fn -> File.rm_rf!(directory) end)
+    pcm = :binary.copy(<<321::signed-little-16>>, 240)
+    File.write!(Path.join(directory, "search.pcm"), pcm)
+    channel = start_supervised!({ClarificationChannel, self()})
+
+    recorder =
+      start_supervised!({BookingDesk.Recorder, directory: Path.join(directory, "capture")})
+
+    readback = start_supervised!({BookingDesk.Readback, []})
+    now = System.monotonic_time(:millisecond)
+
+    {%{
+       mode: :replay,
+       stage: :insurance,
+       stage_at: now - 10_000,
+       stage_due: 0,
+       speech: :idle,
+       last_audio_at: now - 2_000,
+       text: "Which doctor would you like?",
+       session: session,
+       identity_request: lookup,
+       channel: channel,
+       recorder: recorder,
+       readback: readback,
+       clips: directory,
+       readback_revision: 0,
+       confirmation_readback: false,
+       greeting_completed: true,
+       any_doctor: false,
+       clinician_replies: MapSet.new()
+     }, pcm, channel}
+  end
+
   test "a corrected search delivers only its result and booking still needs fresh unconditional approval" do
     judge = fn state ->
       cond do
@@ -573,7 +744,7 @@ defmodule BookingDesk.BookingSessionTest do
     end
   end
 
-  defp start_session(judge, policy_opts \\ []) do
+  defp start_session(judge, policy_opts \\ [], registered? \\ true) do
     {:ok, memory} = start_supervised(BookingDesk.Conversation)
     policy = Keyword.merge([conversation: memory, judge: judge, coalesce_ms: 0], policy_opts)
 
@@ -598,7 +769,11 @@ defmodule BookingDesk.BookingSessionTest do
     assert_receive {:provider, provider}
     assert_receive {:backend, backend}
     assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 5_000
-    :ok = Parlora.update_context(session, registration(Parlora.snapshot(session).session_id))
+
+    if registered? do
+      :ok = Parlora.update_context(session, registration(Parlora.snapshot(session).session_id))
+    end
+
     {session, provider, backend}
   end
 

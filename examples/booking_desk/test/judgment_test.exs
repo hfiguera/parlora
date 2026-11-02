@@ -4,6 +4,40 @@ defmodule BookingDesk.JudgmentTest do
 
   defp answer(value, p \\ 0.99), do: %{choice: value, probabilities: %{value => p}}
 
+  test "approved speech spellings become canonical doctors only after the confidence gate" do
+    fields = %{"intent" => answer("availability"), "date" => answer("2026-11-04")}
+
+    for spelling <- ["li", "lee"] do
+      assert {:ok, %{"clinician" => "lee"}} =
+               Judgment.decode(Map.put(fields, "clinician", answer(spelling)))
+    end
+
+    for spelling <- ["li", "lee", "patel", "any"] do
+      assert {:ok, %{"clinician" => "unknown"}} =
+               Judgment.decode(Map.put(fields, "clinician", answer(spelling, 0.84)))
+    end
+
+    for spelling <- ["unknown", "lin", "smith", "leigh"] do
+      assert {:ok, %{"clinician" => "unknown"}} =
+               Judgment.decode(Map.put(fields, "clinician", answer(spelling)))
+    end
+
+    assert {:ok, %{"clinician" => "any"}} =
+             Judgment.decode(Map.put(fields, "clinician", answer("any")))
+
+    assert {:incomplete, %{"clinician" => "lee", "intent" => "unknown"}, ["intent"]} =
+             fields
+             |> Map.put("clinician", answer("li"))
+             |> Map.put("intent", answer("confirm", 0.84))
+             |> Judgment.decode()
+
+    choices = BookingDesk.Clinicians.choices()
+    assert choices["lee"] =~ "Dr. Li"
+    refute Map.has_key?(choices, "li")
+    assert BookingDesk.Store.clinicians() == %{"lee" => "Dr. Lee", "patel" => "Dr. Patel"}
+    assert BookingDesk.Clinicians.guidance() =~ "explicit spelling correction"
+  end
+
   test "uncertain results are cached for unchanged input but not new caller or backend state" do
     state = %{
       latest_user: "The morning one",

@@ -1295,11 +1295,14 @@ defmodule BookingDesk.Policy do
     request = if "intent" in missing, do: Map.delete(request, "intent"), else: request
     lookup = identity(snapshot)
 
-    input = %{
-      booking_request: request,
-      unresolved_intent: "intent" in missing,
-      lookup_request: if(lookup, do: lookup.lookup_request)
-    }
+    input =
+      %{
+        booking_request: request,
+        missing_fields: missing,
+        unresolved_intent: "intent" in missing,
+        lookup_request: if(lookup, do: lookup.lookup_request)
+      }
+      |> BookingDesk.ClinicianClarification.tag(snapshot, latest, missing)
 
     offer =
       if "intent" in missing and match?(%{confirmed: true}, insurance(snapshot)),
@@ -1642,11 +1645,13 @@ defmodule BookingDesk.Policy do
         {:ok, associate(pending, lookup)}
 
       clinician not in ["lee", "patel", "any"] ->
-        clarify(
+        clarify_booking(
+          snapshot,
           cursor,
           pending,
           lookup,
-          "Do you have a particular doctor in mind, or is any available doctor okay?"
+          %{"date" => date},
+          ["clinician"]
         )
 
       date not in BookingDesk.Store.dates() ->
