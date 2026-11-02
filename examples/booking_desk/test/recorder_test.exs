@@ -192,4 +192,42 @@ defmodule BookingDesk.RecorderTest do
     refute File.read!(Path.join(path, "session.json")) =~ "private"
     GenServer.stop(recorder)
   end
+
+  test "policy rejections retain safe diagnostics instead of empty event data", %{
+    recorder: recorder,
+    path: path
+  } do
+    for type <- [:policy_rejected, :policy_failed, :context_rejected] do
+      Recorder.event(recorder, %Parlora.Event{
+        id: Atom.to_string(type),
+        session_id: "test",
+        source: :session,
+        adapter_id: "session",
+        generation: 0,
+        type: type,
+        observed_at_us: System.monotonic_time(:microsecond),
+        payload: %{
+          error:
+            Parlora.Error.new(
+              :invalid_argument,
+              "Clarification requires a question and an optional 1–128 byte key",
+              %{private: "private credential"}
+            )
+        }
+      })
+    end
+
+    report = Recorder.finish(recorder, %{})
+    assert length(report.events) == 3
+
+    assert Enum.all?(report.events, fn event ->
+             event.data == %{
+               error_code: :invalid_argument,
+               error_reason: :invalid_clarification
+             }
+           end)
+
+    refute File.read!(Path.join(path, "events.jsonl")) =~ "private"
+    GenServer.stop(recorder)
+  end
 end

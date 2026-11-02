@@ -11,10 +11,14 @@ defmodule BookingDesk.Identity do
     do: Enum.any?(dialogue, &(&1.speaker == :assistant and requested?(&1.text)))
 
   def validate(output, state) when is_map(output) do
+    retained = Map.get(state, :retained_identity, %{})
+
     source =
       state.dialogue
       |> Enum.filter(&(&1.speaker == :user))
       |> Enum.map_join(" ", & &1.text)
+      |> Kernel.<>(" " <> Enum.join(Map.get(state, :retained_registration, []), " "))
+      |> Kernel.<>(" " <> retained_source(retained))
       |> normalize()
 
     with true <- Enum.sort(Map.keys(output)) == Enum.sort(@fields),
@@ -28,7 +32,7 @@ defmodule BookingDesk.Identity do
          true <-
            supported?(output["name_evidence"], source) and
              Enum.all?(output["dob_evidence"], &supported?(&1, source)) do
-      validate_fields(output)
+      validate_fields(output, state, retained)
     else
       _ -> {:error, :invalid_extraction}
     end
@@ -36,33 +40,84 @@ defmodule BookingDesk.Identity do
 
   def validate(_, _), do: {:error, :invalid_extraction}
 
-  defp validate_fields(%{"status" => "ambiguous"}), do: {:incomplete, [:ambiguous]}
+  defp validate_fields(%{"status" => "ambiguous"}, _, _), do: {:incomplete, [:ambiguous]}
 
-  defp validate_fields(%{"status" => "incomplete"} = output) do
-    missing =
-      Enum.filter([:name, :dob], fn
-        :name -> output["full_name"] == nil
-        :dob -> output["dob"] == nil
-      end)
+  defp validate_fields(output, state, retained) do
+    changed =
+      is_binary(output["full_name"]) and retained[:name] != nil and
+        normalize(output["full_name"]) != retained.name
 
-    {:incomplete, if(missing == [], do: [:ambiguous], else: missing)}
+    output = isolate_person(output, state, changed)
+    retained = if changed, do: %{}, else: retained
+
+    retained =
+      if output["dob"] == nil and output["dob_evidence"] != [],
+        do: Map.delete(retained, :dob),
+        else: retained
+
+    with {:ok, name} <- name_fields(output),
+         {:ok, dob} <- dob_fields(output) do
+      fields = retained |> Map.merge(name) |> Map.merge(dob)
+      finish_fields(output["status"], fields, changed)
+    end
   end
 
-  defp validate_fields(output) do
-    with name when is_binary(name) <- output["full_name"],
-         evidence when is_binary(evidence) <- output["name_evidence"],
-         name = normalize(name),
-         true <-
-           name == normalize(evidence) and byte_size(name) <= 100 and
-             Regex.match?(~r/^[\p{L}][\p{L}\p{M}'-]*(?:\s+[\p{L}][\p{L}\p{M}'-]*){1,7}$/u, name),
-         dob when is_binary(dob) <- output["dob"],
-         {:ok, date} <- Date.from_iso8601(dob),
+  defp isolate_person(output, state, true) do
+    source = normalize(state.latest_user)
+
+    fresh =
+      output["dob_evidence"] != [] and
+        Enum.all?(output["dob_evidence"], &supported?(&1, source))
+
+    if fresh, do: output, else: Map.merge(output, %{"dob" => nil, "dob_evidence" => []})
+  end
+
+  defp isolate_person(output, _, false), do: output
+
+  defp name_fields(%{"full_name" => nil, "name_evidence" => nil}), do: {:ok, %{}}
+
+  defp name_fields(%{"full_name" => name, "name_evidence" => evidence})
+       when is_binary(name) and is_binary(evidence) do
+    value = normalize(name)
+
+    if value == normalize(evidence) and byte_size(value) <= 100 and
+         Regex.match?(~r/^[\p{L}][\p{L}\p{M}'-]*(?:\s+[\p{L}][\p{L}\p{M}'-]*){1,7}$/u, value),
+       do: {:ok, %{name: value, name_evidence: evidence}},
+       else: {:error, :invalid_extraction}
+  end
+
+  defp name_fields(_), do: {:error, :invalid_extraction}
+
+  defp dob_fields(%{"dob" => nil, "dob_evidence" => []}), do: {:ok, %{}}
+  defp dob_fields(%{"dob" => nil, "dob_evidence" => parts}), do: {:ok, %{dob_evidence: parts}}
+
+  defp dob_fields(%{"dob" => dob, "dob_evidence" => parts}) when is_binary(dob) do
+    with {:ok, date} <- Date.from_iso8601(dob),
          true <- date.year >= 1900 and Date.compare(date, ~D[2026-11-02]) != :gt,
-         {:ok, ^dob} <- BookingDesk.BirthDate.parse(Enum.join(output["dob_evidence"], " ")) do
-      {:ok, %{name: name, dob: dob}}
+         {:ok, ^dob} <- BookingDesk.BirthDate.parse(Enum.join(parts, " ")) do
+      {:ok, %{dob: dob, dob_evidence: parts}}
     else
       _ -> {:error, :invalid_extraction}
     end
+  end
+
+  defp dob_fields(_), do: {:error, :invalid_extraction}
+
+  defp finish_fields(status, fields, changed) do
+    missing = Enum.reject([:name, :dob], &Map.has_key?(fields, &1))
+
+    case {status, missing, changed} do
+      {"complete", [], _} -> {:ok, Map.take(fields, [:name, :dob])}
+      {"complete", _, false} -> {:error, :invalid_extraction}
+      _ -> {:incomplete, if(missing == [], do: [:ambiguous], else: missing), fields}
+    end
+  end
+
+  defp retained_source(retained) do
+    ([retained[:name_evidence] || retained[:name], retained[:dob]] ++
+       Map.get(retained, :dob_evidence, []))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 
   defp normalize(text),

@@ -91,4 +91,229 @@ defmodule BookingDesk.ReminderPolicyTest do
                end
              )
   end
+
+  test "uncertainty preserves the reminder step and asks about the pending destination" do
+    current = %{
+      status: "verify_new",
+      destination: "+12025550199",
+      patient: "p",
+      original_phone: nil
+    }
+
+    assert {:clarify, question} =
+             ReminderPolicy.interpret(snapshot("Is this your new number?", "Maybe"), current,
+               reminder_judge: fn _ -> {:error, :uncertain} end,
+               phone_extractor: fn _ -> {:incomplete, [:phone]} end
+             )
+
+    assert question =~ BookingDesk.Reminders.spoken(current.destination)
+    refute question =~ "Would you like a text reminder?"
+  end
+
+  test "a number supplied under uncertainty survives later turns but cannot authorize consent" do
+    memory = start_supervised!(BookingDesk.Conversation)
+    opts = [conversation: memory]
+    s = struct(Parlora.ContextSnapshot, snapshot("What cell number?", "2025550199"))
+    s = %{s | revision: 2}
+    s = BookingDesk.Conversation.attach(s, opts)
+    current = %{status: "need_number", destination: nil, patient: "p", original_phone: nil}
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(
+               s,
+               current,
+               opts ++
+                 [
+                   reminder_judge: fn _ -> {:error, :uncertain} end,
+                   phone_extractor: fn _ -> {:ok, %{phone: "+12025550199"}} end
+                 ]
+             )
+
+    later = %{
+      s
+      | revision: 30,
+        transcripts: [%{speaker: :user, delta: "Use that number", arrival_order: 30}]
+    }
+
+    later = BookingDesk.Conversation.attach(later, opts)
+
+    assert {:input, %{operation: "reminder_number", phone: "+12025550199"}} =
+             ReminderPolicy.interpret(
+               later,
+               current,
+               opts ++
+                 [
+                   reminder_judge: fn state ->
+                     assert state.conversation.phone == "+12025550199"
+                     {:ok, "number"}
+                   end,
+                   phone_extractor: fn _ -> {:incomplete, [:phone]} end
+                 ]
+             )
+
+    old_question =
+      struct(
+        Parlora.ContextSnapshot,
+        snapshot("Can we text your cell ending in zero one eight eight?", "Yes")
+      )
+
+    old_question = BookingDesk.Conversation.attach(%{old_question | revision: 31}, opts)
+    old = %{current | status: "verify_existing", destination: "+12025550188"}
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(
+               old_question,
+               old,
+               opts ++ [reminder_judge: fn _ -> {:ok, "confirm_number"} end]
+             )
+
+    for status <- ["scheduled", "declined"] do
+      assert :associate =
+               ReminderPolicy.interpret(later, %{current | status: status},
+                 reminder_judge: fn _ -> flunk("terminal reminder was reinterpreted") end
+               )
+    end
+
+    offered = %{current | status: "offered"}
+
+    assert {:clarify, question} =
+             ReminderPolicy.interpret(
+               later,
+               offered,
+               opts ++
+                 [
+                   reminder_judge: fn _ -> {:error, :uncertain} end,
+                   phone_extractor: fn _ -> {:incomplete, [:phone]} end
+                 ]
+             )
+
+    assert BookingDesk.Run.reminder_offer?(question)
+  end
+
+  test "conditional replies cannot grant reminder consent even with a confident classification" do
+    offer = %{status: "offered", destination: nil, patient: "p", original_phone: nil}
+    destination = %{offer | status: "verify_new", destination: "+12025550199"}
+
+    for text <- [
+          "Yes, if it is free",
+          "Maybe",
+          "No, don't send it",
+          "Yes, but wait",
+          "Yes, don’t send it"
+        ] do
+      assert :associate =
+               ReminderPolicy.interpret(snapshot("Would you like a text reminder?", text), offer,
+                 reminder_judge: fn _ -> {:ok, "opt_in"} end
+               )
+
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(
+                 snapshot("Can we text two zero two five five five zero one nine nine?", text),
+                 destination,
+                 reminder_judge: fn _ -> {:ok, "confirm_number"} end
+               )
+    end
+  end
+
+  test "rechecking one phone fragment cannot feed that same fragment back as earlier evidence" do
+    memory = start_supervised!(BookingDesk.Conversation)
+    opts = [conversation: memory, reminder_judge: fn _ -> {:error, :uncertain} end]
+    s = struct(Parlora.ContextSnapshot, snapshot("What cell number?", "202555"))
+    current = %{status: "need_number", destination: nil, patient: "p", original_phone: nil}
+    owner = self()
+
+    extract = fn state ->
+      send(owner, {:retained_digits, state.retained_phone_evidence})
+      {:incomplete, [:phone], %{evidence: ["202555"]}}
+    end
+
+    for revision <- [2, 3] do
+      turn = BookingDesk.Conversation.attach(%{s | revision: revision}, opts)
+
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(turn, current, opts ++ [phone_extractor: extract])
+
+      assert_receive {:retained_digits, []}
+    end
+
+    later = %{s | revision: 4, transcripts: [%{speaker: :user, delta: "0199", arrival_order: 3}]}
+    later = BookingDesk.Conversation.attach(later, opts)
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(
+               later,
+               current,
+               opts ++
+                 [
+                   phone_extractor: fn state ->
+                     assert state.retained_phone_evidence == ["202555"]
+
+                     BookingDesk.Phone.validate(
+                       %{"phone" => "+12025550199", "evidence" => ["202555", "0199"]},
+                       state.latest_user,
+                       state.retained_phone_evidence
+                     )
+                   end
+                 ]
+             )
+
+    assert BookingDesk.Conversation.context(BookingDesk.Conversation.attach(later, opts)).phone ==
+             "+12025550199"
+  end
+
+  test "streaming captions replace their own phone prefix instead of counting it twice" do
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    opts = [
+      conversation: memory,
+      reminder_judge: fn _ -> {:error, :uncertain} end,
+      phone_extractor: fn state ->
+        assert state.retained_phone_evidence == []
+        phone = if state.latest_user == "2025550199", do: "+12025550199"
+
+        BookingDesk.Phone.validate(
+          %{"phone" => phone, "evidence" => state.latest_user},
+          state.latest_user
+        )
+      end
+    ]
+
+    current = %{status: "need_number", destination: nil, patient: "p", original_phone: nil}
+    first = struct(Parlora.ContextSnapshot, snapshot("What cell number?", "202555"))
+    first = %{first | revision: 2}
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(BookingDesk.Conversation.attach(first, opts), current, opts)
+
+    extended = %{
+      first
+      | revision: 3,
+        transcripts: [%{speaker: :user, delta: "0", arrival_order: 3} | first.transcripts]
+    }
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(
+               BookingDesk.Conversation.attach(extended, opts),
+               current,
+               opts
+             )
+
+    assert BookingDesk.Conversation.context(BookingDesk.Conversation.attach(extended, opts)).phone_evidence ==
+             ["2025550"]
+
+    complete = %{
+      extended
+      | revision: 4,
+        transcripts: [%{speaker: :user, delta: "199", arrival_order: 4} | extended.transcripts]
+    }
+
+    for revision <- [4, 5] do
+      turn = BookingDesk.Conversation.attach(%{complete | revision: revision}, opts)
+      assert {:clarify, _} = ReminderPolicy.interpret(turn, current, opts)
+    end
+
+    assert BookingDesk.Conversation.context(
+             BookingDesk.Conversation.attach(%{complete | revision: 5}, opts)
+           ).phone == "+12025550199"
+  end
 end

@@ -29,6 +29,9 @@ defmodule BookingDesk.Store do
   def snapshot(server \\ __MODULE__), do: GenServer.call(server, :snapshot)
   def proposals(server \\ __MODULE__), do: GenServer.call(server, :proposals)
 
+  def appointment(request, lookup, session, server \\ __MODULE__),
+    do: GenServer.call(server, {:appointment, request, lookup, session})
+
   def readback_proposal(patient, id, revision, server \\ __MODULE__),
     do: GenServer.call(server, {:readback_proposal, patient, id, revision})
 
@@ -118,6 +121,9 @@ defmodule BookingDesk.Store do
     do: {:reply, BookingDesk.Reminders.state(db, booking, lookup, session), db}
 
   def handle_call(:reminder_jobs, _from, db), do: {:reply, BookingDesk.Reminders.jobs(db), db}
+
+  def handle_call({:appointment, request, lookup, session}, _from, db),
+    do: {:reply, appointment_result(db, request, lookup, session), db}
 
   def handle_call({:identity, request, session}, _from, db),
     do: {:reply, matched_identity(db, request, session), db}
@@ -653,6 +659,32 @@ defmodule BookingDesk.Store do
 
       _ ->
         nil
+    end
+  end
+
+  defp appointment_result(db, request, lookup, session) do
+    with [[encoded, result]] <-
+           query(db, "SELECT input,result FROM receipts WHERE id=?", [request]),
+         %{
+           "operation" => "confirm",
+           "lookup_request" => ^lookup,
+           "session" => ^session,
+           "patient" => patient
+         } <- JSON.decode!(encoded),
+         ^patient <- matched_identity(db, lookup, session),
+         %{"status" => "completed", "facts" => facts} <- JSON.decode!(result),
+         id when is_binary(id) <- facts["appointment"] || facts["cancelled"],
+         [[slot, status, confirmation]] <-
+           query(
+             db,
+             "SELECT slot,status,confirmation FROM appointments WHERE id=? AND patient=?",
+             [id, patient]
+           ) do
+      kind = if facts["cancelled"], do: "cancellation", else: "booking"
+      confirmation = if kind == "cancellation", do: "BD-" <> request, else: confirmation
+      %{appointment: id, slot: slot, status: status, confirmation: confirmation, kind: kind}
+    else
+      _ -> nil
     end
   end
 

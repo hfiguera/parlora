@@ -29,6 +29,7 @@ defmodule BookingDesk.Application do
         {BookingDesk.Judgment, []},
         {Task.Supervisor, name: BookingDesk.GuardTasks, max_children: 8},
         {DynamicSupervisor, name: BookingDesk.CallGuards, strategy: :one_for_one},
+        {DynamicSupervisor, name: BookingDesk.Conversations, strategy: :one_for_one},
         {Task.Supervisor, name: BookingDesk.IdentityTasks, max_children: 2},
         {BookingDesk.Identity.Extractor, []},
         Supervisor.child_spec(
