@@ -355,6 +355,14 @@ defmodule BookingDesk.StoreTest do
       appointment: "appt_existing"
     })
 
+    assert %{change: "reschedule"} = Store.readback_proposal("p_1002", "proposal-a", 4, store)
+
+    assert %{change: "reschedule", clinician_id: "lee"} =
+             BookingDesk.Policy.current_proposal(
+               proposal_snapshot("reschedule", "proposal-a", "2026-11-05T14:00:00"),
+               store
+             )
+
     assert confirm(store, "proposal-a", "booking-a")["status"] == "completed"
 
     assert Enum.any?(Store.snapshot(store), fn [id, _, _, status, _] ->
@@ -406,7 +414,59 @@ defmodule BookingDesk.StoreTest do
 
     assert result["status"] == "completed"
     assert [[_, _, _, "booked", _]] = Store.snapshot(store)
+    assert %{change: "cancel"} = Store.readback_proposal("p_1002", "cancel-proposal", 4, store)
+
+    assert %{change: "cancel"} =
+             BookingDesk.Policy.current_proposal(
+               proposal_snapshot("cancel", "cancel-proposal", ""),
+               store
+             )
+
     assert confirm(store, "cancel-proposal", "cancel-write")["status"] == "completed"
     assert [[_, _, _, "cancelled", _]] = Store.snapshot(store)
+  end
+
+  test "expired proposals cannot be read back or confirmed", %{store: store} do
+    propose(store, "expired-proposal")
+
+    :ok =
+      Exqlite.Sqlite3.execute(
+        :sys.get_state(store),
+        "UPDATE proposals SET expires=0 WHERE id='expired-proposal'"
+      )
+
+    assert Store.readback_proposal("p_1002", "expired-proposal", 4, store) == nil
+
+    assert BookingDesk.Policy.current_proposal(
+             proposal_snapshot("book", "expired-proposal", "2026-11-05T10:15:00"),
+             store
+           ) == nil
+
+    assert confirm(store, "expired-proposal", "expired-write")["status"] == "failed"
+    assert length(Store.snapshot(store)) == 1
+  end
+
+  defp proposal_snapshot(change, id, slot) do
+    %Parlora.ContextSnapshot{
+      session_id: "store-test-p_1002",
+      application_context: %{lookup_request: "store-test-p_1002-lookup"},
+      tasks: %{
+        "t" => %{
+          id: "t",
+          status: :completed,
+          revision: 1,
+          request_ids: [id],
+          input: %{
+            operation: "propose",
+            change: change,
+            patient: "p_1002",
+            lookup_request: "store-test-p_1002-lookup",
+            slot: slot,
+            revision: 4,
+            cursor: 4
+          }
+        }
+      }
+    }
   end
 end

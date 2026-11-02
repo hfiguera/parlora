@@ -132,4 +132,42 @@ defmodule BookingDesk.JudgmentTest do
                %{verified_offers: [morning, %{morning | clinician: "patel"}]}
              )
   end
+
+  test "cancellation approves its immutable proposal without inventing replacement slot fields" do
+    answers = %{
+      "intent" => answer("confirm"),
+      "date" => answer("unknown"),
+      "time" => answer("unknown"),
+      "clinician" => answer("unknown")
+    }
+
+    assert {:ok, %{"intent" => "confirm"}} =
+             Judgment.decode(answers, %{proposal: %{change: "cancel"}})
+
+    for change <- ~w(book reschedule) do
+      assert {:incomplete, _, ["date", "time", "clinician"]} =
+               Judgment.decode(answers, %{proposal: %{change: change}})
+    end
+  end
+
+  test "a failed interpreter returns unavailable and a fresh input can recover" do
+    state = %{latest_user: "failure-#{System.unique_integer([:positive])}"}
+
+    assert {:error, :unavailable} =
+             Judgment.classify(state, evaluator: fn _ -> raise "service failed" end)
+
+    assert {:ok, %{"intent" => "none"}} =
+             Judgment.classify(%{state | latest_user: state.latest_user <> " corrected"},
+               evaluator: fn _ -> {:ok, %{"intent" => "none"}} end
+             )
+  end
+
+  test "confidence gates reject malformed probabilities instead of treating them as permission" do
+    for probability <- [nil, "0.99", true, -1, 1.1] do
+      refute Judgment.confident?(%{choice: "confirm", probabilities: %{"confirm" => probability}})
+    end
+
+    refute Judgment.confident?(%{choice: "confirm", probabilities: nil})
+    assert Judgment.confident?(answer("confirm"))
+  end
 end

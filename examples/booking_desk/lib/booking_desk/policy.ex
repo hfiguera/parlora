@@ -1,6 +1,7 @@
 defmodule BookingDesk.Policy do
   alias BookingDesk.Conversation
   alias BookingDesk.Identity.Extractor
+  alias BookingDesk.Recovery
 
   @moduledoc "Application-owned booking decisions. JEV proposes semantics; code binds operations to current state."
   @behaviour Parlora.ContextPolicy
@@ -71,7 +72,7 @@ defmodule BookingDesk.Policy do
       registration_ready?(latest, cursor, snapshot) ->
         resume_search(snapshot, pending, latest, cursor)
 
-      caller_consumed?(latest, cursor) ->
+      protected_work?(latest, cursor) ->
         {:ok, associate(pending, latest)}
 
       assistant_speaking?(snapshot, trigger) ->
@@ -100,6 +101,9 @@ defmodule BookingDesk.Policy do
       latest && latest.input.operation in ["lookup", "insurance"] &&
         latest.status == :completed && cursor <= latest.input.cursor && patient(snapshot) != nil
 
+  defp protected_work?(latest, cursor),
+    do: caller_consumed?(latest, cursor) || Recovery.pending_write?(latest)
+
   defp caller_consumed?(latest, cursor), do: latest && cursor <= latest.input.cursor
 
   defp assistant_speaking?(snapshot, trigger),
@@ -108,10 +112,14 @@ defmodule BookingDesk.Policy do
         snapshot.provider_speech == :speaking && hd(snapshot.transcripts).speaker == :assistant
 
   defp request_state(snapshot, latest, cursor) do
-    dialogue =
+    turns =
       BookingDesk.Dialogue.build(snapshot.transcripts,
-        after_cursor: if(latest, do: latest.input.cursor)
+        after_cursor: if(latest, do: latest.input.cursor),
+        with_cursor: true
       )
+
+    dialogue = Enum.map(turns, &Map.take(&1, [:speaker, :text]))
+    caller = turns |> Enum.filter(&(&1.speaker == :user)) |> List.last()
 
     latest_user =
       dialogue |> Enum.filter(&(&1.speaker == :user)) |> List.last() |> Map.fetch!(:text)
@@ -120,7 +128,7 @@ defmodule BookingDesk.Policy do
       dialogue: dialogue,
       latest_user: latest_user,
       active:
-        if(latest,
+        if(latest && not Conversation.context(snapshot).identity_changed,
           do:
             Map.drop(latest.input, [
               :name,
@@ -139,6 +147,7 @@ defmodule BookingDesk.Policy do
       reminder: BookingDesk.ReminderPolicy.context(snapshot),
       appointment: BookingDesk.ReminderPolicy.appointment(snapshot),
       pending_request: pending_request(snapshot),
+      pending_question: if(latest, do: get_in(latest, [:clarification, :message])),
       verified_offers: verified_offers(snapshot),
       dates: BookingDesk.Store.dates(),
       today: "2026-11-02",
@@ -147,6 +156,7 @@ defmodule BookingDesk.Policy do
         session_id: snapshot.session_id,
         provider_generation: snapshot.provider_generation,
         caller_cursor: cursor,
+        caller_turn: caller.first_cursor,
         application_context:
           Map.drop(snapshot.application_context, [:booking_conversation_frame]),
         tasks:
@@ -166,7 +176,8 @@ defmodule BookingDesk.Policy do
       latest: latest,
       cursor: cursor,
       text: state.latest_user,
-      demographics: demographics
+      demographics: demographics,
+      options: opts
     }
 
     continue_demographics(context, state, result, opts)
@@ -178,10 +189,18 @@ defmodule BookingDesk.Policy do
   end
 
   defp extract_request(snapshot, latest, cursor, opts) do
-    # Coalesce a bounded caller fragment before interpreting it.
     Process.sleep(Keyword.get(opts, :coalesce_ms, 180))
     state = request_state(snapshot, latest, cursor)
+    {snapshot, state} = prepare_registration(snapshot, state, opts)
+    result = classify_request(state, opts)
+    snapshot = remember_request(snapshot, state, result, latest, cursor, opts)
+    state = %{state | conversation: Conversation.decision_context(snapshot)}
+    demographics = extract_identity(snapshot, state, result, opts)
+    snapshot = Conversation.remember(snapshot, opts, identity: demographics)
+    {snapshot, state, result, demographics}
+  end
 
+  defp prepare_registration(snapshot, state, opts) do
     snapshot =
       Conversation.remember(snapshot, opts,
         registration_requested: BookingDesk.Identity.requested_in?(state.dialogue)
@@ -202,21 +221,74 @@ defmodule BookingDesk.Policy do
           )
     }
 
+    {snapshot, state}
+  end
+
+  defp classify_request(state, opts) do
     judge = Keyword.get(opts, :judge, &BookingDesk.Judgment.classify/1)
-    result = judge.(state)
+
+    cond do
+      command = Recovery.command(state.latest_user) ->
+        command
+
+      state.proposal != nil and BookingDesk.Reply.simple(state.latest_user) == :decline ->
+        {:ok, %{"intent" => "decline_proposal"}}
+
+      true ->
+        judge.(state)
+    end
+  end
+
+  defp remember_request(snapshot, state, result, latest, cursor, opts) do
     snapshot = Conversation.remember(snapshot, opts, judgment: result)
 
-    state = %{state | conversation: Conversation.decision_context(snapshot)}
+    snapshot =
+      if match?({:ok, %{"intent" => "restart"}}, result) and not Recovery.pending_write?(latest),
+        do: Conversation.remember(snapshot, opts, reset: cursor),
+        else: snapshot
+
+    snapshot =
+      if match?({:ok, %{"intent" => "decline_proposal"}}, result) and state.proposal != nil do
+        Conversation.remember(snapshot, opts,
+          declined_proposal: state.proposal.id,
+          search_declined: %{
+            "date" => String.slice(state.proposal.slot, 0, 10),
+            "clinician" => state.proposal.clinician_id
+          }
+        )
+      else
+        snapshot
+      end
+
+    if match?({:ok, %{"intent" => "reminder"}}, result),
+      do: resume_reminder(snapshot, state, opts),
+      else: snapshot
+  end
+
+  defp resume_reminder(snapshot, state, opts) do
+    updates =
+      if state.proposal,
+        do: [reminder_route: :active, declined_proposal: state.proposal.id],
+        else: [reminder_route: :active]
+
+    Conversation.remember(snapshot, opts, updates)
+  end
+
+  defp extract_identity(snapshot, state, result, opts) do
+    control? =
+      match?(
+        {:ok, %{"intent" => intent}}
+        when intent in ["restart", "repeat", "retry", "decline_proposal", "reminder"],
+        result
+      )
 
     identity? =
-      match?({:ok, %{"intent" => "lookup"}}, result) or
-        (patient(snapshot) == nil and Conversation.context(snapshot).registration_requested)
+      not control? and
+        (match?({:ok, %{"intent" => "lookup"}}, result) or
+           (patient(snapshot) == nil and Conversation.context(snapshot).registration_requested))
 
     extractor = Keyword.get(opts, :identity_extractor, &Extractor.check/1)
-    demographics = if identity?, do: extractor.(state), else: :not_requested
-    snapshot = Conversation.remember(snapshot, opts, identity: demographics)
-
-    {snapshot, state, result, demographics}
+    if identity?, do: extractor.(state), else: :not_requested
   end
 
   defp continue_demographics(%{demographics: :pending} = context, _, _, _),
@@ -272,7 +344,8 @@ defmodule BookingDesk.Policy do
       context.latest,
       context.cursor,
       context.text,
-      context.demographics
+      context.demographics,
+      context.options
     )
   end
 
@@ -330,6 +403,10 @@ defmodule BookingDesk.Policy do
 
   defp apply_reminder(snapshot, reminder, pending, latest, cursor, opts) do
     case BookingDesk.ReminderPolicy.interpret(snapshot, reminder, opts) do
+      :appointment ->
+        snapshot = Conversation.remember(snapshot, opts, reminder_route: :suspended)
+        interpret_request(snapshot, pending, latest, cursor, opts)
+
       {:input, fields} ->
         input =
           base(snapshot, cursor)
@@ -361,7 +438,16 @@ defmodule BookingDesk.Policy do
     end
   end
 
-  defp interpreted(snapshot, _result, pending, latest, cursor, latest_user, {:error, _} = failure) do
+  defp interpreted(
+         snapshot,
+         _result,
+         pending,
+         latest,
+         cursor,
+         latest_user,
+         {:error, _} = failure,
+         opts
+       ) do
     decide(
       snapshot,
       {:ok, %{"intent" => "lookup"}},
@@ -369,16 +455,15 @@ defmodule BookingDesk.Policy do
       latest,
       cursor,
       latest_user,
-      failure
+      failure,
+      opts
     )
   end
 
-  defp interpreted(snapshot, result, pending, latest, cursor, latest_user, demographics) do
+  defp interpreted(snapshot, result, pending, latest, cursor, latest_user, demographics, opts) do
     result = registration_interpretation(snapshot, result, demographics)
 
-    uncertain =
-      uncertain_result?(result) or incomplete_identity?(demographics) or
-        partial_approval?(latest, result, latest_user)
+    uncertain = needs_clarification?(latest, result, latest_user, demographics, opts)
 
     # A semantic approval can precede its complete spoken wording ("Yeah, go ...").
     # Keep the literal consent check, but give later fragments the same bounded
@@ -389,7 +474,7 @@ defmodule BookingDesk.Policy do
       key = "uncertain:#{cursor}"
 
       if match?(%{context_wait: %{expired?: true, recheck_key: ^key}}, entry) do
-        decide(snapshot, result, pending, latest, cursor, latest_user, demographics)
+        decide(snapshot, result, pending, latest, cursor, latest_user, demographics, opts)
       else
         target =
           wait_target(pending, latest)
@@ -397,9 +482,21 @@ defmodule BookingDesk.Policy do
         {:ok, [%{target | recheck_after_ms: 1_500, recheck_key: key}]}
       end
     else
-      decide(snapshot, result, pending, latest, cursor, latest_user, demographics)
+      decide(snapshot, result, pending, latest, cursor, latest_user, demographics, opts)
     end
   end
+
+  defp needs_clarification?(latest, result, latest_user, demographics, opts) do
+    uncertain_result?(result) or incomplete_identity?(demographics) or
+      partial_approval?(latest, result, latest_user) or
+      settle_approval?(latest, result, opts)
+  end
+
+  defp settle_approval?(latest, result, opts),
+    do:
+      match?(%{input: %{operation: "propose"}}, latest) and
+        match?({:ok, %{"intent" => "confirm"}}, result) and
+        Keyword.get(opts, :settle_confirm_ms, 1_500) > 0
 
   defp uncertain_result?({:ok, %{"intent" => intent}}),
     do: intent in ["insurance_same", "insurance_changed", "unclear"]
@@ -427,13 +524,28 @@ defmodule BookingDesk.Policy do
 
   defp partial_approval?(_, _, _), do: false
 
-  def decide(snapshot, result, pending, latest, cursor, text, demographics \\ :not_requested) do
-    case result do
-      {:incomplete, _, _} when not is_nil(latest) and latest.input.operation == "confirm" ->
-        {:ok, associate(pending, latest)}
+  def decide(
+        snapshot,
+        result,
+        pending,
+        latest,
+        cursor,
+        text,
+        demographics \\ :not_requested,
+        opts \\ []
+      ) do
+    if Recovery.pending_write?(latest) do
+      {:ok, associate(pending, latest)}
+    else
+      {snapshot, result} = search_reply(snapshot, latest, cursor, text, result, opts)
+      dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics)
+    end
+  end
 
+  defp dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics) do
+    case result do
       {:incomplete, judgment, missing} ->
-        clarify_booking(snapshot, cursor, pending, latest, judgment, missing)
+        incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text)
 
       {:ok, %{"intent" => intent} = judgment} ->
         context = %{
@@ -447,11 +559,6 @@ defmodule BookingDesk.Policy do
 
         decide_intent(intent, judgment, context)
 
-      _ when not is_nil(latest) and latest.input.operation == "confirm" ->
-        # Ambiguous progress speech cannot hold a verified write result hostage.
-        # The admitted immutable proposal remains authoritative; do not retry it.
-        {:ok, associate(pending, latest)}
-
       {:error, :unavailable} ->
         clarify(
           cursor,
@@ -464,6 +571,177 @@ defmodule BookingDesk.Policy do
         clarify_booking(snapshot, cursor, pending, latest, %{}, ["intent"])
     end
   end
+
+  defp incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text) do
+    if judgment["intent"] in ["choose_slot", "reschedule"] do
+      decide_intent(judgment["intent"], judgment, %{
+        snapshot: snapshot,
+        pending: pending,
+        latest: latest,
+        cursor: cursor,
+        text: text,
+        demographics: :not_requested
+      })
+    else
+      clarify_booking(snapshot, cursor, pending, latest, judgment, missing)
+    end
+  end
+
+  defp search_reply(snapshot, latest, cursor, text, result, opts) do
+    if match?(
+         {:ok, %{"intent" => intent}}
+         when intent not in ["none", "progress", "unclear", "confirm"],
+         result
+       ),
+       do: {snapshot, result},
+       else: resolve_search_reply(snapshot, latest, cursor, text, result, opts)
+  end
+
+  defp resolve_search_reply(snapshot, latest, cursor, text, result, opts) do
+    case {identity(snapshot), insurance(snapshot)} do
+      {%{lookup_request: lookup}, %{confirmed: true}} ->
+        case BookingDesk.SearchClarification.reply(
+               snapshot,
+               latest,
+               lookup,
+               pending_request(snapshot),
+               cursor,
+               text,
+               opts
+             ) do
+          {:ok, _} = reply ->
+            {snapshot, reply}
+
+          {:decline, _} ->
+            preferences = %{"date" => latest.input.date, "clinician" => latest.input.clinician}
+            snapshot = Conversation.remember(snapshot, opts, search_declined: preferences)
+            {snapshot, {:ok, %{"intent" => "decline_search"}}}
+
+          {:repeat, _} ->
+            {snapshot, {:ok, %{"intent" => "repeat"}}}
+
+          :unresolved ->
+            {snapshot, result}
+        end
+
+      _ ->
+        {snapshot, result}
+    end
+  end
+
+  defp decide_intent("reminder", _, context) do
+    case BookingDesk.ReminderPolicy.state(context.snapshot) do
+      nil ->
+        clarify(
+          context.cursor,
+          context.pending,
+          context.latest,
+          "Let's finish selecting and confirming an appointment first. What appointment help do you need?"
+        )
+
+      %{status: status} when status in ["scheduled", "declined"] ->
+        clarify(
+          context.cursor,
+          context.pending,
+          context.latest,
+          "The reminder is already #{status}. Your appointment remains booked."
+        )
+
+      reminder ->
+        clarify(
+          context.cursor,
+          context.pending,
+          context.latest,
+          BookingDesk.ReminderPolicy.question(reminder)
+        )
+    end
+  end
+
+  defp decide_intent("decline_proposal", _, context) do
+    clarify(
+      context.cursor,
+      context.pending,
+      context.latest,
+      "I haven't accepted that proposal or changed your appointment. Would you like to check a different date or time?",
+      %{
+        booking_request: pending_request(context.snapshot),
+        lookup_request: identity(context.snapshot).lookup_request,
+        unresolved_intent: false
+      }
+    )
+  end
+
+  defp decide_intent("decline_search", _, context) do
+    lookup = identity(context.snapshot)
+
+    clarify(
+      context.cursor,
+      context.pending,
+      context.latest,
+      "I haven't changed that search. Which date would you like to check?",
+      %{
+        booking_request: pending_request(context.snapshot),
+        lookup_request: lookup.lookup_request,
+        unresolved_intent: false
+      }
+    )
+  end
+
+  defp decide_intent("restart", _, context) do
+    if Recovery.pending_write?(context.latest),
+      do: {:ok, associate(context.pending, context.latest)},
+      else:
+        clarify(
+          context.cursor,
+          context.pending,
+          context.latest,
+          "Let's start a new request. Completed appointments remain unchanged. Could I have your full name and date of birth?",
+          %{booking_request: %{}, lookup_request: nil}
+        )
+  end
+
+  defp decide_intent("repeat", _, context) do
+    if Recovery.pending_write?(context.latest) or
+         (match?(%{status: :submitted, input: %{operation: "availability"}}, context.latest) and
+            not unresolved_search?(context.snapshot, context.latest)) do
+      {:ok, associate(context.pending, context.latest)}
+    else
+      state = request_state(context.snapshot, context.latest, context.cursor)
+
+      clarify(
+        context.cursor,
+        context.pending,
+        context.latest,
+        Recovery.question(state, context.latest),
+        if(context.latest, do: get_in(context.latest, [:clarification, :input]) || %{}, else: %{})
+      )
+    end
+  end
+
+  defp decide_intent(
+         "retry",
+         _,
+         %{latest: %{status: status, input: %{operation: "availability"}} = latest} = context
+       )
+       when status in [:failed, :cancelled, :completed] do
+    decide_intent(
+      "availability",
+      %{"date" => latest.input.date, "clinician" => latest.input.clinician},
+      context
+    )
+  end
+
+  defp decide_intent("retry", _, %{latest: %{input: %{operation: "confirm"}} = latest} = context),
+    do: {:ok, associate(context.pending, latest)}
+
+  defp decide_intent("retry", _, context),
+    do:
+      clarify(
+        context.cursor,
+        context.pending,
+        context.latest,
+        "Which date and doctor would you like to check? A booking that was already submitted will not be retried."
+      )
 
   defp decide_intent(intent, _judgment, %{
          snapshot: snapshot,
@@ -481,7 +759,8 @@ defmodule BookingDesk.Policy do
          snapshot: snapshot,
          pending: pending,
          latest: latest,
-         cursor: cursor
+         cursor: cursor,
+         text: text
        })
        when intent in ["insurance_same", "insurance_changed", "insurance_update"] do
     current = insurance(snapshot)
@@ -495,8 +774,11 @@ defmodule BookingDesk.Policy do
           "Could I have your full name and date of birth so I can find your record?"
         )
 
-      intent == "insurance_same" and current.confirmed ->
+      insurance_current?(intent, current) ->
         {:ok, associate(pending, latest)}
+
+      insurance_refused?(intent, text) ->
+        clarify(cursor, pending, latest, BookingDesk.Insurance.question(current))
 
       intent == "insurance_update" and
           not BookingDesk.Insurance.valid_carrier?(judgment["new_carrier"]) ->
@@ -639,58 +921,33 @@ defmodule BookingDesk.Policy do
     end
   end
 
-  defp decide_intent(intent, judgment, %{
-         snapshot: snapshot,
-         pending: pending,
-         latest: latest,
-         cursor: cursor
-       })
-       when intent in ["choose_slot", "reschedule"] do
-    date = judgment["date"]
-    time = judgment["time"]
-
-    verified = completed_search(snapshot, date, judgment["clinician"])
-    clinician = clinician_preference(judgment, verified)
-    candidates = slot_candidates(snapshot, verified, date, time, clinician)
-
-    case candidates do
-      [slot] ->
-        propose_slot(snapshot, pending, latest, cursor, intent, slot, verified)
-
-      [_, _ | _] ->
+  defp decide_intent(intent, judgment, %{snapshot: snapshot} = context)
+       when intent in ["choose_slot", "reschedule", "cancel"] do
+    cond do
+      patient(snapshot) == nil ->
         clarify(
-          cursor,
-          pending,
-          latest,
-          "More than one doctor has that time. Which doctor would you prefer?"
+          context.cursor,
+          context.pending,
+          context.latest,
+          "Could I have your full name and date of birth so I can find your record?"
         )
 
-      _ ->
+      intent != "cancel" and not insurance(snapshot).confirmed ->
         clarify(
-          cursor,
-          pending,
-          latest,
-          "Please choose a doctor and an exact time from the availability we checked. Nothing has been booked."
+          context.cursor,
+          context.pending,
+          context.latest,
+          BookingDesk.Insurance.question(insurance(snapshot))
         )
+
+      intent != "cancel" and judgment["date"] not in BookingDesk.Store.dates() ->
+        clarify_booking(snapshot, context.cursor, context.pending, context.latest, judgment, [
+          "date"
+        ])
+
+      true ->
+        appointment_intent(intent, judgment, context)
     end
-  end
-
-  defp decide_intent("cancel", _judgment, %{
-         snapshot: snapshot,
-         pending: pending,
-         latest: latest,
-         cursor: cursor
-       }) do
-    input =
-      Map.merge(base(snapshot, cursor), %{
-        operation: "propose",
-        change: "cancel",
-        slot: "",
-        appointment: "appt_existing",
-        revision: cursor
-      })
-
-    {:ok, start(pending, latest, input)}
   end
 
   defp decide_intent("confirm", _judgment, %{
@@ -733,7 +990,8 @@ defmodule BookingDesk.Policy do
   defp decide_intent(_intent, _judgment, %{
          pending: pending,
          latest: %{input: %{operation: "confirm"}} = latest
-       }) do
+       })
+       when latest.status not in [:completed, :failed, :cancelled] do
     {:ok, associate(pending, latest)}
   end
 
@@ -744,6 +1002,78 @@ defmodule BookingDesk.Policy do
          latest: latest
        }) do
     clarify_booking(snapshot, cursor, pending, latest, judgment, ["intent"])
+  end
+
+  defp insurance_current?(intent, current), do: intent == "insurance_same" and current.confirmed
+
+  defp insurance_refused?(intent, text),
+    do: intent == "insurance_same" and not BookingDesk.Consent.unconditional?(text)
+
+  defp appointment_intent(intent, judgment, %{
+         snapshot: snapshot,
+         pending: pending,
+         latest: latest,
+         cursor: cursor
+       })
+       when intent in ["choose_slot", "reschedule"] do
+    date = judgment["date"]
+    time = judgment["time"]
+
+    verified = completed_search(snapshot, date, judgment["clinician"])
+    clinician = clinician_preference(judgment, verified)
+    candidates = slot_candidates(snapshot, verified, date, time, clinician)
+
+    if verified == nil and date in BookingDesk.Store.dates() do
+      decide_intent("availability", judgment, %{
+        snapshot: snapshot,
+        pending: pending,
+        latest: latest,
+        cursor: cursor
+      })
+    else
+      choose_candidate(candidates, snapshot, pending, latest, cursor, intent, verified)
+    end
+  end
+
+  defp appointment_intent("cancel", _judgment, %{
+         snapshot: snapshot,
+         pending: pending,
+         latest: latest,
+         cursor: cursor
+       }) do
+    input =
+      Map.merge(base(snapshot, cursor), %{
+        operation: "propose",
+        change: "cancel",
+        slot: "",
+        appointment: appointment_target(snapshot),
+        revision: cursor
+      })
+
+    {:ok, start(pending, latest, input)}
+  end
+
+  defp choose_candidate(candidates, snapshot, pending, latest, cursor, intent, verified) do
+    case candidates do
+      [slot] ->
+        propose_slot(snapshot, pending, latest, cursor, intent, slot, verified)
+
+      [_, _ | _] ->
+        clarify(
+          cursor,
+          pending,
+          latest,
+          "More than one doctor has that time. Which doctor would you prefer?"
+        )
+
+      _ ->
+        clarify(
+          cursor,
+          pending,
+          latest,
+          "Please choose a doctor and an exact time from the availability we checked. Nothing has been booked."
+        )
+    end
   end
 
   defp unresolved_search?(snapshot, %{input: %{operation: "availability"}} = task) do
@@ -830,19 +1160,25 @@ defmodule BookingDesk.Policy do
         change: if(intent == "reschedule", do: "reschedule", else: "book"),
         slot: slot.id,
         clinician: slot.clinician,
-        appointment: "appt_existing",
+        appointment: appointment_target(snapshot),
         revision: cursor,
         search_cursor: verified.input.cursor
       })
 
     if latest && latest.input.operation == "propose" &&
-         latest.input.slot == input.slot && latest.input.change == input.change,
+         latest.input.slot == input.slot && latest.input.change == input.change &&
+         latest.status not in [:failed, :cancelled] &&
+         (latest.status != :completed || current_proposal(snapshot) != nil),
        do: {:ok, associate(pending, latest)},
        else: {:ok, start(pending, latest, input)}
   end
 
   defp availability_decisions(intent, pending, latest, input) do
     cond do
+      same_search?(latest, input) and latest.status in [:completed, :failed, :cancelled] and
+          input.cursor > latest.input.cursor ->
+        replace_search(pending, latest, input)
+
       same_search?(latest, input) and
           match?(%{input: %{unresolved_intent: true}}, Map.get(latest, :clarification)) ->
         replace_search(pending, latest, input)
@@ -890,11 +1226,29 @@ defmodule BookingDesk.Policy do
     request = if "intent" in missing, do: Map.delete(request, "intent"), else: request
     lookup = identity(snapshot)
 
-    clarify(cursor, pending, latest, clarification_question(snapshot, request, missing), %{
+    input = %{
       booking_request: request,
       unresolved_intent: "intent" in missing,
       lookup_request: if(lookup, do: lookup.lookup_request)
-    })
+    }
+
+    offer =
+      if "intent" in missing and match?(%{confirmed: true}, insurance(snapshot)),
+        do: BookingDesk.SearchClarification.offer(snapshot, latest, request, cursor)
+
+    case offer do
+      {question, action} ->
+        clarify(cursor, pending, latest, question, Map.put(input, :search_clarification, action))
+
+      _ ->
+        clarify(
+          cursor,
+          pending,
+          latest,
+          clarification_question(snapshot, request, missing),
+          input
+        )
+    end
   end
 
   defp booking_preferences(judgment) do
@@ -904,12 +1258,35 @@ defmodule BookingDesk.Policy do
   defp clarification_question(snapshot, request, missing) do
     carrier = Conversation.context(snapshot).carrier
     current = insurance(snapshot)
+    proposal = current_proposal(snapshot)
 
-    if "intent" in missing and carrier != nil and current != nil and not current.confirmed do
-      "I've kept #{carrier} as the insurance company you supplied. Should I update that information? Your appointment has not been changed."
-    else
-      booking_question(request, missing)
+    cond do
+      proposal != nil and proposal_preferences_match?(proposal, request) ->
+        Recovery.proposal_question(proposal)
+
+      current != nil and not current.confirmed and carrier != nil ->
+        "I've kept #{carrier} as the insurance company you supplied. Should I update that information? Your appointment has not been changed."
+
+      current != nil and not current.confirmed ->
+        BookingDesk.Insurance.question(current)
+
+      true ->
+        booking_question(request, missing)
     end
+  end
+
+  defp proposal_preferences_match?(%{change: "cancel"}, _), do: true
+
+  defp proposal_preferences_match?(proposal, request) do
+    expected = %{
+      "date" => String.slice(proposal.slot, 0, 10),
+      "time" => String.slice(proposal.slot, 11, 5),
+      "clinician" => proposal.clinician_id
+    }
+
+    Enum.all?(Map.take(request, ["date", "time", "clinician"]), fn {key, value} ->
+      value == "any" or expected[key] == value
+    end)
   end
 
   defp booking_question(request, missing) do
@@ -1015,15 +1392,16 @@ defmodule BookingDesk.Policy do
       Map.get(task.input, :insurance_request) == proof
   end
 
-  def current_proposal(snapshot) do
-    case {latest_task(snapshot), identity(snapshot)} do
+  def current_proposal(snapshot, store \\ BookingDesk.Store) do
+    case {latest_task(snapshot), identity(snapshot, store)} do
       {%{
          status: :completed,
          input: %{operation: "propose", revision: revision} = input,
          request_ids: [id | _]
        }, %{patient: patient, lookup_request: lookup}} ->
-        if input.patient == patient and input.lookup_request == lookup do
-          stored_proposal(input, id, patient, lookup, revision)
+        if input.patient == patient and input.lookup_request == lookup and
+             Conversation.context(snapshot).declined_proposal != id do
+          stored_proposal(input, id, patient, lookup, revision, store)
         end
 
       _ ->
@@ -1031,22 +1409,11 @@ defmodule BookingDesk.Policy do
     end
   end
 
-  defp stored_proposal(%{change: "cancel"}, id, patient, _lookup, revision) do
-    case Enum.find(BookingDesk.Store.proposals(), fn [request, owner, _, _, _, rev, status] ->
-           request == id and owner == patient and rev == revision and status == "pending"
-         end) do
-      [^id, ^patient, "cancel", slot, _, ^revision, "pending"] ->
-        %{id: id, change: "cancel", slot: slot, revision: revision}
-
-      _ ->
-        nil
-    end
-  end
-
-  defp stored_proposal(input, id, patient, lookup, revision) do
-    case BookingDesk.Store.readback_proposal(patient, id, revision) do
-      %{lookup_request: ^lookup, slot: slot} = proposal when slot == input.slot ->
-        Map.take(proposal, [:id, :change, :slot, :revision, :clinician_id])
+  defp stored_proposal(input, id, patient, lookup, revision, store) do
+    case BookingDesk.Store.readback_proposal(patient, id, revision, store) do
+      %{lookup_request: ^lookup} = proposal ->
+        if Map.get(input, :change) == "cancel" or proposal.slot == input.slot,
+          do: Map.take(proposal, [:id, :change, :slot, :revision, :clinician_id])
 
       _ ->
         nil
@@ -1080,7 +1447,7 @@ defmodule BookingDesk.Policy do
       ~r/\b(yes|confirm|go ahead|please book|please cancel|please reschedule)\b/i,
       text
     ) &&
-      not Regex.match?(~r/\b(no|not|don't|unless|if|maybe|perhaps|wait|instead)\b/i, text)
+      BookingDesk.Consent.unconditional?(text)
   end
 
   def identity(snapshot, store \\ BookingDesk.Store) do
@@ -1138,6 +1505,13 @@ defmodule BookingDesk.Policy do
     end
   end
 
+  defp appointment_target(snapshot) do
+    case BookingDesk.ReminderPolicy.appointment(snapshot) do
+      %{appointment: id, status: "booked"} -> id
+      _ -> "appt_existing"
+    end
+  end
+
   defp base(snapshot, cursor), do: Map.put(identity(snapshot) || %{}, :cursor, cursor)
 
   defp latest_task(snapshot),
@@ -1170,6 +1544,24 @@ defmodule BookingDesk.Policy do
   end
 
   defp resume_search(snapshot, pending, lookup, cursor) do
+    if Conversation.context(snapshot).goal == "cancel" do
+      input =
+        base(snapshot, cursor)
+        |> Map.merge(%{
+          operation: "propose",
+          change: "cancel",
+          slot: "",
+          appointment: appointment_target(snapshot),
+          revision: cursor
+        })
+
+      start_followup(pending, lookup, input)
+    else
+      resume_registration_search(snapshot, pending, lookup, cursor)
+    end
+  end
+
+  defp resume_registration_search(snapshot, pending, lookup, cursor) do
     preferences = registration_preferences(snapshot, %{}, lookup)
     date = preferences.date
     clinician = preferences.clinician
@@ -1199,24 +1591,27 @@ defmodule BookingDesk.Policy do
             clinician: clinician
           })
 
-        if pending do
-          {:ok, start(pending, lookup, input)}
-        else
-          {:ok,
-           [
-             %D{
-               kind: :start_task,
-               anchor_task_id: lookup.id,
-               expected_anchor_revision: lookup.revision,
-               input: input
-             }
-           ]}
-        end
+        start_followup(pending, lookup, input)
     end
   end
 
+  defp start_followup(nil, lookup, input),
+    do:
+      {:ok,
+       [
+         %D{
+           kind: :start_task,
+           anchor_task_id: lookup.id,
+           expected_anchor_revision: lookup.revision,
+           input: input
+         }
+       ]}
+
+  defp start_followup(pending, lookup, input), do: {:ok, start(pending, lookup, input)}
+
   defp registration_preferences(snapshot, judgment, latest) do
     preferences = Map.merge(pending_request(snapshot), booking_preferences(judgment))
+    latest = if Conversation.context(snapshot).identity_changed, do: nil, else: latest
 
     %{
       date: preferences["date"] || (latest && Map.get(latest.input, :date)),

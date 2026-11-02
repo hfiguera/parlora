@@ -89,7 +89,7 @@ defmodule BookingDesk.IdentityExtractorTest do
     assert Map.keys(:sys.get_state(server).entries) == [{"test", 1}]
   end
 
-  test "timeouts are cached and the per-session evaluation budget is bounded" do
+  test "timeouts are cached, a turn's budget is bounded, and a new caller turn can recover" do
     parent = self()
 
     server =
@@ -111,10 +111,67 @@ defmodule BookingDesk.IdentityExtractorTest do
     assert_receive :started
     assert {:error, :unavailable} = ready(server, s)
     assert {:error, :unavailable} = Extractor.check(s, server)
-    next = state("A corrected reply", "test", 0, 2)
+
+    next =
+      state("A corrected fragment", "test", 0, 2)
+      |> put_in([:interpretation_binding, :caller_turn], 1)
+
     assert :pending = Extractor.check(next, server)
     assert {:error, :unavailable} = ready(server, next)
     refute_receive :started, 30
+    fresh = state("A fresh caller turn", "test", 0, 3)
+    assert :pending = Extractor.check(fresh, server)
+    assert_receive :started
+    assert {:error, :unavailable} = ready(server, fresh)
+  end
+
+  test "a huge earlier turn cannot poison a fresh short extraction" do
+    parent = self()
+
+    server =
+      start(
+        debounce_ms: 0,
+        evaluator: fn input ->
+          send(parent, {:bounded, input})
+          {:ok, %{name: "jamie rivera", dob: "1990-03-12"}}
+        end
+      )
+
+    s = state()
+    s = %{s | dialogue: [%{speaker: :user, text: String.duplicate("old ", 3_000)} | s.dialogue]}
+    assert :pending = Extractor.check(s, server)
+    assert {:ok, _} = ready(server, s)
+    assert_receive {:bounded, input}
+    assert input.latest_user == s.latest_user
+    assert byte_size(JSON.encode!(input)) <= 8_000
+    assert length(input.dialogue) == 1
+  end
+
+  test "an exhausted turn can be followed by a successful fresh extraction" do
+    server =
+      start(
+        debounce_ms: 0,
+        max_evaluations: 1,
+        evaluator: fn input ->
+          if input.latest_user == "bad input",
+            do: {:error, :invalid_extraction},
+            else: {:ok, %{name: "jamie rivera", dob: "1990-03-12"}}
+        end
+      )
+
+    bad = state("bad input", "recovery", 0, 1)
+    assert :pending = Extractor.check(bad, server)
+    assert {:error, :invalid_extraction} = ready(server, bad)
+
+    fragment =
+      state("corrected fragment", "recovery", 0, 2)
+      |> put_in([:interpretation_binding, :caller_turn], 1)
+
+    assert :pending = Extractor.check(fragment, server)
+    assert {:error, :unavailable} = ready(server, fragment)
+    fresh = state("Jamie Rivera, March twelfth, 1990", "recovery", 0, 3)
+    assert :pending = Extractor.check(fresh, server)
+    assert {:ok, %{name: "jamie rivera"}} = ready(server, fresh)
   end
 
   test "extraction diagnostics distinguish invalid evidence without recording demographics" do

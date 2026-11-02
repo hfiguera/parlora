@@ -74,6 +74,7 @@ defmodule BookingDesk.PolicyTest do
     do:
       BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
         coalesce_ms: 0,
+        settle_confirm_ms: 0,
         judge: fn _ -> result end,
         identity_extractor: fn _ -> extraction end
       )
@@ -145,6 +146,326 @@ defmodule BookingDesk.PolicyTest do
     assert {:ok, [decision]} = interpret(snapshot(), {:ok, %{"intent" => "progress"}})
     assert decision.kind == :associate_delegation
     assert decision.task_id == "t"
+  end
+
+  test "explicit retry refreshes a failed read and a fresh completed search can be checked again" do
+    for status <- [:failed, :completed] do
+      s = put_in(snapshot().tasks["t"][:status], status)
+      s = %{s | transcripts: [%{speaker: :user, delta: "Please try again", arrival_order: 8}]}
+
+      result =
+        if status == :failed,
+          do: {:ok, %{"intent" => "retry"}},
+          else: {:ok, %{"intent" => "availability", "date" => "2026-11-04", "clinician" => "lee"}}
+
+      assert {:ok, [decision]} = interpret(s, result)
+      assert decision.kind == :supersede_task
+      assert decision.input.operation == "availability"
+    end
+  end
+
+  test "appointment changes requested before registration ask for identity rather than failing backend work" do
+    for intent <- ~w(cancel choose_slot reschedule) do
+      s = %ContextSnapshot{
+        session_id: "unregistered",
+        transcripts: [
+          %{speaker: :user, delta: "Please help with my appointment", arrival_order: 8}
+        ],
+        pending_delegations: %{"d" => %{status: :pending, received_at_us: 1}}
+      }
+
+      assert {:ok, [decision]} =
+               interpret(
+                 s,
+                 {:ok,
+                  %{
+                    "intent" => intent,
+                    "date" => "2026-11-05",
+                    "time" => "10:15",
+                    "clinician" => "lee"
+                  }}
+               )
+
+      assert decision.kind == :request_clarification
+      assert decision.message =~ "full name"
+    end
+  end
+
+  test "an unresolved reschedule date asks for that date before searching or proposing" do
+    s = snapshot()
+    s = put_in(s.tasks["t"][:context_wait], %{expired?: true, recheck_key: "uncertain:8"})
+
+    assert {:ok, [question]} =
+             interpret(
+               s,
+               {:incomplete,
+                %{
+                  "intent" => "reschedule",
+                  "date" => "unknown",
+                  "time" => "unknown",
+                  "clinician" => "lee"
+                }, ["date", "time"]}
+             )
+
+    assert question.kind == :request_clarification
+    assert question.message =~ "What date"
+  end
+
+  test "a cancellation request survives registration and resumes as a proposal, not an availability search" do
+    session = "cancel-registration"
+    lookup = "cancel-registration-lookup"
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    opts = [
+      conversation: memory,
+      coalesce_ms: 0,
+      judge: fn _ -> raise "consumed registration must resume the stored goal" end
+    ]
+
+    initial = %ContextSnapshot{
+      session_id: session,
+      transcripts: [%{speaker: :user, delta: "Cancel my appointment", arrival_order: 1}]
+    }
+
+    current = BookingDesk.Conversation.attach(initial, opts)
+    BookingDesk.Conversation.remember(current, opts, judgment: {:ok, %{"intent" => "cancel"}})
+
+    BookingDesk.Store.execute(
+      %{operation: "lookup", name: "Jamie Rivera", dob: "1990-03-12", session: session},
+      lookup
+    )
+
+    s = %{
+      initial
+      | revision: 2,
+        transcripts: [
+          %{speaker: :user, delta: "Jamie Rivera, March twelfth, 1990", arrival_order: 8}
+        ],
+        tasks: %{
+          "t" => %{
+            id: "t",
+            revision: 1,
+            status: :completed,
+            request_ids: [lookup],
+            input: %{operation: "lookup", cursor: 8, name: "jamie rivera", dob: "1990-03-12"}
+          }
+        }
+    }
+
+    assert {:ok, [decision]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :backend_completed}, opts)
+
+    assert decision.kind == :start_task
+    assert decision.anchor_task_id == "t"
+    assert decision.input.operation == "propose"
+    assert decision.input.change == "cancel"
+
+    assert :ok ==
+             DecisionValidation.validate(%State{context: s, limits: %Parlora.Limits{}}, [decision])
+  end
+
+  test "start over clears unconfirmed data and a fresh patient cannot inherit old search preferences" do
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    opts = [
+      conversation: memory,
+      coalesce_ms: 0,
+      judge: fn _ -> raise "literal restart needs no model" end
+    ]
+
+    s = snapshot()
+    initial = BookingDesk.Conversation.attach(s, opts)
+
+    BookingDesk.Conversation.remember(initial, opts,
+      judgment: {:ok, %{"intent" => "availability", "date" => "2026-11-05", "clinician" => "lee"}}
+    )
+
+    s = %{s | transcripts: [%{speaker: :user, delta: "Start over", arrival_order: 8}]}
+
+    assert {:ok, [question]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation}, opts)
+
+    assert question.message =~ "full name"
+    current = BookingDesk.Conversation.attach(s, opts)
+    assert BookingDesk.Conversation.context(current).preferences == %{}
+    assert BookingDesk.Policy.identity(current) == nil
+
+    s = %{
+      s
+      | revision: s.revision + 1,
+        transcripts: [%{speaker: :user, delta: "Alex Morgan, July 24, 1985", arrival_order: 20}]
+    }
+
+    assert {:ok, [lookup]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
+               conversation: memory,
+               coalesce_ms: 0,
+               judge: fn _ -> {:ok, %{"intent" => "lookup"}} end,
+               identity_extractor: fn _ -> {:ok, %{name: "alex morgan", dob: "1985-07-24"}} end
+             )
+
+    assert lookup.input.operation == "lookup"
+    assert lookup.input.date == nil
+    assert lookup.input.clinician == nil
+  end
+
+  test "restart and retry while a booking is pending never repeat or hide the write" do
+    for text <- ["Start over", "Please try again", "Cancel it", "Another date"] do
+      s = %{snapshot("confirm") | transcripts: [%{speaker: :user, delta: text, arrival_order: 8}]}
+
+      assert {:ok, [decision]} =
+               BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
+                 coalesce_ms: 0,
+                 judge: fn _ -> raise "must await the admitted write" end
+               )
+
+      assert decision.kind == :associate_delegation
+    end
+  end
+
+  test "a refused search correction is cleared so progress does not revive it" do
+    s = snapshot()
+
+    assert {:ok, [question]} =
+             BookingDesk.Policy.decide(
+               s,
+               {:incomplete, %{"date" => "2026-11-05", "clinician" => "lee"}, ["intent"]},
+               {"d", s.pending_delegations["d"]},
+               s.tasks["t"],
+               8,
+               "Thursday?"
+             )
+
+    s = put_in(s.tasks["t"][:clarification], %{message: question.message, input: question.input})
+
+    s = %{
+      s
+      | transcripts: [
+          %{speaker: :user, delta: "No", arrival_order: 20},
+          %{speaker: :assistant, delta: question.message, arrival_order: 10}
+        ]
+    }
+
+    assert {:ok, [repeated]} =
+             BookingDesk.Policy.decide(
+               s,
+               {:ok, %{"intent" => "repeat"}},
+               {"d", s.pending_delegations["d"]},
+               s.tasks["t"],
+               20,
+               "Repeat that"
+             )
+
+    assert repeated.kind == :request_clarification
+    assert repeated.input.search_clarification == question.input.search_clarification
+
+    assert {:ok, [declined]} =
+             BookingDesk.Policy.decide(
+               s,
+               {:error, :uncertain},
+               {"d", s.pending_delegations["d"]},
+               s.tasks["t"],
+               20,
+               "No"
+             )
+
+    assert declined.input.unresolved_intent == false
+    assert declined.input.booking_request["date"] == "2026-11-04"
+    s = put_in(s.tasks["t"].clarification.input, declined.input)
+
+    assert {:ok, [progress]} =
+             BookingDesk.Policy.decide(
+               s,
+               {:ok, %{"intent" => "progress"}},
+               {"d", s.pending_delegations["d"]},
+               s.tasks["t"],
+               21,
+               "Still checking?"
+             )
+
+    assert progress.kind == :associate_delegation
+  end
+
+  test "refusing a proposal preserves the appointment and a later model yes cannot revive it" do
+    s = snapshot("propose")
+
+    execute(
+      %{operation: "availability", patient: "p_1002", date: "2026-11-05", cursor: 777},
+      "decline-offers"
+    )
+
+    execute(
+      %{
+        operation: "propose",
+        patient: "p_1002",
+        slot: "2026-11-05T10:15:00",
+        revision: 778,
+        search_cursor: 777
+      },
+      "decline-proposal"
+    )
+
+    input = %{
+      operation: "propose",
+      change: "book",
+      slot: "2026-11-05T10:15:00",
+      revision: 778,
+      cursor: 778,
+      patient: "p_1002",
+      lookup_request: s.application_context.lookup_request
+    }
+
+    task =
+      Map.merge(s.tasks["t"], %{
+        status: :completed,
+        input: input,
+        request_ids: ["decline-proposal"]
+      })
+
+    s = %{
+      s
+      | tasks: %{"t" => task},
+        transcripts: [
+          %{speaker: :user, delta: "No", arrival_order: 800},
+          %{
+            speaker: :assistant,
+            delta: "November fifth at 10:15 AM with Dr. Lee, shall I book it?",
+            arrival_order: 790
+          }
+        ]
+    }
+
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    opts = [
+      conversation: memory,
+      coalesce_ms: 0,
+      settle_confirm_ms: 0,
+      judge: fn _ -> raise "plain refusal needs no model" end
+    ]
+
+    before = BookingDesk.Store.snapshot()
+
+    assert {:ok, [declined]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation}, opts)
+
+    assert declined.kind == :request_clarification
+    assert declined.message =~ "haven't accepted"
+    current = BookingDesk.Conversation.attach(s, opts)
+    assert BookingDesk.Policy.current_proposal(current) == nil
+    s = %{s | transcripts: [%{speaker: :user, delta: "Yes", arrival_order: 810}]}
+
+    opts =
+      Keyword.put(opts, :judge, fn _ ->
+        {:ok,
+         %{"intent" => "confirm", "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
+      end)
+
+    assert {:ok, [blocked]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation}, opts)
+
+    assert blocked.kind == :request_clarification
+    assert BookingDesk.Store.snapshot() == before
   end
 
   test "a fresh availability request replaces a different search unless explicitly additional" do

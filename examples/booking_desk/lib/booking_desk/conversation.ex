@@ -14,7 +14,10 @@ defmodule BookingDesk.Conversation do
     phone_evidence: [],
     phone_previous_evidence: [],
     phone_cursor: nil,
-    phone_turn: nil
+    phone_turn: nil,
+    reset_cursor: nil,
+    declined_proposal: nil,
+    reminder_route: :auto
   }
   @goals ~w(availability cancel reschedule)
 
@@ -121,7 +124,11 @@ defmodule BookingDesk.Conversation do
   defp scoped(data, {_, old}, {_, new}) when old != new,
     do: %{
       data
-      | phone: nil,
+      | reminder_route: :auto,
+        goal: nil,
+        preferences: %{},
+        declined_proposal: nil,
+        phone: nil,
         phone_evidence: [],
         phone_previous_evidence: [],
         phone_cursor: nil,
@@ -214,6 +221,20 @@ defmodule BookingDesk.Conversation do
   defp with_cursor(update, _), do: update
 
   defp put_fact({:judgment, {:ok, fields}}, data), do: remember_judgment(data, fields)
+
+  defp put_fact({:reset, cursor}, %{reset_cursor: cursor} = data), do: data
+
+  defp put_fact({:reset, cursor}, _),
+    do: %{@empty | reset_cursor: cursor, identity_changed: true, registration_requested: true}
+
+  defp put_fact({:search_declined, preferences}, data),
+    do: %{data | preferences: preferences(preferences)}
+
+  defp put_fact({:declined_proposal, id}, data),
+    do: %{data | declined_proposal: id, goal: if(data.goal == "cancel", do: nil, else: data.goal)}
+
+  defp put_fact({:reminder_route, route}, data) when route in [:active, :suspended],
+    do: %{data | reminder_route: route}
 
   defp put_fact({:judgment, {:incomplete, fields, missing}}, data) do
     fields = if "intent" in missing, do: Map.delete(fields, "intent"), else: fields

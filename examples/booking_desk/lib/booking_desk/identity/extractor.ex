@@ -1,7 +1,7 @@
 defmodule BookingDesk.Identity.Extractor do
   alias BookingDesk.Identity.LLM
 
-  @moduledoc "Debounced, bounded extraction outside the session/audio loop; stale caller revisions are inert."
+  @moduledoc "Debounced extraction with per-turn budgets; fresh caller turns can recover and stale revisions are inert."
   use GenServer
 
   def start_link(opts \\ []) do
@@ -43,7 +43,7 @@ defmodule BookingDesk.Identity.Extractor do
 
   defp check_current(state, s) do
     case input(state) do
-      {:ok, slot, key, source} ->
+      {:ok, slot, key, source, turn} ->
         s = admit(s, slot)
         old = Map.get(s.entries, slot, %{key: nil, job: nil, timer: nil, attempts: 0})
 
@@ -59,7 +59,8 @@ defmodule BookingDesk.Identity.Extractor do
               input: source,
               job: nil,
               timer: timer,
-              attempts: old.attempts,
+              attempts: if(Map.get(old, :turn) == turn, do: old.attempts, else: 0),
+              turn: turn,
               result: :pending,
               touched: System.monotonic_time(:millisecond)
             }
@@ -126,16 +127,30 @@ defmodule BookingDesk.Identity.Extractor do
         :retained_phone_evidence
       ])
 
-    if is_list(source[:dialogue]) and is_binary(source[:latest_user]) and
+    source = bounded_dialogue(source)
+
+    if source != nil and is_binary(source[:latest_user]) and
          String.trim(source.latest_user) != "" and byte_size(JSON.encode!(source)) <= 8_000 do
       key = :crypto.hash(:sha256, :erlang.term_to_binary({cursor, source}))
-      {:ok, {session, generation}, key, source}
+      turn = Map.get(state.interpretation_binding, :caller_turn, cursor)
+      {:ok, {session, generation}, key, source, turn}
     else
       :error
     end
   end
 
   defp input(_), do: :error
+
+  defp bounded_dialogue(%{dialogue: dialogue} = source) when is_list(dialogue) do
+    base = %{source | dialogue: []}
+
+    Enum.reduce_while(Enum.reverse(dialogue), base, fn turn, acc ->
+      next = %{acc | dialogue: [turn | acc.dialogue]}
+      if byte_size(JSON.encode!(next)) <= 8_000, do: {:cont, next}, else: {:halt, acc}
+    end)
+  end
+
+  defp bounded_dialogue(_), do: nil
 
   defp launch(entry, s) do
     evaluate = s.evaluator

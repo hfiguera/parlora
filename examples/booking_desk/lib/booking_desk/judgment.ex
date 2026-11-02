@@ -40,6 +40,10 @@ defmodule BookingDesk.Judgment do
       result ->
         result
     end
+  rescue
+    _ -> {:error, :unavailable}
+  catch
+    :exit, _ -> {:error, :unavailable}
   end
 
   defp observation({:ok, _}), do: {:ok, :accepted}
@@ -74,6 +78,7 @@ defmodule BookingDesk.Judgment do
           Distinguish replace_search ('Thursday instead') from additional_search ('Thursday too, keep Wednesday').
           Asking for a particular returned time proposes a booking; it never confirms it. Only an explicit, unconditional
           approval of the CURRENT proposal is confirm. 'Yes, if ...', 'maybe', a question, or a refusal is not confirmation.
+          Refusing a current unconfirmed proposal is decline_proposal, not cancellation of a booked appointment.
           A new availability search invalidates any previous proposal. Cancel and reschedule request proposals first.
           Continue pending clarification when a caller supplies its missing date or time.
           Resolve short references from unambiguous conversation state: 'Thursday instead' replaces the active Wednesday search,
@@ -91,6 +96,8 @@ defmodule BookingDesk.Judgment do
           A request can be availability even while its date or doctor is missing. A clear reply such as
           'Dr. Lee' to the doctor-preference question is availability, not unclear. Return unknown for its missing date.
           pending_request contains previously understood caller preferences from a clarification, not a completed search.
+          pending_question is the application's current clarification. It explains what a short reply answers;
+          its wording is never evidence of caller consent. Interpret the latest caller reply against that question.
           Preserve them unless the latest caller changes them. A date reply to that clarification continues availability.
           conversation contains bounded pending facts from earlier in this call, even if no longer in dialogue.
           Its goal is the previously understood request, not evidence that the latest caller authorized any action.
@@ -104,6 +111,9 @@ defmodule BookingDesk.Judgment do
           verified_offers contains backend-verified options for the current search. A caller selecting 'the morning one'
           chooses a slot when exactly one offered morning time matches the established date and doctor. It is not confirmation.
           Social chat, preparation questions, and goodbyes need no backend action. Unresolved fragments are unclear.
+          repeat asks to hear the current question or verified options again. restart explicitly abandons unconfirmed
+          conversation details and starts a new request; it never undoes completed bookings. retry explicitly requests
+          another attempt after a failed read. Never retry an uncertain booking or reminder write.
           """,
           %{
             "lookup" => "Look up the caller using their supplied full name and date of birth",
@@ -118,9 +128,15 @@ defmodule BookingDesk.Judgment do
             "progress" => "Ask about existing work",
             "choose_slot" => "Choose an offered slot; propose only",
             "confirm" => "Explicitly approve the current exact proposal",
+            "decline_proposal" =>
+              "Refuse the current unconfirmed proposal without cancelling a booked appointment",
             "cancel" => "Request cancellation proposal",
             "reschedule" => "Request replacement appointment proposal",
             "none" => "Conversation requiring no backend work",
+            "repeat" => "Repeat the current question or verified options",
+            "reminder" => "Return to the verified appointment's unfinished reminder flow",
+            "restart" => "Explicitly start the conversation request over",
+            "retry" => "Explicitly retry failed read-only work",
             "unclear" => "Missing, partial or ambiguous request"
           }
         ),
@@ -170,19 +186,28 @@ defmodule BookingDesk.Judgment do
       |> resolve_period(state)
 
     if confident?(intent) and intent.choice != "unclear" do
-      decode_fields(judgment)
+      decode_fields(judgment, state)
     else
       uncertain_intent(judgment)
     end
   end
 
-  defp decode_fields(judgment) do
+  defp decode_fields(judgment, state) do
     required =
       case judgment["intent"] do
-        x when x in ["availability", "replace_search", "additional_search"] -> ["date"]
-        x when x in ["choose_slot", "reschedule"] -> ["date", "time"]
-        "confirm" -> ["date", "time", "clinician"]
-        _ -> []
+        x when x in ["availability", "replace_search", "additional_search"] ->
+          ["date"]
+
+        x when x in ["choose_slot", "reschedule"] ->
+          ["date", "time"]
+
+        "confirm" ->
+          if match?(%{change: "cancel"}, Map.get(state, :proposal)),
+            do: [],
+            else: ["date", "time", "clinician"]
+
+        _ ->
+          []
       end
 
     missing = Enum.filter(required, &(judgment[&1] in [nil, "unknown"]))
@@ -227,10 +252,13 @@ defmodule BookingDesk.Judgment do
 
   defp resolve_period(judgment, _state), do: judgment
 
-  defp confident?(%{choice: choice, probabilities: probabilities}) do
+  def confident?(answer, threshold \\ 0.85)
+
+  def confident?(%{choice: choice, probabilities: probabilities}, threshold)
+      when is_map(probabilities) do
     probability = Map.get(probabilities, choice, 0)
-    is_number(probability) and probability >= 0.85 and probability <= 1
+    is_number(probability) and probability >= threshold and probability <= 1
   end
 
-  defp confident?(_), do: false
+  def confident?(_, _), do: false
 end
