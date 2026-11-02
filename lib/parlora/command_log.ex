@@ -37,6 +37,12 @@ defmodule Parlora.CommandLog do
   defp insert(log, id, digest) when map_size(log.entries) < log.limit,
     do: {:new, %{log | entries: Map.put(log.entries, id, digest)}}
 
-  defp insert(_log, _id, _digest),
-    do: Error.tuple(:backpressure, "Command record capacity exhausted")
+  defp insert(log, _id, _digest),
+    do:
+      Error.tuple(:backpressure, "Command record capacity exhausted", %{
+        resource: :command_records,
+        retention: :session,
+        retained: map_size(log.entries),
+        limit: log.limit
+      })
 end

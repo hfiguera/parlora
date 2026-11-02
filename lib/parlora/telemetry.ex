@@ -13,7 +13,7 @@ defmodule Parlora.Telemetry do
   alias Parlora.ID
 
   @operations ~w(session startup shutdown policy backend_queue backend delivery recovery interruption)a
-  @events ~w(failed policy_failed policy_rejected admission_rejected adapter_down disconnected
+  @events ~w(transcripts_compacted failed policy_failed policy_rejected admission_rejected adapter_down disconnected
     cancellation_requested cancellation_rejected cancellation_unconfirmed delegation_cancelled
     update_applied update_rejected update_uncertain delegation_associated
     stale_result result_delivery request_uncertain output_recovery_requested output_recovered
@@ -128,6 +128,9 @@ defmodule Parlora.Telemetry do
         :inserted_silence_us,
         :source_unavailable_us,
         :recovery_wait_us,
+        :retained,
+        :retained_bytes,
+        :dropped,
         :dropped_bytes,
         :dropped_frames,
         :dropped_duration_us,

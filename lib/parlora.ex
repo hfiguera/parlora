@@ -50,7 +50,15 @@ defmodule Parlora do
   Required options are `:channel`, `:provider`, `:backend`, and `:context_policy`,
   each a `{module, keyword_options}` tuple. Optional session settings include
   `:instructions`, `:history`, `:context`, `:event_sink`, `:audio_format`, and
-  `:limits`. The default format is mono PCM16LE at 24 kHz; use
+  `:limits`, and `:transcript_retention`. Transcript retention defaults to
+  `:rolling`: the snapshot keeps a recent, bounded suffix and reports dropped
+  entries in `snapshot.transcript_retention`. Choose `:close` to fail at capacity.
+  Limits `:max_transcripts` (8192 entries) and `:max_transcript_bytes` (1048576
+  encoded bytes) bound current transcript history independently of model tokens.
+  Keep durable facts in application context or application storage. Job and
+  command identity records retain their separate lifetime `:max_records` cap.
+
+  The default format is mono PCM16LE at 24 kHz; use
   `Parlora.AudioFormat.pcmu/0` for phone audio.
 
   Provider audio limits are applied automatically, with explicit `:limits`
@@ -195,6 +203,9 @@ defmodule Parlora do
 
       not Keyword.keyword?(Keyword.get(options, :limits, [])) ->
         Error.tuple(:invalid_argument, "Limits must be a keyword list")
+
+      Keyword.get(options, :transcript_retention, :rolling) not in [:rolling, :close] ->
+        Error.tuple(:invalid_argument, "transcript_retention must be :rolling or :close")
 
       true ->
         :ok

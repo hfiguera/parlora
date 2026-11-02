@@ -57,7 +57,7 @@ defmodule Parlora.StabilityTest do
     4 + warmup(code_bytes, stable, remaining - 1)
   end
 
-  test "deadline uncertainty, transcript exhaustion, and provider loss have explicit outcomes" do
+  test "deadline uncertainty, transcript rollover, and provider loss have explicit outcomes" do
     {session, _channel, provider, backend, pids} = boot(job_timeout_ms: 30)
     request = request(provider, 123)
     assert_receive {:parlora_event, %Event{type: :request_uncertain}}
@@ -69,12 +69,13 @@ defmodule Parlora.StabilityTest do
     {session, _channel, provider, _backend, pids} = boot(max_transcripts: 8)
     for _fragment <- 1..9, do: transcript(provider, " hello")
 
-    assert_receive {:parlora_event,
-                    %Event{type: :failed, payload: %{error: %{code: :backpressure}}}}
-
-    await_cleanup(pids)
-    refute Process.alive?(session)
-    flush()
+    snapshot = Parlora.snapshot(session)
+    retained = snapshot.transcript_retention.retained
+    assert retained <= 8
+    assert length(snapshot.transcripts) == retained
+    assert snapshot.transcript_retention.dropped > 0
+    assert Parlora.status(session).status == :ready
+    finish(session, pids)
   end
 
   test "one session retains bounded history across many completed corrections" do

@@ -77,7 +77,11 @@ defmodule Parlora.Session.State do
       context: %ContextSnapshot{
         session_id: id,
         provider_generation: 0,
-        application_context: Keyword.get(options, :context, %{})
+        application_context: Keyword.get(options, :context, %{}),
+        transcript_retention: %{
+          %ContextSnapshot{}.transcript_retention
+          | mode: Keyword.get(options, :transcript_retention, :rolling)
+        }
       }
     }
   end

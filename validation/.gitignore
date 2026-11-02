@@ -68,3 +68,6 @@ datasets/
 !/recovery-wait-20261004/arrivals.json
 !/recovery-wait-20261004/windows.json
 !/speech-recovery-20261004/gpt-live-call.json
+
+# Provider limits checked for the session-retention policy.
+!/session-retention/provider-limits.json

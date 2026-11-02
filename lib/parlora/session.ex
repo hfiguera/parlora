@@ -21,6 +21,7 @@ defmodule Parlora.Session do
     Jobs,
     Progress,
     Recovery,
+    Retention,
     Shutdown,
     Startup,
     State,
@@ -298,29 +299,19 @@ defmodule Parlora.Session do
     do: Startup.ready(state, role, payload.capabilities)
 
   defp apply_event(%{status: :ready} = state, %Event{type: :transcript_delta, payload: payload}) do
-    if length(state.context.transcripts) < state.limits.max_transcripts do
-      state =
-        if payload.speaker == :user and String.trim(payload.delta) != "" and
-             match?(%{stage: :awaiting_user}, state.output_recovery),
-           do: %{state | output_recovery: nil},
-           else: state
+    case Retention.append_transcript(state, payload) do
+      {:ok, state} ->
+        state =
+          if payload.speaker == :user and String.trim(payload.delta) != "" and
+               match?(%{stage: :awaiting_user}, state.output_recovery),
+             do: %{state | output_recovery: nil},
+             else: state
 
-      entry =
-        Map.merge(payload, %{
-          provider_generation: state.context.provider_generation,
-          arrival_order: state.context.revision
-        })
+        Interpretation.start(state, %ContextTrigger{kind: :transcript_updated})
 
-      state =
-        State.revise(state, %{state.context | transcripts: [entry | state.context.transcripts]})
-
-      Interpretation.start(state, %ContextTrigger{kind: :transcript_updated})
-    else
-      State.emit(state, :failed, %{
-        error: Error.new(:backpressure, "Transcript capacity exhausted")
-      })
-
-      Shutdown.begin(state, :cancel)
+      {:error, error} ->
+        State.emit(state, :failed, %{error: error})
+        Shutdown.begin(state, :cancel)
     end
   end
 

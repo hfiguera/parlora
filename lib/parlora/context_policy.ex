@@ -12,6 +12,13 @@ defmodule Parlora.ContextPolicy do
   the caller corrects it. Decisions are checked against current context and task
   revisions before admission.
 
+  Transcripts may be a retained recent suffix. Inspect
+  `snapshot.transcript_retention` before relying on absent conversational details;
+  preserve important facts in application context or your own storage. Compaction
+  revises context, so decisions from older snapshots are checked again against
+  current context before effects are admitted. Task and command records are not
+  evicted to make room for transcripts.
+
   The policy is application code; it may use deterministic rules or an
   interpretation service. Its decisions do not authorize business side effects.
   Validate permissions and confirmations in application operations too. See

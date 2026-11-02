@@ -1,7 +1,7 @@
 defmodule Parlora.Session.DecisionValidation do
   @moduledoc false
   alias Parlora.{ContextDecision, Error}
-  alias Parlora.Session.ContextWait
+  alias Parlora.Session.{ContextWait, Retention}
 
   def validate(state, decisions) when is_list(decisions) do
     with :ok <- validate_shapes(decisions), do: validate_batch(state, decisions)
@@ -36,10 +36,20 @@ defmodule Parlora.Session.DecisionValidation do
         Error.tuple(:backpressure, "Backend job capacity exhausted, including superseded work")
 
       clarification_count(state, decisions) > state.limits.max_records ->
-        Error.tuple(:backpressure, "Clarification record capacity exhausted")
+        Retention.record_limit(
+          state,
+          :clarifications,
+          "Clarification record capacity exhausted",
+          MapSet.size(state.clarifications)
+        )
 
       map_size(state.jobs) + starts > state.limits.max_records ->
-        Error.tuple(:backpressure, "Session record capacity exhausted")
+        Retention.record_limit(
+          state,
+          :jobs,
+          "Session record capacity exhausted",
+          map_size(state.jobs)
+        )
 
       true ->
         validate_decisions(state, decisions)

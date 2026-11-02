@@ -24,7 +24,17 @@ defmodule Parlora.BoundsTest do
     {:new, log} = CommandLog.admit(%CommandLog{limit: 1}, "one", :mute)
     assert {:duplicate, ^log} = CommandLog.admit(log, "one", :mute)
     assert {:error, %{code: :invalid_argument}} = CommandLog.admit(log, "one", :unmute)
-    assert {:error, %{code: :backpressure}} = CommandLog.admit(log, "two", :mute)
+
+    assert {:error,
+            %{code: :backpressure, details: %{retention: :session, retained: 1, limit: 1}}} =
+             CommandLog.admit(log, "two", :mute)
+
+    for index <- 1..100 do
+      assert {:error, %{code: :backpressure}} = CommandLog.admit(log, "rejected-#{index}", :mute)
+    end
+
+    assert {:duplicate, ^log} = CommandLog.admit(log, "one", :mute)
+    assert {:error, %{code: :invalid_argument}} = CommandLog.admit(log, "one", :unmute)
   end
 
   test "invalid limits cannot create unbounded queues or unreadable frames" do
@@ -34,6 +44,7 @@ defmodule Parlora.BoundsTest do
     assert {:error, _error} = Limits.new(provider_audio_queue_bytes: 480)
     assert {:error, _error} = Limits.new(provider_audio_queue_bytes: 24_001)
     assert {:error, _error} = Limits.new(provider_audio_max_age_ms: 0)
+    assert {:error, _error} = Limits.new(max_transcript_bytes: 0)
     assert {:error, _error} = Limits.new(unknown: 1)
   end
 end

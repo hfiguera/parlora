@@ -1,6 +1,6 @@
 defmodule Parlora.Session.Progress do
   @moduledoc false
-  alias Parlora.Session.{Health, State, Uncertainty}
+  alias Parlora.Session.{Health, Retention, State, Uncertainty}
   alias Parlora.Telemetry
 
   def snapshot(state) do
@@ -13,6 +13,7 @@ defmodule Parlora.Session.Progress do
         Map.get(Map.get(state.ready, :provider, %{}), :context_acknowledgment?, false),
       observed_at_us: System.monotonic_time(:microsecond),
       interpretation: interpretation(state),
+      retention: Retention.snapshot(state),
       delegations:
         Map.new(state.context.pending_delegations, fn {id, entry} ->
           {id,
