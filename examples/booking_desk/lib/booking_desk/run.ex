@@ -27,10 +27,17 @@ defmodule BookingDesk.Run do
           {ReplayChannel,
            owner: self(), audio_observer: observer, recorder: recorder, ambience: ambience}
 
-    provider_options =
-      BookingDesk.PhonicSettings.options(Keyword.get(opts, :phonic_native_conversation, false))
+    native_conversation = Keyword.get(opts, :phonic_native_conversation, true)
 
-    {:ok, session} = BookingDesk.start(channel, provider_options: provider_options)
+    provider_options =
+      BookingDesk.PhonicSettings.options(
+        System.get_env("PARLORA_PROVIDER", "openai"),
+        native_conversation
+      )
+
+    {:ok, session} =
+      BookingDesk.start(channel, phonic_native_conversation: native_conversation)
+
     {:ok, readback} = BookingDesk.Readback.start_link()
     Process.send_after(self(), :deadline, 210_000)
 

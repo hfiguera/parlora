@@ -4,7 +4,13 @@ defmodule BookingDesk do
   def start(channel, opts \\ []) do
     provider = Keyword.get(opts, :provider, System.get_env("PARLORA_PROVIDER", "openai"))
 
-    provider_adapter = provider(provider, Keyword.get(opts, :provider_options, []))
+    provider_adapter =
+      provider(
+        provider,
+        Keyword.get(opts, :provider_options, []),
+        Keyword.get(opts, :phonic_native_conversation, true)
+      )
+
     {channel_module, channel_opts} = channel
     {outer_observer, channel_opts} = Keyword.pop(channel_opts, :audio_observer)
 
@@ -32,7 +38,13 @@ defmodule BookingDesk do
     end
   end
 
-  defp start_session(guard, {channel_module, channel_opts}, provider_adapter, provider, opts) do
+  defp start_session(
+         guard,
+         {channel_module, channel_opts},
+         {_module, provider_options} = provider_adapter,
+         provider,
+         opts
+       ) do
     observer = BookingDesk.CallGuard.observer(guard)
 
     with {:ok, conversation} <-
@@ -56,11 +68,7 @@ defmodule BookingDesk do
                conversation: conversation,
                phonic_busy:
                  provider == "phonic" and
-                   Keyword.get(
-                     Keyword.get(opts, :provider_options, []),
-                     :wait_for_response,
-                     false
-                   )
+                   Keyword.get(provider_options, :wait_for_response, false)
              )},
           context: %{},
           instructions: instructions(provider),
@@ -87,7 +95,7 @@ defmodule BookingDesk do
 
   def limits(_), do: [job_timeout_ms: 35_000, policy_timeout_ms: 5_000]
 
-  def provider(name, overrides \\ []) do
+  def provider(name, overrides \\ [], native_conversation \\ true) do
     {module, variable} =
       case name do
         "openai" -> {Parlora.Providers.OpenAI, "OPENAI_API_KEY"}
@@ -96,7 +104,12 @@ defmodule BookingDesk do
         "phonic" -> {Parlora.Providers.Phonic, "PHONIC_API_KEY"}
       end
 
-    options = [api_key: System.fetch_env!(variable)]
+    options =
+      Keyword.put(
+        BookingDesk.PhonicSettings.options(name, native_conversation),
+        :api_key,
+        System.fetch_env!(variable)
+      )
 
     options =
       if voice = assistant_voice(name), do: Keyword.put(options, :voice, voice), else: options

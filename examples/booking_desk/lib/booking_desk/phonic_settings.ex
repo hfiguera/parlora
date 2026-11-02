@@ -1,12 +1,9 @@
 defmodule BookingDesk.PhonicSettings do
-  @moduledoc "Opt-in native conversation profile for reproducible Phonic listening runs."
+  @moduledoc "Default native conversation profile for the booking example's Phonic sessions."
 
-  def options(false), do: []
+  def options(provider, enabled \\ true)
 
-  def options(true) do
-    if System.get_env("PARLORA_PROVIDER", "openai") != "phonic",
-      do: raise(ArgumentError, "--phonic-native-conversation requires PARLORA_PROVIDER=phonic")
-
+  def options("phonic", true) do
     [
       enable_assistant_backchannel: true,
       assistant_backchannel_aggressiveness: 0.3,
@@ -20,4 +17,6 @@ defmodule BookingDesk.PhonicSettings do
       boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"]
     ]
   end
+
+  def options(_provider, _enabled), do: []
 end
