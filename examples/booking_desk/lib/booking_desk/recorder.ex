@@ -222,7 +222,7 @@ defmodule BookingDesk.Recorder do
   defp relative(s, at), do: max(0, (at - s.origin) / 1_000)
 
   defp selected(%{type: :transcript_delta, payload: p}),
-    do: Map.take(p, [:speaker, :delta, :start_ms, :end_ms])
+    do: Map.take(p, [:speaker, :delta, :start_ms, :end_ms, :segment_id])
 
   defp selected(%{type: :task_submitted, payload: %{request: r}}),
     do: Map.take(r, [:id, :task_id, :task_revision, :input])

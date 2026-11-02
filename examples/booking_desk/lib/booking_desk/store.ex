@@ -4,7 +4,7 @@ defmodule BookingDesk.Store do
   alias Exqlite.Sqlite3, as: SQL
   @dates ~w(2026-11-04 2026-11-05 2026-11-06 2026-11-11 2026-11-12)
   def dates, do: @dates
-  def clinicians, do: %{"lee" => "Dr. Lee", "patel" => "Dr. Patel"}
+  def clinicians, do: BookingDesk.Clinicians.names()
   def slot_id(date, time, "lee"), do: date <> "T" <> time <> ":00"
   def slot_id(date, time, "patel"), do: date <> "T" <> time <> ":00@patel"
 

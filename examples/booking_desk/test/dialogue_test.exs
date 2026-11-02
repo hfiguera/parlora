@@ -2,6 +2,23 @@ defmodule BookingDesk.DialogueTest do
   use ExUnit.Case, async: true
   alias BookingDesk.Dialogue
 
+  test "untimed assistant fragments join within one provider reply but never across replies" do
+    parts = [
+      %{speaker: :assistant, delta: "Can we text 0188?", segment_id: "second", arrival_order: 4},
+      %{speaker: :assistant, delta: "0188?", segment_id: "first", arrival_order: 3},
+      %{speaker: :assistant, delta: "Can we text ", segment_id: "first", arrival_order: 2},
+      %{speaker: :user, delta: "Yes, a reminder please", arrival_order: 1}
+    ]
+
+    assert [
+             %{speaker: :user},
+             %{speaker: :assistant, text: "Can we text 0188?", first_cursor: 2},
+             %{speaker: :assistant, text: "Can we text 0188?", first_cursor: 4}
+           ] = Dialogue.build(parts, include_assistant_reply: true, with_cursor: true)
+
+    assert [%{speaker: :user}] = Dialogue.build(parts)
+  end
+
   defp build(parts) do
     parts
     |> Enum.map(fn {speaker, text, first, last, generation} ->

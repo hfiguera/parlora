@@ -13,6 +13,39 @@ defmodule BookingDesk.ReminderPolicyTest do
     }
   end
 
+  test "simple consent to an exact reminder offer opts in without inventing number consent" do
+    state = %{status: "offered", patient: "p", original_phone: "2025550188"}
+
+    opts = [
+      reminder_judge: fn _ -> flunk("an exact reminder offer and simple yes need no model") end
+    ]
+
+    for offer <- [
+          "Would you like a text reminder?",
+          "Would you like a text reminder 24 hours before the appointment?",
+          "Would you like a SMS reminder for this appointment?"
+        ],
+        reply <- ["Yes", "Yeah, that'd be helpful.", "Yes, that would be helpful!", "Yes, please"] do
+      assert {:input, %{operation: "reminder_opt_in"}} =
+               ReminderPolicy.interpret(snapshot(offer, reply), state, opts)
+    end
+
+    uncertain = [
+      reminder_judge: fn _ -> {:error, :uncertain} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for offer <- [
+          "Shall I book that?",
+          "Would you not like a text reminder?",
+          "Would you like marketing texts?",
+          "Would you like a text reminder if you pay?",
+          "Can we send the reminder to 0188?"
+        ] do
+      assert {:clarify, _} = ReminderPolicy.interpret(snapshot(offer, "Yes"), state, uncertain)
+    end
+  end
+
   test "a literal cell confirmation to an exact permission question needs no probabilistic judgment" do
     state = %{
       status: "verify_existing",

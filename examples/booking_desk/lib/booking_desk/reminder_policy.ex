@@ -14,11 +14,31 @@ defmodule BookingDesk.ReminderPolicy do
 
     route = Conversation.context(snapshot).reminder_route
 
-    case if(route == :active or (route == :auto and active), do: state(snapshot)) do
+    case routed_reminder(snapshot, route, active) do
       %{status: status} when status in ["scheduled", "declined"] -> nil
       state -> state
     end
   end
+
+  defp routed_reminder(snapshot, :suspended, true) do
+    current = state(snapshot)
+    if offered_reply?(snapshot, current), do: current
+  end
+
+  defp routed_reminder(snapshot, :active, _), do: state(snapshot)
+  defp routed_reminder(snapshot, :auto, true), do: state(snapshot)
+  defp routed_reminder(_, _, _), do: nil
+
+  defp offered_reply?(snapshot, %{status: "offered"} = current) do
+    dialogue = BookingDesk.ReminderReadback.turns(snapshot, current)
+
+    question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+
+    match?(%{speaker: :user}, List.last(dialogue)) and question != nil and
+      BookingDesk.Reminders.offer_question?(question.text)
+  end
+
+  defp offered_reply?(_, _), do: false
 
   def context(snapshot) do
     case state(snapshot) do
@@ -86,6 +106,7 @@ defmodule BookingDesk.ReminderPolicy do
     result =
       cond do
         BookingDesk.Recovery.command(latest_user) -> {:ok, "appointment"}
+        literal_opt_in?(current, state) -> {:ok, "opt_in"}
         literal_confirmation?(current, state) -> {:ok, "confirm_number"}
         true -> classify.(state)
       end
@@ -93,14 +114,30 @@ defmodule BookingDesk.ReminderPolicy do
     interpret_reply(result, snapshot, current, state, opts)
   end
 
-  defp literal_confirmation?(%{status: status, destination: destination}, state)
-       when status in ["verify_existing", "verify_new"] do
-    text =
-      state.latest_user
+  defp normalized_reply(text),
+    do:
+      text
       |> String.downcase()
       |> String.replace("’", "'")
       |> String.replace(~r/[.,!]/u, "")
       |> String.trim()
+
+  defp literal_opt_in?(%{status: "offered"}, state) do
+    text = normalized_reply(state.latest_user)
+    question = state.dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+
+    accept =
+      BookingDesk.Reply.simple(text) == :accept or
+        text in ["yeah that'd be helpful", "yes that'd be helpful", "yes that would be helpful"]
+
+    accept and question != nil and BookingDesk.Reminders.offer_question?(question.text)
+  end
+
+  defp literal_opt_in?(_, _), do: false
+
+  defp literal_confirmation?(%{status: status, destination: destination}, state)
+       when status in ["verify_existing", "verify_new"] do
+    text = normalized_reply(state.latest_user)
 
     accept =
       BookingDesk.Reply.simple(text) == :accept or

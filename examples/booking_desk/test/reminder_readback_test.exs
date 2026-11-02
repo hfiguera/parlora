@@ -38,6 +38,68 @@ defmodule BookingDesk.ReminderReadbackTest do
   defp remember(snapshot, scope),
     do: put_in(snapshot.tasks["reminder"][:clarification], %{input: scope})
 
+  test "repeated correct questions are not concatenated into a wrong destination" do
+    question = "Can we send the reminder to your cell number ending in zero one eight eight?"
+    s = snapshot(question)
+    first = Map.put(hd(s.transcripts), :segment_id, "first-reply")
+    second = %{first | arrival_order: 12, segment_id: "second-reply"}
+    s = %{s | transcripts: [second, first, List.last(s.transcripts)]}
+
+    assert ReminderReadback.verified?(s, current())
+    assert correction(s) == nil
+
+    same_reply = %{
+      s
+      | transcripts: [%{second | segment_id: "first-reply"}, first, List.last(s.transcripts)]
+    }
+
+    refute ReminderReadback.verified?(same_reply, current())
+    assert {_, _} = correction(same_reply)
+
+    for answer <- ["Yes", "Yep, that's my cell"] do
+      consent = %{speaker: :user, delta: answer, arrival_order: 13}
+      later = %{s | transcripts: [consent | s.transcripts]}
+
+      assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+               ReminderPolicy.interpret(later, current(),
+                 reminder_judge: fn _ -> {:ok, "confirm_number"} end
+               )
+    end
+
+    for answer <- ["Yes, if it is free", "No, don't send it"] do
+      consent = %{speaker: :user, delta: answer, arrival_order: 13}
+      later = %{s | transcripts: [consent | s.transcripts]}
+
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(later, current(),
+                 reminder_judge: fn _ -> {:ok, "confirm_number"} end
+               )
+    end
+  end
+
+  test "an earlier correct question cannot hide a newer wrong or incomplete readback" do
+    s = snapshot("Can we text your cell ending in 0188?")
+    first = Map.put(hd(s.transcripts), :segment_id, "first-reply")
+
+    for {text, repair?} <- [
+          {"Can we text your cell ending in 4289?", true},
+          {"Can we text your cell ending in zero one eight", false},
+          {"Can we text your cell ending in 0188 or 4289?", true}
+        ] do
+      second = %{first | arrival_order: 12, segment_id: "second-reply", delta: text}
+      later = %{s | transcripts: [second, first, List.last(s.transcripts)]}
+      refute ReminderReadback.verified?(later, current())
+      assert match?({_, _}, correction(later)) == repair?
+      consent = %{speaker: :user, delta: "Yes", arrival_order: 13}
+      later = %{later | transcripts: [consent | later.transcripts]}
+
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(later, current(),
+                 reminder_judge: fn _ -> {:ok, "confirm_number"} end
+               )
+    end
+  end
+
   test "a wrong numeric or spoken suffix is corrected without another caller turn" do
     for text <- [
           "Is your cell number ending in 4289 — can we send the reminder there?",

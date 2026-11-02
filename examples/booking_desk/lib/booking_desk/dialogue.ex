@@ -18,7 +18,7 @@ defmodule BookingDesk.Dialogue do
     |> Enum.reverse()
     # An admitted request is also a caller boundary. Untimed providers may send
     # the next question without an intervening assistant transcript.
-    |> Enum.chunk_by(&{&1.speaker, request_side(&1, cursor)})
+    |> Enum.chunk_by(&{&1.speaker, request_side(&1, cursor), speech_boundary(&1)})
     |> Enum.map(&run(&1, cursor))
     |> Enum.reduce([], &append/2)
     # Assistant acknowledgments after the latest caller cannot change its intent.
@@ -35,6 +35,11 @@ defmodule BookingDesk.Dialogue do
 
   defp request_side(_, _), do: nil
 
+  defp speech_boundary(%{speaker: :assistant} = part),
+    do: {Map.get(part, :provider_generation), Map.get(part, :segment_id)}
+
+  defp speech_boundary(part), do: {Map.get(part, :provider_generation), nil}
+
   defp run(parts, cursor) do
     generation =
       case Enum.map(parts, &Map.get(&1, :provider_generation)) |> Enum.uniq() do
@@ -50,6 +55,7 @@ defmodule BookingDesk.Dialogue do
       speaker: hd(parts).speaker,
       first_cursor: Map.get(hd(parts), :arrival_order, 0),
       request_side: request_side(hd(parts), cursor),
+      speech_boundary: speech_boundary(hd(parts)),
       text: Enum.map_join(parts, & &1.delta),
       generation: if(timed?, do: generation),
       start_ms: if(timed?, do: Enum.min_by(parts, & &1.start_ms).start_ms),
@@ -80,7 +86,8 @@ defmodule BookingDesk.Dialogue do
   end
 
   defp append(next, [%{speaker: speaker} = previous | rest])
-       when next.speaker == speaker and next.request_side == previous.request_side do
+       when next.speaker == speaker and next.request_side == previous.request_side and
+              next.speech_boundary == previous.speech_boundary do
     timed? = previous.generation != nil and previous.generation == next.generation
 
     [

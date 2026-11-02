@@ -154,13 +154,8 @@ defmodule BookingDesk.Judgment do
         ),
       "clinician" =>
         TypeSafe.choice(
-          "Which doctor does the caller request or select? Resolve an explicit Dr. Lee or Dr. Patel from caller words. For identity details, preserve the earlier appointment request's doctor. A date-only correction or time-only choice preserves a specific pending_request or active doctor unless changed. 'Anyone available' or 'no preference' means any for a search, but when choosing a slot shared by doctors do not invent a specific doctor. An approval uses the current proposal's clinician unless contradicted. Unknown means not established; never silently default to Dr. Lee.",
-          %{
-            "lee" => "Dr. Lee",
-            "patel" => "Dr. Patel",
-            "any" => "No particular doctor; any available clinician",
-            "unknown" => "No clinician preference can be resolved"
-          }
+          "Which doctor does the caller request or select? #{BookingDesk.Clinicians.guidance()} For identity details, preserve the earlier appointment request's doctor. A date-only correction or time-only choice preserves a specific pending_request or active doctor unless changed. 'Anyone available' or 'no preference' means any for a search, but when choosing a slot shared by doctors do not invent a specific doctor. An approval uses the current proposal's clinician unless contradicted.",
+          BookingDesk.Clinicians.choices()
         ),
       "time" =>
         TypeSafe.choice(
@@ -189,6 +184,7 @@ defmodule BookingDesk.Judgment do
       |> Map.new(fn {key, answer} ->
         {key, if(confident?(answer), do: answer.choice, else: "unknown")}
       end)
+      |> BookingDesk.Clinicians.normalize()
       |> resolve_period(state)
 
     if confident?(intent) and intent.choice != "unclear" do

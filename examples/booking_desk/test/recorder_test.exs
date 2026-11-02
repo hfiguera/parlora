@@ -10,6 +10,26 @@ defmodule BookingDesk.RecorderTest do
     %{recorder: recorder, path: path}
   end
 
+  test "caption evidence retains provider reply IDs for auditing separate questions", %{
+    recorder: recorder
+  } do
+    event = %Parlora.Event{
+      id: "caption",
+      session_id: "test",
+      source: :provider,
+      adapter_id: "phonic",
+      generation: 0,
+      type: :transcript_delta,
+      observed_at_us: System.monotonic_time(:microsecond),
+      payload: %{speaker: :assistant, delta: "Can we text 0188?", segment_id: "reply-1"}
+    }
+
+    Recorder.event(recorder, event)
+    report = Recorder.finish(recorder, %{})
+    assert [%{data: %{segment_id: "reply-1"}}] = report.events
+    GenServer.stop(recorder)
+  end
+
   test "separate audio tracks retain offsets, count credits, and omit credentials", %{
     recorder: recorder,
     path: path

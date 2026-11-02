@@ -282,6 +282,15 @@ defmodule BookingDesk.Reminders do
       )
   end
 
+  def offer_question?(text) do
+    question = text |> String.trim() |> String.split(~r/(?<=[.!?])\s+/u) |> List.last()
+
+    Regex.match?(
+      ~r/^Would you like a (?:text|SMS) reminder(?: (?:24 hours before (?:your|the) appointment|for this appointment))?\?$/i,
+      question
+    )
+  end
+
   def readback_digits(text) do
     words =
       Map.new(
