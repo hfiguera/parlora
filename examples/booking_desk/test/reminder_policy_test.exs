@@ -25,6 +25,7 @@ defmodule BookingDesk.ReminderPolicyTest do
 
     for question <- [
           "Great. I'll set that up now. Could we send it to your cell ending in zero one eight eight?",
+          "Would you like a text reminder for this appointment? Can we send it to your cell number ending in zero one eight eight?",
           "Can we send the reminder to 0188?"
         ],
         answer <- ["Yep, that's my cell", "Yes, please", "Yep, that’s my cell."] do

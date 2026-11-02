@@ -1,18 +1,9 @@
 defmodule BookingDesk.ReminderReadback do
   @moduledoc "Repair assistant phone readbacks from verified reminder state, without granting consent."
-  alias BookingDesk.{Dialogue, Reminders}
+  alias BookingDesk.{ReadbackScope, Reminders}
 
   def turns(snapshot, current, opts \\ []) do
-    boundary = scope(snapshot, current)[:after_cursor]
-
-    snapshot.transcripts
-    |> Enum.reject(fn part ->
-      part.speaker == :assistant and
-        ((boundary != nil and part.arrival_order <= boundary) or
-           Map.get(part, :provider_generation, snapshot.provider_generation) !=
-             snapshot.provider_generation)
-    end)
-    |> Dialogue.build(Keyword.put(opts, :with_cursor, true))
+    ReadbackScope.turns(snapshot, Map.get(current, :request_id), :reminder_readback, opts)
   end
 
   def correction(
@@ -36,15 +27,7 @@ defmodule BookingDesk.ReminderReadback do
           attempt = previous + 1
 
           {question(current, attempt),
-           %{
-             reminder_readback: %{
-               request_id: current.request_id,
-               provider_generation: snapshot.provider_generation,
-               task_revision: task.revision,
-               after_cursor: snapshot.transcripts |> Enum.map(& &1.arrival_order) |> Enum.max(),
-               attempt: attempt
-             }
-           }}
+           ReadbackScope.input(snapshot, task, :reminder_readback, attempt)}
         end
 
       _ ->
@@ -65,7 +48,7 @@ defmodule BookingDesk.ReminderReadback do
   def verified?(_, _), do: false
 
   defp wrong_number?(text, expected) do
-    String.contains?(text, "?") and
+    Regex.match?(~r/\?(?:\s*|\s+Your appointment remains booked\.\s*)$/i, text) and
       Regex.match?(~r/\b(cell|phone|number)\b|\b(send|text)\b.*\bto\b/i, text) and
       Reminders.readback_digits(text) != "" and not Reminders.readback?(text, expected)
   end
@@ -84,34 +67,6 @@ defmodule BookingDesk.ReminderReadback do
       "I'm having trouble verifying the number readback. Your appointment remains booked. What cell number should we use? Please include all ten digits."
 
   defp scope(snapshot, current) do
-    snapshot
-    |> Map.get(:tasks, %{})
-    |> Map.values()
-    |> Enum.find_value(%{}, fn task ->
-      current_scope(task, current, snapshot.provider_generation)
-    end)
+    ReadbackScope.current(snapshot, Map.get(current, :request_id), :reminder_readback)
   end
-
-  defp current_scope(
-         %{revision: revision, request_ids: [request | _], clarification: %{input: input}},
-         %{request_id: request},
-         generation
-       ) do
-    case input do
-      %{
-        reminder_readback:
-          %{
-            request_id: ^request,
-            provider_generation: ^generation,
-            task_revision: ^revision
-          } = scope
-      } ->
-        scope
-
-      _ ->
-        nil
-    end
-  end
-
-  defp current_scope(_, _, _), do: nil
 end

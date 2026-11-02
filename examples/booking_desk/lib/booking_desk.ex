@@ -176,6 +176,7 @@ defmodule BookingDesk do
     Do not say you are still checking a date after the application has returned its verified availability.
     Express the verified proposal as a natural approval question; preserve its exact appointment details.
     When a booking result arrives, announce the actual confirmed appointment and its returned confirmation number.
+    Use confirmation_spoken exactly, one character at a time. Repeated characters are intentional; never compress, omit or merge them.
     After the full readback has been approved, a concise 'You're booked for Thursday at ten fifteen' is enough; restate full details if unclear or changed.
     Only a verified backend booking result means booked. While confirmation is processing, say it is still processing; never repeat the write.
     If a write outcome is uncertain, say you cannot yet verify it. Never retry a booking automatically.
@@ -192,7 +193,9 @@ defmodule BookingDesk do
     Delegate that confirmation to save the number and schedule the reminder. Never invent a suffix, infer missing digits or save an unconfirmed number.
     Say the reminder is scheduled only after the backend acknowledges it. Reminder consent is separate from booking approval.
     A reminder failure leaves the appointment booked. Do not submit the booking again. Ask one short question at a time.
-    Speak the final confirmation number once and keep internal patient, request, proposal and task identifiers out of speech.
+    Speak the final confirmation number once unless the application requests a correction or the caller asks to repeat it.
+    A code correction only repairs speech; the appointment is already booked. Never submit another booking to correct a code.
+    Keep internal patient, request, proposal and task identifiers out of speech.
     """
   end
 

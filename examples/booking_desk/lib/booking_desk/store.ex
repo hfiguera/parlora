@@ -503,13 +503,15 @@ defmodule BookingDesk.Store do
           clinician_id(clinician_name)
 
         {reminder_summary, reminder} = BookingDesk.Reminders.offer(db, patient)
+        confirmation_spoken = BookingDesk.Confirmation.spoken(confirmation)
 
         success(
-          "#{if operation == "reschedule", do: "Rescheduled", else: "Booked"}: #{slot_label(slot)}, #{clinician_name}. Confirmation #{confirmation}. #{reminder_summary}",
+          "#{if operation == "reschedule", do: "Rescheduled", else: "Booked"}: #{slot_label(slot)}, #{clinician_name}. Read the complete confirmation exactly as follows: #{confirmation_spoken}. Preserve every repeated character; do not shorten this sequence. #{reminder_summary}",
           %{
             appointment: id,
             slot: slot,
             confirmation: confirmation,
+            confirmation_spoken: confirmation_spoken,
             patient: patient,
             clinician: clinician,
             clinician_name: clinician_name,

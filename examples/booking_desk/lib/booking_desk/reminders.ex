@@ -273,7 +273,7 @@ defmodule BookingDesk.Reminders do
   end
 
   def destination_question?(text, expected) do
-    question = text |> String.trim() |> String.split(~r/(?<=[.!])\s+/u) |> List.last()
+    question = text |> String.trim() |> String.split(~r/(?<=[.!?])\s+/u) |> List.last()
 
     readback?(text, expected) and
       Regex.match?(

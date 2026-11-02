@@ -103,6 +103,37 @@ defmodule BookingDesk.RemindersTest do
     assert summary =~ "no usable cell number"
   end
 
+  test "confirmation readout and recovery data come from the exact booking receipt", ctx do
+    code = ctx.booking["facts"]["confirmation"]
+    spoken = ctx.booking["facts"]["confirmation_spoken"]
+    assert BookingDesk.Confirmation.complete?(spoken, code)
+    assert ctx.booking["summary"] =~ spoken
+    assert ctx.booking["summary"] =~ "Preserve every repeated character"
+
+    task = %{
+      status: :submitted,
+      request_ids: ["booked"],
+      input: %{operation: "confirm", lookup_request: ctx.base.lookup_request}
+    }
+
+    s = %Parlora.ContextSnapshot{
+      session_id: ctx.base.session,
+      application_context: %{lookup_request: ctx.base.lookup_request}
+    }
+
+    assert %{confirmation: ^code, readout: ^spoken, reminder_status: "offered"} =
+             BookingDesk.Confirmation.current(s, task, ctx.store)
+
+    assert BookingDesk.Confirmation.current(%{s | session_id: "another-call"}, task, ctx.store) ==
+             nil
+
+    assert BookingDesk.Confirmation.current(s, %{task | request_ids: ["unverified"]}, ctx.store) ==
+             nil
+
+    assert BookingDesk.Confirmation.current(s, %{task | status: :failed}, ctx.store) == nil
+    assert Store.reminder_jobs(ctx.store) == []
+  end
+
   test "Gemini's longer confirmation/reminder burst fits a bounded receive queue" do
     alias Parlora.{AdapterInit, AudioFormat, Limits}
     alias Parlora.Provider.OutputBuffer

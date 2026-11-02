@@ -62,9 +62,21 @@ defmodule BookingDesk.Policy do
       |> Enum.sort_by(fn {_, d} -> d.received_at_us end)
       |> List.first()
 
-    case {user, readback_correction(snapshot, latest, cursor)} do
+    case {user, readback_correction(snapshot, latest, cursor, pending)} do
       {[], _} ->
         {:ok, []}
+
+      {_, {:wait, key}} ->
+        {:ok,
+         [
+           %D{
+             kind: :wait_for_context,
+             task_id: latest.id,
+             expected_task_revision: latest.revision,
+             recheck_after_ms: 2_000,
+             recheck_key: key
+           }
+         ]}
 
       {_, {message, scope}} ->
         clarify(cursor, pending, latest, message, scope)
@@ -108,8 +120,31 @@ defmodule BookingDesk.Policy do
 
   defp readback_correction(
          snapshot,
+         %{input: %{operation: "confirm"}} = task,
+         cursor,
+         nil
+       ) do
+    current = BookingDesk.Confirmation.current(snapshot, task)
+
+    case BookingDesk.Confirmation.correction(snapshot, current, task, cursor) do
+      {_message, %{confirmation_readback: scope}} = correction ->
+        key =
+          "confirmation:#{scope.request_id}:#{scope.provider_generation}:#{scope.after_cursor}"
+
+        if match?(%{context_wait: %{expired?: true, recheck_key: ^key}}, task),
+          do: correction,
+          else: {:wait, key}
+
+      _ ->
+        nil
+    end
+  end
+
+  defp readback_correction(
+         snapshot,
          %{status: status, input: %{operation: operation, cursor: cursor}} = task,
-         cursor
+         cursor,
+         _pending
        )
        when status in [:submitted, :completed] and
               operation in ["reminder_opt_in", "reminder_number"] do
@@ -117,7 +152,7 @@ defmodule BookingDesk.Policy do
     BookingDesk.ReminderReadback.correction(snapshot, current, task, cursor)
   end
 
-  defp readback_correction(_, _, _), do: nil
+  defp readback_correction(_, _, _, _), do: nil
 
   defp registration_ready?(latest, cursor, snapshot),
     do:

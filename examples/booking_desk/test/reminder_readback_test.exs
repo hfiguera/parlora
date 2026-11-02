@@ -41,6 +41,7 @@ defmodule BookingDesk.ReminderReadbackTest do
   test "a wrong numeric or spoken suffix is corrected without another caller turn" do
     for text <- [
           "Is your cell number ending in 4289 — can we send the reminder there?",
+          "Can we text your cell ending in four two eight nine? Your appointment remains booked.",
           "Can we text your cell ending in four two eight nine?"
         ] do
       s = snapshot(text)
@@ -58,6 +59,9 @@ defmodule BookingDesk.ReminderReadbackTest do
     for text <- [
           "Can we text your cell ending in zero one eight eight?",
           "Is your cell number ending in 428",
+          "Would you like a text reminder? Can we send it to your cell ending in zero",
+          "Would you like a text reminder? Can we send it to your cell ending in zero one eight",
+          "Would you like a text reminder? Can we send it to your cell ending in zero one eight eight?",
           "What cell number should we use?",
           "Would you like a reminder 24 hours before?",
           "Your confirmation number is BD-4289."
