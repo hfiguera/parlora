@@ -52,13 +52,14 @@ defmodule BookingDesk.RemindersTest do
       store
     )
 
-    Store.execute(
-      Map.merge(base, %{operation: "confirm", proposal: "proposal", revision: 2}),
-      "booked",
-      store
-    )
+    booking =
+      Store.execute(
+        Map.merge(base, %{operation: "confirm", proposal: "proposal", revision: 2}),
+        "booked",
+        store
+      )
 
-    %{store: store, base: Map.put(base, :booking_request, "booked")}
+    %{store: store, booking: booking, base: Map.put(base, :booking_request, "booked")}
   end
 
   defp run(ctx, operation, id, extra \\ %{}) do
@@ -76,6 +77,30 @@ defmodule BookingDesk.RemindersTest do
       |> Map.merge(extra)
 
     {Store.execute(input, id, ctx.store), input}
+  end
+
+  test "booking grounds the actual stored suffix before opt-in without granting consent", ctx do
+    assert ctx.booking["facts"]["reminder"] == %{"status" => "offered", "last_four" => "0188"}
+    assert ctx.booking["summary"] =~ "zero one eight eight"
+    refute ctx.booking["summary"] =~ "2025550188"
+    assert Store.reminder_jobs(ctx.store) == []
+
+    assert Store.reminder("booked", ctx.base.lookup_request, ctx.base.session, ctx.store).status ==
+             "offered"
+
+    db = :sys.get_state(ctx.store)
+    Exqlite.Sqlite3.execute(db, "UPDATE patients SET phone='2025550199' WHERE id='p_1002'")
+    {summary, offer} = Reminders.offer(db, "p_1002")
+    assert offer.last_four == "0199"
+    assert summary =~ "zero one nine nine"
+    {optin, _} = run(ctx, "reminder_opt_in", "fresh-number")
+    assert optin["facts"]["reminder"]["last_four"] == "0199"
+    assert optin["summary"] =~ "zero one nine nine"
+    assert Store.reminder_jobs(ctx.store) == []
+    Exqlite.Sqlite3.execute(db, "UPDATE patients SET phone=NULL WHERE id='p_1002'")
+    {summary, offer} = Reminders.offer(db, "p_1002")
+    assert offer.last_four == nil
+    assert summary =~ "no usable cell number"
   end
 
   test "Gemini's longer confirmation/reminder burst fits a bounded receive queue" do

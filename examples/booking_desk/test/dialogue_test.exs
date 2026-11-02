@@ -17,6 +17,18 @@ defmodule BookingDesk.DialogueTest do
     |> Dialogue.build()
   end
 
+  test "monitoring can include the assistant reply without changing caller interpretation" do
+    parts = [
+      %{speaker: :assistant, delta: "Is your cell ending in 4289?", arrival_order: 2},
+      %{speaker: :user, delta: "Yes, a reminder please", arrival_order: 1}
+    ]
+
+    assert [%{speaker: :user}] = Dialogue.build(parts)
+
+    assert [%{speaker: :user}, %{speaker: :assistant, text: "Is your cell ending in 4289?"}] =
+             Dialogue.build(parts, include_assistant_reply: true)
+  end
+
   test "a smaller history limit keeps the newest turns in conversational order" do
     transcripts =
       for order <- 1..13 do

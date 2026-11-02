@@ -416,6 +416,97 @@ defmodule BookingDesk.BookingSessionTest do
     assert BookingDesk.Store.snapshot() == appointments
   end
 
+  test "a guessed phone suffix before opt-in completes is corrected before fresh reminder consent" do
+    judge = fn state ->
+      intent =
+        case state.latest_user do
+          "November fifth with Dr. Lee" -> "availability"
+          "Ten fifteen" -> "choose_slot"
+          "Yes, please book it" -> "confirm"
+        end
+
+      {:ok,
+       %{
+         "intent" => intent,
+         "date" => "2026-11-05",
+         "time" => "10:15",
+         "clinician" => "lee"
+       }}
+    end
+
+    {session, provider, backend} =
+      start_session(judge,
+        reminder_judge: fn state ->
+          case state.latest_user do
+            "Yeah, that'd be helpful" ->
+              {:ok, "opt_in"}
+
+            "Yep, that's my cell" ->
+              question = Enum.find(Enum.reverse(state.dialogue), &(&1.speaker == :assistant))
+              refute question.text =~ "4289"
+              assert BookingDesk.Reminders.readback?(question.text, "0188")
+              {:ok, "confirm_number"}
+          end
+        end
+      )
+
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, _available}, 2_000
+    assistant(provider, "Dr. Lee has 10:15 AM or 2 PM on November fifth. Which works?", 2_000)
+    caller(provider, "Ten fifteen", 3_000, "choose")
+    assert_receive {:submitted, proposal}, 2_000
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+    assistant(provider, readback.content, 5_000)
+    caller(provider, "Yes, please book it", 6_000, "book")
+    assert_receive {:submitted, booking}, 4_000
+    Provider.complete(backend, booking)
+    assert_receive {:context, booked}, 2_000
+    assert booked.content =~ "zero one eight eight"
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    assistant(provider, "You're booked. Would you like a text reminder?", 8_000)
+    caller(provider, "Yeah, that'd be helpful", 9_000, "opt-in")
+    assert_receive {:submitted, optin}, 4_000
+    assert optin.input.operation == "reminder_opt_in"
+
+    # The spoken guess precedes the verified result, exactly as in the live failure.
+    assistant(
+      provider,
+      "Is your cell number ending in 4289 — can we send the reminder there?",
+      11_000
+    )
+
+    Provider.complete(backend, optin)
+
+    optin_id = optin.id
+
+    assert_receive {:parlora_event, %Event{type: :request_completed, request_id: ^optin_id}},
+                   2_000
+
+    assert_receive {:context, %{content: "Let me correct that number." <> _} = correction}, 4_000
+    assert BookingDesk.Reminders.readback?(correction.content, "0188")
+    refute_receive {:submitted, _}, 100
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    assert Parlora.snapshot(session).tasks[optin.task_id].clarification.input.reminder_readback.request_id ==
+             optin.id
+
+    assistant(provider, correction.content, 13_000)
+    caller(provider, "Yep, that's my cell", 15_000, "destination-consent")
+    assert_receive {:submitted, confirmation}, 4_000
+    assert confirmation.input.operation == "reminder_confirm"
+    assert confirmation.input.destination == "+12025550188"
+    assert confirmation.input.reminder_revision == optin.id
+    Provider.complete(backend, confirmation)
+
+    assert_receive {:context, %{content: "Your text reminder is scheduled" <> _}}, 2_000
+    assert [[_, "p_1002", "+12025550188", _, "simulated", _]] = BookingDesk.Store.reminder_jobs()
+    refute_receive {:submitted, _}, 100
+  end
+
   defp start_session(judge, policy_opts \\ []) do
     {:ok, memory} = start_supervised(BookingDesk.Conversation)
     policy = Keyword.merge([conversation: memory, judge: judge, coalesce_ms: 0], policy_opts)

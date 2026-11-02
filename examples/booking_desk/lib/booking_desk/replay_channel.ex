@@ -25,6 +25,7 @@ defmodule BookingDesk.ReplayChannel do
      %{
        init: init,
        observer: opts[:audio_observer] || opts[:observer],
+       recorder: opts[:recorder],
        owner: Keyword.fetch!(opts, :owner),
        input: %AudioQueue{capacity: init.limits.audio_queue_bytes},
        output: %AudioQueue{capacity: init.limits.audio_queue_bytes},
@@ -59,8 +60,8 @@ defmodule BookingDesk.ReplayChannel do
     <<pcm::binary-size(^count), rest::binary>> = s.pending
     pcm = pcm <> :binary.copy(<<0>>, 480 - count)
 
-    if s.ambience && s.pending_label && count > 0 do
-      BookingDesk.Recorder.mark(s.observer.pid, "input:caller_started", %{
+    if s.ambience && is_pid(s.recorder) && s.pending_label && count > 0 do
+      BookingDesk.Recorder.mark(s.recorder, "input:caller_started", %{
         label: s.pending_label,
         tick: s.sequence,
         bytes: s.pending_bytes

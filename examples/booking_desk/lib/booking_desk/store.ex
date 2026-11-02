@@ -502,15 +502,18 @@ defmodule BookingDesk.Store do
         clinician =
           clinician_id(clinician_name)
 
+        {reminder_summary, reminder} = BookingDesk.Reminders.offer(db, patient)
+
         success(
-          "#{if operation == "reschedule", do: "Rescheduled", else: "Booked"}: #{slot_label(slot)}, #{clinician_name}. Confirmation #{confirmation}. Ask whether they would like a text reminder 24 hours before the appointment. Wait for their answer; do not assume consent or a mobile number.",
+          "#{if operation == "reschedule", do: "Rescheduled", else: "Booked"}: #{slot_label(slot)}, #{clinician_name}. Confirmation #{confirmation}. #{reminder_summary}",
           %{
             appointment: id,
             slot: slot,
             confirmation: confirmation,
             patient: patient,
             clinician: clinician,
-            clinician_name: clinician_name
+            clinician_name: clinician_name,
+            reminder: reminder
           }
         )
     end

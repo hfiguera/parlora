@@ -62,10 +62,20 @@ defmodule BookingDesk.Policy do
       |> Enum.sort_by(fn {_, d} -> d.received_at_us end)
       |> List.first()
 
-    cond do
-      user == [] ->
+    case {user, readback_correction(snapshot, latest, cursor)} do
+      {[], _} ->
         {:ok, []}
 
+      {_, {message, scope}} ->
+        clarify(cursor, pending, latest, message, scope)
+
+      {_, nil} ->
+        interpret_booking_flow(snapshot, trigger, opts, {pending, latest, cursor})
+    end
+  end
+
+  defp interpret_booking_flow(snapshot, trigger, opts, {pending, latest, cursor}) do
+    cond do
       latest == nil and pending == nil ->
         observe_request(snapshot, cursor, opts)
 
@@ -95,6 +105,19 @@ defmodule BookingDesk.Policy do
         interpret_request(snapshot, pending, latest, cursor, opts)
     end
   end
+
+  defp readback_correction(
+         snapshot,
+         %{status: status, input: %{operation: operation, cursor: cursor}} = task,
+         cursor
+       )
+       when status in [:submitted, :completed] and
+              operation in ["reminder_opt_in", "reminder_number"] do
+    current = BookingDesk.ReminderPolicy.state(snapshot)
+    BookingDesk.ReminderReadback.correction(snapshot, current, task, cursor)
+  end
+
+  defp readback_correction(_, _, _), do: nil
 
   defp registration_ready?(latest, cursor, snapshot),
     do:

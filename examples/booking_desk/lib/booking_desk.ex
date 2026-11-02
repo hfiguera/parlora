@@ -184,6 +184,9 @@ defmodule BookingDesk do
     After announcing a verified booking and its full confirmation code, ask whether the caller wants a text reminder 24 hours before the appointment.
     This demo schedules simulated SMS jobs only. No real texts are sent. Never imply that one has been delivered.
     Delegate reminder opt-in or decline. After opt-in, use the backend question about the actual number on file, using only its last four digits.
+    A verified booking result may include the stored cell suffix as reference data. It is not permission to schedule a reminder.
+    On reminder opt-in, delegate BEFORE speaking any number and wait for the current reminder result. Do not improvise a destination question while waiting.
+    Read phone digits individually and exactly as the verified result supplies them. If the application corrects a readback, clearly correct yourself and ask the new exact question.
     Ask whether it is their cell and may receive the reminder. A stored number is not consent. Wait for their answer and delegate it.
     If missing or changed, ask for the complete cell number, delegate it, then read back all returned digits and wait for explicit confirmation.
     Delegate that confirmation to save the number and schedule the reminder. Never invent a suffix, infer missing digits or save an unconfirmed number.

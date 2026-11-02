@@ -1,6 +1,6 @@
 defmodule BookingDesk.AmbienceTest do
   use ExUnit.Case, async: false
-  alias BookingDesk.{Ambience, Recorder, ReplayChannel}
+  alias BookingDesk.{Ambience, CallGuard, Recorder, ReplayChannel}
 
   test "continuous background wraps at the same phase and leaves caller gain unchanged" do
     noise =
@@ -56,7 +56,14 @@ defmodule BookingDesk.AmbienceTest do
     end
   end
 
-  test "the actual replay sends the mixed samples to the input reader and records exact caller onset" do
+  for mode <- [:direct, :guarded, :guarded_without_marker_recorder] do
+    @mode mode
+    test "#{mode} replay preserves mixed audio and sends onset markers only to its explicit recorder" do
+      check_recorded_replay(@mode)
+    end
+  end
+
+  defp check_recorded_replay(mode) do
     path =
       Path.join(
         System.tmp_dir!(),
@@ -64,7 +71,18 @@ defmodule BookingDesk.AmbienceTest do
       )
 
     on_exit(fn -> File.rm_rf!(path) end)
-    {:ok, recorder} = Recorder.start_link(directory: path)
+    recorder = start_supervised!({Recorder, directory: path})
+    outer = Recorder.observer(recorder)
+
+    {observer, guard} =
+      if mode == :direct do
+        {outer, nil}
+      else
+        guard = start_supervised!({CallGuard, event_sink: self(), audio_observer: outer})
+        {CallGuard.observer(guard), guard}
+      end
+
+    marker_recorder = if mode != :guarded_without_marker_recorder, do: recorder
 
     init = %Parlora.AdapterInit{
       session_id: "ambience-test",
@@ -80,13 +98,14 @@ defmodule BookingDesk.AmbienceTest do
     {:ok, channel} =
       ReplayChannel.start_link(init,
         owner: self(),
-        observer: Recorder.observer(recorder),
+        audio_observer: observer,
+        recorder: marker_recorder,
         ambience: %Ambience{pcm: noise, info: %{}}
       )
 
     assert_receive {:parlora_event, %{type: :ready}}
     assert_receive {:channel, ^channel}
-    voice = :binary.copy(<<500::signed-little-16>>, 240)
+    voice = :binary.copy(<<500::signed-little-16>>, 480)
     assert ReplayChannel.play(channel, voice, "search") == :ok
     # Read after a few real 10ms ticks so both idle ambience and the caller reach the input queue.
     Process.sleep(35)
@@ -96,14 +115,27 @@ defmodule BookingDesk.AmbienceTest do
     assert 100 in values
     assert Enum.all?(values, &(&1 in [100, 600]))
     assert ReplayChannel.close(channel, "done", :normal) == :ok
-    report = Recorder.finish(recorder, %{})
-
-    assert [%{data: %{label: "search", bytes: 480, tick: tick}}] =
-             Enum.filter(report.events, &(&1.name == "input:caller_started"))
-
-    raw = File.read!(Path.join(path, "input.pcm"))
-    assert binary_part(raw, tick * 480, 480) == :binary.copy(<<600::signed-little-16>>, 240)
     GenServer.stop(channel)
-    GenServer.stop(recorder)
+
+    if guard do
+      assert Process.alive?(guard)
+      assert CallGuard.observer(guard) == observer
+    end
+
+    report = Recorder.finish(recorder, %{})
+    markers = Enum.filter(report.events, &(&1.name == "input:caller_started"))
+    raw = File.read!(Path.join(path, "input.pcm"))
+
+    if marker_recorder do
+      assert [%{data: %{label: "search", bytes: 960, tick: tick}}] = markers
+      assert binary_part(raw, tick * 480, 480) == :binary.copy(<<600::signed-little-16>>, 240)
+    else
+      assert markers == []
+      assert :binary.match(raw, :binary.copy(<<600::signed-little-16>>, 240)) != :nomatch
+    end
+
+    assert report.audio.dropped_packets == 0
+    assert :atomics.get(outer.credits, 1) == 0
+    assert :atomics.get(observer.credits, 1) == 0
   end
 end
