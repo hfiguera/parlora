@@ -2,17 +2,19 @@ defmodule Parlora.Providers.Phonic.Responses do
   @moduledoc false
   alias Parlora.Providers.Phonic.Protocol
 
+  @covered_instruction "Use the current application update. Do not repeat completed work or an already announced result."
+
   def association(command, content, true, true), do: %{command | output: %{result: content}}
   def association(command, _content, true, _native?), do: command
+
+  def association(command, content, false, true),
+    do: %{command | output: %{result: content, instruction: @covered_instruction}}
 
   def association(command, _content, false, _native?) do
     output =
       command.output
       |> Map.delete(:result)
-      |> Map.put(
-        :instruction,
-        "Use the current application update. Do not repeat completed work or an already announced result."
-      )
+      |> Map.put(:instruction, @covered_instruction)
 
     %{command | output: output}
   end

@@ -91,20 +91,26 @@ Tool chaining is disabled (`allow_tool_chaining: false`) to avoid the repeated-c
 bursts observed in validation. This also restricts autonomous sequences of tool
 calls by the voice model.
 
-Phonic tools run asynchronously. The default `wait_for_response: false` keeps
-new voice tool calls available while backend work runs; Parlora requests each
-result reply explicitly. Setting `wait_for_response: true` selects Phonic's
-native busy mode: the model can converse and report progress while waiting,
+Phonic tools run asynchronously. The default `wait_for_response: true` selects
+Phonic's native busy mode: the model can converse and report progress while waiting,
 but Phonic holds other voice tools until the call completes. Phonic owns that
 call's result reply; the adapter sends its output without `generate_reply`.
 This prevents a native answer followed by a second application-triggered answer.
+When a later native call associates with completed work, its output still carries
+the current verified facts, together with an instruction against repeating work
+or an already announced answer. A prior acknowledgment finishing does not prove
+that the result was spoken. Manual-mode duplicate routes keep the original reply
+owner. Neither mode repeats backend execution to repair speech.
+Set `wait_for_response: false` when your application needs concurrent voice tool
+calls. Parlora then requests each result reply explicitly. Busy mode changes
+voice-tool admission; application policies still own corrections and execution.
 
 `forbid_speech_after_tool_call: true` remains the default, following Phonic's
 [background-task combination](https://docs.phonic.ai/docs/build/tools/how_tools_execute).
 With busy mode enabled, this skips immediate tool narration while preserving
 native progress and result speech. It can be set to `false` in busy mode.
 Manual response mode rejects that combination because it would introduce a
-second result-reply owner. Pre-tool acknowledgments remain optional by default.
+second result-reply owner. Pre-tool acknowledgments are required by default.
 `require_speech_before_tool_call` and `wait_for_speech_before_tool_call` are
 configurable independently. For example, requiring speech without waiting for
 its completion lets Phonic choose its own acknowledgment while backend work
@@ -131,9 +137,10 @@ deduplication records. Conflicting duplicates and superseded results are rejecte
   system message. Expired calls also use new context; their old tool outputs are
   never resent.
 - `resolve_delegation/3` closes associated or superseded calls without scheduling
-  a duplicate manual response. Already covered facts are removed from bookkeeping
-  outputs, with an instruction not to repeat them. Busy mode owns any native
-  response to those terminal outputs. A result reply that yields
+  a duplicate manual response. Manual bookkeeping outputs remove already covered
+  facts; native associated outputs retain their current verified facts. Both carry
+  an instruction against repetition. Busy mode owns any native response to those
+  terminal outputs. A manual result reply that yields
   to a new tool call before producing output can resume once on association.
   Cancellation removes queued correlated updates, and newer queued task revisions
   replace obsolete ones. Cancellation events preserve backend-outcome uncertainty.
@@ -172,7 +179,7 @@ audio messages, so boundary ordering remains part of the upstream wire contract.
 | `model` | `"phonic-1"` | Other models are rejected. |
 | `voice` | `"sabrina"` | A Phonic voice ID. |
 | `instructions` | `"Keep replies brief."` | Application instructions plus delegation guidance. |
-| `tool_timeout_ms` | `30_000` | Between 1,000 and 180,000 ms. Align with backend deadlines. |
+| `tool_timeout_ms` | `60_000` | Between 1,000 and 180,000 ms. Align with backend deadlines; this does not extend the backend job deadline. |
 | `acknowledgment_timeout_ms` | `5_000` | Between 1 and 60,000 ms; missing tool-output acknowledgment remains unknown. |
 | `response_timeout_ms` | `15_000` | Between 1 and 60,000 ms; missing response lifecycle progress closes explicitly. |
 | `early_delegation` | `false` | Requests tool calls during caller speech; requires organization enablement. |
@@ -180,11 +187,39 @@ audio messages, so boundary ordering remains part of the upstream wire contract.
 
 ### Native conversation controls
 
-These are keyword options in the provider tuple. Except for the existing
-600-second no-input end limit, absent settings are omitted so Phonic's service
-defaults apply. Enabling them is opt-in; existing applications keep their
-configuration. Unknown names, duplicates, invalid types, out-of-range values,
-and incompatible combinations return a startup error before connecting.
+These are keyword options in the provider tuple. Parlora supplies the following
+defaults, based on the BookingDesk conversation and café-input validation:
+
+| Option | Parlora default |
+| --- | --- |
+| `enable_assistant_backchannel` | `true` |
+| `assistant_backchannel_aggressiveness` | `0.3` |
+| `audio_speed` | `1.05` |
+| `vad_threshold` | `0.5` |
+| `vad_min_speech_duration_ms` | `120` |
+| `vad_min_silence_duration_ms` | `600` |
+| `min_words_to_interrupt` | `1` |
+| `background_noise` / `background_noise_level` | `nil` / `0` |
+| `require_speech_before_tool_call` | `true` |
+| `wait_for_speech_before_tool_call` | `false` |
+| `wait_for_response` | `true` |
+| `forbid_speech_after_tool_call` | `true` |
+| `no_input_end_conversation_sec` | `600` |
+
+`Parlora.Providers.Phonic.default_options/0` returns the defaults without
+credentials or application data. Pass only your overrides in the provider tuple;
+explicit `false`, zero and supported `nil` values take precedence. Unknown names
+and duplicates are rejected before merging. Invalid types, out-of-range values
+and incompatible effective combinations return a startup error before connecting.
+
+Setting `enable_assistant_backchannel: false` removes inherited aggressiveness.
+Explicitly supplying aggressiveness while disabling backchannels is an error.
+An aggressiveness override alone uses the default enabled backchannels.
+Remaining omitted settings use Phonic's service defaults. Clinic keywords,
+pronunciation dictionaries, languages and business instructions belong to the app.
+The listening profile was validated with the bundled café track and tested English
+voices. Validate quiet speech, accents and short interruptions for your own input;
+speech detection does not identify the foreground speaker in every environment.
 
 | Option | Accepted values |
 | --- | --- |
@@ -204,9 +239,9 @@ and incompatible combinations return a startup error before connecting.
 | `generate_no_input_poke_text` | Boolean; native generation of the silence prompt. |
 | `no_input_poke_sec` / `no_input_poke_text` | `nil` or integer 1–120 seconds; optional nonempty text, at most 1,000 characters locally. Generated poke text takes precedence. |
 | `no_input_end_conversation_sec` | Integer 30–600; adapter default 600. |
-| `require_speech_before_tool_call` | Boolean; adapter default `false` (speech is optional). |
+| `require_speech_before_tool_call` | Boolean; adapter default `true`. Set `false` for optional pre-tool speech. |
 | `wait_for_speech_before_tool_call` | Boolean; adapter default `false`. |
-| `wait_for_response` | Boolean; adapter default `false`. `true` selects native busy-mode response ownership. |
+| `wait_for_response` | Boolean; adapter default `true`. Set `false` for concurrent voice tools and manual result replies. |
 | `forbid_speech_after_tool_call` | Boolean; default `true`. `false` requires busy mode. |
 
 Keyword and pronunciation lists have a local capacity of 256 entries; language
@@ -221,14 +256,9 @@ messages and do not guarantee a shorter response delay.
 provider =
   {Parlora.Providers.Phonic,
    api_key: System.fetch_env!("PHONIC_API_KEY"),
-   enable_assistant_backchannel: true,
-   assistant_backchannel_aggressiveness: 0.3,
-   require_speech_before_tool_call: true,
-   wait_for_speech_before_tool_call: false,
-   wait_for_response: true,
-   tool_timeout_ms: 60_000,
-   vad_min_silence_duration_ms: 600,
-   audio_speed: 1.05}
+   audio_speed: 1.0,
+   wait_for_response: false,
+   boosted_keywords: ["My Company", "My Product"]}
 ```
 
 Execution remains async and application-owned. Changing `execution_mode` or

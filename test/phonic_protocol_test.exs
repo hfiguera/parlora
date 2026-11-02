@@ -41,7 +41,8 @@ defmodule Parlora.PhonicProtocolTest do
     assert [tool] = config.tools
     assert tool.require_speech_before_tool_call
     refute tool.wait_for_speech_before_tool_call
-    refute tool.wait_for_response or tool.allow_tool_chaining or tool.can_run_during_user_speech
+    assert tool.wait_for_response
+    refute tool.allow_tool_chaining or tool.can_run_during_user_speech
     assert tool.execution_mode == "async" and tool.forbid_speech_after_tool_call
     assert tool.tool_schema.function.name == Protocol.function()
     assert tool.tool_schema.function.strict
@@ -51,7 +52,6 @@ defmodule Parlora.PhonicProtocolTest do
   test "invalid native settings and misspellings return errors instead of being silently ignored" do
     for {key, value} <- [
           enable_assistant_backchannel: "true",
-          assistant_backchannel_aggressiveness: 0.5,
           audio_speed: 1.51,
           background_noise: "cafe",
           background_noise_level: -0.1,
@@ -137,12 +137,17 @@ defmodule Parlora.PhonicProtocolTest do
   test "response ownership and tool schema cannot be overridden by native configuration" do
     for {key, value} <- [
           execution_mode: "sync",
-          forbid_speech_after_tool_call: false,
           allow_tool_chaining: true
         ] do
       assert {:error, %{code: :unsupported, details: %{setting: ^key}}} =
                Protocol.start([{:api_key, "test"}, {key, value}], %AudioFormat{})
     end
+
+    assert {:error, %{code: :unsupported, details: %{setting: :forbid_speech_after_tool_call}}} =
+             Protocol.start(
+               [api_key: "test", wait_for_response: false, forbid_speech_after_tool_call: false],
+               %AudioFormat{}
+             )
 
     for key <- [
           :tools,
@@ -184,11 +189,11 @@ defmodule Parlora.PhonicProtocolTest do
       refute config.push_to_talk
       refute config.stream_ahead_of_real_time
       refute Map.has_key?(config, :data_retention_policy)
-      refute Map.has_key?(config, :enable_assistant_backchannel)
-      refute Map.has_key?(config, :audio_speed)
-      refute Map.has_key?(config, :vad_min_silence_duration_ms)
+      assert config.enable_assistant_backchannel
+      assert config.audio_speed == 1.05
+      assert config.vad_min_silence_duration_ms == 600
       assert [tool] = config.tools
-      assert tool.execution_mode == "async" and tool.wait_for_response == false
+      assert tool.execution_mode == "async" and tool.wait_for_response
       refute tool.allow_tool_chaining
       assert tool.forbid_speech_after_tool_call
       assert tool.tool_schema.function.strict

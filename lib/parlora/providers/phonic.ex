@@ -5,12 +5,13 @@ defmodule Parlora.Providers.Phonic do
   Caller transcripts are word fragments with unavailable timestamps. Speech
   boundaries delimit assistant captions and interruption epochs. Speakable
   updates wait locally for the current turn and receive queue drain. By default,
-  result context receives one explicit reply. With `wait_for_response: true`,
-  Phonic owns correlated tool-result speech; no manual result reply is requested.
-  Native backchannels, voice pacing and listening controls are opt-in provider
-  options. Backend validation and execution remain application-owned.
-  Duplicate association routes do not
-  schedule another announcement of a result covered by that reply.
+  native busy mode owns correlated tool-result speech, with listening backchannels,
+  pre-tool acknowledgments and tuned voice pacing and speech detection. Apps can
+  override individual provider options. `wait_for_response: false` keeps concurrent
+  voice tools available and uses explicit result replies instead. Backend validation
+  and execution remain application-owned.
+  Duplicate association routes do not schedule another manual reply. Native tool
+  outputs retain current verified facts and an instruction against repetition.
   Tool outputs may receive provider-processing acknowledgments; other context
   writes remain unconfirmed. Neither observation establishes physical playback.
 
@@ -34,7 +35,26 @@ defmodule Parlora.Providers.Phonic do
   }
 
   alias Parlora.Provider.{OutputBuffer, WebSocketConnection}
-  alias Parlora.Providers.Phonic.{Audio, Calls, Connection, Correlation, Protocol, Responses}
+
+  alias Parlora.Providers.Phonic.{
+    Audio,
+    Calls,
+    Connection,
+    Correlation,
+    Options,
+    Protocol,
+    Responses
+  }
+
+  @doc """
+  Returns the provider's default options without credentials or app-specific data.
+
+  Pass overrides directly in the provider tuple; startup merges and validates them.
+  Disabling backchannels also removes inherited aggressiveness. Supplying an
+  explicit aggressiveness while disabling backchannels is rejected.
+  """
+  @spec default_options() :: keyword()
+  def default_options, do: Options.defaults()
 
   @impl true
   def audio_limits(format \\ %AudioFormat{}), do: OutputBuffer.burst_limits(format, 20_000)
@@ -67,8 +87,8 @@ defmodule Parlora.Providers.Phonic do
       tool_timers: %{},
       acknowledgments: %{},
       tool_timeout_ms: config.tools |> hd() |> Map.fetch!(:tool_call_output_timeout_ms),
-      acknowledgment_timeout_ms: Keyword.get(options, :acknowledgment_timeout_ms, 5_000),
-      response_timeout_ms: Keyword.get(options, :response_timeout_ms, 15_000),
+      acknowledgment_timeout_ms: Options.get(options, :acknowledgment_timeout_ms),
+      response_timeout_ms: Options.get(options, :response_timeout_ms),
       response_watch: nil,
       inbound: OutputBuffer.new(init.limits),
       outbound: %AudioQueue{capacity: init.limits.audio_queue_bytes},
@@ -328,8 +348,8 @@ defmodule Parlora.Providers.Phonic do
        when delivery in [:awaiting_provider, :accepted, :unconfirmed, :unknown] and
               is_binary(content) and content != "" do
     speak? = association_speaks?(state, id, content)
-    # Closing a duplicate route must not reintroduce its facts into a later
-    # generation. The queued/original update already owns that result.
+    # Manual duplicate routes leave speech to the original update. A native
+    # pending call still needs its verified facts even after a prior reply ended.
     command = Responses.association(command, content, speak?, state.native_busy?)
 
     update = association_update(state, id, if(speak?, do: content))

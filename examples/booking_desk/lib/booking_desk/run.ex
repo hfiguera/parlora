@@ -2,6 +2,7 @@ defmodule BookingDesk.Run do
   @moduledoc "Bounded live scenarios driven by task and speech milestones, never injected transcripts."
   alias BookingDesk.{Recorder, ReplayChannel}
   alias Parlora.Event
+  alias Parlora.Providers.Phonic
 
   def run(directory, clips, opts \\ []) do
     if Keyword.get(opts, :observability, false) do
@@ -54,6 +55,7 @@ defmodule BookingDesk.Run do
       clips: clips,
       mode: mode,
       provider_options: Map.new(provider_options),
+      provider_defaults: provider_defaults(),
       any_doctor: Keyword.get(opts, :any_doctor, false),
       clinician_replies: MapSet.new(),
       ambience: ambience != nil,
@@ -94,6 +96,12 @@ defmodule BookingDesk.Run do
       if Process.alive?(readback), do: GenServer.stop(readback)
       if Process.alive?(session), do: Parlora.close(session)
     end
+  end
+
+  defp provider_defaults do
+    if System.get_env("PARLORA_PROVIDER", "openai") == "phonic",
+      do: Map.new(Phonic.default_options()),
+      else: %{}
   end
 
   defp start_microphone(:microphone) do
@@ -638,6 +646,7 @@ defmodule BookingDesk.Run do
             },
             mode: s.mode,
             provider_options: s.provider_options,
+            provider_defaults: s.provider_defaults,
             scenario: "booking-correction",
             booking_flow: %{
               version: 4,

@@ -90,7 +90,7 @@ defmodule Parlora.PhonicSessionTest do
   end
 
   for {codec, format} <- [pcm: %AudioFormat{}, pcmu: AudioFormat.pcmu()],
-      native_busy? <- [false, true] do
+      native_busy? <- [false, true, :default] do
     @format format
     @native_busy native_busy?
     test "#{codec} session with native busy=#{native_busy?} corrects work and rejects stale results",
@@ -203,6 +203,42 @@ defmodule Parlora.PhonicSessionTest do
     assert map_size(Parlora.status(session).jobs) == 1
   end
 
+  test "default native replies retain completed facts across a late association without re-execution",
+       context do
+    {session, server, _channel, backend} =
+      boot(context.port, %AudioFormat{}, AssociationPolicy, :default)
+
+    emit(server, %{"type" => "input_text", "text" => "order 124"})
+    emit(server, call("original"))
+    assert_receive {:submitted, request}
+    :ok = FakeBackend.complete(backend, request, "Current verified order 124")
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    emit(server, %{"type" => "tool_call_output_processed", "tool_call_id" => "original"})
+    assert_receive {:parlora_event, %Event{type: :result_delivery, payload: %{stage: :accepted}}}
+    emit(server, %{"type" => "assistant_started_speaking"})
+
+    emit(server, %{
+      "type" => "audio_chunk",
+      "audio" => Base.encode64(:binary.copy(<<1, 0>>, 240)),
+      "text" => "Let me check that."
+    })
+
+    emit(server, %{"type" => "assistant_finished_speaking"})
+    emit(server, call("alias"))
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "alias", "output" => output}}
+
+    assert output["result"] == "Current verified order 124"
+    assert output["instruction"] =~ "Do not repeat"
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 20
+    refute_receive {:submitted, _duplicate}, 20
+    assert map_size(Parlora.status(session).jobs) == 1
+  end
+
   test "a native association to existing work remains busy until that task's verified result",
        context do
     {session, server, _channel, backend} =
@@ -256,6 +292,9 @@ defmodule Parlora.PhonicSessionTest do
   end
 
   defp boot(port, format, policy \\ OrderPolicy, native_busy? \\ false) do
+    overrides = if native_busy? == :default, do: [], else: [wait_for_response: native_busy?]
+    native_busy? = native_busy? != false
+
     caps = %Parlora.Channel.Capabilities{
       input_formats: [format],
       output_formats: [format],
@@ -265,15 +304,7 @@ defmodule Parlora.PhonicSessionTest do
     {:ok, session} =
       Parlora.start_session(
         audio_format: format,
-        provider:
-          {LocalProvider,
-           api_key: "private-test",
-           port: port,
-           enable_assistant_backchannel: true,
-           assistant_backchannel_aggressiveness: 0.3,
-           require_speech_before_tool_call: true,
-           wait_for_speech_before_tool_call: false,
-           wait_for_response: native_busy?},
+        provider: {LocalProvider, [api_key: "private-test", port: port] ++ overrides},
         channel: {MemoryChannel, observer: self(), capabilities: caps},
         backend: {FakeBackend, observer: self()},
         context_policy: {policy, []},

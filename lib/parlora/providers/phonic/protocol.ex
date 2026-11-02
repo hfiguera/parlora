@@ -22,7 +22,7 @@ defmodule Parlora.Providers.Phonic.Protocol do
   end
 
   def start(options, format) do
-    with :ok <- Options.validate(options),
+    with {:ok, options} <- Options.resolve(options),
          :ok <- validate_selection(options, format),
          :ok <- validate_context(options),
          :ok <- validate_timeouts(options),
@@ -31,9 +31,9 @@ defmodule Parlora.Providers.Phonic.Protocol do
        configure(
          options,
          format,
-         Keyword.get(options, :instructions, "Keep replies brief."),
-         Keyword.get(options, :voice, "sabrina"),
-         Keyword.get(options, :tool_timeout_ms, 30_000)
+         Keyword.fetch!(options, :instructions),
+         Keyword.fetch!(options, :voice),
+         Keyword.fetch!(options, :tool_timeout_ms)
        )}
     end
   end
@@ -59,10 +59,10 @@ defmodule Parlora.Providers.Phonic.Protocol do
 
   defp validate_context(options) do
     cond do
-      not text?(Keyword.get(options, :instructions, "Keep replies brief."), 0, 999_000) ->
+      not text?(Keyword.fetch!(options, :instructions), 0, 999_000) ->
         Error.tuple(:invalid_argument, "Instructions must be valid UTF-8 of at most 999000 bytes")
 
-      not text?(Keyword.get(options, :voice, "sabrina"), 1, 128) ->
+      not text?(Keyword.fetch!(options, :voice), 1, 128) ->
         Error.tuple(:invalid_argument, "Voice must be a nonempty voice ID of at most 128 bytes")
 
       true ->
@@ -72,13 +72,13 @@ defmodule Parlora.Providers.Phonic.Protocol do
 
   defp validate_timeouts(options) do
     constraints = [
-      tool_timeout_ms: {30_000, 1_000, 180_000},
-      response_timeout_ms: {15_000, 1, 60_000},
-      acknowledgment_timeout_ms: {5_000, 1, 60_000}
+      tool_timeout_ms: {1_000, 180_000},
+      response_timeout_ms: {1, 60_000},
+      acknowledgment_timeout_ms: {1, 60_000}
     ]
 
-    Enum.reduce_while(constraints, :ok, fn {key, {default, minimum, maximum}}, :ok ->
-      value = Keyword.get(options, key, default)
+    Enum.reduce_while(constraints, :ok, fn {key, {minimum, maximum}}, :ok ->
+      value = Keyword.fetch!(options, key)
 
       if is_integer(value) and value in minimum..maximum,
         do: {:cont, :ok},
@@ -159,7 +159,6 @@ defmodule Parlora.Providers.Phonic.Protocol do
       push_to_talk: false,
       stream_ahead_of_real_time: false,
       generate_welcome_message: false,
-      no_input_end_conversation_sec: 600,
       tools: [
         Map.merge(
           tool(timeout, Keyword.get(options, :early_delegation, false)),
@@ -180,10 +179,6 @@ defmodule Parlora.Providers.Phonic.Protocol do
       type: "custom_websocket",
       execution_mode: "async",
       tool_call_output_timeout_ms: timeout,
-      require_speech_before_tool_call: false,
-      wait_for_speech_before_tool_call: false,
-      wait_for_response: false,
-      forbid_speech_after_tool_call: true,
       allow_tool_chaining: false,
       can_run_during_user_speech: early?,
       tool_schema: %{

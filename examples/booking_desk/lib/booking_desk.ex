@@ -1,5 +1,6 @@
 defmodule BookingDesk do
   alias Parlora.Provider.OutputBuffer
+  alias Parlora.Providers.Phonic
   @moduledoc "Fictional clinic scheduling through Parlora, JEV and deterministic Jido actions."
   def start(channel, opts \\ []) do
     provider = Keyword.get(opts, :provider, System.get_env("PARLORA_PROVIDER", "openai"))
@@ -68,7 +69,11 @@ defmodule BookingDesk do
                conversation: conversation,
                phonic_busy:
                  provider == "phonic" and
-                   Keyword.get(provider_options, :wait_for_response, false)
+                   Keyword.get(
+                     provider_options,
+                     :wait_for_response,
+                     Phonic.default_options()[:wait_for_response]
+                   )
              )},
           context: %{},
           instructions: instructions(provider),

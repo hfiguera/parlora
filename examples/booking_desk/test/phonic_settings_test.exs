@@ -39,6 +39,10 @@ defmodule BookingDesk.PhonicSettingsTest do
 
   test "selecting Phonic applies the booking profile without an opt-in or matching environment" do
     assert {Parlora.Providers.Phonic, options} = BookingDesk.provider("phonic")
+
+    assert Keyword.drop(options, [:api_key]) ==
+             [boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"]]
+
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
 
     assert config.model == "phonic-1"
@@ -108,21 +112,20 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert tool.tool_call_output_timeout_ms == 60_000
   end
 
-  test "opting out uses the unmodified library configuration" do
+  test "opting out selects manual responses without duplicating library listening defaults" do
     assert {Parlora.Providers.Phonic, options} = BookingDesk.provider("phonic", [], false)
-    assert options == [api_key: "booking-test-key"]
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
     assert {:ok, baseline} = Protocol.start([api_key: "booking-test-key"], %AudioFormat{})
-    assert config == baseline
 
-    refute Map.has_key?(config, :enable_assistant_backchannel)
-    refute Map.has_key?(config, :audio_speed)
-    refute Map.has_key?(config, :vad_threshold)
-    refute Map.has_key?(config, :vad_min_speech_duration_ms)
+    refute config.enable_assistant_backchannel
+    refute Map.has_key?(config, :assistant_backchannel_aggressiveness)
+    assert config.audio_speed == baseline.audio_speed
+    assert config.vad_threshold == baseline.vad_threshold
+    assert config.vad_min_speech_duration_ms == baseline.vad_min_speech_duration_ms
     assert [tool] = config.tools
     refute tool.wait_for_response
     refute tool.require_speech_before_tool_call
-    assert tool.tool_call_output_timeout_ms == 30_000
+    assert tool.tool_call_output_timeout_ms == 60_000
   end
 
   test "explicit enablement stays compatible and opting out still permits individual overrides" do
@@ -130,14 +133,15 @@ defmodule BookingDesk.PhonicSettingsTest do
     {_, options} = BookingDesk.provider("phonic", [audio_speed: 1.1], false)
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
     assert config.audio_speed == 1.1
-    refute Map.has_key?(config, :enable_assistant_backchannel)
+    refute config.enable_assistant_backchannel
     refute hd(config.tools).wait_for_response
   end
 
   test "session startup enables the matching busy-mode correction policy by default" do
     state = start_booking([])
     assert {Parlora.Providers.Phonic, options} = state.options[:provider]
-    assert options[:wait_for_response]
+    assert {:ok, config} = Protocol.start(options, %AudioFormat{})
+    assert hd(config.tools).wait_for_response
     assert {BookingDesk.Policy, policy} = state.policy
     assert policy[:phonic_busy]
   end

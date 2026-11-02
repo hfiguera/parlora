@@ -44,7 +44,7 @@ defmodule BookingDesk.MixProject do
         "credo --config-file .credo.exs --strict",
         "ex_dna --max-clones 0",
         "booking_desk.credence",
-        "dialyzer"
+        "dialyzer --force-check"
       ]
     ]
   end

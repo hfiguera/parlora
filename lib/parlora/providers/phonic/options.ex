@@ -2,6 +2,31 @@ defmodule Parlora.Providers.Phonic.Options do
   @moduledoc false
   alias Parlora.Error
 
+  @defaults [
+    model: "phonic-1",
+    voice: "sabrina",
+    instructions: "Keep replies brief.",
+    tool_timeout_ms: 60_000,
+    acknowledgment_timeout_ms: 5_000,
+    response_timeout_ms: 15_000,
+    early_delegation: false,
+    zero_data_retention: false,
+    enable_assistant_backchannel: true,
+    assistant_backchannel_aggressiveness: 0.3,
+    require_speech_before_tool_call: true,
+    wait_for_speech_before_tool_call: false,
+    wait_for_response: true,
+    forbid_speech_after_tool_call: true,
+    audio_speed: 1.05,
+    vad_threshold: 0.5,
+    vad_min_speech_duration_ms: 120,
+    vad_min_silence_duration_ms: 600,
+    min_words_to_interrupt: 1,
+    background_noise: nil,
+    background_noise_level: 0,
+    no_input_end_conversation_sec: 600
+  ]
+
   @base ~w(api_key model voice instructions history tool_timeout_ms acknowledgment_timeout_ms response_timeout_ms early_delegation zero_data_retention)a
   @conversation [
     enable_assistant_backchannel: :boolean,
@@ -36,16 +61,29 @@ defmodule Parlora.Providers.Phonic.Options do
     allow_tool_chaining: false
   ]
 
-  def validate(options) do
+  def defaults, do: @defaults
+  def get(options, key), do: Keyword.get(options, key, Keyword.fetch!(@defaults, key))
+
+  def resolve(options) do
     if Keyword.keyword?(options) do
       with :ok <- validate_keys(options),
-           :ok <- validate_values(options),
-           :ok <- validate_ownership(options) do
-        validate_dependencies(options)
-      end
+           resolved <- inherit(options),
+           :ok <- validate_values(resolved),
+           :ok <- validate_ownership(resolved),
+           :ok <- validate_dependencies(resolved),
+           do: {:ok, resolved}
     else
       invalid(:options, "Phonic options must be a keyword list")
     end
+  end
+
+  defp inherit(options) do
+    resolved = Keyword.merge(@defaults, options)
+
+    if Keyword.fetch!(resolved, :enable_assistant_backchannel) == false and
+         not Keyword.has_key?(options, :assistant_backchannel_aggressiveness),
+       do: Keyword.delete(resolved, :assistant_backchannel_aggressiveness),
+       else: resolved
   end
 
   def conversation(options) do
@@ -102,7 +140,7 @@ defmodule Parlora.Providers.Phonic.Options do
   defp validate_dependencies(options) do
     cond do
       Keyword.get(options, :forbid_speech_after_tool_call, true) == false and
-          not Keyword.get(options, :wait_for_response, false) ->
+          not Keyword.fetch!(options, :wait_for_response) ->
         Error.tuple(
           :unsupported,
           "Automatic post-tool speech requires native busy response ownership",
@@ -110,7 +148,7 @@ defmodule Parlora.Providers.Phonic.Options do
         )
 
       Keyword.has_key?(options, :assistant_backchannel_aggressiveness) and
-          not Keyword.get(options, :enable_assistant_backchannel, false) ->
+          not Keyword.fetch!(options, :enable_assistant_backchannel) ->
         invalid(
           :assistant_backchannel_aggressiveness,
           "Backchannel aggressiveness requires enabled backchannels"

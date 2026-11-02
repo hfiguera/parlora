@@ -31,6 +31,8 @@ as errors, checks compile cycles and formatting, runs the tests, and then runs
 Credo, ExDNA, read-only Credence analysis and Dialyzer. These tools are development
 and test dependencies; the same versions are pinned in Parlora. Credence uses
 conservative assumptions and isolates compiler analysis in separate processes.
+Dialyzer checks the local Parlora dependency even when lockfiles are unchanged,
+so cached type information follows library API changes.
 No check rewrites source or makes a model call. GitHub Actions runs this suite
 and the Python tests, with a Dialyzer PLT cache keyed by runtime and dependencies.
 
@@ -58,7 +60,7 @@ The example selects Ara for Grok and Sulafat for Gemini. JEV uses `jev-1.13.0`;
 structured extraction uses `openai:gpt-6-luna`. Available API credit is required for
 live calls. Keep keys out of source files and recordings.
 
-Phonic sessions use the booking example's native conversation profile by default:
+Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second
 tool timeout, speech speed `1.05`, a 600-ms end-of-turn silence threshold, and
@@ -66,14 +68,17 @@ one-word interruptions. Speech detection uses threshold `0.5` and a 120-ms
 minimum speech duration to reduce false turns from café chatter without
 requiring multiple words to interrupt. Recognition keywords include Cedarwood,
 Dr. Lee and Dr. Patel. Booking approval, number verification and reminder consent remain
-application-controlled. Parlora's library defaults and other speech providers
-are unchanged.
+application-controlled. The example supplies only its clinic keywords; other
+speech providers are unchanged.
 
 No extra flag is needed with `PARLORA_PROVIDER=phonic`. The existing
 `--phonic-native-conversation` flag is still accepted; use
-`--no-phonic-native-conversation` to compare against the library defaults.
-Direct callers of `BookingDesk.start/2` get the same profile and can set
-`phonic_native_conversation: false` or override individual `provider_options`.
+`--no-phonic-native-conversation` to compare manual result delivery without
+backchannels or required pre-tool acknowledgments. Voice and listening settings
+still inherit Parlora's defaults. Direct callers of `BookingDesk.start/2` get the
+same profile and can set `phonic_native_conversation: false` or override individual
+`provider_options`. Recorded `provider_defaults` and `provider_options` distinguish
+the library defaults from the app's overrides.
 
 ## Talk through your microphone
 

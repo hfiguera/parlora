@@ -1105,10 +1105,15 @@ for configuration and delivery semantics.
 
 ## Phonic contract additions
 
-Phonic uses asynchronous client tools with explicit reply continuation. It
+Phonic uses asynchronous client tools with native busy-mode result replies by
+default. `wait_for_response: false` enables concurrent voice tools and explicit
+reply continuation. Native listening acknowledgments, pre-tool speech and tuned
+speech detection are default provider settings; apps can override supported
+options. `Parlora.Providers.Phonic.default_options/0` exposes the default values. It
 supports PCM24 pipelines and converts PCMU8 internally over a PCM24 connection.
 Caller word fragments and assistant utterance captions have unavailable timing.
-Quiet/instruction updates submit context; speakable updates schedule a response.
+Quiet/instruction updates submit context; speakable updates schedule a response
+or complete the associated native tool response according to the selected mode.
 Only correlated tool-output processing can acknowledge a result; arbitrary
 context remains unconfirmed, so the overall acknowledgment capability is false.
 Interruption events use the existing clear/resume barrier. Network loss closes

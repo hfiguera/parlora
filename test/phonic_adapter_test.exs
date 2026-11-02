@@ -25,7 +25,9 @@ defmodule Parlora.PhonicAdapterTest do
       limits: %Limits{}
     }
 
-    {:ok, config} = Protocol.start([api_key: "private-test"], init.audio_format)
+    {:ok, config} =
+      Protocol.start([api_key: "private-test", wait_for_response: false], init.audio_format)
+
     {:ok, state, _continue} = Phonic.init({init, [api_key: "private-test"], config})
 
     state = %{
@@ -172,7 +174,7 @@ defmodule Parlora.PhonicAdapterTest do
     test "native backchannel ending #{@finish_order} does not release queued facts", context do
       {:ok, config} =
         Protocol.start(
-          [api_key: "private-test", enable_assistant_backchannel: true],
+          [api_key: "private-test", enable_assistant_backchannel: true, wait_for_response: false],
           context.state.init.audio_format
         )
 
@@ -443,7 +445,7 @@ defmodule Parlora.PhonicAdapterTest do
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
   end
 
-  test "native busy associations close without manual replies or repeated covered facts",
+  test "native busy associations retain facts without manual replies and discourage repetition",
        context do
     state = ready_busy(context)
     state = deliver(context, state, call("first", "order"))
@@ -469,13 +471,52 @@ defmodule Parlora.PhonicAdapterTest do
     assert_receive {:phonic_command,
                     %{"type" => "tool_call_output", "tool_call_id" => "late", "output" => output}}
 
-    refute Map.has_key?(output, "result")
+    assert output["result"] == "Verified result"
     assert output["instruction"] =~ "Do not repeat"
     assert state.response_watch != nil
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
     state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
     assert state.pending_contexts == []
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  @tag :native_alias_result
+  test "a native alias still receives verified facts after an acknowledgment ended the prior reply",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("original", "check Wednesday"))
+    result = %{update("corrected", "original") | content: "Thursday has 10:15 AM and 2 PM."}
+    {:reply, :ok, state} = Phonic.handle_call({:append, result}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    state = deliver(context, state, started())
+
+    state =
+      deliver(context, state, audio(:binary.copy(<<1, 0>>, 240), "Let me switch to Thursday."))
+
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    state = deliver(context, state, call("alias", "check Thursday"))
+    refute state.calls.records["alias"][:reply_yielded?]
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :accepted,
+      result: result.content
+    }
+
+    {:reply, :ok, state} = Phonic.handle_call({:resolve_delegation, "alias", outcome}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "alias", "output" => output}}
+
+    assert output["result"] == result.content
+    assert output["instruction"] =~ "Do not repeat"
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    assert state.response_watch != nil
   end
 
   test "native busy cancellation removes queued results and admits a later fresh call", context do
@@ -681,7 +722,7 @@ defmodule Parlora.PhonicAdapterTest do
        context do
     {:ok, config} =
       Protocol.start(
-        [api_key: "private-test", early_delegation: true],
+        [api_key: "private-test", early_delegation: true, wait_for_response: false],
         context.state.init.audio_format
       )
 
@@ -1231,7 +1272,7 @@ defmodule Parlora.PhonicAdapterTest do
   defp ready_busy(context) do
     {:ok, config} =
       Protocol.start(
-        [api_key: "private-test", wait_for_response: true],
+        [api_key: "private-test"],
         context.state.init.audio_format
       )
 
