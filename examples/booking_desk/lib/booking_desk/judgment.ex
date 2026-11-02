@@ -56,7 +56,7 @@ defmodule BookingDesk.Judgment do
     if Process.whereis(BookingDesk.TypeSafe) do
       case TypeSafe.system_one(BookingDesk.TypeSafe,
              state: state,
-             questions: questions(),
+             questions: questions(state),
              retry: [max_attempts: 1]
            ) do
         {:ok, response} -> decode(response.answers, state)
@@ -67,7 +67,7 @@ defmodule BookingDesk.Judgment do
     end
   end
 
-  def questions do
+  def questions(state \\ %{}) do
     %{
       "intent" =>
         TypeSafe.choice(
@@ -108,8 +108,9 @@ defmodule BookingDesk.Judgment do
           can be insurance_update without repeating its name. It never establishes eligibility or coverage.
           reminder records the verified booking's reminder stage, including scheduled or declined outcomes. Never restart
           a booking or reminder because recent dialogue omits its result. Memory and prior consent cannot authorize a new write.
-          verified_offers contains backend-verified options for the current search. A caller selecting 'the morning one'
-          chooses a slot when exactly one offered morning time matches the established date and doctor. It is not confirmation.
+          verified_offers contains backend-verified options for the current search. 'The first one', 'first option',
+          'the morning one', 'second', or 'the later one' selects an offered slot: choose_slot, NEVER confirm.
+          Resolve its complete date, doctor and time with the slot question using the assistant's actual spoken options.
           Social chat, preparation questions, and goodbyes need no backend action. Unresolved fragments are unclear.
           repeat asks to hear the current question or verified options again. restart explicitly abandons unconfirmed
           conversation details and starts a new request; it never undoes completed bookings. retry explicitly requests
@@ -173,6 +174,11 @@ defmodule BookingDesk.Judgment do
           }
         )
     }
+    |> then(fn questions ->
+      if Map.get(state, :verified_offers, []) == [],
+        do: questions,
+        else: Map.put(questions, "slot", BookingDesk.SlotChoice.question(state))
+    end)
   end
 
   def decode(answers, state \\ %{}) do
@@ -186,7 +192,9 @@ defmodule BookingDesk.Judgment do
       |> resolve_period(state)
 
     if confident?(intent) and intent.choice != "unclear" do
-      decode_fields(judgment, state)
+      with {:ok, selected} <- BookingDesk.SlotChoice.resolve(judgment, answers["slot"], state) do
+        decode_fields(selected, state)
+      end
     else
       uncertain_intent(judgment)
     end

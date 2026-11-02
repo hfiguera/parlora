@@ -95,7 +95,7 @@ defmodule BookingDesk.JudgmentTest do
              |> Judgment.decode()
   end
 
-  test "period selections require a unique current offered time and preserve doctor ambiguity" do
+  test "a period without verified offers cannot invent a slot" do
     answers = %{
       "intent" => answer("choose_slot"),
       "date" => answer("2026-11-05"),
@@ -103,34 +103,8 @@ defmodule BookingDesk.JudgmentTest do
       "time" => answer("morning")
     }
 
-    morning = %{date: "2026-11-05", time: "10:15", clinician: "lee"}
-    afternoon = %{morning | time: "14:00"}
-    state = %{verified_offers: [morning, afternoon]}
-    assert {:ok, %{"time" => "10:15"}} = Judgment.decode(answers, state)
-
-    assert {:incomplete, %{"intent" => "unknown", "time" => "10:15"}, ["intent"]} =
-             Judgment.decode(Map.put(answers, "intent", answer("choose_slot", 0.84)), state)
-
-    assert {:ok, %{"time" => "14:00"}} =
-             Judgment.decode(Map.put(answers, "time", answer("afternoon")), state)
-
-    assert {:incomplete, _, ["time"]} = Judgment.decode(answers, %{verified_offers: []})
-
-    assert {:incomplete, _, ["time"]} =
-             Judgment.decode(answers, %{verified_offers: [morning, %{morning | time: "11:00"}]})
-
-    assert {:incomplete, _, ["time"]} =
-             Judgment.decode(answers, %{verified_offers: [%{morning | date: "2026-11-04"}]})
-
-    assert {:incomplete, _, ["time"]} =
-             Judgment.decode(Map.put(answers, "time", answer("morning", 0.84)), state)
-
-    # Same time with different doctors resolves only the time, never a doctor.
-    assert {:ok, %{"time" => "10:15", "clinician" => "unknown"}} =
-             Judgment.decode(
-               Map.put(answers, "clinician", answer("unknown")),
-               %{verified_offers: [morning, %{morning | clinician: "patel"}]}
-             )
+    assert {:incomplete, %{"time" => "unknown"}, ["time"]} =
+             Judgment.decode(answers, %{verified_offers: []})
   end
 
   test "cancellation approves its immutable proposal without inventing replacement slot fields" do

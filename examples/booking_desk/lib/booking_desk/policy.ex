@@ -489,6 +489,8 @@ defmodule BookingDesk.Policy do
   defp needs_clarification?(latest, result, latest_user, demographics, opts) do
     uncertain_result?(result) or incomplete_identity?(demographics) or
       partial_approval?(latest, result, latest_user) or
+      (match?({:ok, %{"offered_slot" => true}}, result) and
+         Keyword.get(opts, :settle_choice_ms, 1_500) > 0) or
       settle_approval?(latest, result, opts)
   end
 
@@ -570,6 +572,15 @@ defmodule BookingDesk.Policy do
       _ ->
         clarify_booking(snapshot, cursor, pending, latest, %{}, ["intent"])
     end
+  end
+
+  defp incomplete_decision(_snapshot, _judgment, ["slot"], pending, latest, cursor, _text) do
+    clarify(
+      cursor,
+      pending,
+      latest,
+      "Which of the offered times would you like? You can say its time or position in the list. If more than one matches, please include the doctor and date. Nothing has been booked."
+    )
   end
 
   defp incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text) do

@@ -1868,6 +1868,7 @@ defmodule BookingDesk.PolicyTest do
     assert {:ok, [proposal]} =
              BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
                coalesce_ms: 0,
+               settle_choice_ms: 0,
                judge: fn state ->
                  assert Enum.any?(state.verified_offers, &(&1.date == "2026-11-04"))
                  assert Enum.any?(state.verified_offers, &(&1.date == "2026-11-05"))
@@ -1878,7 +1879,8 @@ defmodule BookingDesk.PolicyTest do
                        "intent" => "choose_slot",
                        "date" => "2026-11-04",
                        "clinician" => "lee",
-                       "time" => "morning"
+                       "time" => "morning",
+                       "slot" => "2026-11-04/lee/10:15"
                      },
                      fn {key, value} ->
                        {key, %{choice: value, probabilities: %{value => 0.99}}}
@@ -2025,6 +2027,7 @@ defmodule BookingDesk.PolicyTest do
     assert {:ok, [proposal]} =
              BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
                coalesce_ms: 0,
+               settle_choice_ms: 0,
                judge: fn state ->
                  answers =
                    Map.new(
@@ -2032,7 +2035,8 @@ defmodule BookingDesk.PolicyTest do
                        "intent" => "choose_slot",
                        "date" => "2026-11-04",
                        "clinician" => "patel",
-                       "time" => "morning"
+                       "time" => "morning",
+                       "slot" => "2026-11-04/patel/10:15"
                      },
                      fn {key, value} ->
                        {key, %{choice: value, probabilities: %{value => 0.99}}}

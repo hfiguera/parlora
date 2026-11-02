@@ -130,15 +130,16 @@ defmodule BookingDesk.BookingSessionTest do
                  "clinician" => "lee"
                }}
 
-        state.latest_user == "The morning one" ->
+        state.latest_user == "The first one" ->
           assert length(state.verified_offers) == 2
           assert Enum.all?(state.verified_offers, &(&1.date == "2026-11-05"))
 
           %{
             "intent" => "choose_slot",
             "date" => "2026-11-05",
-            "time" => "morning",
-            "clinician" => "lee"
+            "time" => "unknown",
+            "clinician" => "unknown",
+            "slot" => "2026-11-05/lee/10:15"
           }
           |> Map.new(fn {field, choice} ->
             {field, %{choice: choice, probabilities: %{choice => 0.99}}}
@@ -210,8 +211,8 @@ defmodule BookingDesk.BookingSessionTest do
     assert result.content =~ "November 5"
     refute result.content =~ "November 4"
 
-    assistant(provider, result.content, 7_000)
-    caller(provider, "The morning one", 8_000, "slot")
+    assistant(provider, "On November fifth, Dr. Lee has 10:15 AM or 2 PM. Which works?", 7_000)
+    caller(provider, "The first one", 8_000, "slot")
     assert_receive {:submitted, proposal}, 2_000
     assert proposal.input.operation == "propose"
     assert proposal.input.slot == "2026-11-05T10:15:00"
@@ -288,16 +289,21 @@ defmodule BookingDesk.BookingSessionTest do
           {:incomplete, %{"intent" => "reschedule", "date" => "2026-11-05", "clinician" => "lee"},
            ["time"]}
 
-        "Ten fifteen" ->
+        "The second option" ->
           assert state.conversation.goal == "reschedule"
+          assert Enum.any?(state.dialogue, &(&1.text =~ "2 PM or 10:15 AM"))
 
-          {:ok,
-           %{
-             "intent" => "reschedule",
-             "date" => "2026-11-05",
-             "time" => "10:15",
-             "clinician" => "lee"
-           }}
+          %{
+            "intent" => "choose_slot",
+            "date" => "unknown",
+            "time" => "unknown",
+            "clinician" => "unknown",
+            "slot" => "2026-11-05/lee/10:15"
+          }
+          |> Map.new(fn {field, choice} ->
+            {field, %{choice: choice, probabilities: %{choice => 0.99}}}
+          end)
+          |> BookingDesk.Judgment.decode(state)
 
         "Yes, please" ->
           assert state.proposal.change == "reschedule"
@@ -325,8 +331,9 @@ defmodule BookingDesk.BookingSessionTest do
     assert search.input.operation == "availability"
     Provider.complete(backend, search)
     assert_receive {:context, available}, 2_000
-    assistant(provider, available.content, 2_000)
-    caller(provider, "Ten fifteen", 3_000, "replacement-slot")
+    assert available.content =~ "November 5"
+    assistant(provider, "Dr. Lee has 2 PM or 10:15 AM on November fifth. Which works?", 2_000)
+    caller(provider, "The second option", 3_000, "replacement-slot")
     assert_receive {:submitted, proposal}, 2_000
     assert proposal.input.change == "reschedule"
     assert proposal.input.appointment == "appt_existing"
@@ -355,6 +362,58 @@ defmodule BookingDesk.BookingSessionTest do
            end)
 
     refute_receive {:submitted, _}, 30
+  end
+
+  test "a fragmented ambiguous choice settles before proposing and a fresh selection recovers" do
+    judge = fn state ->
+      if state.latest_user == "November fifth with Dr. Lee" do
+        {:ok, %{"intent" => "availability", "date" => "2026-11-05", "clinician" => "lee"}}
+      else
+        slot =
+          if state.latest_user == "The first or the second",
+            do: "ambiguous",
+            else: "2026-11-05/lee/10:15"
+
+        %{"intent" => "choose_slot", "slot" => slot}
+        |> Map.new(fn {field, choice} ->
+          {field, %{choice: choice, probabilities: %{choice => 0.99}}}
+        end)
+        |> BookingDesk.Judgment.decode(state)
+      end
+    end
+
+    {_session, provider, backend} = start_session(judge)
+    appointments = BookingDesk.Store.snapshot()
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, _available}, 2_000
+    assistant(provider, "Dr. Lee has 10:15 AM or 2 PM on November fifth. Which works?", 2_000)
+    caller(provider, "The first", 3_000, "ambiguous")
+    refute_receive {:submitted, _}, 300
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: " or the second",
+      start_ms: 3_400,
+      end_ms: 4_200
+    })
+
+    assert_receive {:context, question}, 4_000
+    assert question.content =~ "Which of the offered times"
+    refute_receive {:submitted, _}, 50
+    assert BookingDesk.Store.snapshot() == appointments
+
+    assistant(provider, question.content, 5_000)
+    caller(provider, "The first option", 6_000, "selection")
+    assert_receive {:submitted, proposal}, 4_000
+    assert proposal.input.operation == "propose"
+    assert proposal.input.slot == "2026-11-05T10:15:00"
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+    assert readback.content =~ "10:15"
+    refute_receive {:submitted, _}, 50
+    assert BookingDesk.Store.snapshot() == appointments
   end
 
   defp start_session(judge, policy_opts \\ []) do
