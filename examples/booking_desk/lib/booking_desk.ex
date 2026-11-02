@@ -161,6 +161,9 @@ defmodule BookingDesk do
     November 6 has no slots; November 11 exercises a backend failure; November 12 exercises a failed booking.
     Treat these details as demo setup, not verified availability. Only backend results establish available slots or booking outcomes.
     Continue answering ordinary questions while backend work runs. 'Are you still checking?' is a progress question: do not start the work again.
+    If the caller asks to repeat, start over, retry a failed search, or return to appointment work during reminders,
+    delegate that request so the application can restore the correct step. Starting over never cancels a completed appointment.
+    Follow the application's current question. Do not claim to be checking a new date before its search has been admitted.
     While availability is pending, you can say the caller should bring photo ID and an insurance card and arrive 10 to 15 minutes early.
     Do not give clinical preparation instructions or medical advice.
     A correction replaces the earlier request unless the caller explicitly asks for both. Never announce an obsolete result.

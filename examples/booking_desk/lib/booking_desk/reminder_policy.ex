@@ -5,7 +5,16 @@ defmodule BookingDesk.ReminderPolicy do
   @moduledoc "Read-only semantic reminder decisions, bound to a verified booking and exact destination."
 
   def current(snapshot) do
-    case state(snapshot) do
+    latest =
+      snapshot.tasks |> Map.values() |> Enum.max_by(&Map.get(&1.input, :cursor, 0), fn -> nil end)
+
+    active =
+      latest != nil and
+        latest.input.operation in ~w(confirm reminder_opt_in reminder_decline reminder_change reminder_number reminder_confirm)
+
+    route = Conversation.context(snapshot).reminder_route
+
+    case if(route == :active or (route == :auto and active), do: state(snapshot)) do
       %{status: status} when status in ["scheduled", "declined"] -> nil
       state -> state
     end
@@ -74,7 +83,22 @@ defmodule BookingDesk.ReminderPolicy do
 
     classify = Keyword.get(opts, :reminder_judge, &classify/1)
 
-    case classify.(state) do
+    result =
+      if BookingDesk.Recovery.command(latest_user),
+        do: {:ok, "appointment"},
+        else: classify.(state)
+
+    interpret_reply(result, snapshot, current, state, opts)
+  end
+
+  defp interpret_reply(result, snapshot, current, state, opts) do
+    dialogue = state.dialogue
+    latest_user = state.latest_user
+
+    case result do
+      {:ok, "appointment"} ->
+        :appointment
+
       {:ok, "number"} when current.status in ["need_number", "verify_existing", "verify_new"] ->
         extract_number(snapshot, state, opts)
 
@@ -185,6 +209,8 @@ defmodule BookingDesk.ReminderPolicy do
     do:
       "I couldn't confirm your reminder preference. Would you like a text reminder? Your appointment remains booked."
 
+  def question(current, phone \\ nil), do: uncertainty_question(current, phone)
+
   defp pending_number_question(_phone),
     do:
       "I've kept the cell number you supplied. Would you like to use that number for the reminder? It still needs a complete readback and confirmation. Your appointment remains booked."
@@ -229,7 +255,7 @@ defmodule BookingDesk.ReminderPolicy do
       ~r/\b(yes|yep|yeah|sure|okay|ok|correct|go ahead|sounds good|please (send|text|use)|i want|i would like)\b/i,
       text
     ) and
-      not Regex.match?(~r/\b(no|not|don't|unless|if|maybe|perhaps|wait|instead)\b/i, text)
+      BookingDesk.Consent.unconditional?(text)
   end
 
   def classify(state), do: BookingDesk.Judgment.classify(state, evaluator: &evaluate/1)
@@ -250,6 +276,8 @@ defmodule BookingDesk.ReminderPolicy do
           confirm_number. A new readback and fresh confirmation are still required. Preserve the verified reminder
           stage during uncertainty; never restart an earlier consent question or a completed booking.
           decline means they do not want a text reminder. Conditional/partial/uncertain replies are unclear. Progress/social/goodbye is none.
+          appointment means the caller wants to return to appointment work, change patient, repeat a question,
+          start over, cancel or reschedule the appointment, or check another date. Route that request back to the booking flow.
           """,
           %{
             "opt_in" => "Accept the text reminder",
@@ -258,6 +286,7 @@ defmodule BookingDesk.ReminderPolicy do
             "change" => "Request a different number",
             "decline" => "Decline text reminders",
             "none" => "No reminder action",
+            "appointment" => "Return to appointment work or conversation recovery",
             "unclear" => "Uncertain or partial reply"
           }
         )
@@ -275,7 +304,7 @@ defmodule BookingDesk.ReminderPolicy do
            retry: [max_attempts: 1]
          ) do
       {:ok, %{answers: %{"reply" => %{choice: choice, probabilities: probabilities}}}} ->
-        if Map.get(probabilities, choice, 0) >= 0.85,
+        if BookingDesk.Judgment.confident?(%{choice: choice, probabilities: probabilities}),
           do: {:ok, choice},
           else: {:error, :uncertain}
 

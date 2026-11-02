@@ -95,7 +95,7 @@ defmodule BookingDesk.JudgmentTest do
              |> Judgment.decode()
   end
 
-  test "period selections require a unique current offered time and preserve doctor ambiguity" do
+  test "a period without verified offers cannot invent a slot" do
     answers = %{
       "intent" => answer("choose_slot"),
       "date" => answer("2026-11-05"),
@@ -103,33 +103,45 @@ defmodule BookingDesk.JudgmentTest do
       "time" => answer("morning")
     }
 
-    morning = %{date: "2026-11-05", time: "10:15", clinician: "lee"}
-    afternoon = %{morning | time: "14:00"}
-    state = %{verified_offers: [morning, afternoon]}
-    assert {:ok, %{"time" => "10:15"}} = Judgment.decode(answers, state)
+    assert {:incomplete, %{"time" => "unknown"}, ["time"]} =
+             Judgment.decode(answers, %{verified_offers: []})
+  end
 
-    assert {:incomplete, %{"intent" => "unknown", "time" => "10:15"}, ["intent"]} =
-             Judgment.decode(Map.put(answers, "intent", answer("choose_slot", 0.84)), state)
+  test "cancellation approves its immutable proposal without inventing replacement slot fields" do
+    answers = %{
+      "intent" => answer("confirm"),
+      "date" => answer("unknown"),
+      "time" => answer("unknown"),
+      "clinician" => answer("unknown")
+    }
 
-    assert {:ok, %{"time" => "14:00"}} =
-             Judgment.decode(Map.put(answers, "time", answer("afternoon")), state)
+    assert {:ok, %{"intent" => "confirm"}} =
+             Judgment.decode(answers, %{proposal: %{change: "cancel"}})
 
-    assert {:incomplete, _, ["time"]} = Judgment.decode(answers, %{verified_offers: []})
+    for change <- ~w(book reschedule) do
+      assert {:incomplete, _, ["date", "time", "clinician"]} =
+               Judgment.decode(answers, %{proposal: %{change: change}})
+    end
+  end
 
-    assert {:incomplete, _, ["time"]} =
-             Judgment.decode(answers, %{verified_offers: [morning, %{morning | time: "11:00"}]})
+  test "a failed interpreter returns unavailable and a fresh input can recover" do
+    state = %{latest_user: "failure-#{System.unique_integer([:positive])}"}
 
-    assert {:incomplete, _, ["time"]} =
-             Judgment.decode(answers, %{verified_offers: [%{morning | date: "2026-11-04"}]})
+    assert {:error, :unavailable} =
+             Judgment.classify(state, evaluator: fn _ -> raise "service failed" end)
 
-    assert {:incomplete, _, ["time"]} =
-             Judgment.decode(Map.put(answers, "time", answer("morning", 0.84)), state)
-
-    # Same time with different doctors resolves only the time, never a doctor.
-    assert {:ok, %{"time" => "10:15", "clinician" => "unknown"}} =
-             Judgment.decode(
-               Map.put(answers, "clinician", answer("unknown")),
-               %{verified_offers: [morning, %{morning | clinician: "patel"}]}
+    assert {:ok, %{"intent" => "none"}} =
+             Judgment.classify(%{state | latest_user: state.latest_user <> " corrected"},
+               evaluator: fn _ -> {:ok, %{"intent" => "none"}} end
              )
+  end
+
+  test "confidence gates reject malformed probabilities instead of treating them as permission" do
+    for probability <- [nil, "0.99", true, -1, 1.1] do
+      refute Judgment.confident?(%{choice: "confirm", probabilities: %{"confirm" => probability}})
+    end
+
+    refute Judgment.confident?(%{choice: "confirm", probabilities: nil})
+    assert Judgment.confident?(answer("confirm"))
   end
 end

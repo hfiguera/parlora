@@ -163,16 +163,19 @@ defmodule BookingDesk.Store do
       query(
         db,
         """
-        SELECT p.slot,s.provider,p.expires,p.lookup_request FROM proposals p JOIN slots s ON s.id=p.slot
+        SELECT s.id,s.provider,p.expires,p.lookup_request,p.operation FROM proposals p
+        LEFT JOIN appointments a ON a.id=p.appointment AND a.patient=p.patient
+        JOIN slots s ON s.id=CASE WHEN p.operation='cancel' THEN a.slot ELSE p.slot END
         WHERE p.id=? AND p.patient=? AND p.revision=? AND p.status='pending'
-          AND p.operation='book' AND p.expires>?
+          AND p.operation IN ('book','reschedule','cancel') AND p.expires>?
+          AND (p.operation!='cancel' OR a.status='booked')
         """,
         [id, patient, revision, System.system_time(:second)]
       )
 
     proposal =
       case result do
-        [[slot, clinician, expires, lookup]] ->
+        [[slot, clinician, expires, lookup, change]] ->
           %{
             id: id,
             patient: patient,
@@ -184,14 +187,15 @@ defmodule BookingDesk.Store do
               Enum.find_value(clinicians(), fn {key, name} -> if name == clinician, do: key end),
             expires: expires,
             status: "pending",
-            change: "book"
+            change: change
           }
 
         _ ->
           nil
       end
 
-    {:reply, if(proposal_insurance?(db, id), do: proposal), db}
+    permitted = proposal != nil and (proposal.change == "cancel" or proposal_insurance?(db, id))
+    {:reply, if(permitted, do: proposal), db}
   end
 
   def handle_call({:execute, input, id}, _from, db) do

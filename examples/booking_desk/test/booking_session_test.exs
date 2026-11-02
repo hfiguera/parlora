@@ -2,6 +2,15 @@ defmodule BookingDesk.BookingSessionTest do
   use ExUnit.Case, async: false
   alias Parlora.{BackendResult, Event}
 
+  setup do
+    db = :sys.get_state(BookingDesk.Store)
+    {:ok, saved} = Exqlite.Sqlite3.serialize(db)
+
+    on_exit(fn ->
+      :ok = Exqlite.Sqlite3.deserialize(db, saved)
+    end)
+  end
+
   defmodule Provider do
     use GenServer
     use Parlora.AdapterClient
@@ -95,8 +104,6 @@ defmodule BookingDesk.BookingSessionTest do
   end
 
   test "a corrected search delivers only its result and booking still needs fresh unconditional approval" do
-    {:ok, memory} = start_supervised(BookingDesk.Conversation)
-
     judge = fn state ->
       cond do
         state.latest_user == "November fourth with Dr. Lee" ->
@@ -109,20 +116,35 @@ defmodule BookingDesk.BookingSessionTest do
           assert state.verified_offers == []
           {:ok, %{"intent" => "progress"}}
 
-        state.latest_user == "Change the search to November fifth" ->
+        state.latest_user == "Yes" ->
           assert state.pending_request["date"] == "2026-11-05"
-          {:ok, %{"intent" => "replace_search", "date" => "2026-11-05", "clinician" => "lee"}}
 
-        state.latest_user == "The morning one" ->
+          if state.proposal == nil,
+            do: {:error, :uncertain},
+            else:
+              {:ok,
+               %{
+                 "intent" => "confirm",
+                 "date" => "2026-11-05",
+                 "time" => "10:15",
+                 "clinician" => "lee"
+               }}
+
+        state.latest_user == "The first one" ->
+          assert length(state.verified_offers) == 2
           assert Enum.all?(state.verified_offers, &(&1.date == "2026-11-05"))
 
-          {:ok,
-           %{
-             "intent" => "choose_slot",
-             "date" => "2026-11-05",
-             "time" => "10:15",
-             "clinician" => "lee"
-           }}
+          %{
+            "intent" => "choose_slot",
+            "date" => "2026-11-05",
+            "time" => "unknown",
+            "clinician" => "unknown",
+            "slot" => "2026-11-05/lee/10:15"
+          }
+          |> Map.new(fn {field, choice} ->
+            {field, %{choice: choice, probabilities: %{choice => 0.99}}}
+          end)
+          |> BookingDesk.Judgment.decode(state)
 
         state.latest_user in ["Yes, if my insurance covers it", "Yes, please book it"] ->
           {:ok,
@@ -132,24 +154,31 @@ defmodule BookingDesk.BookingSessionTest do
              "time" => "10:15",
              "clinician" => "lee"
            }}
+
+        state.latest_user == "Maybe another date" ->
+          {:error, :uncertain}
+
+        state.latest_user == "Cancel that appointment" ->
+          assert state.appointment.status == "booked"
+          {:ok, %{"intent" => "cancel"}}
+
+        state.latest_user == "Yes, please cancel it" ->
+          assert state.proposal.change == "cancel"
+
+          BookingDesk.Judgment.decode(
+            %{"intent" => %{choice: "confirm", probabilities: %{"confirm" => 0.99}}},
+            state
+          )
       end
     end
 
-    {:ok, session} =
-      Parlora.start_session(
-        channel: {BookingDesk.ReplayChannel, owner: self()},
-        provider: {Provider, owner: self()},
-        backend: {Backend, owner: self()},
-        context_policy: {BookingDesk.Policy, conversation: memory, judge: judge, coalesce_ms: 0},
-        event_sink: self()
+    {_session, provider, backend} =
+      start_session(judge,
+        reminder_judge: fn state ->
+          assert state.latest_user in ["Cancel that appointment", "Maybe another date"]
+          {:ok, "appointment"}
+        end
       )
-
-    on_exit(fn -> if Process.alive?(session), do: Parlora.close(session) end)
-    :ok = BookingDesk.Conversation.bind(memory, session)
-    assert_receive {:provider, provider}
-    assert_receive {:backend, backend}
-    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 5_000
-    :ok = Parlora.update_context(session, registration(Parlora.snapshot(session).session_id))
 
     caller(provider, "November fourth with Dr. Lee", 0, "search")
     assert_receive {:submitted, old}, 2_000
@@ -172,8 +201,8 @@ defmodule BookingDesk.BookingSessionTest do
     refute_receive {:context, _}, 50
     refute_receive {:submitted, _}, 30
 
-    caller(provider, "Change the search to November fifth", 6_000, "replacement")
-    assert_receive {:submitted, replacement}, 2_000
+    caller(provider, "Yes", 6_000, "replacement")
+    assert_receive {:submitted, replacement}, 4_000
     assert replacement.task_id == old.task_id
     assert replacement.task_revision == 2
     assert replacement.input.date == "2026-11-05"
@@ -182,8 +211,8 @@ defmodule BookingDesk.BookingSessionTest do
     assert result.content =~ "November 5"
     refute result.content =~ "November 4"
 
-    assistant(provider, result.content, 7_000)
-    caller(provider, "The morning one", 8_000, "slot")
+    assistant(provider, "On November fifth, Dr. Lee has 10:15 AM or 2 PM. Which works?", 7_000)
+    caller(provider, "The first one", 8_000, "slot")
     assert_receive {:submitted, proposal}, 2_000
     assert proposal.input.operation == "propose"
     assert proposal.input.slot == "2026-11-05T10:15:00"
@@ -192,7 +221,16 @@ defmodule BookingDesk.BookingSessionTest do
     assistant(provider, readback.content, 9_000)
     appointments = BookingDesk.Store.snapshot()
 
-    caller(provider, "Yes, if my insurance covers it", 10_000, "conditional")
+    caller(provider, "Yes", 10_000, "conditional")
+    refute_receive {:submitted, _}, 300
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: ", if my insurance covers it",
+      start_ms: 10_400,
+      end_ms: 11_200
+    })
+
     assert_receive {:context, consent_question}, 4_000
     assert consent_question.content =~ "explicitly confirm"
     refute_receive {:submitted, _}, 50
@@ -200,12 +238,211 @@ defmodule BookingDesk.BookingSessionTest do
 
     assistant(provider, readback.content, 11_000)
     caller(provider, "Yes, please book it", 12_000, "approval")
-    assert_receive {:submitted, confirmation}, 2_000
+    assert_receive {:submitted, confirmation}, 4_000
     assert confirmation.input.operation == "confirm"
     assert confirmation.input.proposal == proposal.id
     assert confirmation.input.revision == proposal.input.revision
+    Provider.complete(backend, confirmation)
+    assert_receive {:context, booked}, 2_000
+    assert booked.content =~ "Booked"
+
+    assistant(provider, "Would you like a text reminder?", 14_000)
+    caller(provider, "Maybe another date", 15_000, "uncertain-appointment")
+    assert_receive {:context, recovery_question}, 6_000
+    refute recovery_question.content =~ "reminder"
+    assistant(provider, recovery_question.content, 17_000)
+    caller(provider, "Back to the reminder", 18_000, "resume-reminder")
+    assert_receive {:context, reminder_question}, 2_000
+    assert reminder_question.content =~ "text reminder"
+    assistant(provider, reminder_question.content, 19_000)
+    caller(provider, "Cancel that appointment", 20_000, "cancel")
+    assert_receive {:submitted, cancellation}, 4_000
+    assert cancellation.input.operation == "propose"
+    assert cancellation.input.change == "cancel"
+    assert cancellation.input.appointment == confirmation.id
+    Provider.complete(backend, cancellation)
+    assert_receive {:context, cancel_readback}, 2_000
+    assistant(provider, cancel_readback.content, 22_000)
+    caller(provider, "Yes, please cancel it", 23_000, "cancel-approval")
+    assert_receive {:submitted, cancel_write}, 4_000
+    assert cancel_write.input.proposal == cancellation.id
+    Provider.complete(backend, cancel_write)
+    assert_receive {:context, _cancelled}, 2_000
+    appointments = BookingDesk.Store.snapshot()
+
+    assert Enum.any?(appointments, fn [id, _, _, status, _] ->
+             id == confirmation.id and status == "cancelled"
+           end)
+
+    assert Enum.any?(appointments, fn [id, _, _, status, _] ->
+             id == "appt_existing" and status == "booked"
+           end)
+
     refute_receive {:parlora_event, %Event{type: :policy_rejected}}, 30
     refute_receive {:submitted, _}, 30
+  end
+
+  test "date-only rescheduling checks availability and changes the original only after approval" do
+    judge = fn state ->
+      case state.latest_user do
+        "Move my original appointment to November fifth with Dr. Lee" ->
+          {:incomplete, %{"intent" => "reschedule", "date" => "2026-11-05", "clinician" => "lee"},
+           ["time"]}
+
+        "The second option" ->
+          assert state.conversation.goal == "reschedule"
+          assert Enum.any?(state.dialogue, &(&1.text =~ "2 PM or 10:15 AM"))
+
+          %{
+            "intent" => "choose_slot",
+            "date" => "unknown",
+            "time" => "unknown",
+            "clinician" => "unknown",
+            "slot" => "2026-11-05/lee/10:15"
+          }
+          |> Map.new(fn {field, choice} ->
+            {field, %{choice: choice, probabilities: %{choice => 0.99}}}
+          end)
+          |> BookingDesk.Judgment.decode(state)
+
+        "Yes, please" ->
+          assert state.proposal.change == "reschedule"
+
+          {:ok,
+           %{
+             "intent" => "confirm",
+             "date" => "2026-11-05",
+             "time" => "10:15",
+             "clinician" => "lee"
+           }}
+      end
+    end
+
+    {_session, provider, backend} = start_session(judge)
+
+    caller(
+      provider,
+      "Move my original appointment to November fifth with Dr. Lee",
+      0,
+      "reschedule"
+    )
+
+    assert_receive {:submitted, search}, 4_000
+    assert search.input.operation == "availability"
+    Provider.complete(backend, search)
+    assert_receive {:context, available}, 2_000
+    assert available.content =~ "November 5"
+    assistant(provider, "Dr. Lee has 2 PM or 10:15 AM on November fifth. Which works?", 2_000)
+    caller(provider, "The second option", 3_000, "replacement-slot")
+    assert_receive {:submitted, proposal}, 2_000
+    assert proposal.input.change == "reschedule"
+    assert proposal.input.appointment == "appt_existing"
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+
+    assert Enum.any?(BookingDesk.Store.snapshot(), fn [id, _, _, status, _] ->
+             id == "appt_existing" and status == "booked"
+           end)
+
+    assistant(provider, readback.content, 5_000)
+    caller(provider, "Yes, please", 6_000, "approve-reschedule")
+    assert_receive {:submitted, confirmation}, 4_000
+    assert confirmation.input.proposal == proposal.id
+    Provider.complete(backend, confirmation)
+    assert_receive {:context, result}, 2_000
+    assert result.content =~ "Rescheduled"
+    appointments = BookingDesk.Store.snapshot()
+
+    assert Enum.any?(appointments, fn [id, _, _, status, _] ->
+             id == "appt_existing" and status == "cancelled"
+           end)
+
+    assert Enum.any?(appointments, fn [id, _, _, status, _] ->
+             id == confirmation.id and status == "booked"
+           end)
+
+    refute_receive {:submitted, _}, 30
+  end
+
+  test "a fragmented ambiguous choice settles before proposing and a fresh selection recovers" do
+    judge = fn state ->
+      if state.latest_user == "November fifth with Dr. Lee" do
+        {:ok, %{"intent" => "availability", "date" => "2026-11-05", "clinician" => "lee"}}
+      else
+        slot =
+          if state.latest_user == "The first or the second",
+            do: "ambiguous",
+            else: "2026-11-05/lee/10:15"
+
+        %{"intent" => "choose_slot", "slot" => slot}
+        |> Map.new(fn {field, choice} ->
+          {field, %{choice: choice, probabilities: %{choice => 0.99}}}
+        end)
+        |> BookingDesk.Judgment.decode(state)
+      end
+    end
+
+    {_session, provider, backend} = start_session(judge)
+    appointments = BookingDesk.Store.snapshot()
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, _available}, 2_000
+    assistant(provider, "Dr. Lee has 10:15 AM or 2 PM on November fifth. Which works?", 2_000)
+    caller(provider, "The first", 3_000, "ambiguous")
+    refute_receive {:submitted, _}, 300
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: " or the second",
+      start_ms: 3_400,
+      end_ms: 4_200
+    })
+
+    assert_receive {:context, question}, 4_000
+    assert question.content =~ "Which of the offered times"
+    refute_receive {:submitted, _}, 50
+    assert BookingDesk.Store.snapshot() == appointments
+
+    assistant(provider, question.content, 5_000)
+    caller(provider, "The first option", 6_000, "selection")
+    assert_receive {:submitted, proposal}, 4_000
+    assert proposal.input.operation == "propose"
+    assert proposal.input.slot == "2026-11-05T10:15:00"
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+    assert readback.content =~ "10:15"
+    refute_receive {:submitted, _}, 50
+    assert BookingDesk.Store.snapshot() == appointments
+  end
+
+  defp start_session(judge, policy_opts \\ []) do
+    {:ok, memory} = start_supervised(BookingDesk.Conversation)
+    policy = Keyword.merge([conversation: memory, judge: judge, coalesce_ms: 0], policy_opts)
+
+    {:ok, session} =
+      Parlora.start_session(
+        channel: {BookingDesk.ReplayChannel, owner: self()},
+        provider: {Provider, owner: self()},
+        backend: {Backend, owner: self()},
+        context_policy: {BookingDesk.Policy, policy},
+        event_sink: self()
+      )
+
+    on_exit(fn ->
+      if Process.alive?(session) do
+        ref = Process.monitor(session)
+        Parlora.close(session)
+        assert_receive {:DOWN, ^ref, :process, ^session, _}, 5_000
+      end
+    end)
+
+    :ok = BookingDesk.Conversation.bind(memory, session)
+    assert_receive {:provider, provider}
+    assert_receive {:backend, backend}
+    assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 5_000
+    :ok = Parlora.update_context(session, registration(Parlora.snapshot(session).session_id))
+    {session, provider, backend}
   end
 
   defp caller(provider, text, start_ms, id) do

@@ -79,6 +79,30 @@ defmodule BookingDesk.ReminderPolicyTest do
              )
   end
 
+  test "appointment changes and recovery controls can leave every unfinished reminder step" do
+    for status <- ~w(offered need_number verify_existing verify_new) do
+      state = %{
+        status: status,
+        patient: "p",
+        original_phone: "2025550188",
+        destination: "+12025550188"
+      }
+
+      assert :appointment =
+               ReminderPolicy.interpret(
+                 snapshot("Would you like a reminder?", "Cancel that appointment"),
+                 state,
+                 reminder_judge: fn _ -> {:ok, "appointment"} end,
+                 phone_extractor: fn _ -> raise "not a phone answer" end
+               )
+
+      assert :appointment =
+               ReminderPolicy.interpret(snapshot("Which number?", "Start over"), state,
+                 reminder_judge: fn _ -> raise "literal recovery needs no model" end
+               )
+    end
+  end
+
   test "structured phone extraction gets the caller binding and never authorizes scheduling" do
     state = %{status: "need_number", patient: "p", original_phone: nil}
 
