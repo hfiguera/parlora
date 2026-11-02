@@ -46,6 +46,8 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert config.enable_assistant_backchannel
     assert config.assistant_backchannel_aggressiveness == 0.3
     assert config.audio_speed == 1.05
+    assert config.vad_threshold == 0.5
+    assert config.vad_min_speech_duration_ms == 120
     assert config.vad_min_silence_duration_ms == 600
     assert config.min_words_to_interrupt == 1
     assert config.boosted_keywords == ["Cedarwood", "Dr. Lee", "Dr. Patel"]
@@ -61,6 +63,18 @@ defmodule BookingDesk.PhonicSettingsTest do
     refute tool.can_run_during_user_speech
     assert tool.tool_schema.function.strict
     assert tool.tool_schema.function.name == "delegate_to_backend"
+  end
+
+  test "speech detection can be tuned without requiring multiple words to interrupt" do
+    {_, options} = BookingDesk.provider("phonic", vad_threshold: 0.55)
+    assert {:ok, config} = Protocol.start(options, %AudioFormat{})
+    assert config.vad_threshold == 0.55
+    assert config.vad_min_speech_duration_ms == 120
+    assert config.min_words_to_interrupt == 1
+    assert config.enable_assistant_backchannel
+    assert config.assistant_backchannel_aggressiveness == 0.3
+    assert hd(config.tools).wait_for_response
+    assert hd(config.tools).require_speech_before_tool_call
   end
 
   test "other booking providers retain their existing options even when the environment is Phonic" do
@@ -103,6 +117,8 @@ defmodule BookingDesk.PhonicSettingsTest do
 
     refute Map.has_key?(config, :enable_assistant_backchannel)
     refute Map.has_key?(config, :audio_speed)
+    refute Map.has_key?(config, :vad_threshold)
+    refute Map.has_key?(config, :vad_min_speech_duration_ms)
     assert [tool] = config.tools
     refute tool.wait_for_response
     refute tool.require_speech_before_tool_call

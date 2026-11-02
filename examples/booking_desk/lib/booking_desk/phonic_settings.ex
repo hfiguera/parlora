@@ -12,6 +12,8 @@ defmodule BookingDesk.PhonicSettings do
       wait_for_response: true,
       tool_timeout_ms: 60_000,
       audio_speed: 1.05,
+      vad_threshold: 0.5,
+      vad_min_speech_duration_ms: 120,
       vad_min_silence_duration_ms: 600,
       min_words_to_interrupt: 1,
       boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"]

@@ -62,8 +62,10 @@ Phonic sessions use the booking example's native conversation profile by default
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second
 tool timeout, speech speed `1.05`, a 600-ms end-of-turn silence threshold, and
-one-word interruptions. Recognition keywords include Cedarwood, Dr. Lee and
-Dr. Patel. Booking approval, number verification and reminder consent remain
+one-word interruptions. Speech detection uses threshold `0.5` and a 120-ms
+minimum speech duration to reduce false turns from café chatter without
+requiring multiple words to interrupt. Recognition keywords include Cedarwood,
+Dr. Lee and Dr. Patel. Booking approval, number verification and reminder consent remain
 application-controlled. Parlora's library defaults and other speech providers
 are unchanged.
 
@@ -139,6 +141,21 @@ mix run run.exs "runs/cafe-$(date +%Y%m%d-%H%M%S)" clips \
 The background is not added to assistant output. The loop's source, CC0 license,
 level and processing are documented in [the asset notes](priv/ambience/cafe/README.md).
 Ambience is supported only in replay mode, not with an actual microphone.
+
+After a Phonic replay, check for extra caller turns during background-only input:
+
+```sh
+python3 scripts/audit_caller_turns.py runs/YOUR_RECORDING
+```
+
+This read-only audit uses captured caller-input onset ticks and clip lengths,
+with a three-second allowance for transcript arrival. It rejects unexpected
+caller turns, missing clip transcripts and dropped capture data; it writes
+`caller-turn-verification.json` and exits unsuccessfully on failure. It never
+mutes input or uses the script to filter live caller speech. A passing workflow
+alone does not establish noise rejection. Speech detection is a tradeoff: test
+quiet voices and short refusals too; sustained background voices can still
+be recognized as speech.
 
 ## Application behavior
 
