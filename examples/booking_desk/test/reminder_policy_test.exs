@@ -2,6 +2,75 @@ defmodule BookingDesk.ReminderPolicyTest do
   use ExUnit.Case, async: true
   alias BookingDesk.ReminderPolicy
 
+  test "native acknowledgments cannot supply consent or hide conditions on the caller's answer" do
+    current = %{
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p",
+      original_phone: "2025550188"
+    }
+
+    opts = [
+      reminder_judge: fn _ -> {:ok, "confirm_number"} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for {question, first, last, expected} <- [
+          {"Can we send the reminder to 0188?", "Yes, ", "please", :allow},
+          {"Can we send the reminder to 0188?", "Yes, ", "if it is free", :deny},
+          {"Can we send the reminder to 0188?", "Yes, ", "but don't send it", :deny},
+          {"Can we send the reminder to 4289?", "Yes, ", "please", :deny},
+          {"Is 0188 your cell?", "Yes, ", "please", :allow}
+        ] do
+      s = snapshot(question, last)
+
+      s = %{
+        s
+        | transcripts: [
+            %{speaker: :user, delta: last, segment_id: "caller", arrival_order: 4},
+            %{
+              speaker: :assistant,
+              delta: "Mm-hmm.",
+              segment_id: "ack",
+              overlaps_user_segment_id: "caller",
+              arrival_order: 3
+            },
+            %{speaker: :user, delta: first, segment_id: "caller", arrival_order: 2},
+            %{speaker: :assistant, delta: question, segment_id: "question", arrival_order: 1}
+          ]
+      }
+
+      case expected do
+        :allow ->
+          assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+                   ReminderPolicy.interpret(s, current, opts)
+
+        :deny ->
+          result = ReminderPolicy.interpret(s, current, opts)
+          assert match?({:clarify, _}, result), inspect({question, first, last, result})
+      end
+    end
+
+    s = snapshot("Can we send the reminder to 0188?", "I'm not sure")
+
+    acknowledgment = %{
+      speaker: :assistant,
+      delta: "Yes, please",
+      segment_id: "ack",
+      overlaps_user_segment_id: "caller",
+      arrival_order: 3
+    }
+
+    caller = Map.put(hd(s.transcripts), :segment_id, "caller")
+
+    assert {:clarify, _} =
+             ReminderPolicy.interpret(
+               %{s | transcripts: [acknowledgment, caller, List.last(s.transcripts)]},
+               current,
+               opts
+             )
+  end
+
   defp snapshot(question, answer) do
     %{
       session_id: "test",

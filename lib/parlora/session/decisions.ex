@@ -38,7 +38,9 @@ defmodule Parlora.Session.Decisions do
         {:current,
          fn current ->
            fresh = resolution_outcome(current, entry, outcome)
-           fn -> module.resolve_delegation(pid, id, fresh) end
+           metadata = resolution_metadata(current, entry)
+
+           fn -> invoke_resolution(module, pid, id, fresh, metadata) end
          end},
         fn current, _reply -> current end,
         guard: fn current ->
@@ -51,6 +53,28 @@ defmodule Parlora.Session.Decisions do
       state
     end
   end
+
+  defp invoke_resolution(module, pid, id, outcome, metadata) do
+    if function_exported?(module, :resolve_delegation, 4),
+      do: module.resolve_delegation(pid, id, outcome, metadata),
+      else: module.resolve_delegation(pid, id, outcome)
+  end
+
+  defp resolution_metadata(state, %{task_id: task_id}) do
+    case state.context.tasks[task_id] do
+      %{revision: revision} ->
+        %{
+          task_id: task_id,
+          task_revision: revision,
+          provider_generation: state.context.provider_generation
+        }
+
+      _ ->
+        nil
+    end
+  end
+
+  defp resolution_metadata(_state, _entry), do: nil
 
   defp resolution_current?(state, id, _entry, %{status: :superseded}) do
     not Enum.any?(state.jobs, fn {_id, job} ->

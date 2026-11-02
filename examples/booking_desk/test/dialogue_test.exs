@@ -2,6 +2,80 @@ defmodule BookingDesk.DialogueTest do
   use ExUnit.Case, async: true
   alias BookingDesk.Dialogue
 
+  test "native backchannels preserve the complete untimed caller turn and every assistant word" do
+    parts =
+      [
+        %{speaker: :assistant, delta: "What is your date of birth?", segment_id: "question"},
+        %{speaker: :user, delta: "March ", segment_id: "caller"},
+        %{
+          speaker: :assistant,
+          delta: "Mm-hmm. ",
+          segment_id: "backchannel-1",
+          overlaps_user_segment_id: "caller"
+        },
+        %{speaker: :user, delta: "twelfth ", segment_id: "caller"},
+        %{
+          speaker: :assistant,
+          delta: "Okay. ",
+          segment_id: "backchannel-2",
+          overlaps_user_segment_id: "caller"
+        },
+        %{speaker: :user, delta: "nineteen ninety.", segment_id: "caller"}
+      ]
+      |> Enum.with_index(1)
+      |> Enum.map(fn {part, index} ->
+        Map.merge(part, %{provider_generation: 0, arrival_order: index})
+      end)
+      |> Enum.reverse()
+
+    assert Dialogue.build(parts) == [
+             %{speaker: :assistant, text: "What is your date of birth?"},
+             %{speaker: :user, text: "March twelfth nineteen ninety."}
+           ]
+
+    assert Dialogue.build(parts, include_assistant_reply: true) |> Enum.map(& &1.text) ==
+             [
+               "What is your date of birth?",
+               "March twelfth nineteen ninety.",
+               "Mm-hmm. ",
+               "Okay. "
+             ]
+
+    next = %{
+      speaker: :user,
+      delta: "Yes",
+      segment_id: "next",
+      arrival_order: 7,
+      provider_generation: 0
+    }
+
+    assert List.last(Dialogue.build([next | parts])).text == "Yes"
+
+    assert Dialogue.build(parts, after_cursor: 4)
+           |> Enum.filter(&(&1.speaker == :user))
+           |> Enum.map(& &1.text) ==
+             ["March twelfth ", "nineteen ninety."]
+  end
+
+  test "an overlap from another provider generation cannot join caller turns" do
+    parts =
+      [
+        %{speaker: :user, delta: "Yes", segment_id: "caller", provider_generation: 1},
+        %{
+          speaker: :assistant,
+          delta: "Okay",
+          segment_id: "ack",
+          overlaps_user_segment_id: "caller",
+          provider_generation: 0
+        },
+        %{speaker: :user, delta: "No", segment_id: "caller", provider_generation: 1}
+      ]
+      |> Enum.reverse()
+
+    assert [%{speaker: :user, text: "Yes"}, %{speaker: :assistant}, %{speaker: :user, text: "No"}] =
+             Dialogue.build(parts)
+  end
+
   test "untimed assistant fragments join within one provider reply but never across replies" do
     parts = [
       %{speaker: :assistant, delta: "Can we text 0188?", segment_id: "second", arrival_order: 4},

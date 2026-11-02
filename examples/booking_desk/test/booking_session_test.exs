@@ -219,6 +219,17 @@ defmodule BookingDesk.BookingSessionTest do
     })
 
     assert_receive :initial_doctor_observed, 4_000
+    # The judge notification precedes retention. Do not advance the caller and
+    # cancel that worker before the original preference has been saved.
+    case :sys.get_state(session).policy_task do
+      %{pid: pid} ->
+        ref = Process.monitor(pid)
+        assert_receive {:DOWN, ^ref, :process, ^pid, _}, 4_000
+
+      nil ->
+        :ok
+    end
+
     assistant(provider, "May I have your full name and date of birth?", 3_000)
     caller(provider, "Jamie Rivera, March 12, 1990", 4_000, "identity")
     assert_receive {:submitted, lookup}, 4_000

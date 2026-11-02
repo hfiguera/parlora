@@ -77,6 +77,12 @@ session's `limits:` option.
 Caller `input_text` messages were observed as word fragments. The adapter adds a
 word separator and emits `transcript_delta` with unavailable timestamps.
 Assistant audio text shares a locally assigned `segment_id` for each utterance.
+Caller fragments share a `segment_id` delimited by native caller speech events.
+Assistant speech starting during that turn carries `overlaps_user_segment_id`.
+This reports wire ordering, not a semantic classification of the words. Native
+backchannels do not complete the caller's pending response or release queued
+facts. Applications assembling dialogue can keep that caller turn intact while
+retaining the overlapping assistant words separately, as BookingDesk does.
 Neither transcript establishes that the caller heard the audio.
 
 ## Tools, context, and corrections
@@ -85,12 +91,24 @@ Tool chaining is disabled (`allow_tool_chaining: false`) to avoid the repeated-c
 bursts observed in validation. This also restricts autonomous sequences of tool
 calls by the voice model.
 
-Phonic tools run asynchronously with `wait_for_response: false`, allowing further
-caller corrections and tool calls while backend work is pending. The alternative
-busy mode suppresses other tools, so the adapter does not select it.
-`forbid_speech_after_tool_call: true` suppresses automatic post-tool speech;
-the adapter requests the result reply explicitly. Pre-tool acknowledgments remain
-optional, and new caller input can still initiate unrelated work or corrections.
+Phonic tools run asynchronously. The default `wait_for_response: false` keeps
+new voice tool calls available while backend work runs; Parlora requests each
+result reply explicitly. Setting `wait_for_response: true` selects Phonic's
+native busy mode: the model can converse and report progress while waiting,
+but Phonic holds other voice tools until the call completes. Phonic owns that
+call's result reply; the adapter sends its output without `generate_reply`.
+This prevents a native answer followed by a second application-triggered answer.
+
+`forbid_speech_after_tool_call: true` remains the default, following Phonic's
+[background-task combination](https://docs.phonic.ai/docs/build/tools/how_tools_execute).
+With busy mode enabled, this skips immediate tool narration while preserving
+native progress and result speech. It can be set to `false` in busy mode.
+Manual response mode rejects that combination because it would introduce a
+second result-reply owner. Pre-tool acknowledgments remain optional by default.
+`require_speech_before_tool_call` and `wait_for_speech_before_tool_call` are
+configurable independently. For example, requiring speech without waiting for
+its completion lets Phonic choose its own acknowledgment while backend work
+overlaps it. This does not grant the model execution authority.
 
 The adapter exposes client calls as `delegation_requested`; the normal Parlora
 context policy decides whether and how to admit work. Provider arguments are
@@ -99,9 +117,12 @@ deduplication records. Conflicting duplicates and superseded results are rejecte
 
 - `:speakable` context is admitted to a bounded local queue. Once caller speech,
   the automatic/current response, and the receive queue settle, the adapter
-  completes the tool call or injects a system message and requests one explicit
-  reply. Keeping the facts out of the earlier turn avoids an automatic answer
-  followed by a second announcement. Multiple pending updates can share a reply.
+  completes the call using its selected response owner. Busy-mode call outputs
+  receive a native reply, with no manual reply request. Uncorrelated application
+  updates use one explicit reply, including clarifications while a native call
+  is still pending. Their speech and receive queue settle before the native
+  result is published. Keeping facts out of earlier turns avoids duplicate
+  announcements. Multiple uncorrelated updates can share a manual reply.
   `context_submitted` is emitted only when the queued command is actually written
   to the socket. This does not wait for physical playback.
 - `:quiet` and `:instruction` inject a system message without scheduling speech.
@@ -110,7 +131,9 @@ deduplication records. Conflicting duplicates and superseded results are rejecte
   system message. Expired calls also use new context; their old tool outputs are
   never resent.
 - `resolve_delegation/3` closes associated or superseded calls without scheduling
-  a duplicate response for an already covered result. A result reply that yields
+  a duplicate manual response. Already covered facts are removed from bookkeeping
+  outputs, with an instruction not to repeat them. Busy mode owns any native
+  response to those terminal outputs. A result reply that yields
   to a new tool call before producing output can resume once on association.
   Cancellation removes queued correlated updates, and newer queued task revisions
   replace obsolete ones. Cancellation events preserve backend-outcome uncertainty.
@@ -154,6 +177,114 @@ audio messages, so boundary ordering remains part of the upstream wire contract.
 | `response_timeout_ms` | `15_000` | Between 1 and 60,000 ms; missing response lifecycle progress closes explicitly. |
 | `early_delegation` | `false` | Requests tool calls during caller speech; requires organization enablement. |
 | `zero_data_retention` | `false` | When true, explicitly requests ZDR; rejection never falls back to retention. |
+
+### Native conversation controls
+
+These are keyword options in the provider tuple. Except for the existing
+600-second no-input end limit, absent settings are omitted so Phonic's service
+defaults apply. Enabling them is opt-in; existing applications keep their
+configuration. Unknown names, duplicates, invalid types, out-of-range values,
+and incompatible combinations return a startup error before connecting.
+
+| Option | Accepted values |
+| --- | --- |
+| `enable_assistant_backchannel` | Boolean; native listening acknowledgments while the caller speaks. |
+| `assistant_backchannel_aggressiveness` | Number 0–1; requires enabled backchannels. |
+| `audio_speed` | Number 0.5–1.5. |
+| `background_noise` / `background_noise_level` | `nil`, `"office"`, `"call-center"`, or `"coffee-shop"`; level 0–0.25. |
+| `vad_prebuffer_duration_ms` | Integer 0–2,000. |
+| `vad_min_speech_duration_ms` / `vad_min_silence_duration_ms` | Integer 0–1,500. |
+| `vad_threshold` | Number 0.2–0.8. |
+| `min_words_to_interrupt` | Integer 1–10. Raising this can delay short caller interruptions. |
+| `boosted_keywords` | Unique nonempty strings, at most 50 characters each. |
+| `pronunciation_dictionary` | Maps with exactly `word` and `pronunciation`; unique words, at most 30 and 50 characters respectively. Atom or string keys are accepted. |
+| `intelligence_level` | `"standard"` or `"high"`; provider latency/reasoning tradeoff. |
+| `default_language` / `additional_languages` | ISO 639-1 codes; additional languages must exclude the default (`"en"` if omitted). |
+| `multilingual_mode` | `"request"`, `"initial"`, or `"auto"`; auto supports at most two additional languages. |
+| `generate_no_input_poke_text` | Boolean; native generation of the silence prompt. |
+| `no_input_poke_sec` / `no_input_poke_text` | `nil` or integer 1–120 seconds; optional nonempty text, at most 1,000 characters locally. Generated poke text takes precedence. |
+| `no_input_end_conversation_sec` | Integer 30–600; adapter default 600. |
+| `require_speech_before_tool_call` | Boolean; adapter default `false` (speech is optional). |
+| `wait_for_speech_before_tool_call` | Boolean; adapter default `false`. |
+| `wait_for_response` | Boolean; adapter default `false`. `true` selects native busy-mode response ownership. |
+| `forbid_speech_after_tool_call` | Boolean; default `true`. `false` requires busy mode. |
+
+Keyword and pronunciation lists have a local capacity of 256 entries; language
+lists have the same local capacity. These are adapter memory bounds. Numeric
+limits and pronunciation lengths above follow the
+[official WebSocket schema](https://docs.phonic.ai/api-reference/conversations/conversations)
+and [official SDK types](https://github.com/Phonic-Co/phonic-python/blob/main/src/phonic/types/config_options.py).
+Native backchannels acknowledge listening; they are not timed backend progress
+messages and do not guarantee a shorter response delay.
+
+```elixir
+provider =
+  {Parlora.Providers.Phonic,
+   api_key: System.fetch_env!("PHONIC_API_KEY"),
+   enable_assistant_backchannel: true,
+   assistant_backchannel_aggressiveness: 0.3,
+   require_speech_before_tool_call: true,
+   wait_for_speech_before_tool_call: false,
+   wait_for_response: true,
+   tool_timeout_ms: 60_000,
+   vad_min_silence_duration_ms: 600,
+   audio_speed: 1.05}
+```
+
+Execution remains async and application-owned. Changing `execution_mode` or
+`allow_tool_chaining` away from `"async"` and `false` returns `:unsupported`.
+Raw `tools`, transport formats, hosted-agent configuration, and arbitrary
+additional parameters cannot override the adapter contract. Native speech
+settings never authorize a backend action or retry an uncertain write.
+
+Busy mode admits one pending native call. An unexpected simultaneous call fails
+before delegation; duplicate IDs cannot execute twice. A queued newer task
+revision can replace an unsent output on its existing call. Cancellation removes
+queued correlated facts. A missing local busy-tool deadline closes explicitly
+with uncertainty instead of inventing a result or retrying work. Missing native
+response progress after output uses the existing response timeout.
+
+Caller speech during a pending busy call does not arm an ordinary-response
+deadline: Phonic may wait for the tool result before answering a correction.
+The tool deadline remains active. A pending association to existing backend work
+also stays busy until its verified result or an application clarification.
+The coordinator supplies task identity, revision and provider generation through
+the optional `resolve_delegation/4` callback; adapters implementing only `/3`
+keep their existing behavior. Phonic keeps that metadata local, binds queued and
+future updates to the active call, and rejects older revisions. It does not send
+task identity as model instructions or execute another backend request.
+
+Native tool handoffs retire the current speech generation even after audio has
+started, following the [LiveKit Phonic adapter](https://github.com/livekit/agents/blob/main/livekit-plugins/livekit-plugins-phonic/livekit/plugins/phonic/realtime/realtime_model.py).
+An unfinished result can resume once through its associated call. Native result
+outputs contain the verified result, keeping application bookkeeping out of that
+speech path. Text audio without a new speech-start marker is admitted only at a
+native handoff within the same uninterrupted output epoch. After caller
+interruption, a fresh native speech boundary is still required.
+
+Applications must account for busy mode holding further voice tools. BookingDesk
+allows only validated availability read corrections to revise an existing
+correlated task without a fresh voice call. Its patient, insurance, date and
+clinician checks still apply. Proposals, bookings and reminder writes retain
+fresh delegation and consent requirements. The library's normal task-revision
+checks reject obsolete backend results. A live wire probe also confirmed that
+application clarification speech during a pending call preserves its eventual
+native result response.
+
+BookingDesk can exercise the profile above, plus recognition keywords, through
+its normal recorder without changing provider defaults or the blog:
+
+```sh
+cd examples/booking_desk
+PARLORA_PROVIDER=phonic BOOKING_DATABASE=:memory: \
+  mix run run.exs runs/phonic-native clips/reminders \
+  --phonic-native-conversation --ambience priv/ambience/cafe/manifest.json
+```
+
+The report records the explicit profile in `provider_options`. Credentials are
+loaded from the environment and are not included in that profile.
+Its 60-second tool budget covers the example's 35-second backend deadline plus
+policy processing and speech settling before output publication.
 
 With `zero_data_retention: false`, no retention override is sent: **Phonic's
 provider/workspace defaults apply**, documented as indefinite transcript and audio

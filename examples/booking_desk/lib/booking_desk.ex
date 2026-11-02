@@ -4,7 +4,7 @@ defmodule BookingDesk do
   def start(channel, opts \\ []) do
     provider = Keyword.get(opts, :provider, System.get_env("PARLORA_PROVIDER", "openai"))
 
-    provider_adapter = provider(provider)
+    provider_adapter = provider(provider, Keyword.get(opts, :provider_options, []))
     {channel_module, channel_opts} = channel
     {outer_observer, channel_opts} = Keyword.pop(channel_opts, :audio_observer)
 
@@ -53,7 +53,14 @@ defmodule BookingDesk do
             {BookingDesk.Policy,
              Keyword.merge(Keyword.get(opts, :policy, []),
                call_guard: guard,
-               conversation: conversation
+               conversation: conversation,
+               phonic_busy:
+                 provider == "phonic" and
+                   Keyword.get(
+                     Keyword.get(opts, :provider_options, []),
+                     :wait_for_response,
+                     false
+                   )
              )},
           context: %{},
           instructions: instructions(provider),
@@ -80,7 +87,7 @@ defmodule BookingDesk do
 
   def limits(_), do: [job_timeout_ms: 35_000, policy_timeout_ms: 5_000]
 
-  def provider(name) do
+  def provider(name, overrides \\ []) do
     {module, variable} =
       case name do
         "openai" -> {Parlora.Providers.OpenAI, "OPENAI_API_KEY"}
@@ -94,7 +101,7 @@ defmodule BookingDesk do
     options =
       if voice = assistant_voice(name), do: Keyword.put(options, :voice, voice), else: options
 
-    {module, options}
+    {module, Keyword.merge(options, overrides)}
   end
 
   def assistant_voice("gemini"), do: "Sulafat"

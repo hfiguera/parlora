@@ -166,6 +166,416 @@ defmodule Parlora.PhonicAdapterTest do
     refute_receive {:parlora_event, %Event{type: :playback_observed}}, 10
   end
 
+  for finish_order <- [:during_caller, :after_caller] do
+    @finish_order finish_order
+    @tag :reply_coordination
+    test "native backchannel ending #{@finish_order} does not release queued facts", context do
+      {:ok, config} =
+        Protocol.start(
+          [api_key: "private-test", enable_assistant_backchannel: true],
+          context.state.init.audio_format
+        )
+
+      state = ready(context, %{context.state | config: config})
+      state = deliver(context, state, %{"type" => "user_started_speaking"})
+      {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+      state = deliver(context, state, %{"type" => "input_text", "text" => "Yes"})
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :transcript_delta,
+                        payload: %{speaker: :user, segment_id: caller}
+                      }}
+
+      assert is_binary(caller)
+      {:reply, :ok, state} = Phonic.handle_call({:append, update("result", nil)}, nil, state)
+      state = deliver(context, state, started())
+      state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 240), "Mm-hmm."))
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :transcript_delta,
+                        payload: %{speaker: :assistant, overlaps_user_segment_id: ^caller}
+                      }}
+
+      state = deliver(context, state, %{"type" => "input_text", "text" => "if it's free"})
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :transcript_delta,
+                        payload: %{speaker: :user, segment_id: ^caller}
+                      }}
+
+      state =
+        if @finish_order == :during_caller, do: deliver(context, state, finished()), else: state
+
+      assert state.auto_response_pending
+      state = deliver(context, state, %{"type" => "user_finished_speaking"})
+      watch = state.response_watch
+      assert watch != nil and state.auto_response_pending
+
+      state =
+        if @finish_order == :after_caller, do: deliver(context, state, finished()), else: state
+
+      assert state.auto_response_pending and state.response_watch == watch
+      {:reply, {:ok, frames}, state} = Phonic.handle_call({:read, 960}, nil, state)
+      assert Enum.map_join(frames, & &1.data) == :binary.copy(<<1, 0>>, 240)
+      refute_receive {:phonic_command, %{"type" => "add_system_message"}}, 10
+      refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+      state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+      refute state.auto_response_pending
+      assert_receive {:phonic_command, %{"type" => "add_system_message"}}
+      assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+      refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    end
+  end
+
+  @tag :reply_coordination
+  test "native busy mode can ask an application clarification without manually repeating its result",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order 123"))
+    state = deliver(context, state, call("busy", "order 123"))
+    assert_receive {:parlora_event, %Event{type: :delegation_requested, payload: %{id: "busy"}}}
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 10
+    question = %{update("question", nil) | content: "Which order color did you want?"}
+    {:reply, :ok, state} = Phonic.handle_call({:append, question}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "add_system_message",
+                      "system_message" => "Which order color did you want?"
+                    }}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    assert state.busy_call_id == "busy"
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "busy")}, nil, state)
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 240), "Which color?"))
+    state = deliver(context, state, finished())
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "tool_call_output",
+                      "tool_call_id" => "busy",
+                      "output" => %{"result" => "Verified result"}
+                    }}
+
+    assert state.busy_call_id == nil and state.response_watch != nil
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+
+    state =
+      deliver(context, state, %{"type" => "tool_call_output_processed", "tool_call_id" => "busy"})
+
+    assert_receive {:parlora_event, %Event{type: :context_acknowledged, command_id: "result"}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<2, 0>>, 240), "Verified result."))
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    assert state.pending_contexts == []
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "native busy mode replaces an unsent obsolete result on its original call", context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order 123"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+
+    old = %{
+      update("old", "busy")
+      | task_id: "task",
+        task_revision: 1,
+        content: "Obsolete order 123"
+    }
+
+    new = %{old | id: "new", task_revision: 2, content: "Current verified order 124"}
+    {:reply, :ok, state} = Phonic.handle_call({:append, old}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, new}, nil, state)
+    assert_receive {:parlora_event, %Event{type: :context_rejected, command_id: "old"}}
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "tool_call_output",
+                      "tool_call_id" => "busy",
+                      "output" => %{"result" => "Current verified order 124"}
+                    }}
+
+    assert state.calls.records["busy"].outcome == %{result: "Current verified order 124"}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    {:reply, :ok, _} = Phonic.handle_call({:append, new}, nil, state)
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+  end
+
+  test "a busy caller correction does not wait for an ordinary reply before publishing its tool result",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "check Wednesday"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    state = deliver(context, state, %{"type" => "input_text", "text" => "Thursday instead"})
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    assert state.response_watch == nil and not state.auto_response_pending
+    assert state.busy_call_id == "busy"
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("corrected", "busy")}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "busy"}}
+    assert state.response_watch != nil
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "a pending native association waits for its scoped task result without completing early",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("alias", "same request"))
+    metadata = %{task_id: "tracked", task_revision: 1, provider_generation: 0}
+    outcome = %{status: :associated, task_status: :submitted, result: "Still pending"}
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:resolve_delegation, "alias", outcome, metadata}, nil, state)
+
+    assert state.calls.records["alias"].status == :pending
+    assert state.busy_task == metadata
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    fact = %{update("result", nil) | task_id: "tracked", task_revision: 2}
+    quiet = %{fact | id: "quiet", kind: :quiet}
+    {:reply, :ok, state} = Phonic.handle_call({:append, quiet}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "add_system_message"}}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    assert state.calls.records["alias"].status == :pending
+    {:reply, :ok, state} = Phonic.handle_call({:append, fact}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "tool_call_output",
+                      "tool_call_id" => "alias",
+                      "output" => %{"result" => "Verified result"}
+                    }}
+
+    assert state.busy_task == nil
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "native task binding preserves queued context IDs and rejects stale or foreign metadata",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("alias", "same request"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    fact = %{update("result", nil) | task_id: "tracked", task_revision: 2}
+    {:reply, :ok, state} = Phonic.handle_call({:append, fact}, nil, state)
+    metadata = %{task_id: "tracked", task_revision: 1, provider_generation: 0}
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :awaiting_provider,
+      result: "Verified result"
+    }
+
+    assert {:reply, {:error, %{code: :invalid_argument}}, _} =
+             Phonic.handle_call(
+               {:resolve_delegation, "alias", outcome, %{metadata | provider_generation: 9}},
+               nil,
+               state
+             )
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:resolve_delegation, "alias", outcome, metadata}, nil, state)
+
+    assert state.busy_task.task_revision == 2
+    stale = %{fact | id: "old", task_revision: 1}
+
+    assert {:reply, {:error, %{code: :invalid_argument}}, _} =
+             Phonic.handle_call({:append, stale}, nil, state)
+
+    foreign = %{fact | id: "foreign", task_id: "different", delegation_id: "alias"}
+
+    assert {:reply, {:error, %{code: :invalid_argument}}, _} =
+             Phonic.handle_call({:append, foreign}, nil, state)
+
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "alias"}}
+    assert_receive {:parlora_event, %Event{type: :context_submitted, command_id: "result"}}
+
+    _state =
+      deliver(context, state, %{"type" => "tool_call_output_processed", "tool_call_id" => "alias"})
+
+    assert_receive {:parlora_event, %Event{type: :context_acknowledged, command_id: "result"}}
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "a queued clarification completes its native call once and a later result uses fresh context",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    question = %{update("question", "busy") | content: "Which order?"}
+    {:reply, :ok, state} = Phonic.handle_call({:append, question}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "busy")}, nil, state)
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "tool_call_output",
+                      "tool_call_id" => "busy",
+                      "output" => %{"result" => "Which order?"}
+                    }}
+
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 240), "Which order?"))
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, _state} = Phonic.handle_call({:read, 960}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "add_system_message", "system_message" => "Verified result"}}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "native busy associations close without manual replies or repeated covered facts",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("first", "order"))
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "first")}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "first"}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 240), "The verified result."))
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    state = deliver(context, state, call("late", "same order"))
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :unconfirmed,
+      result: "Verified result"
+    }
+
+    {:reply, :ok, state} = Phonic.handle_call({:resolve_delegation, "late", outcome}, nil, state)
+    state = deliver(context, state, finished())
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "late", "output" => output}}
+
+    refute Map.has_key?(output, "result")
+    assert output["instruction"] =~ "Do not repeat"
+    assert state.response_watch != nil
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+    assert state.pending_contexts == []
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "native busy cancellation removes queued results and admits a later fresh call", context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("cancel", "order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "cancel")}, nil, state)
+
+    state =
+      deliver(context, state, %{"type" => "tool_call_interrupted", "tool_call_id" => "cancel"})
+
+    assert state.busy_call_id == nil
+    assert_receive {:parlora_event, %Event{type: :context_rejected, command_id: "result"}}
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    state = deliver(context, state, call("fresh", "order 124"))
+    assert state.busy_call_id == "fresh"
+  end
+
+  test "native busy deadlines fail explicitly without retrying or inventing a tool result",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order"))
+    token = state.tool_timers["busy"].token
+
+    assert {:noreply, %{status: :closed}} =
+             Phonic.handle_info({:phonic_tool_timeout, "busy", token}, state)
+
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+  end
+
+  test "a missing native result response expires without an extra manual reply", context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order"))
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "busy")}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output"}}
+    token = state.response_watch.token
+
+    assert {:noreply, %{status: :closed}} =
+             Phonic.handle_info({:phonic_response_timeout, token}, state)
+
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "provider expiry releases native ownership and later current facts use one fresh manual reply",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "busy")}, nil, state)
+
+    state =
+      deliver(context, state, %{
+        "type" => "tool_call_output_processed",
+        "tool_call_id" => "busy",
+        "timed_out" => true
+      })
+
+    assert state.busy_call_id == nil and state.response_watch != nil
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    _state = deliver(context, state, %{"type" => "assistant_chose_not_to_respond"})
+
+    assert_receive {:phonic_command,
+                    %{"type" => "add_system_message", "system_message" => "Verified result"}}
+
+    assert_receive {:phonic_command, %{"type" => "generate_reply"}}
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  test "replacing a native result still validates its JSON-encoded tool-output budget", context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("old", "busy")}, nil, state)
+    new = %{update("new", "busy") | content: String.duplicate("\"", 8_000)}
+
+    assert {:reply, {:error, %{code: :invalid_argument}}, next} =
+             Phonic.handle_call({:append, new}, nil, state)
+
+    assert next.pending_contexts == state.pending_contexts
+    assert next.calls == state.calls
+
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+  end
+
+  test "native busy mode rejects an unexpected simultaneous tool before delegating it", context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("first", "order"))
+    assert_receive {:parlora_event, %Event{type: :delegation_requested, payload: %{id: "first"}}}
+    state = deliver(context, state, call("second", "another order"))
+    assert state.status == :closed
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 10
+  end
+
   @tag :reply_coordination
   test "caller-time results stay private until the automatic acknowledgment ends, then reply once",
        context do
@@ -682,6 +1092,151 @@ defmodule Parlora.PhonicAdapterTest do
 
   defp ready(context, state \\ nil),
     do: deliver(context, state || context.state, %{"type" => "ready_to_start_conversation"})
+
+  test "native task aliases bind replacement and cancellation to their actual wire call",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("original", "order"))
+
+    state =
+      deliver(context, state, %{"type" => "tool_call_interrupted", "tool_call_id" => "original"})
+
+    state = deliver(context, state, call("alias", "same task"))
+    metadata = %{task_id: "tracked", task_revision: 1, provider_generation: 0}
+    outcome = %{status: :associated, task_status: :submitted, result: "Still pending"}
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:resolve_delegation, "alias", outcome, metadata}, nil, state)
+
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+
+    old = %{
+      update("old", "original")
+      | task_id: "tracked",
+        task_revision: 1,
+        content: "Obsolete order"
+    }
+
+    current = %{old | id: "current", task_revision: 2, content: "Current verified order"}
+    {:reply, :ok, state} = Phonic.handle_call({:append, old}, nil, state)
+    {:reply, :ok, state} = Phonic.handle_call({:append, current}, nil, state)
+    assert_receive {:parlora_event, %Event{type: :context_rejected, command_id: "old"}}
+
+    state =
+      deliver(context, state, %{"type" => "tool_call_interrupted", "tool_call_id" => "original"})
+
+    refute_receive {:parlora_event, %Event{type: :context_rejected, command_id: "current"}}, 10
+    assert [%{id: "current"}] = state.pending_contexts
+    _state = deliver(context, state, %{"type" => "user_finished_speaking"})
+
+    assert_receive {:phonic_command,
+                    %{
+                      "type" => "tool_call_output",
+                      "tool_call_id" => "alias",
+                      "output" => %{"result" => "Current verified order"}
+                    }}
+
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
+  for caption <- ["", "Let me check."] do
+    @handoff_caption caption
+    test "native result handoff after #{inspect(caption)} retires the abandoned generation",
+         context do
+      state = ready_busy(context)
+      state = deliver(context, state, call("first", "order"))
+      {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "first")}, nil, state)
+      assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "first"}}
+      state = deliver(context, state, started())
+      state = deliver(context, state, audio(:binary.copy(<<0, 0>>, 240), @handoff_caption))
+      state = deliver(context, state, call("alias", "same order"))
+
+      outcome = %{
+        status: :associated,
+        task_status: :completed,
+        result_delivery: :unconfirmed,
+        result: "Verified result"
+      }
+
+      {:reply, :ok, state} =
+        Phonic.handle_call({:resolve_delegation, "alias", outcome}, nil, state)
+
+      {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+
+      assert_receive {:phonic_command,
+                      %{
+                        "type" => "tool_call_output",
+                        "tool_call_id" => "alias",
+                        "output" => %{"result" => "Verified result"}
+                      }}
+
+      assert state.response_watch != nil
+      refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+
+      assert {:reply, :ok, _} =
+               Phonic.handle_call({:resolve_delegation, "alias", outcome}, nil, state)
+
+      refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    end
+  end
+
+  test "native handoff accepts unmarked text audio only within its uninterrupted output epoch",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("busy", "order"))
+    state = deliver(context, state, audio(:binary.copy(<<0, 0>>, 240), ""))
+    assert state.inbound.bytes == 0
+    bytes = :binary.copy(<<1, 0>>, 240)
+    state = deliver(context, state, audio(bytes, "Let me check."))
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{delta: "Let me check."}}}
+
+    assert {:reply, {:ok, frames}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    assert Enum.map_join(frames, & &1.data) == bytes
+    state = deliver(context, state, finished())
+    {:reply, :ok, state} = Phonic.handle_call({:append, update("result", "busy")}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "busy"}}
+    state = deliver(context, state, audio(bytes, "Verified result"))
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{delta: "Verified result"}}}
+
+    {:reply, {:ok, _}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    state = deliver(context, state, finished())
+
+    state =
+      deliver(context, state, %{"type" => "tool_call_interrupted", "tool_call_id" => "busy"})
+
+    state = deliver(context, state, call("new", "another order"))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    state = deliver(context, state, audio(bytes, "Obsolete trailing speech"))
+    assert state.inbound.bytes == 0
+
+    refute_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{delta: "Obsolete trailing speech"}}},
+                   10
+
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(bytes, "Fresh boundary"))
+    assert state.inbound.bytes > 0
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{delta: "Fresh boundary"}}}
+  end
+
+  defp ready_busy(context) do
+    {:ok, config} =
+      Protocol.start(
+        [api_key: "private-test", wait_for_response: true],
+        context.state.init.audio_format
+      )
+
+    ready(context, %{context.state | config: config, native_busy?: true})
+  end
 
   defp started, do: %{"type" => "assistant_started_speaking"}
   defp finished, do: %{"type" => "assistant_finished_speaking"}

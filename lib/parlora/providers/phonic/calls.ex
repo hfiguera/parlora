@@ -64,6 +64,15 @@ defmodule Parlora.Providers.Phonic.Calls do
   def cancel(calls, id), do: transition(calls, id, :cancelled)
   def expire(calls, id), do: transition(calls, id, :expired)
 
+  # A queued result may be replaced before the socket has completed its call.
+  def stage_output(calls, id, outcome),
+    do: put_in(calls.records[id], %{calls.records[id] | status: :completed, outcome: outcome})
+
+  def sent_output(calls, id, output) do
+    record = calls.records[id]
+    put_in(calls.records[id], %{record | status: :completed, outcome: record.outcome || output})
+  end
+
   defp transition(calls, id, status) do
     case calls.records[id] do
       %{status: current} = record when current in [:pending, :completed] ->

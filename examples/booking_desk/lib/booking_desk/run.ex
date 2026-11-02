@@ -27,7 +27,10 @@ defmodule BookingDesk.Run do
           {ReplayChannel,
            owner: self(), audio_observer: observer, recorder: recorder, ambience: ambience}
 
-    {:ok, session} = BookingDesk.start(channel)
+    provider_options =
+      BookingDesk.PhonicSettings.options(Keyword.get(opts, :phonic_native_conversation, false))
+
+    {:ok, session} = BookingDesk.start(channel, provider_options: provider_options)
     {:ok, readback} = BookingDesk.Readback.start_link()
     Process.send_after(self(), :deadline, 210_000)
 
@@ -43,6 +46,7 @@ defmodule BookingDesk.Run do
       channel: nil,
       clips: clips,
       mode: mode,
+      provider_options: Map.new(provider_options),
       any_doctor: Keyword.get(opts, :any_doctor, false),
       clinician_replies: MapSet.new(),
       ambience: ambience != nil,
@@ -626,6 +630,7 @@ defmodule BookingDesk.Run do
                 "caller excerpts and deterministic name/date validation; exact database match"
             },
             mode: s.mode,
+            provider_options: s.provider_options,
             scenario: "booking-correction",
             booking_flow: %{
               version: 4,

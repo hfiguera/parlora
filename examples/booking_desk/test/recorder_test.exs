@@ -21,12 +21,20 @@ defmodule BookingDesk.RecorderTest do
       generation: 0,
       type: :transcript_delta,
       observed_at_us: System.monotonic_time(:microsecond),
-      payload: %{speaker: :assistant, delta: "Can we text 0188?", segment_id: "reply-1"}
+      payload: %{
+        speaker: :assistant,
+        delta: "Mm-hmm.",
+        segment_id: "reply-1",
+        overlaps_user_segment_id: "caller-1"
+      }
     }
 
     Recorder.event(recorder, event)
     report = Recorder.finish(recorder, %{})
-    assert [%{data: %{segment_id: "reply-1"}}] = report.events
+
+    assert [%{data: %{segment_id: "reply-1", overlaps_user_segment_id: "caller-1"}}] =
+             report.events
+
     GenServer.stop(recorder)
   end
 

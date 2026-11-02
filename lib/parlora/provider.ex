@@ -50,6 +50,9 @@ defmodule Parlora.Provider do
   @callback resume_output(pid(), non_neg_integer()) :: :ok | {:error, Parlora.Error.t()}
   @doc "Resolve a provider function call that was associated, rejected, or superseded without a new result."
   @callback resolve_delegation(pid(), String.t(), map()) :: :ok | {:error, Parlora.Error.t()}
+  @doc "Resolve with coordinator-owned task identity, revision and provider generation; adapters may keep this metadata local."
+  @callback resolve_delegation(pid(), String.t(), map(), map() | nil) ::
+              :ok | {:error, Parlora.Error.t()}
   @doc "Provider receive-storage defaults, independent of the playback cushion. Explicit session limits override them."
   @callback audio_limits(Parlora.AudioFormat.t()) :: keyword()
   @doc "Replace an overloaded voice transport after the coordinator cleared its playback. Preserve backend execution and logical provider generation."
@@ -60,5 +63,6 @@ defmodule Parlora.Provider do
                       output_buffer_status: 1,
                       arm_output_ready: 3,
                       resume_output: 2,
-                      resolve_delegation: 3
+                      resolve_delegation: 3,
+                      resolve_delegation: 4
 end

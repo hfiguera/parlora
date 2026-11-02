@@ -2,6 +2,7 @@ defmodule Parlora.Providers.Phonic.Protocol do
   @moduledoc false
   alias Parlora.{AudioFormat, ContextUpdate, Error}
   alias Parlora.Provider.Capabilities
+  alias Parlora.Providers.Phonic.Options
   @model "phonic-1"
   @function "delegate_to_backend"
 
@@ -21,7 +22,8 @@ defmodule Parlora.Providers.Phonic.Protocol do
   end
 
   def start(options, format) do
-    with :ok <- validate_selection(options, format),
+    with :ok <- Options.validate(options),
+         :ok <- validate_selection(options, format),
          :ok <- validate_context(options),
          :ok <- validate_timeouts(options),
          :ok <- validate_flags(options) do
@@ -158,8 +160,15 @@ defmodule Parlora.Providers.Phonic.Protocol do
       stream_ahead_of_real_time: false,
       generate_welcome_message: false,
       no_input_end_conversation_sec: 600,
-      tools: [tool(timeout, Keyword.get(options, :early_delegation, false))]
+      tools: [
+        Map.merge(
+          tool(timeout, Keyword.get(options, :early_delegation, false)),
+          Options.tool(options)
+        )
+      ]
     }
+
+    config = Map.merge(config, Options.conversation(options))
 
     if Keyword.get(options, :zero_data_retention, false),
       do: Map.put(config, :data_retention_policy, %{zero_data_retention: true}),

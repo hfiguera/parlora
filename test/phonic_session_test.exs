@@ -1,6 +1,6 @@
 defmodule Parlora.PhonicSessionTest do
   use ExUnit.Case, async: true
-  alias Parlora.{AudioFormat, Event}
+  alias Parlora.{AudioFormat, ContextUpdate, Event}
   alias Parlora.TestSupport.{FakeBackend, MemoryChannel, OrderPolicy, PhonicPeer}
 
   defmodule AssociationPolicy do
@@ -39,6 +39,18 @@ defmodule Parlora.PhonicSessionTest do
     alias Parlora.Provider.WebSocketConnection
     alias Parlora.Providers.Phonic
 
+    defoverridable start_link: 2
+
+    def start_link(init, options) do
+      with {:ok, config} <-
+             Parlora.Providers.Phonic.Protocol.start(
+               Keyword.delete(options, :port),
+               init.audio_format
+             ) do
+        GenServer.start_link(__MODULE__, {init, options, config})
+      end
+    end
+
     @impl true
     def init({init, options, config}) do
       {:ok, state, continue} = Phonic.init({init, options, config})
@@ -64,6 +76,8 @@ defmodule Parlora.PhonicSessionTest do
     @impl true
     defdelegate resolve_delegation(pid, id, outcome), to: Phonic
     @impl true
+    defdelegate resolve_delegation(pid, id, outcome, metadata), to: Phonic
+    @impl true
     defdelegate audio_limits(format), to: Phonic
   end
 
@@ -75,11 +89,15 @@ defmodule Parlora.PhonicSessionTest do
     %{port: port}
   end
 
-  for {codec, format} <- [pcm: %AudioFormat{}, pcmu: AudioFormat.pcmu()] do
+  for {codec, format} <- [pcm: %AudioFormat{}, pcmu: AudioFormat.pcmu()],
+      native_busy? <- [false, true] do
     @format format
-    test "#{codec} session corrects work, rejects stale results and correlates provider processing",
+    @native_busy native_busy?
+    test "#{codec} session with native busy=#{native_busy?} corrects work and rejects stale results",
          context do
-      {session, server, _channel, backend} = boot(context.port, @format)
+      {session, server, _channel, backend} =
+        boot(context.port, @format, OrderPolicy, @native_busy)
+
       emit(server, %{"type" => "input_text", "text" => "order 123"})
 
       emit(server, %{
@@ -107,6 +125,10 @@ defmodule Parlora.PhonicSessionTest do
                       }}
 
       refute_receive {:phonic_command, %{"output" => %{"result" => "Obsolete order 123"}}}, 20
+
+      if @native_busy,
+        do: refute_receive({:phonic_command, %{"type" => "generate_reply"}}, 20),
+        else: assert_receive({:phonic_command, %{"type" => "generate_reply"}})
 
       emit(server, %{
         "type" => "tool_call_output_processed",
@@ -181,7 +203,59 @@ defmodule Parlora.PhonicSessionTest do
     assert map_size(Parlora.status(session).jobs) == 1
   end
 
-  defp boot(port, format, policy \\ OrderPolicy) do
+  test "a native association to existing work remains busy until that task's verified result",
+       context do
+    {session, server, _channel, backend} =
+      boot(context.port, %AudioFormat{}, AssociationPolicy, true)
+
+    emit(server, %{"type" => "input_text", "text" => "order 124"})
+    emit(server, call("original"))
+    assert_receive {:submitted, request}
+
+    clarification = %ContextUpdate{
+      id: "clarification",
+      kind: :speakable,
+      provider_generation: 0,
+      delegation_id: "original",
+      task_id: request.task_id,
+      task_revision: request.task_revision,
+      content: "Which order color?"
+    }
+
+    assert :ok = Parlora.append_context(session, clarification)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    emit(server, %{"type" => "assistant_chose_not_to_respond"})
+    emit(server, call("alias"))
+    assert_receive {:parlora_event, %Event{type: :delegation_associated, payload: %{id: "alias"}}}
+
+    refute_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "alias"}},
+                   20
+
+    refute_receive {:submitted, _duplicate}, 20
+    :ok = FakeBackend.complete(backend, request, "Current verified order 124")
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "alias", "output" => output}}
+
+    assert output == %{"result" => "Current verified order 124"}
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 20
+    emit(server, %{"type" => "tool_call_output_processed", "tool_call_id" => "alias"})
+    request_id = request.id
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :result_delivery,
+                      request_id: ^request_id,
+                      payload: %{stage: :accepted}
+                    }}
+
+    assert map_size(Parlora.status(session).jobs) == 1
+  end
+
+  defp boot(port, format, policy \\ OrderPolicy, native_busy? \\ false) do
     caps = %Parlora.Channel.Capabilities{
       input_formats: [format],
       output_formats: [format],
@@ -191,7 +265,15 @@ defmodule Parlora.PhonicSessionTest do
     {:ok, session} =
       Parlora.start_session(
         audio_format: format,
-        provider: {LocalProvider, api_key: "private-test", port: port},
+        provider:
+          {LocalProvider,
+           api_key: "private-test",
+           port: port,
+           enable_assistant_backchannel: true,
+           assistant_backchannel_aggressiveness: 0.3,
+           require_speech_before_tool_call: true,
+           wait_for_speech_before_tool_call: false,
+           wait_for_response: native_busy?},
         channel: {MemoryChannel, observer: self(), capabilities: caps},
         backend: {FakeBackend, observer: self()},
         context_policy: {policy, []},
@@ -206,7 +288,16 @@ defmodule Parlora.PhonicSessionTest do
                       "type" => "config",
                       "model" => "phonic-1",
                       "input_format" => "pcm_24000",
-                      "tools" => [%{"allow_tool_chaining" => false, "wait_for_response" => false}]
+                      "enable_assistant_backchannel" => true,
+                      "assistant_backchannel_aggressiveness" => 0.3,
+                      "tools" => [
+                        %{
+                          "allow_tool_chaining" => false,
+                          "wait_for_response" => ^native_busy?,
+                          "require_speech_before_tool_call" => true,
+                          "wait_for_speech_before_tool_call" => false
+                        }
+                      ]
                     }}
 
     emit(server, %{"type" => "ready_to_start_conversation"})
