@@ -117,7 +117,14 @@ defmodule BookingDesk.Identity.Extractor do
          } = state
        )
        when is_binary(session) and is_integer(generation) and is_integer(cursor) do
-    source = Map.take(state, [:dialogue, :latest_user])
+    source =
+      Map.take(state, [
+        :dialogue,
+        :latest_user,
+        :retained_identity,
+        :retained_registration,
+        :retained_phone_evidence
+      ])
 
     if is_list(source[:dialogue]) and is_binary(source[:latest_user]) and
          String.trim(source.latest_user) != "" and byte_size(JSON.encode!(source)) <= 8_000 do
@@ -165,6 +172,7 @@ defmodule BookingDesk.Identity.Extractor do
             case result do
               {:ok, _} -> {:ok, :accepted}
               {:incomplete, _} -> {:incomplete, :needs_clarification}
+              {:incomplete, _, _} -> {:incomplete, :needs_clarification}
               {:error, :invalid_extraction} -> {:error, :invalid_extraction}
               _ -> {:error, :unavailable}
             end

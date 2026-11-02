@@ -20,8 +20,26 @@ defmodule BookingDesk do
              BookingDesk.CallGuards,
              {BookingDesk.CallGuard, guard_opts}
            ) do
-      observer = BookingDesk.CallGuard.observer(guard)
+      result =
+        start_session(guard, {channel_module, channel_opts}, provider_adapter, provider, opts)
 
+      case result do
+        {:ok, session} -> BookingDesk.CallGuard.bind(guard, session)
+        _ -> DynamicSupervisor.terminate_child(BookingDesk.CallGuards, guard)
+      end
+
+      result
+    end
+  end
+
+  defp start_session(guard, {channel_module, channel_opts}, provider_adapter, provider, opts) do
+    observer = BookingDesk.CallGuard.observer(guard)
+
+    with {:ok, conversation} <-
+           DynamicSupervisor.start_child(
+             BookingDesk.Conversations,
+             {BookingDesk.Conversation, []}
+           ) do
       result =
         Parlora.start_session(
           channel: {channel_module, Keyword.put(channel_opts, :audio_observer, observer)},
@@ -32,7 +50,11 @@ defmodule BookingDesk do
              agent_options: [jido: BookingDesk.Jido],
              result: &map_result/1},
           context_policy:
-            {BookingDesk.Policy, Keyword.put(Keyword.get(opts, :policy, []), :call_guard, guard)},
+            {BookingDesk.Policy,
+             Keyword.merge(Keyword.get(opts, :policy, []),
+               call_guard: guard,
+               conversation: conversation
+             )},
           context: %{},
           instructions: instructions(provider),
           event_sink: guard,
@@ -40,8 +62,8 @@ defmodule BookingDesk do
         )
 
       case result do
-        {:ok, session} -> BookingDesk.CallGuard.bind(guard, session)
-        _ -> DynamicSupervisor.terminate_child(BookingDesk.CallGuards, guard)
+        {:ok, session} -> BookingDesk.Conversation.bind(conversation, session)
+        _ -> DynamicSupervisor.terminate_child(BookingDesk.Conversations, conversation)
       end
 
       result

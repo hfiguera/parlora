@@ -55,7 +55,7 @@ defmodule BookingDesk.JudgmentTest do
     answers = put_in(answers["time"], answer("10:15"))
     assert {:ok, %{"time" => "10:15"}} = Judgment.decode(answers)
 
-    assert {:error, :uncertain} =
+    assert {:incomplete, %{"intent" => "unknown", "date" => "2026-11-05"}, ["intent"]} =
              Judgment.decode(put_in(answers["intent"], answer("confirm", 0.84)))
 
     assert {:incomplete, _, ["time"]} =
@@ -66,6 +66,33 @@ defmodule BookingDesk.JudgmentTest do
              )
 
     assert {:error, :uncertain} = Judgment.decode(%{})
+  end
+
+  test "uncertain intent preserves independently confident preferences without granting an action" do
+    fields = %{
+      "date" => answer("2026-11-05"),
+      "clinician" => answer("lee"),
+      "time" => answer("10:15")
+    }
+
+    for intent <- [answer("replace_search", 0.84), answer("confirm", 0.84), answer("unclear")] do
+      assert {:incomplete, judgment, ["intent"]} =
+               Judgment.decode(Map.put(fields, "intent", intent))
+
+      assert judgment == %{
+               "intent" => "unknown",
+               "date" => "2026-11-05",
+               "clinician" => "lee",
+               "time" => "10:15"
+             }
+    end
+
+    assert {:incomplete, %{"clinician" => "unknown", "time" => "unknown"}, ["intent"]} =
+             fields
+             |> Map.put("clinician", answer("patel", 0.84))
+             |> Map.put("time", answer("14:00", 0.84))
+             |> Map.put("intent", answer("replace_search", 0.84))
+             |> Judgment.decode()
   end
 
   test "period selections require a unique current offered time and preserve doctor ambiguity" do
@@ -80,6 +107,9 @@ defmodule BookingDesk.JudgmentTest do
     afternoon = %{morning | time: "14:00"}
     state = %{verified_offers: [morning, afternoon]}
     assert {:ok, %{"time" => "10:15"}} = Judgment.decode(answers, state)
+
+    assert {:incomplete, %{"intent" => "unknown", "time" => "10:15"}, ["intent"]} =
+             Judgment.decode(Map.put(answers, "intent", answer("choose_slot", 0.84)), state)
 
     assert {:ok, %{"time" => "14:00"}} =
              Judgment.decode(Map.put(answers, "time", answer("afternoon")), state)

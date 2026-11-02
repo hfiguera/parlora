@@ -230,11 +230,15 @@ defmodule BookingDesk.Recorder do
   defp selected(%{type: type, payload: p})
        when type in [:request_completed, :request_failed, :stale_result], do: safe_result(p)
 
-  defp selected(%{type: :failed, payload: %{error: %Parlora.Error{} = error}}) do
+  defp selected(%{type: type, payload: %{error: %Parlora.Error{} = error}})
+       when type in [:failed, :policy_rejected, :policy_failed, :context_rejected] do
     data = %{error_code: error.code}
 
-    case error.details do
-      %{reason: reason} when is_atom(reason) and not is_nil(reason) ->
+    case {error.message, error.details} do
+      {"Clarification requires a question and an optional 1–128 byte key", _} ->
+        Map.put(data, :error_reason, :invalid_clarification)
+
+      {_, %{reason: reason}} when is_atom(reason) and not is_nil(reason) ->
         Map.put(data, :error_reason, reason)
 
       _ ->

@@ -1,38 +1,69 @@
 defmodule BookingDesk.ReminderPolicy do
+  alias BookingDesk.Conversation
   alias BookingDesk.Identity.Extractor
 
   @moduledoc "Read-only semantic reminder decisions, bound to a verified booking and exact destination."
 
   def current(snapshot) do
-    snapshot.tasks
-    |> Map.values()
-    |> Enum.filter(&(&1.input.operation == "confirm" and &1.status == :completed))
-    |> Enum.sort_by(& &1.input.cursor, :desc)
-    |> Enum.find_value(&reminder_for_task(&1, snapshot))
-  end
-
-  defp reminder_for_task(%{request_ids: [id | _]} = task, snapshot) do
-    case BookingDesk.Store.reminder(id, task.input.lookup_request, snapshot.session_id) do
+    case state(snapshot) do
       %{status: status} when status in ["scheduled", "declined"] -> nil
       state -> state
     end
   end
 
-  defp reminder_for_task(_, _), do: nil
+  def context(snapshot) do
+    case state(snapshot) do
+      nil -> nil
+      state -> Map.drop(state, [:original_phone, :patient])
+    end
+  end
+
+  def state(snapshot) do
+    verified_context(snapshot, &BookingDesk.Store.reminder/3)
+  end
+
+  def appointment(snapshot), do: verified_context(snapshot, &BookingDesk.Store.appointment/3)
+
+  defp verified_context(snapshot, read) do
+    identity = BookingDesk.Policy.identity(snapshot)
+
+    snapshot.tasks
+    |> Map.values()
+    |> Enum.filter(&(&1.input.operation == "confirm" and &1.status == :completed))
+    |> Enum.sort_by(& &1.input.cursor, :desc)
+    |> Enum.find_value(fn task ->
+      if identity && Map.get(task.input, :lookup_request) == identity.lookup_request,
+        do: read_result(task, snapshot, read)
+    end)
+  end
+
+  defp read_result(%{request_ids: [id | _]} = task, snapshot, read) do
+    read.(id, task.input.lookup_request, snapshot.session_id)
+  end
+
+  defp read_result(_, _, _), do: nil
+
+  def interpret(_snapshot, %{status: status}, _opts) when status in ["scheduled", "declined"],
+    do: :associate
 
   def interpret(snapshot, current, opts) do
-    dialogue = BookingDesk.Dialogue.build(snapshot.transcripts)
+    turns = BookingDesk.Dialogue.build(snapshot.transcripts, with_cursor: true)
+    dialogue = Enum.map(turns, &Map.take(&1, [:speaker, :text]))
 
-    latest_user =
-      dialogue |> Enum.filter(&(&1.speaker == :user)) |> List.last() |> Map.fetch!(:text)
+    caller = turns |> Enum.filter(&(&1.speaker == :user)) |> List.last()
+    latest_user = caller.text
 
     state = %{
       dialogue: dialogue,
       latest_user: latest_user,
       reminder: Map.drop(current, [:original_phone, :patient]),
+      conversation: Conversation.decision_context(snapshot),
+      retained_phone_evidence:
+        phone_evidence(Conversation.context(snapshot), caller.first_cursor),
       interpretation_binding: %{
         session_id: snapshot.session_id,
         provider_generation: snapshot.provider_generation,
+        caller_turn: caller.first_cursor,
         caller_cursor:
           snapshot.transcripts
           |> Enum.filter(&(&1.speaker == :user))
@@ -44,52 +75,135 @@ defmodule BookingDesk.ReminderPolicy do
     classify = Keyword.get(opts, :reminder_judge, &classify/1)
 
     case classify.(state) do
-      {:ok, "number"} ->
-        extract_number(state, opts)
+      {:ok, "number"} when current.status in ["need_number", "verify_existing", "verify_new"] ->
+        extract_number(snapshot, state, opts)
 
       {:ok, "opt_in"} when current.status == "offered" ->
-        accept_offer(dialogue)
+        accept_offer(dialogue, latest_user)
 
       {:ok, "decline"} ->
         {:input, %{operation: "reminder_decline"}}
 
       {:ok, "change"} ->
+        Conversation.remember(snapshot, opts, phone: :clear)
         {:input, %{operation: "reminder_change"}}
 
       {:ok, "confirm_number"} when current.status in ["verify_existing", "verify_new"] ->
-        confirm_destination(current, dialogue)
+        confirm_number(current, dialogue, state.conversation, latest_user)
 
       {:ok, "none"} ->
         :associate
 
       _ ->
-        {:clarify,
-         "I couldn't confirm your reminder preference. Would you like a text reminder? Your appointment remains booked."}
+        retain_number(snapshot, current, state, opts)
     end
   end
 
-  defp accept_offer(dialogue) do
+  defp accept_offer(dialogue, text) do
     question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
 
-    if question && BookingDesk.Run.reminder_offer?(question.text),
+    if question && BookingDesk.Run.reminder_offer?(question.text) && affirmative?(text),
       do: {:input, %{operation: "reminder_opt_in"}},
       else: :associate
   end
 
-  defp extract_number(state, opts) do
+  defp number(snapshot, state, opts) do
     extract =
       Keyword.get(opts, :phone_extractor, fn state ->
         Extractor.check(state, BookingDesk.PhoneExtractor)
       end)
 
-    case extract.(state) do
+    result = extract.(state)
+
+    evidence =
+      case result do
+        {:incomplete, missing, fields} ->
+          {:incomplete, missing, Map.put(fields, :turn, state.interpretation_binding.caller_turn)}
+
+        {:ok, fields} ->
+          {:ok, Map.put(fields, :turn, state.interpretation_binding.caller_turn)}
+
+        other ->
+          other
+      end
+
+    Conversation.remember(snapshot, opts, phone: evidence)
+    result
+  end
+
+  defp extract_number(snapshot, state, opts) do
+    result = number(snapshot, state, opts)
+
+    result =
+      if match?({:incomplete, _}, result) and state.conversation.phone != nil,
+        do: {:ok, %{phone: state.conversation.phone}},
+        else: result
+
+    case result do
       {:ok, %{phone: phone}} -> {:input, %{operation: "reminder_number", phone: phone}}
       :pending -> :wait
+      {:incomplete, _, _} -> {:clarify, partial_number_question()}
       _ -> {:clarify, "What cell number should we use? Please include all ten digits."}
     end
   end
 
-  defp confirm_destination(current, dialogue) do
+  defp retain_number(snapshot, current, state, opts) do
+    case number(snapshot, state, opts) do
+      :pending -> :wait
+      {:ok, %{phone: phone}} -> {:clarify, uncertainty_question(current, phone)}
+      {:incomplete, _, _} -> {:clarify, partial_number_question()}
+      _ -> {:clarify, uncertainty_question(current, state.conversation.phone)}
+    end
+  end
+
+  defp phone_evidence(%{phone_turn: turn} = context, turn), do: context.phone_previous_evidence
+  defp phone_evidence(%{phone: nil} = context, _), do: context.phone_evidence
+
+  defp phone_evidence(%{phone: phone}, _), do: [phone]
+
+  defp uncertainty_question(%{status: "offered"}, _),
+    do:
+      "Would you like a text reminder for this appointment? Any number you supplied still needs a separate readback and confirmation."
+
+  defp uncertainty_question(current, phone)
+       when is_binary(phone) and phone != current.destination,
+       do: pending_number_question(phone)
+
+  defp uncertainty_question(%{status: status, destination: destination}, _)
+       when status in ["verify_existing", "verify_new"] do
+    expected =
+      if status == "verify_existing", do: String.slice(destination, -4, 4), else: destination
+
+    "Can we send the reminder to #{BookingDesk.Reminders.spoken(expected)}? Your appointment remains booked."
+  end
+
+  defp uncertainty_question(%{status: "need_number"}, _),
+    do:
+      "What cell number should we use? Please include all ten digits. Your appointment remains booked."
+
+  defp uncertainty_question(_, _),
+    do:
+      "I couldn't confirm your reminder preference. Would you like a text reminder? Your appointment remains booked."
+
+  defp pending_number_question(_phone),
+    do:
+      "I've kept the cell number you supplied. Would you like to use that number for the reminder? It still needs a complete readback and confirmation. Your appointment remains booked."
+
+  defp partial_number_question,
+    do:
+      "I've kept the digits you supplied. Please finish the cell number. Nothing will be sent until you confirm its complete readback."
+
+  defp confirm_number(_, _, %{phone_evidence: [_ | _]}, _),
+    do: {:clarify, partial_number_question()}
+
+  defp confirm_number(current, dialogue, conversation, text),
+    do: confirm_destination(current, dialogue, conversation.phone, text)
+
+  defp confirm_destination(current, _, phone, _)
+       when is_binary(phone) and phone != current.destination,
+       do: {:clarify, pending_number_question(phone)}
+
+  defp confirm_destination(current, dialogue, _, text) do
     question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
 
     expected =
@@ -97,7 +211,7 @@ defmodule BookingDesk.ReminderPolicy do
         do: String.slice(current.destination, -4, 4),
         else: current.destination
 
-    if question && BookingDesk.Reminders.readback?(question.text, expected),
+    if question && BookingDesk.Reminders.readback?(question.text, expected) && affirmative?(text),
       do:
         {:input,
          %{
@@ -106,6 +220,16 @@ defmodule BookingDesk.ReminderPolicy do
            readback_verified: true
          }},
       else: {:clarify, "Can we send the reminder to #{BookingDesk.Reminders.spoken(expected)}?"}
+  end
+
+  defp affirmative?(text) do
+    text = String.replace(text, "’", "'")
+
+    Regex.match?(
+      ~r/\b(yes|yep|yeah|sure|okay|ok|correct|go ahead|sounds good|please (send|text|use)|i want|i would like)\b/i,
+      text
+    ) and
+      not Regex.match?(~r/\b(no|not|don't|unless|if|maybe|perhaps|wait|instead)\b/i, text)
   end
 
   def classify(state), do: BookingDesk.Judgment.classify(state, evaluator: &evaluate/1)
@@ -121,6 +245,10 @@ defmodule BookingDesk.ReminderPolicy do
           confirm_number means explicit unconditional approval that the exact number just read back is their cell and can receive the reminder.
           A yes to the reminder offer is opt_in only, not confirmation of an unasked phone question.
           change means the number is wrong or needs changing without supplying a new one. number supplies a new complete phone number.
+          conversation.phone is a caller-grounded but UNCONFIRMED pending number from an earlier reply. An explicit
+          selection of that retained number is number, even without repeating the digits. It is never opt_in or
+          confirm_number. A new readback and fresh confirmation are still required. Preserve the verified reminder
+          stage during uncertainty; never restart an earlier consent question or a completed booking.
           decline means they do not want a text reminder. Conditional/partial/uncertain replies are unclear. Progress/social/goodbye is none.
           """,
           %{
