@@ -744,6 +744,171 @@ defmodule BookingDesk.BookingSessionTest do
     end
   end
 
+  defp reminder_flow_judgment(state, owner) do
+    intent =
+      case state.latest_user do
+        "November fifth with Dr. Lee" ->
+          "availability"
+
+        "Ten fifteen" ->
+          "choose_slot"
+
+        "Yes, please book it" ->
+          "confirm"
+
+        "Yeah, that'd be helpful" ->
+          flunk(
+            "a simple reply to the current exact reminder offer must not use booking classification"
+          )
+
+        "That sounds useful, I guess" ->
+          "reminder"
+
+        "Is it booked yet?" ->
+          assert state.conversation.reminder_route == :suspended
+          send(owner, :reminder_suspended)
+          "progress"
+      end
+
+    {:ok, %{"intent" => intent, "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
+  end
+
+  defp start_reminder_flow(policy_opts \\ []) do
+    owner = self()
+
+    judge = &reminder_flow_judgment(&1, owner)
+
+    {session, provider, backend} =
+      start_session(
+        judge,
+        Keyword.merge(
+          [
+            reminder_judge: fn state ->
+              case state.latest_user do
+                "Is it booked yet?" -> {:ok, "appointment"}
+                "Yeah, that'd be helpful" -> {:ok, "opt_in"}
+                "Yep, that's my cell" -> flunk("exact number consent needs no model")
+              end
+            end
+          ],
+          policy_opts
+        )
+      )
+
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, _availability}, 2_000
+    assistant(provider, "Dr. Lee has 10:15 AM. Which time works?", 2_000)
+    caller(provider, "Ten fifteen", 3_000, "choose")
+    assert_receive {:submitted, proposal}, 2_000
+    Provider.complete(backend, proposal)
+    assert_receive {:context, proposal_readback}, 2_000
+    assistant(provider, proposal_readback.content, 5_000)
+    caller(provider, "Yes, please book it", 6_000, "book")
+    assert_receive {:submitted, booking}, 4_000
+    Provider.complete(backend, booking)
+    assert_receive {:context, booked}, 2_000
+    assistant(provider, booked.content, 8_000)
+    caller(provider, "Is it booked yet?", 10_000, "progress")
+    assert_receive :reminder_suspended, 4_000
+    {session, provider, backend}
+  end
+
+  test "resuming with opt-in asks the destination once and still waits for separate number consent" do
+    {session, provider, backend} = start_reminder_flow()
+
+    assistant(provider, "Would you like a text reminder 24 hours before the appointment?", 12_000)
+    caller(provider, "Yeah, that'd be helpful", 14_000, "opt-in")
+    assert_receive {:submitted, optin}, 4_000
+    assert optin.input.operation == "reminder_opt_in"
+
+    refute_receive {:context,
+                    %{content: "Would you like a text reminder for this appointment?" <> _}},
+                   100
+
+    assert BookingDesk.Store.reminder_jobs() == []
+    Provider.complete(backend, optin)
+    assert_receive {:context, destination}, 2_000
+    assert destination.content =~ "zero one eight eight"
+
+    for text <- ["Can we send the reminder to your cell ending in zero one ", "eight eight?"] do
+      Provider.inject(provider, :transcript_delta, %{
+        speaker: :assistant,
+        delta: text,
+        segment_id: "destination-reply",
+        start_ms: nil,
+        end_ms: nil
+      })
+    end
+
+    snapshot = Parlora.snapshot(session)
+
+    assert BookingDesk.ReminderReadback.verified?(
+             snapshot,
+             BookingDesk.ReminderPolicy.state(snapshot)
+           )
+
+    refute_receive {:context, _}, 100
+    refute_receive {:submitted, _}, 100
+    assert BookingDesk.Store.reminder_jobs() == []
+    caller(provider, "Yep, that's my cell", 18_000, "number-consent")
+    assert_receive {:submitted, confirmation}, 4_000
+    assert confirmation.input.operation == "reminder_confirm"
+    assert confirmation.input.destination == "+12025550188"
+    assert confirmation.input.reminder_revision == optin.id
+    Provider.complete(backend, confirmation)
+    assert_receive {:context, %{content: "Your text reminder is scheduled" <> _}}, 2_000
+    assert [[_, "p_1002", "+12025550188", _, "simulated", _]] = BookingDesk.Store.reminder_jobs()
+    refute_receive {:submitted, _}, 100
+  end
+
+  test "a reminder clarification waits for fresh caller input instead of rejudging the same reply" do
+    count = start_supervised!({Agent, fn -> 0 end})
+
+    {session, provider, _backend} =
+      start_reminder_flow(
+        reminder_judge: fn state ->
+          case state.latest_user do
+            "Is it booked yet?" ->
+              {:ok, "appointment"}
+
+            "Yeah, that'd be helpful" ->
+              {:ok, "opt_in"}
+
+            "That sounds useful, I guess" ->
+              if Agent.get_and_update(count, &{&1, &1 + 1}) == 0,
+                do: {:error, :uncertain},
+                else: {:ok, "opt_in"}
+          end
+        end,
+        phone_extractor: fn _ -> {:incomplete, [:phone]} end
+      )
+
+    assistant(provider, "Would you like a text reminder?", 12_000)
+    caller(provider, "That sounds useful, I guess", 14_000, "uncertain-opt-in")
+    assert_receive {:context, question}, 4_000
+    assert question.content =~ "Would you like a text reminder"
+    snapshot = Parlora.snapshot(session)
+    task = snapshot.tasks |> Map.values() |> Enum.find(&(&1.input.operation == "confirm"))
+    assert task.clarification.input.reminder_clarification.caller_cursor > task.input.cursor
+    assert Agent.get(count, & &1) == 1
+
+    assistant(provider, question.content, 16_000)
+    Provider.inject(provider, :delegation_requested, %{id: "duplicate-opt-in", target: :client})
+    refute_receive {:submitted, _}, 300
+    refute_receive {:context, _}, 100
+    assert Agent.get(count, & &1) == 1
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    caller(provider, "Yeah, that'd be helpful", 18_000, "fresh-opt-in")
+    assert_receive {:submitted, optin}, 4_000
+    assert optin.input.operation == "reminder_opt_in"
+    assert optin.input.cursor > task.clarification.input.reminder_clarification.caller_cursor
+    refute_receive {:submitted, _}, 100
+    assert BookingDesk.Store.reminder_jobs() == []
+  end
+
   defp start_session(judge, policy_opts \\ [], registered? \\ true) do
     {:ok, memory} = start_supervised(BookingDesk.Conversation)
     policy = Keyword.merge([conversation: memory, judge: judge, coalesce_ms: 0], policy_opts)

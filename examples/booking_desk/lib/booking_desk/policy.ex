@@ -94,6 +94,9 @@ defmodule BookingDesk.Policy do
       registration_ready?(latest, cursor, snapshot) ->
         resume_search(snapshot, pending, latest, cursor)
 
+      awaiting_reminder_reply?(snapshot, latest, cursor) ->
+        {:ok, [wait_target(pending, latest)]}
+
       protected_work?(latest, cursor) ->
         {:ok, associate(pending, latest)}
 
@@ -318,18 +321,9 @@ defmodule BookingDesk.Policy do
         snapshot
       end
 
-    if match?({:ok, %{"intent" => "reminder"}}, result),
-      do: resume_reminder(snapshot, state, opts),
+    if match?({:ok, %{"intent" => "reminder"}}, result) and state.proposal != nil,
+      do: Conversation.remember(snapshot, opts, declined_proposal: state.proposal.id),
       else: snapshot
-  end
-
-  defp resume_reminder(snapshot, state, opts) do
-    updates =
-      if state.proposal,
-        do: [reminder_route: :active, declined_proposal: state.proposal.id],
-        else: [reminder_route: :active]
-
-    Conversation.remember(snapshot, opts, updates)
   end
 
   defp extract_identity(snapshot, state, result, opts) do
@@ -434,7 +428,7 @@ defmodule BookingDesk.Policy do
      ]}
   end
 
-  defp reminder_decision(snapshot, reminder, pending, latest, cursor, opts) do
+  defp reminder_decision(snapshot, reminder, pending, latest, cursor, opts, resume? \\ false) do
     # Terminal reminder state cannot create another write from a social reply.
     if reminder.status in ["scheduled", "declined"] do
       {:ok, associate(pending, latest)}
@@ -443,7 +437,7 @@ defmodule BookingDesk.Policy do
       key = "reminder:#{cursor}"
 
       if match?(%{context_wait: %{expired?: true, recheck_key: ^key}}, latest) do
-        apply_reminder(snapshot, reminder, pending, latest, cursor, opts)
+        apply_reminder(snapshot, reminder, pending, latest, cursor, opts, resume?)
       else
         {:ok,
          [
@@ -459,8 +453,22 @@ defmodule BookingDesk.Policy do
     end
   end
 
-  defp apply_reminder(snapshot, reminder, pending, latest, cursor, opts) do
-    case BookingDesk.ReminderPolicy.interpret(snapshot, reminder, opts) do
+  defp apply_reminder(snapshot, reminder, pending, latest, cursor, opts, resume?) do
+    reply = BookingDesk.ReminderPolicy.interpret(snapshot, reminder, opts)
+
+    snapshot = activate_reminder(snapshot, reply, opts, resume?)
+
+    case reply do
+      reply when resume? and reply in [:associate, :appointment] ->
+        clarify_reminder(
+          snapshot,
+          reminder,
+          pending,
+          latest,
+          cursor,
+          BookingDesk.ReminderPolicy.question(reminder)
+        )
+
       :appointment ->
         snapshot = Conversation.remember(snapshot, opts, reminder_route: :suspended)
         interpret_request(snapshot, pending, latest, cursor, opts)
@@ -477,7 +485,7 @@ defmodule BookingDesk.Policy do
         {:ok, start(pending, latest, input)}
 
       {:clarify, message} ->
-        clarify(cursor, pending, latest, message)
+        clarify_reminder(snapshot, reminder, pending, latest, cursor, message)
 
       :associate ->
         {:ok, associate(pending, latest)}
@@ -495,6 +503,51 @@ defmodule BookingDesk.Policy do
          ]}
     end
   end
+
+  defp activate_reminder(snapshot, {kind, _} = reply, opts, false)
+       when kind in [:input, :clarify],
+       do: activate_reminder(snapshot, reply, opts, true)
+
+  defp activate_reminder(snapshot, reply, opts, true) when reply != :wait,
+    do: Conversation.remember(snapshot, opts, reminder_route: :active)
+
+  defp activate_reminder(snapshot, _, _, _), do: snapshot
+
+  defp clarify_reminder(snapshot, reminder, pending, latest, cursor, message) do
+    input = %{
+      reminder_clarification: %{
+        request_id: reminder.request_id,
+        provider_generation: snapshot.provider_generation,
+        task_revision: latest.revision,
+        caller_cursor: cursor
+      }
+    }
+
+    clarify(cursor, pending, latest, message, input)
+  end
+
+  defp awaiting_reminder_reply?(
+         snapshot,
+         %{
+           revision: revision,
+           clarification: %{
+             input: %{
+               reminder_clarification: %{
+                 provider_generation: generation,
+                 task_revision: revision,
+                 caller_cursor: cursor,
+                 request_id: request
+               }
+             }
+           }
+         },
+         cursor
+       ) do
+    generation == snapshot.provider_generation and
+      match?(%{request_id: ^request}, BookingDesk.ReminderPolicy.state(snapshot))
+  end
+
+  defp awaiting_reminder_reply?(_, _, _), do: false
 
   defp interpreted(
          snapshot,
@@ -598,11 +651,11 @@ defmodule BookingDesk.Policy do
       {:ok, associate(pending, latest)}
     else
       {snapshot, result} = search_reply(snapshot, latest, cursor, text, result, opts)
-      dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics)
+      dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics, opts)
     end
   end
 
-  defp dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics) do
+  defp dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics, opts) do
     case result do
       {:incomplete, judgment, missing} ->
         incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text)
@@ -614,7 +667,8 @@ defmodule BookingDesk.Policy do
           latest: latest,
           cursor: cursor,
           text: text,
-          demographics: demographics
+          demographics: demographics,
+          options: opts
         }
 
         decide_intent(intent, judgment, context)
@@ -717,11 +771,14 @@ defmodule BookingDesk.Policy do
         )
 
       reminder ->
-        clarify(
-          context.cursor,
+        reminder_decision(
+          context.snapshot,
+          reminder,
           context.pending,
           context.latest,
-          BookingDesk.ReminderPolicy.question(reminder)
+          context.cursor,
+          context.options,
+          true
         )
     end
   end
