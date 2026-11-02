@@ -17,7 +17,11 @@ defmodule BookingDesk.Judgment do
       nil ->
         started = System.monotonic_time(:microsecond)
         evaluator = Keyword.get(opts, :evaluator, &evaluate/1)
-        result = evaluator.(Map.delete(state, :interpretation_binding))
+
+        result =
+          evaluator.(
+            Map.drop(state, [:interpretation_binding, :retained_identity, :retained_registration])
+          )
 
         {outcome, reason} = observation(result)
 
@@ -39,6 +43,7 @@ defmodule BookingDesk.Judgment do
   end
 
   defp observation({:ok, _}), do: {:ok, :accepted}
+  defp observation({:incomplete, _, ["intent"]}), do: {:uncertain, :low_confidence}
   defp observation({:incomplete, _, _}), do: {:incomplete, :missing_fields}
   defp observation({:error, :unavailable}), do: {:uncertain, :unavailable}
   defp observation(_), do: {:uncertain, :low_confidence}
@@ -87,6 +92,15 @@ defmodule BookingDesk.Judgment do
           'Dr. Lee' to the doctor-preference question is availability, not unclear. Return unknown for its missing date.
           pending_request contains previously understood caller preferences from a clarification, not a completed search.
           Preserve them unless the latest caller changes them. A date reply to that clarification continues availability.
+          conversation contains bounded pending facts from earlier in this call, even if no longer in dialogue.
+          Its goal is the previously understood request, not evidence that the latest caller authorized any action.
+          A retained reschedule goal continues as reschedule when selecting a verified replacement slot; do not
+          silently turn it into a new booking. Explicit corrections or a new request replace the earlier goal.
+          Preserve established preferences across registration and unrelated clarification. A fresh correction takes precedence.
+          conversation.carrier is an unconfirmed caller-supplied insurer; an explicit selection of that retained insurer
+          can be insurance_update without repeating its name. It never establishes eligibility or coverage.
+          reminder records the verified booking's reminder stage, including scheduled or declined outcomes. Never restart
+          a booking or reminder because recent dialogue omits its result. Memory and prior consent cannot authorize a new write.
           verified_offers contains backend-verified options for the current search. A caller selecting 'the morning one'
           chooses a slot when exactly one offered morning time matches the established date and doctor. It is not confirmation.
           Social chat, preparation questions, and goodbyes need no backend action. Unresolved fragments are unclear.
@@ -148,28 +162,40 @@ defmodule BookingDesk.Judgment do
   def decode(answers, state \\ %{}) do
     intent = answers["intent"]
 
-    if confident?(intent) do
-      required =
-        case intent.choice do
-          x when x in ["availability", "replace_search", "additional_search"] -> ["date"]
-          x when x in ["choose_slot", "reschedule"] -> ["date", "time"]
-          "confirm" -> ["date", "time", "clinician"]
-          _ -> []
-        end
+    judgment =
+      answers
+      |> Map.new(fn {key, answer} ->
+        {key, if(confident?(answer), do: answer.choice, else: "unknown")}
+      end)
+      |> resolve_period(state)
 
-      judgment =
-        Map.new(answers, fn {key, answer} ->
-          {key, if(confident?(answer), do: answer.choice, else: "unknown")}
-        end)
+    if confident?(intent) and intent.choice != "unclear" do
+      decode_fields(judgment)
+    else
+      uncertain_intent(judgment)
+    end
+  end
 
-      judgment = resolve_period(judgment, state)
-
-      missing = Enum.filter(required, &(judgment[&1] in [nil, "unknown"]))
-
-      case missing do
-        [] -> {:ok, judgment}
-        _ -> {:incomplete, judgment, missing}
+  defp decode_fields(judgment) do
+    required =
+      case judgment["intent"] do
+        x when x in ["availability", "replace_search", "additional_search"] -> ["date"]
+        x when x in ["choose_slot", "reschedule"] -> ["date", "time"]
+        "confirm" -> ["date", "time", "clinician"]
+        _ -> []
       end
+
+    missing = Enum.filter(required, &(judgment[&1] in [nil, "unknown"]))
+
+    case missing do
+      [] -> {:ok, judgment}
+      _ -> {:incomplete, judgment, missing}
+    end
+  end
+
+  defp uncertain_intent(judgment) do
+    if Enum.any?(["date", "clinician", "time"], &(judgment[&1] not in [nil, "unknown"])) do
+      {:incomplete, Map.put(judgment, "intent", "unknown"), ["intent"]}
     else
       {:error, :uncertain}
     end

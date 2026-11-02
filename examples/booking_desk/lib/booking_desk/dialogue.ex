@@ -9,6 +9,11 @@ defmodule BookingDesk.Dialogue do
     cursor = Keyword.get(opts, :after_cursor)
     limit = Keyword.get(opts, :limit, 10)
 
+    fields =
+      if Keyword.get(opts, :with_cursor, false),
+        do: [:speaker, :text, :first_cursor],
+        else: [:speaker, :text]
+
     transcripts
     |> Enum.reverse()
     # An admitted request is also a caller boundary. Untimed providers may send
@@ -20,7 +25,7 @@ defmodule BookingDesk.Dialogue do
     |> Enum.drop_while(&(&1.speaker == :assistant))
     |> Enum.take(limit)
     |> Enum.reverse()
-    |> Enum.map(&Map.take(&1, [:speaker, :text]))
+    |> Enum.map(&Map.take(&1, fields))
   end
 
   defp request_side(%{speaker: :user} = part, cursor) when is_integer(cursor),
@@ -41,6 +46,7 @@ defmodule BookingDesk.Dialogue do
 
     %{
       speaker: hd(parts).speaker,
+      first_cursor: Map.get(hd(parts), :arrival_order, 0),
       request_side: request_side(hd(parts), cursor),
       text: Enum.map_join(parts, & &1.delta),
       generation: if(timed?, do: generation),

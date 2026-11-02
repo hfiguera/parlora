@@ -1,6 +1,7 @@
 defmodule BookingDesk.PolicyTest do
   use ExUnit.Case, async: false
   alias Parlora.{ContextSnapshot, ContextTrigger}
+  alias Parlora.Session.{DecisionValidation, State}
 
   defp snapshot(operation \\ "availability") do
     %ContextSnapshot{
@@ -146,6 +147,95 @@ defmodule BookingDesk.PolicyTest do
     assert decision.task_id == "t"
   end
 
+  test "a fresh availability request replaces a different search unless explicitly additional" do
+    assert {:ok, [decision]} =
+             interpret(snapshot(), {:ok, %{"intent" => "availability", "date" => "2026-11-05"}})
+
+    assert decision.kind == :supersede_task
+    assert decision.input.date == "2026-11-05"
+  end
+
+  test "explicitly returning to the old date settles its unresolved search question" do
+    s = snapshot()
+
+    s =
+      put_in(s.tasks["t"][:clarification], %{
+        input: %{
+          unresolved_intent: true,
+          booking_request: %{"date" => "2026-11-05"},
+          lookup_request: s.application_context.lookup_request
+        }
+      })
+
+    assert {:ok, [decision]} =
+             interpret(s, {:ok, %{"intent" => "availability", "date" => "2026-11-04"}})
+
+    assert decision.kind == :supersede_task
+    assert decision.input.date == "2026-11-04"
+  end
+
+  test "preference recaps and service failures pass Parlora's decision validation" do
+    s = snapshot()
+
+    for result <- [
+          {:incomplete, %{"date" => "2026-11-05", "clinician" => "lee"}, ["intent"]},
+          {:error, :unavailable}
+        ] do
+      assert {:ok, [decision]} =
+               BookingDesk.Policy.decide(
+                 s,
+                 result,
+                 {"d", s.pending_delegations["d"]},
+                 s.tasks["t"],
+                 8,
+                 "Thursday instead"
+               )
+
+      assert decision.kind == :request_clarification
+      state = %State{context: s, limits: %Parlora.Limits{}}
+      assert :ok == DecisionValidation.validate(state, [decision])
+    end
+  end
+
+  test "progress cannot release an old search while a changed request awaits clarification" do
+    s = snapshot()
+    pending = {"d", s.pending_delegations["d"]}
+
+    assert {:ok, [question]} =
+             BookingDesk.Policy.decide(
+               s,
+               {:incomplete, %{"date" => "2026-11-05", "clinician" => "lee"}, ["intent"]},
+               pending,
+               s.tasks["t"],
+               8,
+               "What about November fifth?"
+             )
+
+    s = put_in(s.tasks["t"][:clarification], %{input: question.input})
+
+    for intent <- ["progress", "none"] do
+      assert {:ok, [decision]} =
+               BookingDesk.Policy.decide(
+                 s,
+                 {:ok, %{"intent" => intent}},
+                 pending,
+                 s.tasks["t"],
+                 9,
+                 "Are you still checking?"
+               )
+
+      assert decision.kind == :request_clarification
+      assert decision.message =~ "November 5"
+      assert decision.input.booking_request["date"] == "2026-11-05"
+
+      assert :ok ==
+               DecisionValidation.validate(
+                 %State{context: s, limits: %Parlora.Limits{}},
+                 [decision]
+               )
+    end
+  end
+
   test "a new caller question excludes identity words already consumed by backend work" do
     s = snapshot()
 
@@ -234,6 +324,110 @@ defmodule BookingDesk.PolicyTest do
 
     assert {:ok, [clarification]} = interpret(%{s | tasks: %{"t" => task}}, {:error, :uncertain})
     assert clarification.kind == :request_clarification
+  end
+
+  test "an uncertain date change retains all preferences and a short reply can resume the search" do
+    s = snapshot()
+    s = put_in(s.tasks["t"][:context_wait], %{expired?: true, recheck_key: "uncertain:8"})
+
+    s = %{
+      s
+      | transcripts: [
+          %{speaker: :user, delta: "November fifth at ten fifteen with Dr. Lee", arrival_order: 8}
+        ]
+    }
+
+    result =
+      uncertain_preferences(%{"date" => "2026-11-05", "clinician" => "lee", "time" => "10:15"})
+
+    assert {:ok, [question]} = interpret(s, result)
+    assert question.kind == :request_clarification
+
+    assert question.input.booking_request == %{
+             "date" => "2026-11-05",
+             "clinician" => "lee",
+             "time" => "10:15"
+           }
+
+    assert question.message =~ "November 5"
+    assert question.message =~ "Dr. Lee"
+    assert question.message =~ "10:15 AM"
+    assert question.message =~ "Nothing has been booked"
+    refute Map.has_key?(question.input.booking_request, "intent")
+
+    s = put_in(s.tasks["t"][:clarification], %{input: question.input})
+
+    s = %{
+      s
+      | transcripts: [%{speaker: :user, delta: "Check that date, please", arrival_order: 20}]
+    }
+
+    assert {:ok, [search]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
+               coalesce_ms: 0,
+               judge: fn state ->
+                 assert state.pending_request == question.input.booking_request
+                 {:ok, Map.put(state.pending_request, "intent", "replace_search")}
+               end
+             )
+
+    assert search.kind == :supersede_task
+    assert search.input.operation == "availability"
+    assert search.input.date == "2026-11-05"
+    assert search.input.clinician == "lee"
+  end
+
+  test "successive uncertain replies merge validated preferences and remain bound to the patient" do
+    s = snapshot()
+
+    stored = %{
+      booking_request: %{
+        "intent" => "choose_slot",
+        "date" => "2026-11-05",
+        "clinician" => "lee",
+        "time" => "10:15"
+      },
+      lookup_request: s.application_context.lookup_request
+    }
+
+    s = put_in(s.tasks["t"][:clarification], %{input: stored})
+    s = put_in(s.tasks["t"][:context_wait], %{expired?: true, recheck_key: "uncertain:8"})
+
+    for result <- [uncertain_preferences(%{"clinician" => "patel"}), {:error, :uncertain}] do
+      assert {:ok, [question]} = interpret(s, result)
+      assert question.kind == :request_clarification
+      assert question.input.booking_request["date"] == "2026-11-05"
+      assert question.input.booking_request["time"] == "10:15"
+      expected = if result == {:error, :uncertain}, do: "lee", else: "patel"
+      assert question.input.booking_request["clinician"] == expected
+      refute Map.has_key?(question.input.booking_request, "intent")
+      assert question.input.lookup_request == stored.lookup_request
+    end
+
+    s = put_in(s.tasks["t"].clarification.input.lookup_request, "another-patient")
+    assert {:ok, [question]} = interpret(s, {:error, :uncertain})
+    assert question.input.booking_request == %{}
+
+    assert {:ok, [question]} =
+             interpret(
+               s,
+               {:incomplete,
+                %{"date" => "2099-01-01", "clinician" => "invented", "time" => "25:00"},
+                ["intent"]}
+             )
+
+    assert question.input.booking_request == %{}
+  end
+
+  defp uncertain_preferences(fields, intent \\ "replace_search") do
+    answers =
+      Map.new(fields, fn {key, value} ->
+        {key, %{choice: value, probabilities: %{value => 0.99}}}
+      end)
+
+    BookingDesk.Judgment.decode(
+      Map.put(answers, "intent", %{choice: intent, probabilities: %{intent => 0.84}})
+    )
   end
 
   test "a pending booking is not repeated when another confirmation arrives" do
@@ -514,14 +708,60 @@ defmodule BookingDesk.PolicyTest do
         transcripts: [%{speaker: :user, delta: "Yes, please.", arrival_order: 32}]
     }
 
+    preferences = %{"date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}
+    uncertain = uncertain_preferences(preferences, "confirm")
+    assert {:ok, [wait]} = interpret(s, uncertain)
+    assert wait.kind == :wait_for_context
+
+    held = put_in(s.tasks["t"][:context_wait], %{expired?: true, recheck_key: wait.recheck_key})
+    assert {:ok, [question]} = interpret(held, uncertain)
+    assert question.kind == :request_clarification
+    assert question.input.booking_request == preferences
+
+    remembered = put_in(held.tasks["t"][:clarification], %{input: question.input})
+
+    for rejected <- [
+          {:incomplete, Map.put(preferences, "intent", "confirm"), ["intent"]},
+          {:incomplete, Map.merge(preferences, %{"intent" => "confirm", "time" => "unknown"}),
+           ["time"]},
+          {:ok, Map.merge(preferences, %{"intent" => "confirm", "date" => "2026-11-04"})},
+          {:ok, Map.merge(preferences, %{"intent" => "confirm", "clinician" => "patel"})}
+        ] do
+      assert {:ok, [decision]} = interpret(remembered, rejected)
+      assert decision.kind == :request_clarification
+    end
+
+    assert length(BookingDesk.Store.snapshot()) == 1
+
     judgment =
       {:ok,
        %{"intent" => "confirm", "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
 
-    assert {:ok, [approval]} = interpret(s, judgment)
+    for correction <- [
+          %{"date" => "2026-11-04"},
+          %{"time" => "14:00"},
+          %{"clinician" => "patel"}
+        ] do
+      changed =
+        put_in(
+          remembered.tasks["t"].clarification.input.booking_request,
+          Map.merge(preferences, correction)
+        )
+
+      assert {:ok, [rejected]} = interpret(changed, judgment)
+      assert rejected.kind == :request_clarification
+    end
+
+    assert {:ok, [approval]} = interpret(remembered, judgment)
     assert approval.input.operation == "confirm"
     assert approval.input.proposal == "context-proposal"
     assert approval.input.revision == 31
+
+    any_doctor =
+      put_in(remembered.tasks["t"].clarification.input.booking_request["clinician"], "any")
+
+    assert {:ok, [any_approval]} = interpret(any_doctor, judgment)
+    assert any_approval.input == approval.input
 
     for clinician <- ["unknown", "patel", nil] do
       assert {:ok, [rejected]} =
@@ -1115,5 +1355,431 @@ defmodule BookingDesk.PolicyTest do
 
     assert blocked.kind == :request_clarification
     assert blocked.message =~ "insurance"
+  end
+
+  test "registration and the original goal survive a long dialogue and overwritten clarifications" do
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    first = %Parlora.ContextSnapshot{
+      session_id: "long-registration",
+      revision: 2,
+      pending_delegations: %{"d" => %{status: :pending, received_at_us: 1}},
+      transcripts: [
+        %{speaker: :user, delta: "Jamie Rivera", arrival_order: 2},
+        %{speaker: :assistant, delta: "Your full name and date of birth?", arrival_order: 1}
+      ]
+    }
+
+    opts = [conversation: memory, coalesce_ms: 0]
+
+    assert {:ok, [waiting]} =
+             BookingDesk.Policy.interpret(
+               first,
+               %ContextTrigger{kind: :delegation},
+               opts ++
+                 [
+                   judge: fn _ ->
+                     {:incomplete,
+                      %{"intent" => "reschedule", "date" => "2026-11-05", "clinician" => "lee"},
+                      ["time"]}
+                   end,
+                   identity_extractor: fn _ ->
+                     {:incomplete, [:dob], %{name: "jamie rivera", name_evidence: "Jamie Rivera"}}
+                   end
+                 ]
+             )
+
+    assert waiting.kind == :wait_for_context
+
+    later = %{
+      first
+      | revision: 50,
+        transcripts: long_dialogue("March twelfth, nineteen ninety", 50)
+    }
+
+    output = %{
+      "status" => "complete",
+      "full_name" => "Jamie Rivera",
+      "name_evidence" => "Jamie Rivera",
+      "dob" => "1990-03-12",
+      "dob_evidence" => ["March twelfth, nineteen ninety"]
+    }
+
+    assert {:ok, [waiting]} =
+             BookingDesk.Policy.interpret(
+               later,
+               %ContextTrigger{kind: :delegation},
+               opts ++
+                 [
+                   judge: fn state ->
+                     refute Enum.any?(state.dialogue, &String.contains?(&1.text, "Jamie"))
+                     assert state.conversation.goal == "reschedule"
+                     assert state.retained_identity.name == "jamie rivera"
+                     {:error, :uncertain}
+                   end,
+                   identity_extractor: &BookingDesk.Identity.validate(output, &1)
+                 ]
+             )
+
+    assert waiting.kind == :wait_for_context
+
+    latest = %{later | revision: 51, transcripts: long_dialogue("Please find my record", 51)}
+
+    assert {:ok, [lookup]} =
+             BookingDesk.Policy.interpret(
+               latest,
+               %ContextTrigger{kind: :delegation},
+               opts ++
+                 [
+                   judge: fn state ->
+                     {:ok, Map.put(state.pending_request, "intent", "lookup")}
+                   end,
+                   identity_extractor: fn state ->
+                     assert state.retained_identity.dob == "1990-03-12"
+
+                     BookingDesk.Identity.validate(
+                       %{output | "dob_evidence" => ["1990-03-12"]},
+                       state
+                     )
+                   end
+                 ]
+             )
+
+    assert lookup.input.operation == "lookup"
+    assert lookup.input.name == "jamie rivera"
+    assert lookup.input.date == "2026-11-05"
+    assert lookup.input.clinician == "lee"
+
+    assert BookingDesk.Conversation.context(BookingDesk.Conversation.attach(latest, opts)).goal ==
+             "reschedule"
+  end
+
+  test "an insurer supplied during uncertain intent survives until explicitly selected" do
+    session = "carrier-retention"
+    id = "carrier-retention-lookup"
+
+    BookingDesk.Store.execute(
+      %{operation: "lookup", name: "Jamie Rivera", dob: "1990-03-12", session: session},
+      id
+    )
+
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    s = %Parlora.ContextSnapshot{
+      session_id: session,
+      revision: 2,
+      application_context: %{lookup_request: id},
+      tasks: %{
+        "t" => %{
+          id: "t",
+          revision: 1,
+          status: :completed,
+          request_ids: [id],
+          input: %{operation: "lookup", cursor: 1, date: "2026-11-05", clinician: "lee"}
+        }
+      },
+      transcripts: [%{speaker: :user, delta: "I switched to Cigna", arrival_order: 2}],
+      pending_delegations: %{"d" => %{status: :pending, received_at_us: 1}}
+    }
+
+    opts = [conversation: memory, coalesce_ms: 0]
+
+    assert {:ok, [waiting]} =
+             BookingDesk.Policy.interpret(
+               s,
+               %ContextTrigger{kind: :delegation},
+               opts ++
+                 [
+                   judge: fn _ -> {:error, :uncertain} end,
+                   insurance_extractor: fn _ -> {:ok, %{carrier: "Cigna"}} end
+                 ]
+             )
+
+    assert waiting.kind == :wait_for_context
+    refute BookingDesk.Store.insurance(id, session).confirmed
+
+    s = %{s | revision: 50, transcripts: long_dialogue("Use that plan", 50)}
+
+    assert {:ok, [review]} =
+             BookingDesk.Policy.interpret(
+               s,
+               %ContextTrigger{kind: :delegation},
+               opts ++
+                 [
+                   judge: fn state ->
+                     assert state.conversation.carrier == "Cigna"
+                     refute state.insurance.confirmed
+                     {:ok, %{"intent" => "insurance_update"}}
+                   end,
+                   insurance_extractor: fn _ -> {:incomplete, [:carrier]} end
+                 ]
+             )
+
+    assert review.input.operation == "insurance"
+    assert review.input.carrier == "Cigna"
+    assert review.input.response == "updated"
+  end
+
+  test "additional searches keep earlier verified offers available for a later period choice" do
+    s = snapshot()
+    context = s.application_context
+
+    tasks =
+      Map.new([{30, "2026-11-04"}, {31, "2026-11-05"}], fn {cursor, date} ->
+        input =
+          Map.merge(context, %{
+            operation: "availability",
+            patient: "p_1002",
+            session: "test",
+            cursor: cursor,
+            date: date,
+            clinician: "lee",
+            search_intent: if(cursor == 31, do: "additional_search", else: "availability")
+          })
+
+        execute(input, "retained-offers-#{cursor}")
+        id = "search-#{cursor}"
+        {id, %{id: id, revision: 1, status: :completed, input: input}}
+      end)
+
+    s = %{s | tasks: tasks, transcripts: long_dialogue("The morning one on Wednesday", 50)}
+
+    assert {:ok, [proposal]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
+               coalesce_ms: 0,
+               judge: fn state ->
+                 assert Enum.any?(state.verified_offers, &(&1.date == "2026-11-04"))
+                 assert Enum.any?(state.verified_offers, &(&1.date == "2026-11-05"))
+
+                 answers =
+                   Map.new(
+                     %{
+                       "intent" => "choose_slot",
+                       "date" => "2026-11-04",
+                       "clinician" => "lee",
+                       "time" => "morning"
+                     },
+                     fn {key, value} ->
+                       {key, %{choice: value, probabilities: %{value => 0.99}}}
+                     end
+                   )
+
+                 BookingDesk.Judgment.decode(answers, state)
+               end
+             )
+
+    assert proposal.input.operation == "propose"
+    assert proposal.input.slot == "2026-11-04T10:15:00"
+    assert proposal.input.search_cursor == 30
+  end
+
+  defp long_dialogue(text, cursor) do
+    [
+      %{speaker: :user, delta: text, arrival_order: cursor}
+      | Enum.map((cursor - 1)..(cursor - 24)//-1, fn order ->
+          %{
+            speaker: if(rem(order, 2) == 0, do: :user, else: :assistant),
+            delta: "Thanks.",
+            arrival_order: order
+          }
+        end)
+    ]
+  end
+
+  test "memory revision bookkeeping cannot cause repeated classification of unchanged caller state" do
+    memory = start_supervised!(BookingDesk.Conversation)
+    owner = self()
+    s = snapshot()
+
+    opts = [
+      conversation: memory,
+      coalesce_ms: 0,
+      judge: fn state ->
+        BookingDesk.Judgment.classify(state,
+          evaluator: fn _ ->
+            send(owner, :classified_once)
+            {:error, :uncertain}
+          end
+        )
+      end
+    ]
+
+    assert {:ok, _} = BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation}, opts)
+
+    assert {:ok, _} =
+             BookingDesk.Policy.interpret(
+               %{s | revision: s.revision + 1},
+               %ContextTrigger{kind: :delegation},
+               opts
+             )
+
+    assert_receive :classified_once
+    refute_receive :classified_once, 20
+  end
+
+  test "registration completion resumes the retained corrected search rather than old task parameters" do
+    memory = start_supervised!(BookingDesk.Conversation)
+    opts = [conversation: memory]
+    s = snapshot("insurance")
+    s = put_in(s.tasks["t"].status, :completed)
+    s = put_in(s.tasks["t"].input.cursor, 8)
+    current = BookingDesk.Conversation.attach(s, opts)
+
+    BookingDesk.Conversation.remember(current, opts,
+      judgment:
+        {:incomplete,
+         %{
+           "intent" => "unknown",
+           "date" => "2026-11-05",
+           "clinician" => "patel",
+           "time" => "14:00"
+         }, ["intent"]}
+    )
+
+    assert {:ok, [search]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :backend_completed}, opts)
+
+    assert search.input.operation == "availability"
+    assert search.input.date == "2026-11-05"
+    assert search.input.clinician == "patel"
+  end
+
+  test "the initial request is remembered before any provider delegation without admitting work" do
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    s = %Parlora.ContextSnapshot{
+      session_id: "early-request",
+      provider_generation: 0,
+      revision: 1,
+      transcripts: [
+        %{speaker: :user, delta: "Reschedule with Dr. Lee on November fifth", arrival_order: 1}
+      ]
+    }
+
+    opts = [
+      conversation: memory,
+      coalesce_ms: 0,
+      judge: fn _ ->
+        {:incomplete, %{"intent" => "reschedule", "date" => "2026-11-05", "clinician" => "lee"},
+         ["time"]}
+      end
+    ]
+
+    assert {:ok, []} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :transcript_updated}, opts)
+
+    data = BookingDesk.Conversation.context(BookingDesk.Conversation.attach(s, opts))
+    assert data.goal == "reschedule"
+    assert data.preferences["date"] == "2026-11-05"
+    assert data.preferences["clinician"] == "lee"
+  end
+
+  test "a retained offer for another doctor on the same date keeps its own verification" do
+    s = snapshot()
+
+    tasks =
+      Map.new([{3000, "patel"}, {3001, "lee"}], fn {cursor, clinician} ->
+        input =
+          Map.merge(s.application_context, %{
+            operation: "availability",
+            patient: "p_1002",
+            session: "test",
+            cursor: cursor,
+            date: "2026-11-04",
+            clinician: clinician,
+            search_intent: if(cursor == 3001, do: "additional_search", else: "availability")
+          })
+
+        execute(input, "retained-doctor-#{cursor}")
+        id = "doctor-#{cursor}"
+        {id, %{id: id, revision: 1, status: :completed, input: input}}
+      end)
+
+    s = %{
+      s
+      | tasks: tasks,
+        transcripts: [%{speaker: :user, delta: "Dr. Patel in the morning", arrival_order: 3002}]
+    }
+
+    assert {:ok, [proposal]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
+               coalesce_ms: 0,
+               judge: fn state ->
+                 answers =
+                   Map.new(
+                     %{
+                       "intent" => "choose_slot",
+                       "date" => "2026-11-04",
+                       "clinician" => "patel",
+                       "time" => "morning"
+                     },
+                     fn {key, value} ->
+                       {key, %{choice: value, probabilities: %{value => 0.99}}}
+                     end
+                   )
+
+                 BookingDesk.Judgment.decode(answers, state)
+               end
+             )
+
+    assert proposal.input.operation == "propose"
+    assert proposal.input.slot == "2026-11-04T10:15:00@patel"
+    assert proposal.input.search_cursor == 3000
+  end
+
+  test "registration evidence survives a pending extractor and later dialogue before delegation" do
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    first = %Parlora.ContextSnapshot{
+      session_id: "pending-registration",
+      provider_generation: 0,
+      revision: 2,
+      transcripts: [
+        %{speaker: :user, delta: "Jamie Rivera", arrival_order: 2},
+        %{speaker: :assistant, delta: "Your full name and date of birth?", arrival_order: 1}
+      ]
+    }
+
+    opts = [conversation: memory, coalesce_ms: 0, judge: fn _ -> {:error, :uncertain} end]
+
+    assert {:ok, []} =
+             BookingDesk.Policy.interpret(
+               first,
+               %ContextTrigger{kind: :transcript_updated},
+               opts ++ [identity_extractor: fn _ -> :pending end]
+             )
+
+    later = %{
+      first
+      | revision: 50,
+        transcripts: long_dialogue("March twelfth, nineteen ninety", 50)
+    }
+
+    output = %{
+      "status" => "complete",
+      "full_name" => "Jamie Rivera",
+      "name_evidence" => "Jamie Rivera",
+      "dob" => "1990-03-12",
+      "dob_evidence" => ["March twelfth, nineteen ninety"]
+    }
+
+    assert {:ok, []} =
+             BookingDesk.Policy.interpret(
+               later,
+               %ContextTrigger{kind: :transcript_updated},
+               opts ++
+                 [
+                   identity_extractor: fn state ->
+                     assert state.retained_identity == %{}
+                     assert "Jamie Rivera" in state.retained_registration
+                     refute Enum.any?(state.dialogue, &String.contains?(&1.text, "Jamie"))
+                     BookingDesk.Identity.validate(output, state)
+                   end
+                 ]
+             )
+
+    retained = BookingDesk.Conversation.context(BookingDesk.Conversation.attach(later, opts))
+    assert retained.identity == %{name: "jamie rivera", dob: "1990-03-12"}
+    assert BookingDesk.Policy.patient(later) == nil
   end
 end

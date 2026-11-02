@@ -99,12 +99,52 @@ defmodule BookingDesk.IdentityTest do
 
   test "missing and ambiguous fields remain incomplete without fixture defaults" do
     missing = %{complete() | "status" => "incomplete", "dob" => nil, "dob_evidence" => []}
-    assert {:incomplete, [:dob]} = Identity.validate(missing, state("Jamie Rivera"))
+
+    assert {:incomplete, [:dob], %{name: "jamie rivera", name_evidence: "Jamie Rivera"}} =
+             Identity.validate(missing, state("Jamie Rivera"))
 
     assert {:incomplete, [:ambiguous]} =
              Identity.validate(%{missing | "status" => "ambiguous"}, state("Jamie Rivera"))
 
     assert Identity.requested?("Could I have your full name and date of birth?")
     refute Identity.requested?("Which doctor would you prefer?")
+  end
+
+  test "validated name and partial birth-date evidence survive outside the dialogue window" do
+    retained = %{
+      name: "jamie rivera",
+      name_evidence: "Jamie Rivera",
+      dob_evidence: ["March twelfth"]
+    }
+
+    s = state("nineteen ninety") |> Map.put(:retained_identity, retained)
+    result = %{complete() | "dob_evidence" => ["March twelfth", "nineteen ninety"]}
+    assert {:ok, %{name: "jamie rivera", dob: "1990-03-12"}} = Identity.validate(result, s)
+
+    partial = %{
+      complete()
+      | "status" => "incomplete",
+        "dob" => nil,
+        "dob_evidence" => ["March twelfth"]
+    }
+
+    assert {:incomplete, [:dob], %{dob_evidence: ["March twelfth"]}} =
+             Identity.validate(partial, state("Jamie Rivera, March twelfth"))
+  end
+
+  test "a new person cannot inherit the previous person's date of birth" do
+    retained = %{
+      name: "jamie rivera",
+      name_evidence: "Jamie Rivera",
+      dob: "1990-03-12",
+      dob_evidence: ["March twelfth, nineteen ninety"]
+    }
+
+    s = state("Actually this is Alex Morgan") |> Map.put(:retained_identity, retained)
+
+    assert {:incomplete, [:dob], %{name: "alex morgan"} = fields} =
+             Identity.validate(complete("Alex Morgan"), s)
+
+    refute Map.has_key?(fields, :dob)
   end
 end

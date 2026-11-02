@@ -279,6 +279,28 @@ defmodule BookingDesk.RemindersTest do
 
     assert [[_, _, _, _, "cancelled", _]] = Store.reminder_jobs(ctx.store)
     assert Store.reminder("booked", "lookup", ctx.base.session, ctx.store) == nil
+
+    assert %{status: "cancelled"} =
+             Store.appointment("booked", "lookup", ctx.base.session, ctx.store)
+
+    assert %{status: "cancelled", kind: "cancellation", confirmation: "BD-cancel"} =
+             Store.appointment("cancel", "lookup", ctx.base.session, ctx.store)
+  end
+
+  test "verified appointment results remain available without dialogue and cannot cross a lookup or call",
+       ctx do
+    assert %{
+             appointment: "booked",
+             slot: "2026-11-05T10:15:00",
+             status: "booked",
+             confirmation: code
+           } =
+             Store.appointment("booked", "lookup", ctx.base.session, ctx.store)
+
+    assert is_binary(code)
+    assert Store.appointment("booked", "another-lookup", ctx.base.session, ctx.store) == nil
+    assert Store.appointment("booked", "lookup", "another-call", ctx.store) == nil
+    assert Store.appointment("proposal", "lookup", ctx.base.session, ctx.store) == nil
   end
 
   test "phone extraction requires exact complete caller evidence; readback rejects a wrong suffix" do
@@ -304,6 +326,33 @@ defmodule BookingDesk.RemindersTest do
     refute Reminders.readback?("Your cell ending in zero one eight eight.", "0188")
     assert Reminders.phone("(202) 555-0188") == "+12025550188"
     refute Reminders.phone("0005550188")
+  end
+
+  test "phone digits can be completed across caller replies without inventing an area code" do
+    assert {:incomplete, [:phone], %{evidence: ["two zero two five five five"]}} =
+             Phone.validate(
+               %{"phone" => nil, "evidence" => "two zero two five five five"},
+               "two zero two five five five"
+             )
+
+    result = %{
+      "phone" => "+12025550199",
+      "evidence" => ["two zero two five five five", "zero one nine nine"]
+    }
+
+    assert {:ok, %{phone: "+12025550199"}} =
+             Phone.validate(result, "zero one nine nine", ["two zero two five five five"])
+
+    assert {:error, :invalid_extraction} = Phone.validate(result, "zero one nine nine")
+
+    assert {:error, :invalid_extraction} =
+             Phone.validate(result, "Yes", ["two zero two five five five"])
+
+    assert {:error, :invalid_extraction} =
+             Phone.validate(
+               %{"phone" => "+12025520255", "evidence" => ["20255", "20255"]},
+               "20255"
+             )
   end
 
   defp sql(db, query) do
