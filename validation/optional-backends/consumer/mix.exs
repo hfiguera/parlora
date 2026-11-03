@@ -17,7 +17,7 @@ defmodule OptionalBackendConsumer.MixProject do
     case System.get_env("PARLORA_OPTIONAL_BACKEND", "none") do
       "none" -> []
       "jido" -> [{:jido, "== 2.4.0"}]
-      "sagents" -> [{:sagents, "== 0.19.2"}]
+      "sagents" -> [{:sagents, "== 0.20.0"}]
       "legion" -> [{:legion, "== 0.6.0"}]
     end
   end
