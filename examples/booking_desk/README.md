@@ -64,7 +64,7 @@ Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second
 tool timeout, speech speed `1.05`, a 600-ms end-of-turn silence threshold, and
-one-word interruptions. Speech detection uses threshold `0.5` and a 120-ms
+one-word interruptions. Speech detection uses threshold `0.7` and a 120-ms
 minimum speech duration to reduce false turns from café chatter without
 requiring multiple words to interrupt. Recognition keywords include Cedarwood,
 Dr. Lee and Dr. Patel. Booking approval, number verification and reminder consent remain
@@ -160,9 +160,12 @@ After a Phonic replay, check for extra caller turns during background-only input
 python3 scripts/audit_caller_turns.py runs/YOUR_RECORDING
 ```
 
-This read-only audit uses captured caller-input onset ticks and clip lengths,
-with a three-second allowance for transcript arrival. It rejects unexpected
-caller turns, missing clip transcripts and dropped capture data; it writes
+This offline audit uses captured caller-input onset ticks and clip lengths,
+with a three-second allowance for transcript arrival and 500 ms for speech-start
+arrival after a clip ends. Phonic recordings require captured caller speech
+boundaries as well as transcripts. It rejects unexpected audio interruptions and speech starts,
+untranscribed starts, caller turns without starts, unexpected caller text, missing
+clip transcripts and dropped capture data; it writes
 `caller-turn-verification.json` and exits unsuccessfully on failure. It never
 mutes input or uses the script to filter live caller speech. A passing workflow
 alone does not establish noise rejection. Speech detection is a tradeoff: test

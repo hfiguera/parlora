@@ -89,6 +89,15 @@ facts. Applications assembling dialogue can keep that caller turn intact while
 retaining the overlapping assistant words separately, as BookingDesk does.
 Neither transcript establishes that the caller heard the audio.
 
+Native caller boundaries are observable as `extension` events with
+`kind: :caller_speech`, a `segment_id`, and `state: :started | :finished | :cancelled`.
+These report speech detection independently of transcript admission. In
+particular, a rejected punctuation transcript does not undo an earlier audio
+interruption. Phonic's explicit `input_cancelled` event clears the caller-speaking
+gate and an outstanding automatic-response watchdog, allowing queued verified
+results to resume. A watchdog for an already-submitted result reply is preserved.
+Cancellation does not create caller text, consent or backend work.
+
 ## Tools, context, and corrections
 
 Tool chaining is disabled (`allow_tool_chaining: false`) to avoid the repeated-call
@@ -199,7 +208,7 @@ defaults, based on the BookingDesk conversation and café-input validation:
 | `enable_assistant_backchannel` | `true` |
 | `assistant_backchannel_aggressiveness` | `0.3` |
 | `audio_speed` | `1.05` |
-| `vad_threshold` | `0.5` |
+| `vad_threshold` | `0.7` |
 | `vad_min_speech_duration_ms` | `120` |
 | `vad_min_silence_duration_ms` | `600` |
 | `min_words_to_interrupt` | `1` |

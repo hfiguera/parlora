@@ -12,16 +12,84 @@ def transcript(at, text, segment="caller"):
             "data": {"speaker": "user", "delta": text, "segment_id": segment}}
 
 
+def speech(at, state="started", segment="caller"):
+    return {"kind": "event", "name": "extension", "at_ms": at,
+            "data": {"kind": "caller_speech", "state": state, "segment_id": segment}}
+
+
 def recording():
-    return {"mode": "replay", "audio": {"sample_rate": 24000, "dropped_packets": 0,
+    return {"mode": "replay", "provider": "phonic",
+            "audio": {"sample_rate": 24000, "dropped_packets": 0,
              "chunks": [{"direction": "input", "at_ms": 74211.214}]},
             "event_log": {"dropped_events": 0},
             "events": [{"kind": "marker", "name": "input:caller_started", "at_ms": 74211.214,
                         "data": {"tick": 0, "bytes": 80640, "label": "choose"}},
+                       speech(74500),
                        transcript(76106.918, "Ten fifteen, please. ")]}
 
 
 class CallerTurnAuditTest(unittest.TestCase):
+    def test_cafe_interruption_fails_even_when_its_punctuation_is_not_caller_dialogue(self):
+        report = recording()
+        report["events"].extend([
+            speech(77314.375, segment="noise"),
+            speech(106376.745, "finished", "noise"),
+            {"kind": "event", "name": "extension", "at_ms": 106378.763,
+             "data": {"kind": "transcript_discarded", "delta": ".", "segment_id": "noise"}}
+        ])
+        result = audit(report)
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["unexpected_caller_turns"], [])
+        self.assertEqual(result["unexpected_speech_starts"][0]["segment_id"], "noise")
+
+    def test_phonic_recordings_without_speech_boundaries_cannot_prove_no_false_interruptions(self):
+        report = recording()
+        report["events"] = [e for e in report["events"] if e["name"] != "extension"]
+        result = audit(report)
+        self.assertFalse(result["passed"])
+        self.assertFalse(result["speech_boundaries_recorded"])
+
+    def test_cancellation_and_finish_are_not_additional_speech_starts(self):
+        report = recording()
+        report["events"].extend([speech(76000, "finished"), speech(76001, "cancelled")])
+        result = audit(report)
+        self.assertTrue(result["passed"])
+        self.assertEqual(result["caller_speech_starts"], 1)
+
+    def test_other_providers_do_not_require_phonic_specific_events(self):
+        report = recording()
+        report["provider"] = "openai"
+        report["events"] = [e for e in report["events"] if e["name"] != "extension"]
+        self.assertTrue(audit(report)["passed"])
+
+    def test_cancellation_without_a_new_speech_start_is_still_checked(self):
+        report = recording()
+        report["events"].append({"kind": "event", "name": "output_interrupted",
+                                 "source": "provider", "at_ms": 77314.375, "data": {}})
+        result = audit(report)
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["unexpected_output_interruptions"], [{"at_ms": 77314.375}])
+
+    def test_real_caller_interruption_within_the_clip_is_valid(self):
+        report = recording()
+        report["events"].append({"kind": "event", "name": "output_interrupted",
+                                 "source": "provider", "at_ms": 74500, "data": {}})
+        self.assertTrue(audit(report)["passed"])
+
+    def test_partial_boundary_capture_cannot_hide_another_caller_turn(self):
+        report = recording()
+        report["events"].append(transcript(74700, "No", "missing-start"))
+        result = audit(report)
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["caller_turns_without_speech_starts"][0]["segment_id"], "missing-start")
+
+    def test_start_without_a_transcript_cannot_pass_even_inside_a_real_clip(self):
+        report = recording()
+        report["events"].append(speech(74700, segment="noise"))
+        result = audit(report)
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["untranscribed_speech_starts"][0]["segment_id"], "noise")
+
     def test_recorded_cafe_false_turn_is_detected_despite_successful_booking(self):
         report = recording()
         report["passed"] = True

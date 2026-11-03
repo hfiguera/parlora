@@ -65,6 +65,32 @@ defmodule BookingDesk.RecorderTest do
     GenServer.stop(recorder)
   end
 
+  test "caller speech boundaries retain identities and cancellation for interruption audits", %{
+    recorder: recorder
+  } do
+    for state <- [:started, :finished, :cancelled] do
+      Recorder.event(recorder, %Parlora.Event{
+        id: "speech-#{state}",
+        session_id: "test",
+        source: :provider,
+        adapter_id: "phonic",
+        generation: 0,
+        type: :extension,
+        observed_at_us: System.monotonic_time(:microsecond),
+        payload: %{kind: :caller_speech, state: state, segment_id: "caller-1"}
+      })
+    end
+
+    report = Recorder.finish(recorder, %{})
+
+    assert Enum.map(report.events, & &1.data) ==
+             Enum.map([:started, :finished, :cancelled], fn state ->
+               %{kind: :caller_speech, state: state, segment_id: "caller-1"}
+             end)
+
+    GenServer.stop(recorder)
+  end
+
   test "separate audio tracks retain offsets, count credits, and omit credentials", %{
     recorder: recorder,
     path: path

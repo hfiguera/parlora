@@ -6,7 +6,7 @@
 
 - Phonic now defaults to native busy-mode result delivery, listening backchannels
   at aggressiveness `0.3`, required pre-tool speech with overlapping backend work,
-  speed `1.05`, speech threshold `0.5`, minimum speech `120 ms`, end-of-turn silence
+  speed `1.05`, speech threshold `0.7`, minimum speech `120 ms`, end-of-turn silence
   `600 ms`, one-word interruptions and a 60-second tool-output timeout. Artificial
   background noise remains disabled. App overrides take precedence and are
   validated after defaults are resolved. Disabling backchannels removes inherited
@@ -22,6 +22,12 @@
 
 ### Fixed
 
+- Raise Phonic's default VAD threshold to `0.7` to reduce false interruptions from
+  café activity while retaining one-word interruptions and native conversation.
+  Explicit app overrides still take precedence. Handle provider-cancelled input
+  without leaving verified results queued or timing out a cancelled automatic
+  response. Expose caller speech boundaries for audits; BookingDesk now rejects
+  false speech starts even when their punctuation transcripts were discarded.
 - Preserve native Phonic result audio when its speech starts before an earlier
   acknowledgment finishes. Track outstanding speech ends until all open speech
   boundaries settle; interruptions reset them. Punctuation-only input remains

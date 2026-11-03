@@ -197,6 +197,74 @@ defmodule Parlora.PhonicAdapterTest do
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
   end
 
+  @tag :cancelled_input
+  test "cancelled non-speech releases a queued native result without inventing a caller turn",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("original", "propose selected slot"))
+    state = deliver(context, state, started())
+    state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 240), "Let me check."))
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    segment = state.caller_segment_id
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :extension,
+                      payload: %{kind: :caller_speech, state: :started, segment_id: ^segment}
+                    }}
+
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+
+    {:reply, :ok, state} =
+      Phonic.handle_call({:append, update("proposal", "original")}, nil, state)
+
+    refute_receive {:phonic_command, %{"type" => "tool_call_output"}}, 10
+    state = deliver(context, state, %{"type" => "input_cancelled"})
+    refute state.caller_speaking or state.auto_response_pending
+    assert state.pending_contexts == []
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :extension,
+                      payload: %{kind: :caller_speech, state: :cancelled, segment_id: ^segment}
+                    }}
+
+    watch = state.response_watch
+    assert watch != nil
+    state = deliver(context, state, %{"type" => "input_cancelled"})
+    assert state.response_watch == watch
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    assert state.response_watch == watch
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+
+    refute_receive {:parlora_event, %Event{type: :transcript_delta, payload: %{speaker: :user}}},
+                   10
+  end
+
+  @tag :cancelled_input
+  test "cancelling an automatic input response retires its watchdog and keeps fresh No interruptible",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    token = state.response_watch.token
+    state = deliver(context, state, %{"type" => "input_cancelled"})
+    assert state.response_watch == nil
+    assert {:noreply, ^state} = Phonic.handle_info({:phonic_response_timeout, token}, state)
+    state = deliver(context, state, started())
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    state = deliver(context, state, %{"type" => "input_text", "text" => "No"})
+    assert state.caller_speaking and state.interrupted?
+    assert_receive {:parlora_event, %Event{type: :output_interrupted, payload: %{token: 2}}}
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{speaker: :user, delta: "No "}}}
+  end
+
   test "plain context is unconfirmed and speakable continuation waits for generation and audio drain",
        context do
     state = ready(context)

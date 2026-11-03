@@ -9,7 +9,7 @@ defmodule Parlora.PhonicDefaultsTest do
       assert config.enable_assistant_backchannel
       assert config.assistant_backchannel_aggressiveness == 0.3
       assert config.audio_speed == 1.05
-      assert config.vad_threshold == 0.5
+      assert config.vad_threshold == 0.7
       assert config.vad_min_speech_duration_ms == 120
       assert config.vad_min_silence_duration_ms == 600
       assert config.min_words_to_interrupt == 1
@@ -39,6 +39,7 @@ defmodule Parlora.PhonicDefaultsTest do
                  wait_for_response: false,
                  audio_speed: 0.75,
                  vad_min_speech_duration_ms: 0,
+                 vad_threshold: 0.42,
                  vad_min_silence_duration_ms: 0,
                  vad_prebuffer_duration_ms: 0,
                  background_noise: nil,
@@ -53,6 +54,7 @@ defmodule Parlora.PhonicDefaultsTest do
     refute Map.has_key?(config, :assistant_backchannel_aggressiveness)
     assert config.audio_speed == 0.75
     assert config.vad_min_speech_duration_ms == 0
+    assert config.vad_threshold == 0.42
     assert config.vad_min_silence_duration_ms == 0
     assert config.vad_prebuffer_duration_ms == 0
     assert config.background_noise == nil and config.background_noise_level == 0

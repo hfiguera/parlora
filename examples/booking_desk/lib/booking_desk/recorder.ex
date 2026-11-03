@@ -228,6 +228,9 @@ defmodule BookingDesk.Recorder do
   defp selected(%{type: :extension, payload: %{kind: :transcript_discarded} = p}),
     do: Map.take(p, [:kind, :cause, :speaker, :delta, :segment_id])
 
+  defp selected(%{type: :extension, payload: %{kind: :caller_speech} = p}),
+    do: Map.take(p, [:kind, :state, :segment_id])
+
   defp selected(%{type: :task_submitted, payload: %{request: r}}),
     do: Map.take(r, [:id, :task_id, :task_revision, :input])
 

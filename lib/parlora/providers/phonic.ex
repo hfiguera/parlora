@@ -640,12 +640,14 @@ defmodule Parlora.Providers.Phonic do
         turn_delegated?: false
     }
 
+    caller_speech(state, :started)
     interrupt(state)
   end
 
   defp event(%{"type" => "interrupted_response"}, state), do: interrupt(state)
 
   defp event(%{"type" => "user_finished_speaking"}, state) do
+    caller_speech(state, :finished)
     state = %{state | caller_speaking: false}
 
     cond do
@@ -661,6 +663,17 @@ defmodule Parlora.Providers.Phonic do
       true ->
         continue_response(state)
     end
+  end
+
+  defp event(%{"type" => "input_cancelled"}, state) do
+    caller_speech(state, :cancelled)
+
+    state =
+      if state.auto_response_pending and not state.reply_active?,
+        do: clear_response_watch(state),
+        else: state
+
+    continue_response(%{state | caller_speaking: false, auto_response_pending: false})
   end
 
   defp event(%{"type" => "input_text", "text" => text}, state)
@@ -956,6 +969,14 @@ defmodule Parlora.Providers.Phonic do
   defp pending_call(%{command: %{type: "tool_call_output", tool_call_id: id}}), do: id
   defp pending_call(%{update: %{delegation_id: id}}), do: id
   defp pending_call(_), do: nil
+
+  defp caller_speech(state, value) do
+    emit(state, :extension, %{
+      kind: :caller_speech,
+      state: value,
+      segment_id: state.caller_segment_id
+    })
+  end
 
   defp interrupt(%{interrupted?: true} = state), do: state
 
