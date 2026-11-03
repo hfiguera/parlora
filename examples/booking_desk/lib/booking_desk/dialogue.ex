@@ -16,6 +16,7 @@ defmodule BookingDesk.Dialogue do
 
     transcripts
     |> Enum.reverse()
+    |> order_overlaps()
     # An admitted request is also a caller boundary. Untimed providers may send
     # the next question without an intervening assistant transcript.
     |> Enum.chunk_by(&{&1.speaker, request_side(&1, cursor), speech_boundary(&1)})
@@ -35,10 +36,8 @@ defmodule BookingDesk.Dialogue do
 
   defp request_side(_, _), do: nil
 
-  defp speech_boundary(%{speaker: :assistant} = part),
+  defp speech_boundary(part),
     do: {Map.get(part, :provider_generation), Map.get(part, :segment_id)}
-
-  defp speech_boundary(part), do: {Map.get(part, :provider_generation), nil}
 
   defp run(parts, cursor) do
     generation =
@@ -120,4 +119,31 @@ defmodule BookingDesk.Dialogue do
   defp nearby?(previous, next),
     do:
       next.start_ms >= previous.end_ms and next.start_ms - previous.end_ms <= @continuation_gap_ms
+
+  # A native acknowledgment may interleave untimed words in one caller turn.
+  # Keep every assistant word after that complete turn; it cannot authorize the
+  # caller's answer to a question which was asked before the turn began.
+  defp order_overlaps(parts) do
+    indexed = Enum.with_index(parts)
+
+    caller_ends =
+      Map.new(
+        for {%{speaker: :user, segment_id: id} = part, index} <- indexed,
+            is_binary(id),
+            do: {speech_boundary(part), index}
+      )
+
+    indexed
+    |> Enum.sort_by(fn {part, index} ->
+      target = overlap_end(part, caller_ends, index)
+      {target, if(target > index, do: 1, else: 0), index}
+    end)
+    |> Enum.map(&elem(&1, 0))
+  end
+
+  defp overlap_end(%{speaker: :assistant, overlaps_user_segment_id: id} = part, ends, index)
+       when is_binary(id),
+       do: max(index, Map.get(ends, {Map.get(part, :provider_generation), id}, index))
+
+  defp overlap_end(_, _, index), do: index
 end

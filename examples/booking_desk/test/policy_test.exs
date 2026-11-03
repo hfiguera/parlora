@@ -1208,6 +1208,92 @@ defmodule BookingDesk.PolicyTest do
     assert wait.task_id == "t"
   end
 
+  test "native busy mode revises validated availability through its existing correlation only" do
+    s = %{snapshot() | pending_delegations: %{}}
+    task = Map.put(s.tasks["t"], :delegation_id, "original-call")
+    s = %{s | tasks: %{"t" => task}}
+
+    opts = [
+      phonic_busy: true,
+      coalesce_ms: 0,
+      judge: fn _ ->
+        {:ok, %{"intent" => "replace_search", "date" => "2026-11-05", "clinician" => "lee"}}
+      end
+    ]
+
+    for status <- [:submitted, :completed] do
+      current = put_in(s.tasks["t"].status, status)
+
+      assert {:ok, [revision]} =
+               BookingDesk.Policy.interpret(
+                 current,
+                 %ContextTrigger{kind: :transcript_updated},
+                 opts
+               )
+
+      assert revision.kind == :supersede_task
+      assert revision.task_id == "t" and revision.expected_task_revision == 1
+      assert revision.delegation_id == nil
+      assert revision.input.operation == "availability" and revision.input.date == "2026-11-05"
+    end
+
+    uncorrelated = put_in(s.tasks["t"].delegation_id, nil)
+
+    assert {:ok, [wait]} =
+             BookingDesk.Policy.interpret(
+               uncorrelated,
+               %ContextTrigger{kind: :transcript_updated},
+               opts
+             )
+
+    assert wait.kind == :wait_for_context
+
+    aliased = %{
+      uncorrelated
+      | pending_delegations: %{"alias" => %{status: :claimed, task_id: "t", task_revision: 1}}
+    }
+
+    assert {:ok, [revision]} =
+             BookingDesk.Policy.interpret(
+               aliased,
+               %ContextTrigger{kind: :transcript_updated},
+               opts
+             )
+
+    assert revision.kind == :supersede_task and revision.delegation_id == nil
+
+    assert {:ok, [default]} =
+             interpret(s, {:ok, %{"intent" => "replace_search", "date" => "2026-11-05"}})
+
+    assert default.kind == :wait_for_context
+  end
+
+  test "native busy read recovery cannot replace fresh delegation or a verified proposal for writes" do
+    s = %{snapshot() | pending_delegations: %{}}
+    task = s.tasks["t"] |> Map.put(:delegation_id, "old-call") |> Map.put(:status, :completed)
+    s = %{s | tasks: %{"t" => task}}
+    before = BookingDesk.Store.snapshot()
+
+    for intent <- ["choose_slot", "confirm"] do
+      opts = [
+        phonic_busy: true,
+        coalesce_ms: 0,
+        settle_confirm_ms: 0,
+        judge: fn _ ->
+          {:ok,
+           %{"intent" => intent, "date" => "2026-11-04", "time" => "10:15", "clinician" => "lee"}}
+        end
+      ]
+
+      assert {:ok, decisions} =
+               BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :transcript_updated}, opts)
+
+      refute Enum.any?(decisions, &(&1.kind in [:start_task, :supersede_task]))
+    end
+
+    assert BookingDesk.Store.snapshot() == before
+  end
+
   test "a validated slot survives assistant acknowledgments until delegation, but not new caller or booking context" do
     s = snapshot()
 

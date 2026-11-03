@@ -1,5 +1,47 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Phonic now defaults to native busy-mode result delivery, listening backchannels
+  at aggressiveness `0.3`, required pre-tool speech with overlapping backend work,
+  speed `1.05`, speech threshold `0.7`, minimum speech `120 ms`, end-of-turn silence
+  `600 ms`, one-word interruptions and a 60-second tool-output timeout. Artificial
+  background noise remains disabled. App overrides take precedence and are
+  validated after defaults are resolved. Disabling backchannels removes inherited
+  aggressiveness. `Parlora.Providers.Phonic.default_options/0` exposes the defaults.
+- **Phonic upgrade:** native busy mode holds other voice tool calls while a
+  result is pending. Apps requiring the previous concurrent voice-tool behavior
+  should set `wait_for_response: false`. Set `require_speech_before_tool_call: false`
+  and `enable_assistant_backchannel: false` to disable the new speech behaviors.
+  Backend job deadlines and application-owned validation and consent are unchanged.
+- BookingDesk inherits Phonic conversation defaults from Parlora and retains only
+  its clinic keywords. Apps override individual settings through `provider_options`;
+  the combined example-only conversation toggle has been removed.
+
+### Fixed
+
+- Raise Phonic's default VAD threshold to `0.7` to reduce false interruptions from
+  café activity while retaining one-word interruptions and native conversation.
+  Explicit app overrides still take precedence. Handle provider-cancelled input
+  without leaving verified results queued or timing out a cancelled automatic
+  response. Expose caller speech boundaries for audits; BookingDesk now rejects
+  false speech starts even when their punctuation transcripts were discarded.
+- Preserve native Phonic result audio when its speech starts before an earlier
+  acknowledgment finishes. Track outstanding speech ends until all open speech
+  boundaries settle, including across native tool handoffs. Late-caption recovery
+  reuses an outstanding boundary instead of counting another start. This also
+  handles short acknowledgments whose last caption precedes the handoff or arrives
+  after the result starts. Caller interruptions reset the accounting.
+  Punctuation-only input remains
+  available as a discarded-transcript diagnostic rather than a caller turn.
+- Keep current verified facts in native Phonic tool outputs when a later call
+  associates with completed work. Previously, an acknowledgment ending the prior
+  reply could cause deduplication to remove the result and strand the conversation.
+  Native response ownership and the instruction against repeated announcements
+  are preserved; no backend work is repeated.
+
 ## 0.4.0
 
 Adds opt-in local audio capture for diagnostics and recording, fixes Gemini and

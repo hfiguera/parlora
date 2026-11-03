@@ -3,6 +3,184 @@ defmodule Parlora.PhonicProtocolTest do
   alias Parlora.{AudioFormat, ContextUpdate}
   alias Parlora.Providers.Phonic.{Calls, Protocol}
 
+  test "native conversational controls reach the config without changing execution authority" do
+    options = [
+      enable_assistant_backchannel: true,
+      assistant_backchannel_aggressiveness: 0.3,
+      audio_speed: 1.1,
+      background_noise: "office",
+      background_noise_level: 0.1,
+      vad_prebuffer_duration_ms: 400,
+      vad_min_speech_duration_ms: 60,
+      vad_min_silence_duration_ms: 600,
+      vad_threshold: 0.4,
+      min_words_to_interrupt: 2,
+      boosted_keywords: ["Cedarwood", "Dr. Lee"],
+      pronunciation_dictionary: [%{word: "Cedarwood", pronunciation: "SEE-der-wood"}],
+      intelligence_level: "high",
+      default_language: "en",
+      additional_languages: ["es", "fr"],
+      multilingual_mode: "auto",
+      generate_no_input_poke_text: false,
+      no_input_poke_sec: 15,
+      no_input_poke_text: "Are you still there?",
+      no_input_end_conversation_sec: 300
+    ]
+
+    assert {:ok, config} =
+             Protocol.start(
+               [
+                 api_key: "test",
+                 require_speech_before_tool_call: true,
+                 wait_for_speech_before_tool_call: false
+               ] ++ options,
+               %AudioFormat{}
+             )
+
+    assert Map.take(config, Keyword.keys(options)) == Map.new(options)
+    assert [tool] = config.tools
+    assert tool.require_speech_before_tool_call
+    refute tool.wait_for_speech_before_tool_call
+    assert tool.wait_for_response
+    refute tool.allow_tool_chaining or tool.can_run_during_user_speech
+    assert tool.execution_mode == "async" and tool.forbid_speech_after_tool_call
+    assert tool.tool_schema.function.name == Protocol.function()
+    assert tool.tool_schema.function.strict
+    assert config.model == "phonic-1" and config.input_format == "pcm_24000"
+  end
+
+  test "invalid native settings and misspellings return errors instead of being silently ignored" do
+    for {key, value} <- [
+          enable_assistant_backchannel: "true",
+          audio_speed: 1.51,
+          background_noise: "cafe",
+          background_noise_level: -0.1,
+          vad_prebuffer_duration_ms: 2001,
+          vad_min_speech_duration_ms: 1501,
+          vad_min_silence_duration_ms: 1.5,
+          vad_threshold: 0.1,
+          min_words_to_interrupt: 0,
+          boosted_keywords: [String.duplicate("a", 51)],
+          boosted_keywords: [String.duplicate("e\u0301", 26)],
+          boosted_keywords: ["same", "same"],
+          boosted_keywords: ["valid" | :invalid],
+          pronunciation_dictionary: [%{word: "x", pronunciation: "x", other: "x"}],
+          pronunciation_dictionary: [%{word: String.duplicate("a", 31), pronunciation: "x"}],
+          pronunciation_dictionary: [%{word: "a", pronunciation: String.duplicate("x", 51)}],
+          pronunciation_dictionary: [
+            %{word: "a", pronunciation: "x"},
+            %{"word" => "a", "pronunciation" => "y"}
+          ],
+          intelligence_level: :high,
+          default_language: "English",
+          additional_languages: ["en"],
+          multilingual_mode: "guess",
+          generate_no_input_poke_text: :yes,
+          no_input_poke_sec: 121,
+          no_input_poke_text: "",
+          no_input_end_conversation_sec: 601,
+          require_speech_before_tool_call: :yes,
+          wait_for_speech_before_tool_call: 1,
+          wait_for_response: :yes,
+          forbid_speech_after_tool_call: :yes,
+          enable_assistant_backchannels: true
+        ] do
+      assert {:error, %{code: :invalid_argument, details: %{setting: ^key}}} =
+               Protocol.start([{:api_key, "test"}, {key, value}], %AudioFormat{})
+    end
+
+    for options <- [
+          nil,
+          %{},
+          [:bad],
+          [{:api_key, "test"}, {:audio_speed, 1}, {:audio_speed, 1.1}]
+        ] do
+      assert {:error, %{code: :invalid_argument}} = Protocol.start(options, %AudioFormat{})
+    end
+
+    assert {:error, %{code: :invalid_argument, details: %{setting: :additional_languages}}} =
+             Protocol.start(
+               [
+                 api_key: "test",
+                 multilingual_mode: "auto",
+                 additional_languages: ["es", "fr", "de"]
+               ],
+               %AudioFormat{}
+             )
+  end
+
+  test "native boundaries, nullable settings and dictionary JSON keys are supported" do
+    for options <- [
+          [audio_speed: 0.5, vad_prebuffer_duration_ms: 0, vad_threshold: 0.2],
+          [audio_speed: 1.5, vad_min_silence_duration_ms: 1500, vad_threshold: 0.8],
+          [enable_assistant_backchannel: true, assistant_backchannel_aggressiveness: 0],
+          [enable_assistant_backchannel: true, assistant_backchannel_aggressiveness: 1],
+          [background_noise: nil, no_input_poke_sec: nil],
+          [boosted_keywords: [String.duplicate("雪", 50)]],
+          [require_speech_before_tool_call: false, wait_for_speech_before_tool_call: true]
+        ] do
+      assert {:ok, _} = Protocol.start([api_key: "test"] ++ options, %AudioFormat{})
+    end
+
+    assert {:ok, config} =
+             Protocol.start(
+               [
+                 api_key: "test",
+                 pronunciation_dictionary: [%{"word" => "Lee", "pronunciation" => "lee"}]
+               ],
+               %AudioFormat{}
+             )
+
+    assert config.pronunciation_dictionary == [%{word: "Lee", pronunciation: "lee"}]
+  end
+
+  test "response ownership and tool schema cannot be overridden by native configuration" do
+    for {key, value} <- [
+          execution_mode: "sync",
+          allow_tool_chaining: true
+        ] do
+      assert {:error, %{code: :unsupported, details: %{setting: ^key}}} =
+               Protocol.start([{:api_key, "test"}, {key, value}], %AudioFormat{})
+    end
+
+    assert {:error, %{code: :unsupported, details: %{setting: :forbid_speech_after_tool_call}}} =
+             Protocol.start(
+               [api_key: "test", wait_for_response: false, forbid_speech_after_tool_call: false],
+               %AudioFormat{}
+             )
+
+    for key <- [
+          :tools,
+          :system_prompt,
+          :input_format,
+          :output_format,
+          :push_to_talk,
+          :additional_params
+        ] do
+      assert {:error, %{code: :invalid_argument}} =
+               Protocol.start([{:api_key, "test"}, {key, "override"}], %AudioFormat{})
+    end
+  end
+
+  test "native busy mode enables one provider-owned async result response" do
+    assert {:ok, config} =
+             Protocol.start([api_key: "test", wait_for_response: true], %AudioFormat{})
+
+    assert [tool] = config.tools
+    assert tool.wait_for_response and tool.forbid_speech_after_tool_call
+    assert tool.execution_mode == "async"
+    refute tool.allow_tool_chaining
+    assert tool.tool_schema.function.strict
+
+    assert {:ok, config} =
+             Protocol.start(
+               [api_key: "test", wait_for_response: true, forbid_speech_after_tool_call: false],
+               %AudioFormat{}
+             )
+
+    refute hd(config.tools).forbid_speech_after_tool_call
+  end
+
   test "configuration pins the model and codecs with strict asynchronous client delegation" do
     for format <- [%AudioFormat{}, AudioFormat.pcmu()] do
       assert {:ok, config} = Protocol.start([api_key: "test"], format)
@@ -11,8 +189,11 @@ defmodule Parlora.PhonicProtocolTest do
       refute config.push_to_talk
       refute config.stream_ahead_of_real_time
       refute Map.has_key?(config, :data_retention_policy)
+      assert config.enable_assistant_backchannel
+      assert config.audio_speed == 1.05
+      assert config.vad_min_silence_duration_ms == 600
       assert [tool] = config.tools
-      assert tool.execution_mode == "async" and tool.wait_for_response == false
+      assert tool.execution_mode == "async" and tool.wait_for_response
       refute tool.allow_tool_chaining
       assert tool.forbid_speech_after_tool_call
       assert tool.tool_schema.function.strict

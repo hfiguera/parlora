@@ -2,6 +2,25 @@ defmodule BookingDesk.RunReportTest do
   use ExUnit.Case, async: true
   alias BookingDesk.RunReport
 
+  test "recorded provider overrides omit API credentials without changing other values" do
+    options = [
+      api_key: "not-a-real-key",
+      wait_for_response: false,
+      assistant_backchannel_aggressiveness: 0,
+      background_noise: nil,
+      boosted_keywords: ["Cedarwood"]
+    ]
+
+    assert RunReport.provider_options(options) == %{
+             wait_for_response: false,
+             assistant_backchannel_aggressiveness: 0,
+             background_noise: nil,
+             boosted_keywords: ["Cedarwood"]
+           }
+
+    assert options[:api_key] == "not-a-real-key"
+  end
+
   test "manual booking and reminder observations do not inherit replay milestone failures" do
     report =
       RunReport.microphone(

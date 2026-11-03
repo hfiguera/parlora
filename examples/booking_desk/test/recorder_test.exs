@@ -21,12 +21,73 @@ defmodule BookingDesk.RecorderTest do
       generation: 0,
       type: :transcript_delta,
       observed_at_us: System.monotonic_time(:microsecond),
-      payload: %{speaker: :assistant, delta: "Can we text 0188?", segment_id: "reply-1"}
+      payload: %{
+        speaker: :assistant,
+        delta: "Mm-hmm.",
+        segment_id: "reply-1",
+        overlaps_user_segment_id: "caller-1"
+      }
     }
 
     Recorder.event(recorder, event)
     report = Recorder.finish(recorder, %{})
-    assert [%{data: %{segment_id: "reply-1"}}] = report.events
+
+    assert [%{data: %{segment_id: "reply-1", overlaps_user_segment_id: "caller-1"}}] =
+             report.events
+
+    GenServer.stop(recorder)
+  end
+
+  test "discarded non-speech remains auditable without becoming caller dialogue", %{
+    recorder: recorder
+  } do
+    payload = %{
+      kind: :transcript_discarded,
+      cause: :no_lexical_content,
+      speaker: :user,
+      delta: ".",
+      segment_id: "noise-1"
+    }
+
+    Recorder.event(recorder, %Parlora.Event{
+      id: "noise",
+      session_id: "test",
+      source: :provider,
+      adapter_id: "phonic",
+      generation: 0,
+      type: :extension,
+      observed_at_us: System.monotonic_time(:microsecond),
+      payload: payload
+    })
+
+    report = Recorder.finish(recorder, %{})
+    assert [%{name: :extension, data: ^payload}] = report.events
+    GenServer.stop(recorder)
+  end
+
+  test "caller speech boundaries retain identities and cancellation for interruption audits", %{
+    recorder: recorder
+  } do
+    for state <- [:started, :finished, :cancelled] do
+      Recorder.event(recorder, %Parlora.Event{
+        id: "speech-#{state}",
+        session_id: "test",
+        source: :provider,
+        adapter_id: "phonic",
+        generation: 0,
+        type: :extension,
+        observed_at_us: System.monotonic_time(:microsecond),
+        payload: %{kind: :caller_speech, state: state, segment_id: "caller-1"}
+      })
+    end
+
+    report = Recorder.finish(recorder, %{})
+
+    assert Enum.map(report.events, & &1.data) ==
+             Enum.map([:started, :finished, :cancelled], fn state ->
+               %{kind: :caller_speech, state: state, segment_id: "caller-1"}
+             end)
+
     GenServer.stop(recorder)
   end
 

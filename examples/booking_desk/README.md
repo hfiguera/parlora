@@ -31,6 +31,8 @@ as errors, checks compile cycles and formatting, runs the tests, and then runs
 Credo, ExDNA, read-only Credence analysis and Dialyzer. These tools are development
 and test dependencies; the same versions are pinned in Parlora. Credence uses
 conservative assumptions and isolates compiler analysis in separate processes.
+Dialyzer checks the local Parlora dependency even when lockfiles are unchanged,
+so cached type information follows library API changes.
 No check rewrites source or makes a model call. GitHub Actions runs this suite
 and the Python tests, with a Dialyzer PLT cache keyed by runtime and dependencies.
 
@@ -57,6 +59,33 @@ To select another speech provider, also export its key and set `PARLORA_PROVIDER
 The example selects Ara for Grok and Sulafat for Gemini. JEV uses `jev-1.13.0`;
 structured extraction uses `openai:gpt-6-luna`. Available API credit is required for
 live calls. Keep keys out of source files and recordings.
+
+Phonic sessions inherit Parlora's native conversation defaults:
+listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
+backend work allowed to overlap it, native busy-mode result delivery, a 60-second
+tool timeout, speech speed `1.05`, a 600-ms end-of-turn silence threshold, and
+one-word interruptions. Speech detection uses threshold `0.7` and a 120-ms
+minimum speech duration to reduce false turns from café chatter without
+requiring multiple words to interrupt. Recognition keywords include Cedarwood,
+Dr. Lee and Dr. Patel. Booking approval, number verification and reminder consent remain
+application-controlled. The example supplies only its clinic keywords; other
+speech providers are unchanged.
+
+No extra flag is needed with `PARLORA_PROVIDER=phonic`. Use `provider_options` in
+`BookingDesk.start/2` or `BookingDesk.Run.run/3` to override individual settings:
+
+```elixir
+BookingDesk.start(channel,
+  provider: "phonic",
+  provider_options: [wait_for_response: false, enable_assistant_backchannel: false]
+)
+```
+
+This selects manual result delivery and disables listening acknowledgments while
+retaining other library defaults. Set `require_speech_before_tool_call: false` too
+if pre-tool speech should be optional. Recorded `provider_defaults` and
+`provider_options` distinguish the library defaults from the app's overrides.
+API keys are omitted from recorded overrides.
 
 ## Talk through your microphone
 
@@ -124,6 +153,24 @@ mix run run.exs "runs/cafe-$(date +%Y%m%d-%H%M%S)" clips \
 The background is not added to assistant output. The loop's source, CC0 license,
 level and processing are documented in [the asset notes](priv/ambience/cafe/README.md).
 Ambience is supported only in replay mode, not with an actual microphone.
+
+After a Phonic replay, check for extra caller turns during background-only input:
+
+```sh
+python3 scripts/audit_caller_turns.py runs/YOUR_RECORDING
+```
+
+This offline audit uses captured caller-input onset ticks and clip lengths,
+with a three-second allowance for transcript arrival and 500 ms for speech-start
+arrival after a clip ends. Phonic recordings require captured caller speech
+boundaries as well as transcripts. It rejects unexpected audio interruptions and speech starts,
+untranscribed starts, caller turns without starts, unexpected caller text, missing
+clip transcripts and dropped capture data; it writes
+`caller-turn-verification.json` and exits unsuccessfully on failure. It never
+mutes input or uses the script to filter live caller speech. A passing workflow
+alone does not establish noise rejection. Speech detection is a tradeoff: test
+quiet voices and short refusals too; sustained background voices can still
+be recognized as speech.
 
 ## Application behavior
 

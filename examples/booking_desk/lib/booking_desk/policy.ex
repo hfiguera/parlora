@@ -658,7 +658,7 @@ defmodule BookingDesk.Policy do
   defp dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics, opts) do
     case result do
       {:incomplete, judgment, missing} ->
-        incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text)
+        incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text, opts)
 
       {:ok, %{"intent" => intent} = judgment} ->
         context = %{
@@ -686,7 +686,7 @@ defmodule BookingDesk.Policy do
     end
   end
 
-  defp incomplete_decision(_snapshot, _judgment, ["slot"], pending, latest, cursor, _text) do
+  defp incomplete_decision(_snapshot, _judgment, ["slot"], pending, latest, cursor, _text, _opts) do
     clarify(
       cursor,
       pending,
@@ -695,7 +695,7 @@ defmodule BookingDesk.Policy do
     )
   end
 
-  defp incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text) do
+  defp incomplete_decision(snapshot, judgment, missing, pending, latest, cursor, text, opts) do
     if judgment["intent"] in ["choose_slot", "reschedule"] do
       decide_intent(judgment["intent"], judgment, %{
         snapshot: snapshot,
@@ -703,7 +703,8 @@ defmodule BookingDesk.Policy do
         latest: latest,
         cursor: cursor,
         text: text,
-        demographics: :not_requested
+        demographics: :not_requested,
+        options: opts
       })
     else
       clarify_booking(snapshot, cursor, pending, latest, judgment, missing)
@@ -947,7 +948,8 @@ defmodule BookingDesk.Policy do
          snapshot: snapshot,
          pending: pending,
          latest: latest,
-         cursor: cursor
+         cursor: cursor,
+         options: opts
        })
        when intent in ["availability", "replace_search", "additional_search"] do
     date = judgment["date"]
@@ -990,7 +992,14 @@ defmodule BookingDesk.Policy do
             search_intent: intent
           })
 
-        {:ok, availability_decisions(intent, pending, latest, input)}
+        {:ok,
+         availability_decisions(
+           intent,
+           pending,
+           latest,
+           input,
+           native_read_route?(snapshot, latest, opts)
+         )}
 
       true ->
         clarify_booking(
@@ -1135,12 +1144,16 @@ defmodule BookingDesk.Policy do
   defp insurance_refused?(intent, text),
     do: intent == "insurance_same" and not BookingDesk.Consent.unconditional?(text)
 
-  defp appointment_intent(intent, judgment, %{
-         snapshot: snapshot,
-         pending: pending,
-         latest: latest,
-         cursor: cursor
-       })
+  defp appointment_intent(
+         intent,
+         judgment,
+         %{
+           snapshot: snapshot,
+           pending: pending,
+           latest: latest,
+           cursor: cursor
+         } = context
+       )
        when intent in ["choose_slot", "reschedule"] do
     date = judgment["date"]
     time = judgment["time"]
@@ -1150,12 +1163,7 @@ defmodule BookingDesk.Policy do
     candidates = slot_candidates(snapshot, verified, date, time, clinician)
 
     if verified == nil and date in BookingDesk.Store.dates() do
-      decide_intent("availability", judgment, %{
-        snapshot: snapshot,
-        pending: pending,
-        latest: latest,
-        cursor: cursor
-      })
+      decide_intent("availability", judgment, context)
     else
       choose_candidate(candidates, snapshot, pending, latest, cursor, intent, verified)
     end
@@ -1299,21 +1307,21 @@ defmodule BookingDesk.Policy do
        else: {:ok, start(pending, latest, input)}
   end
 
-  defp availability_decisions(intent, pending, latest, input) do
+  defp availability_decisions(intent, pending, latest, input, native_busy?) do
     cond do
       same_search?(latest, input) and latest.status in [:completed, :failed, :cancelled] and
           input.cursor > latest.input.cursor ->
-        replace_search(pending, latest, input)
+        replace_search(pending, latest, input, native_busy?)
 
       same_search?(latest, input) and
           match?(%{input: %{unresolved_intent: true}}, Map.get(latest, :clarification)) ->
-        replace_search(pending, latest, input)
+        replace_search(pending, latest, input, native_busy?)
 
       same_search?(latest, input) ->
         associate(pending, latest)
 
       replacement_search?(intent, latest) ->
-        replace_search(pending, latest, input)
+        replace_search(pending, latest, input, native_busy?)
 
       true ->
         start(pending, latest, input)
@@ -1330,18 +1338,36 @@ defmodule BookingDesk.Policy do
       intent in ["availability", "replace_search"] && latest &&
         latest.input.operation == "availability"
 
-  defp replace_search(nil, latest, input), do: wait_for_delegation(latest, input)
+  # Busy mode holds new voice tools. A validated read correction can reuse the
+  # existing task's correlation; booking and reminder writes still need a new call.
+  defp replace_search(nil, latest, input, true),
+    do: supersede_search(latest, input, nil)
 
-  defp replace_search(pending, latest, input),
+  defp replace_search(nil, latest, input, _native_busy?), do: wait_for_delegation(latest, input)
+
+  defp replace_search(pending, latest, input, _native_busy?),
+    do: supersede_search(latest, input, delegation(pending))
+
+  defp supersede_search(latest, input, delegation_id),
     do: [
       %D{
         kind: :supersede_task,
         task_id: latest.id,
         expected_task_revision: latest.revision,
-        delegation_id: delegation(pending),
+        delegation_id: delegation_id,
         input: input
       }
     ]
+
+  defp native_read_route?(snapshot, %{id: task} = latest, opts) do
+    Keyword.get(opts, :phonic_busy, false) and
+      (is_binary(Map.get(latest, :delegation_id)) or
+         Enum.any?(snapshot.pending_delegations, fn {_, entry} ->
+           entry.status == :claimed and Map.get(entry, :task_id) == task
+         end))
+  end
+
+  defp native_read_route?(_, _, _), do: false
 
   defp clarify_booking(snapshot, cursor, pending, latest, judgment, missing) do
     # Only confident, validated preferences survive a clarification. This is

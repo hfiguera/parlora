@@ -1,10 +1,13 @@
 defmodule BookingDesk do
   alias Parlora.Provider.OutputBuffer
+  alias Parlora.Providers.Phonic
   @moduledoc "Fictional clinic scheduling through Parlora, JEV and deterministic Jido actions."
   def start(channel, opts \\ []) do
+    opts = Keyword.validate!(opts, [:provider, :provider_options, :guard, :event_sink, :policy])
     provider = Keyword.get(opts, :provider, System.get_env("PARLORA_PROVIDER", "openai"))
 
-    provider_adapter = provider(provider)
+    provider_adapter = provider(provider, Keyword.get(opts, :provider_options, []))
+
     {channel_module, channel_opts} = channel
     {outer_observer, channel_opts} = Keyword.pop(channel_opts, :audio_observer)
 
@@ -32,7 +35,13 @@ defmodule BookingDesk do
     end
   end
 
-  defp start_session(guard, {channel_module, channel_opts}, provider_adapter, provider, opts) do
+  defp start_session(
+         guard,
+         {channel_module, channel_opts},
+         {_module, provider_options} = provider_adapter,
+         provider,
+         opts
+       ) do
     observer = BookingDesk.CallGuard.observer(guard)
 
     with {:ok, conversation} <-
@@ -53,7 +62,14 @@ defmodule BookingDesk do
             {BookingDesk.Policy,
              Keyword.merge(Keyword.get(opts, :policy, []),
                call_guard: guard,
-               conversation: conversation
+               conversation: conversation,
+               phonic_busy:
+                 provider == "phonic" and
+                   Keyword.get(
+                     provider_options,
+                     :wait_for_response,
+                     Phonic.default_options()[:wait_for_response]
+                   )
              )},
           context: %{},
           instructions: instructions(provider),
@@ -80,7 +96,7 @@ defmodule BookingDesk do
 
   def limits(_), do: [job_timeout_ms: 35_000, policy_timeout_ms: 5_000]
 
-  def provider(name) do
+  def provider(name, overrides \\ []) do
     {module, variable} =
       case name do
         "openai" -> {Parlora.Providers.OpenAI, "OPENAI_API_KEY"}
@@ -89,12 +105,17 @@ defmodule BookingDesk do
         "phonic" -> {Parlora.Providers.Phonic, "PHONIC_API_KEY"}
       end
 
-    options = [api_key: System.fetch_env!(variable)]
+    options =
+      Keyword.put(
+        BookingDesk.PhonicSettings.options(name),
+        :api_key,
+        System.fetch_env!(variable)
+      )
 
     options =
       if voice = assistant_voice(name), do: Keyword.put(options, :voice, voice), else: options
 
-    {module, options}
+    {module, Keyword.merge(options, overrides)}
   end
 
   def assistant_voice("gemini"), do: "Sulafat"

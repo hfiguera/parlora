@@ -1,5 +1,5 @@
-{opts, args, []} =
-  OptionParser.parse(System.argv(),
+{opts, args} =
+  OptionParser.parse!(System.argv(),
     strict: [
       observability: :boolean,
       microphone: :boolean,
