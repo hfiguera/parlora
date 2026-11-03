@@ -18,7 +18,7 @@ defmodule OrderDesk.MixProject do
           {:plug, "== 1.20.3"}
         ] ++
           case System.get_env("PARLORA_BACKEND") do
-            "sagents" -> [{:sagents, "== 0.19.2"}]
+            "sagents" -> [{:sagents, "== 0.20.0"}]
             "legion" -> [{:legion, "== 0.6.0"}]
             _default -> []
           end

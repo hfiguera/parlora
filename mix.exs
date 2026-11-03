@@ -53,7 +53,7 @@ defmodule Parlora.MixProject do
       {:mint_web_socket, "~> 1.0 and >= 1.0.6"},
       {:rustler, "~> 0.38.0", runtime: false},
       {:jido, "~> 2.4.0", optional: true},
-      {:sagents, "~> 0.19.2", optional: true},
+      {:sagents, "~> 0.19.2 or ~> 0.20.0", optional: true},
       {:legion, "~> 0.6.0", optional: true},
       {:telemetry, "~> 1.4 and >= 1.4.2"},
       {:ex_doc, "== 0.40.4", only: :dev, runtime: false},

@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Support optional Sagents `~> 0.20.0` while retaining `~> 0.19.2` compatibility.
+  Development, OrderDesk and isolated backend consumers now use `0.20.0`.
 - Phonic now defaults to native busy-mode result delivery, listening backchannels
   at aggressiveness `0.3`, required pre-tool speech with overlapping backend work,
   speed `1.05`, speech threshold `0.7`, minimum speech `120 ms`, end-of-turn silence
