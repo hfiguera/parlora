@@ -38,6 +38,33 @@ defmodule BookingDesk.RecorderTest do
     GenServer.stop(recorder)
   end
 
+  test "discarded non-speech remains auditable without becoming caller dialogue", %{
+    recorder: recorder
+  } do
+    payload = %{
+      kind: :transcript_discarded,
+      cause: :no_lexical_content,
+      speaker: :user,
+      delta: ".",
+      segment_id: "noise-1"
+    }
+
+    Recorder.event(recorder, %Parlora.Event{
+      id: "noise",
+      session_id: "test",
+      source: :provider,
+      adapter_id: "phonic",
+      generation: 0,
+      type: :extension,
+      observed_at_us: System.monotonic_time(:microsecond),
+      payload: payload
+    })
+
+    report = Recorder.finish(recorder, %{})
+    assert [%{name: :extension, data: ^payload}] = report.events
+    GenServer.stop(recorder)
+  end
+
   test "separate audio tracks retain offsets, count credits, and omit credentials", %{
     recorder: recorder,
     path: path

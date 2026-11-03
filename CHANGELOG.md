@@ -17,10 +17,15 @@
   and `enable_assistant_backchannel: false` to disable the new speech behaviors.
   Backend job deadlines and application-owned validation and consent are unchanged.
 - BookingDesk inherits Phonic conversation defaults from Parlora and retains only
-  its clinic keywords and explicit manual-response comparison overrides.
+  its clinic keywords. Apps override individual settings through `provider_options`;
+  the combined example-only conversation toggle has been removed.
 
 ### Fixed
 
+- Preserve native Phonic result audio when its speech starts before an earlier
+  acknowledgment finishes. Track outstanding speech ends until all open speech
+  boundaries settle; interruptions reset them. Punctuation-only input remains
+  available as a discarded-transcript diagnostic rather than a caller turn.
 - Keep current verified facts in native Phonic tool outputs when a later call
   associates with completed work. Previously, an acknowledgment ending the prior
   reply could cause deduplication to remove the result and strand the conversation.

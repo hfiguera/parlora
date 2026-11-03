@@ -53,11 +53,16 @@ def audit(report, max_transcription_delay_ms=3000):
     missing = [window["label"] for window in windows if window["label"] not in heard]
     complete = (report["audio"].get("dropped_packets") == 0
                 and report.get("event_log", {}).get("dropped_events") == 0)
+    discarded = [{"at_ms": event["at_ms"], **event["data"]}
+                 for event in report["events"]
+                 if event["kind"] == "event" and event["name"] == "extension"
+                 and event["data"].get("kind") == "transcript_discarded"]
     return {"passed": complete and not unexpected and not missing,
             "method": "caller transcript arrival within captured clip plus bounded transcription delay",
             "max_transcription_delay_ms": max_transcription_delay_ms,
             "complete_capture": complete, "caller_turns": len(turns),
             "unexpected_caller_turns": unexpected, "untranscribed_clips": missing,
+            "discarded_non_speech_transcripts": discarded,
             "caller_windows": windows}
 
 

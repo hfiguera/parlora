@@ -205,7 +205,7 @@ defmodule Parlora.PhonicSessionTest do
 
   test "default native replies retain completed facts across a late association without re-execution",
        context do
-    {session, server, _channel, backend} =
+    {session, server, channel, backend} =
       boot(context.port, %AudioFormat{}, AssociationPolicy, :default)
 
     emit(server, %{"type" => "input_text", "text" => "order 124"})
@@ -234,6 +234,32 @@ defmodule Parlora.PhonicSessionTest do
 
     assert output["result"] == "Current verified order 124"
     assert output["instruction"] =~ "Do not repeat"
+
+    emit(server, %{
+      "type" => "audio_chunk",
+      "audio" => Base.encode64(:binary.copy(<<2, 0>>, 240)),
+      "text" => "Let me check again."
+    })
+
+    emit(server, %{"type" => "assistant_started_speaking"})
+    emit(server, %{"type" => "assistant_finished_speaking"})
+    verified = :binary.copy(<<3, 0>>, 240)
+
+    emit(server, %{
+      "type" => "audio_chunk",
+      "audio" => Base.encode64(verified),
+      "text" => output["result"]
+    })
+
+    emit(server, %{"type" => "assistant_finished_speaking"})
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :transcript_delta,
+                      payload: %{speaker: :assistant, delta: "Current verified order 124"}
+                    }}
+
+    assert_receive {:audio_written, ^channel, %Parlora.AudioFrame{data: ^verified}}
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 20
     refute_receive {:submitted, _duplicate}, 20
     assert map_size(Parlora.status(session).jobs) == 1
@@ -305,7 +331,7 @@ defmodule Parlora.PhonicSessionTest do
       Parlora.start_session(
         audio_format: format,
         provider: {LocalProvider, [api_key: "private-test", port: port] ++ overrides},
-        channel: {MemoryChannel, observer: self(), capabilities: caps},
+        channel: {MemoryChannel, observer: self(), capabilities: caps, observe_writes: true},
         backend: {FakeBackend, observer: self()},
         context_policy: {policy, []},
         event_sink: self()

@@ -76,6 +76,10 @@ session's `limits:` option.
 
 Caller `input_text` messages were observed as word fragments. The adapter adds a
 word separator and emits `transcript_delta` with unavailable timestamps.
+Punctuation-only input does not become caller dialogue. It remains observable as
+an `extension` event with `kind: :transcript_discarded` and
+`cause: :no_lexical_content`. A Unicode letter or number is sufficient for
+admission, including one-word interruptions and phone digits in other scripts.
 Assistant audio text shares a locally assigned `segment_id` for each utterance.
 Caller fragments share a `segment_id` delimited by native caller speech events.
 Assistant speech starting during that turn carries `overlaps_user_segment_id`.
@@ -291,6 +295,10 @@ outputs contain the verified result, keeping application bookkeeping out of that
 speech path. Text audio without a new speech-start marker is admitted only at a
 native handoff within the same uninterrupted output epoch. After caller
 interruption, a fresh native speech boundary is still required.
+Native acknowledgments and result replies can have overlapping speech boundaries.
+An earlier finish does not close a later reply: output stays open until every
+outstanding speech end arrives. Caller interruption resets this accounting, and
+unmatched starts are bounded by `limits.max_records`.
 
 Applications must account for busy mode holding further voice tools. BookingDesk
 allows only validated availability read corrections to revise an existing
@@ -301,18 +309,20 @@ checks reject obsolete backend results. A live wire probe also confirmed that
 application clarification speech during a pending call preserves its eventual
 native result response.
 
-BookingDesk can exercise the profile above, plus recognition keywords, through
-its normal recorder without changing provider defaults or the blog:
+BookingDesk inherits the library defaults and adds clinic recognition keywords.
+Use its normal recorder to exercise the profile:
 
 ```sh
 cd examples/booking_desk
 PARLORA_PROVIDER=phonic BOOKING_DATABASE=:memory: \
   mix run run.exs runs/phonic-native clips/reminders \
-  --phonic-native-conversation --ambience priv/ambience/cafe/manifest.json
+  --ambience priv/ambience/cafe/manifest.json
 ```
 
-The report records the explicit profile in `provider_options`. Credentials are
-loaded from the environment and are not included in that profile.
+The report records library defaults in `provider_defaults` and app overrides in
+`provider_options`. Use `provider_options` in `BookingDesk.start/2` or
+`BookingDesk.Run.run/3` to override individual settings. Credentials are loaded
+from the environment and are not included in those fields.
 Its 60-second tool budget covers the example's 35-second backend deadline plus
 policy processing and speech settling before output publication.
 

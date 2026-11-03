@@ -109,6 +109,94 @@ defmodule Parlora.PhonicAdapterTest do
     assert Enum.map_join(frames, & &1.data) == bytes
   end
 
+  @tag :non_speech_transcript
+  test "punctuation-only input is observable but never admitted as a caller transcript",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+
+    for text <- [".", "...", "?! —", "…", "♫"] do
+      _state = deliver(context, state, %{"type" => "input_text", "text" => text})
+
+      refute_receive {:parlora_event,
+                      %Event{type: :transcript_delta, payload: %{speaker: :user}}},
+                     10
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :extension,
+                        payload: %{
+                          kind: :transcript_discarded,
+                          cause: :no_lexical_content,
+                          delta: ^text
+                        }
+                      }}
+    end
+  end
+
+  test "single-word refusals, non-English replies and phone digits remain caller speech",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+
+    for text <- ["No", "Stop", "Sí", "نعم", "はい", "0188", "٠١٨٨"] do
+      _state = deliver(context, state, %{"type" => "input_text", "text" => text})
+      expected = text <> " "
+
+      assert_receive {:parlora_event,
+                      %Event{
+                        type: :transcript_delta,
+                        payload: %{speaker: :user, delta: ^expected}
+                      }}
+    end
+  end
+
+  @tag :overlapping_native_speech
+  test "an acknowledgment ending after the result starts cannot discard the native result",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, call("original", "Wednesday"))
+    result = %{update("current", "original") | content: "Thursday has 10:15 AM or 2 PM."}
+    {:reply, :ok, state} = Phonic.handle_call({:append, result}, nil, state)
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    state = deliver(context, state, started())
+    state = deliver(context, state, call("alias", "Thursday"))
+
+    outcome = %{
+      status: :associated,
+      task_status: :completed,
+      result_delivery: :accepted,
+      result: result.content
+    }
+
+    {:reply, :ok, state} = Phonic.handle_call({:resolve_delegation, "alias", outcome}, nil, state)
+    assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "alias"}}
+
+    prefix = :binary.copy(<<1, 0>>, 240)
+    verified = :binary.copy(<<2, 0>>, 240)
+    state = deliver(context, state, audio(prefix, "Let me check Thursday."))
+    state = deliver(context, state, started())
+    state = deliver(context, state, finished())
+    assert state.speech == :speaking
+    assert state.accepting_output?
+    state = deliver(context, state, audio(verified, result.content))
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :transcript_delta,
+                      payload: %{delta: "Thursday has 10:15 AM or 2 PM."}
+                    }}
+
+    state = deliver(context, state, finished())
+    assert state.speech == :idle
+    {:reply, {:ok, frames}, _state} = Phonic.handle_call({:read, 960}, nil, state)
+    assert Enum.map_join(frames, & &1.data) == prefix <> verified
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+  end
+
   test "plain context is unconfirmed and speakable continuation waits for generation and audio drain",
        context do
     state = ready(context)
@@ -827,15 +915,19 @@ defmodule Parlora.PhonicAdapterTest do
         ] do
       state = ready(context)
       state = deliver(context, state, started())
+      state = deliver(context, state, started())
+      assert state.speech_ends_pending == 2
       state = deliver(context, state, audio(:binary.copy(<<1, 0>>, 480), "old"))
       state = Enum.reduce(events, state, &deliver(context, &2, &1))
       assert state.inbound.bytes == 0 and state.interruption == 1 and state.output_blocked
+      assert state.speech_ends_pending == 0
       assert_receive {:parlora_event, %Event{type: :output_interrupted, payload: %{token: 1}}}
       refute_receive {:parlora_event, %Event{type: :output_interrupted}}, 10
       state = deliver(context, state, audio(:binary.copy(<<2, 0>>, 480), "late old"))
       assert state.inbound.bytes == 0
       state = deliver(context, state, %{"type" => "user_finished_speaking"})
       state = deliver(context, state, started())
+      assert state.speech_ends_pending == 1
       state = deliver(context, state, audio(:binary.copy(<<3, 0>>, 480), "fresh"))
       {:reply, :ok, unchanged} = Phonic.handle_call({:resume_output, 0}, nil, state)
       assert unchanged.output_blocked
@@ -843,7 +935,25 @@ defmodule Parlora.PhonicAdapterTest do
       {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
       assert {:reply, {:ok, frames}, _} = Phonic.handle_call({:read, 960}, nil, state)
       assert Enum.map_join(frames, & &1.data) == :binary.copy(<<3, 0>>, 480)
+      state = deliver(context, state, finished())
+      assert state.speech == :idle and state.speech_ends_pending == 0
     end
+  end
+
+  test "unmatched speech starts fail at the configured record bound", context do
+    state = ready_busy(context)
+    state = %{state | init: %{state.init | limits: %{state.init.limits | max_records: 2}}}
+    state = deliver(context, state, started())
+    state = deliver(context, state, started())
+    assert state.status == :ready and state.speech_ends_pending == 2
+    state = deliver(context, state, started())
+    assert state.status == :closed and state.speech_ends_pending == 0
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :failed,
+                      payload: %{error: %{details: %{reason: :speech_boundary_overflow}}}
+                    }}
   end
 
   test "late associations do not announce pending work or undeliverable results", context do

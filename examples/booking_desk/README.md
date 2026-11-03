@@ -71,14 +71,21 @@ Dr. Lee and Dr. Patel. Booking approval, number verification and reminder consen
 application-controlled. The example supplies only its clinic keywords; other
 speech providers are unchanged.
 
-No extra flag is needed with `PARLORA_PROVIDER=phonic`. The existing
-`--phonic-native-conversation` flag is still accepted; use
-`--no-phonic-native-conversation` to compare manual result delivery without
-backchannels or required pre-tool acknowledgments. Voice and listening settings
-still inherit Parlora's defaults. Direct callers of `BookingDesk.start/2` get the
-same profile and can set `phonic_native_conversation: false` or override individual
-`provider_options`. Recorded `provider_defaults` and `provider_options` distinguish
-the library defaults from the app's overrides.
+No extra flag is needed with `PARLORA_PROVIDER=phonic`. Use `provider_options` in
+`BookingDesk.start/2` or `BookingDesk.Run.run/3` to override individual settings:
+
+```elixir
+BookingDesk.start(channel,
+  provider: "phonic",
+  provider_options: [wait_for_response: false, enable_assistant_backchannel: false]
+)
+```
+
+This selects manual result delivery and disables listening acknowledgments while
+retaining other library defaults. Set `require_speech_before_tool_call: false` too
+if pre-tool speech should be optional. Recorded `provider_defaults` and
+`provider_options` distinguish the library defaults from the app's overrides.
+API keys are omitted from recorded overrides.
 
 ## Talk through your microphone
 

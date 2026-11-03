@@ -101,6 +101,7 @@ defmodule Parlora.Providers.Phonic do
       output_blocked: false,
       accepting_output?: false,
       speech: :idle,
+      speech_ends_pending: 0,
       caption_id: nil,
       caller_segment_id: nil,
       speech_user_segment_id: nil,
@@ -664,19 +665,41 @@ defmodule Parlora.Providers.Phonic do
 
   defp event(%{"type" => "input_text", "text" => text}, state)
        when is_binary(text) and byte_size(text) <= 16_384 do
-    if String.trim(text) != "" do
-      emit(state, :transcript_delta, %{
-        speaker: :user,
-        delta: String.trim(text) <> " ",
-        segment_id: state.caller_segment_id,
-        start_ms: nil,
-        end_ms: nil,
-        timing: :unavailable
-      })
+    text = String.trim(text)
+
+    cond do
+      Regex.match?(~r/[\p{L}\p{N}]/u, text) ->
+        emit(state, :transcript_delta, %{
+          speaker: :user,
+          delta: text <> " ",
+          segment_id: state.caller_segment_id,
+          start_ms: nil,
+          end_ms: nil,
+          timing: :unavailable
+        })
+
+      text != "" ->
+        emit(state, :extension, %{
+          kind: :transcript_discarded,
+          cause: :no_lexical_content,
+          speaker: :user,
+          delta: text,
+          segment_id: state.caller_segment_id
+        })
+
+      true ->
+        :ok
     end
 
     state
   end
+
+  defp event(
+         %{"type" => "assistant_started_speaking"},
+         %{speech_ends_pending: count, init: %{limits: %{max_records: limit}}} = state
+       )
+       when count >= limit,
+       do: fail(state, :speech_boundary_overflow)
 
   defp event(%{"type" => "assistant_started_speaking"}, state) do
     overlap = if state.caller_speaking, do: state.caller_segment_id
@@ -686,6 +709,7 @@ defmodule Parlora.Providers.Phonic do
       %{
         state
         | caption_id: ID.new(),
+          speech_ends_pending: state.speech_ends_pending + 1,
           speech_user_segment_id: overlap,
           accepting_output?: true,
           interrupted?: false,
@@ -695,6 +719,13 @@ defmodule Parlora.Providers.Phonic do
       :speaking
     )
   end
+
+  defp event(
+         %{"type" => "assistant_finished_speaking"},
+         %{speech_ends_pending: count} = state
+       )
+       when count > 1,
+       do: %{state | speech_ends_pending: count - 1}
 
   defp event(%{"type" => "assistant_finished_speaking"}, %{speech: :idle} = state), do: state
 
@@ -967,7 +998,12 @@ defmodule Parlora.Providers.Phonic do
   defp speech(state, value) do
     emit(state, :provider_speech, %{state: value})
     emit(state, :provider_activity, %{state: if(value == :idle, do: :idle, else: :in_progress)})
-    %{state | speech: value}
+
+    %{
+      state
+      | speech: value,
+        speech_ends_pending: if(value == :idle, do: 0, else: state.speech_ends_pending)
+    }
   end
 
   defp input_tick(%{status: :ready} = state) do
@@ -1076,6 +1112,7 @@ defmodule Parlora.Providers.Phonic do
         tool_timers: %{},
         acknowledgments: %{},
         pending_contexts: [],
+        speech_ends_pending: 0,
         covered_results: MapSet.new(),
         associated_results: MapSet.new(),
         inbound: AudioQueue.clear(state.inbound),

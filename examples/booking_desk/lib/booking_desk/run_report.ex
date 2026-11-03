@@ -1,6 +1,9 @@
 defmodule BookingDesk.RunReport do
   @moduledoc "Observed microphone outcomes are separate from scripted replay qualification."
 
+  @doc "Provider overrides recorded in reports, excluding API credentials."
+  def provider_options(options), do: options |> Keyword.delete(:api_key) |> Map.new()
+
   def microphone(submissions, appointments, reminder_jobs, failures) do
     confirmations =
       submissions

@@ -112,8 +112,14 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert tool.tool_call_output_timeout_ms == 60_000
   end
 
-  test "opting out selects manual responses without duplicating library listening defaults" do
-    assert {Parlora.Providers.Phonic, options} = BookingDesk.provider("phonic", [], false)
+  test "explicit options select manual responses without duplicating library listening defaults" do
+    assert {Parlora.Providers.Phonic, options} =
+             BookingDesk.provider("phonic",
+               enable_assistant_backchannel: false,
+               require_speech_before_tool_call: false,
+               wait_for_response: false
+             )
+
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
     assert {:ok, baseline} = Protocol.start([api_key: "booking-test-key"], %AudioFormat{})
 
@@ -128,13 +134,15 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert tool.tool_call_output_timeout_ms == 60_000
   end
 
-  test "explicit enablement stays compatible and opting out still permits individual overrides" do
-    assert BookingDesk.provider("phonic", [], true) == BookingDesk.provider("phonic")
-    {_, options} = BookingDesk.provider("phonic", [audio_speed: 1.1], false)
+  test "disabling backchannels does not implicitly disable busy mode or pre-tool speech" do
+    {_, options} =
+      BookingDesk.provider("phonic", audio_speed: 1.1, enable_assistant_backchannel: false)
+
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
     assert config.audio_speed == 1.1
     refute config.enable_assistant_backchannel
-    refute hd(config.tools).wait_for_response
+    assert hd(config.tools).wait_for_response
+    assert hd(config.tools).require_speech_before_tool_call
   end
 
   test "session startup enables the matching busy-mode correction policy by default" do
@@ -146,16 +154,46 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert policy[:phonic_busy]
   end
 
-  test "session startup respects busy-mode overrides and the native-profile opt-out" do
-    for opts <- [
-          [provider_options: [wait_for_response: false]],
-          [phonic_native_conversation: false]
+  test "session startup derives busy mode only from the explicit setting and library default" do
+    for {overrides, busy?} <- [
+          {[wait_for_response: false], false},
+          {[enable_assistant_backchannel: false], true},
+          {[require_speech_before_tool_call: false], true}
         ] do
-      state = start_booking(opts)
+      state = start_booking(provider_options: overrides)
       assert {Parlora.Providers.Phonic, options} = state.options[:provider]
-      refute Keyword.get(options, :wait_for_response, false)
+      assert {:ok, config} = Protocol.start(options, %AudioFormat{})
+      assert hd(config.tools).wait_for_response == busy?
       assert {BookingDesk.Policy, policy} = state.policy
-      refute policy[:phonic_busy]
+      assert policy[:phonic_busy] == busy?
+    end
+  end
+
+  test "session startup rejects the removed combined option before starting a call" do
+    assert_raise ArgumentError, fn ->
+      BookingDesk.start({StartupChannel, owner: self()}, phonic_native_conversation: false)
+    end
+  end
+
+  test "the runner rejects the removed combined option before recording or requesting credentials" do
+    assert_raise ArgumentError, fn ->
+      BookingDesk.Run.run("unused", "unused", phonic_native_conversation: false)
+    end
+  end
+
+  test "both retired CLI switches produce an option error before starting a call" do
+    previous = System.argv()
+
+    try do
+      for flag <- ["--phonic-native-conversation", "--no-phonic-native-conversation"] do
+        System.argv(["unused", "unused", flag])
+
+        assert_raise OptionParser.ParseError, fn ->
+          Code.eval_file(Path.expand("../run.exs", __DIR__))
+        end
+      end
+    after
+      System.argv(previous)
     end
   end
 

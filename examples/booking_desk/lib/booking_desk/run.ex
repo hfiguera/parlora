@@ -5,6 +5,9 @@ defmodule BookingDesk.Run do
   alias Parlora.Providers.Phonic
 
   def run(directory, clips, opts \\ []) do
+    opts =
+      Keyword.validate!(opts, [:observability, :mode, :ambience, :provider_options, :any_doctor])
+
     if Keyword.get(opts, :observability, false) do
       {:ok, _} = Application.ensure_all_started(:parlora_observer)
     end
@@ -28,16 +31,13 @@ defmodule BookingDesk.Run do
           {ReplayChannel,
            owner: self(), audio_observer: observer, recorder: recorder, ambience: ambience}
 
-    native_conversation = Keyword.get(opts, :phonic_native_conversation, true)
-
     provider_options =
-      BookingDesk.PhonicSettings.options(
-        System.get_env("PARLORA_PROVIDER", "openai"),
-        native_conversation
+      Keyword.merge(
+        BookingDesk.PhonicSettings.options(System.get_env("PARLORA_PROVIDER", "openai")),
+        Keyword.get(opts, :provider_options, [])
       )
 
-    {:ok, session} =
-      BookingDesk.start(channel, phonic_native_conversation: native_conversation)
+    {:ok, session} = BookingDesk.start(channel, provider_options: provider_options)
 
     {:ok, readback} = BookingDesk.Readback.start_link()
     Process.send_after(self(), :deadline, 210_000)
@@ -54,7 +54,7 @@ defmodule BookingDesk.Run do
       channel: nil,
       clips: clips,
       mode: mode,
-      provider_options: Map.new(provider_options),
+      provider_options: BookingDesk.RunReport.provider_options(provider_options),
       provider_defaults: provider_defaults(),
       any_doctor: Keyword.get(opts, :any_doctor, false),
       clinician_replies: MapSet.new(),

@@ -44,6 +44,21 @@ class CallerTurnAuditTest(unittest.TestCase):
         report["events"][-1] = transcript(74700, "No")
         self.assertTrue(audit(report)["passed"])
 
+    def test_old_punctuation_false_turn_still_fails_the_audit(self):
+        report = recording()
+        report["events"].append(transcript(98059.319, ". ", "noise"))
+        self.assertFalse(audit(report)["passed"])
+
+    def test_discarded_non_speech_is_reported_separately_from_caller_turns(self):
+        report = recording()
+        report["events"].append({"kind": "event", "name": "extension", "at_ms": 98059.319,
+                                 "data": {"kind": "transcript_discarded", "cause": "no_lexical_content",
+                                          "speaker": "user", "delta": ".", "segment_id": "noise"}})
+        result = audit(report)
+        self.assertTrue(result["passed"])
+        self.assertEqual(result["caller_turns"], 1)
+        self.assertEqual(result["discarded_non_speech_transcripts"][0]["delta"], ".")
+
     def test_fragmented_transcript_is_one_turn(self):
         report = recording()
         report["events"][-1] = transcript(74500, "Ten ")

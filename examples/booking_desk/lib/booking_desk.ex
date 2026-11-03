@@ -3,14 +3,10 @@ defmodule BookingDesk do
   alias Parlora.Providers.Phonic
   @moduledoc "Fictional clinic scheduling through Parlora, JEV and deterministic Jido actions."
   def start(channel, opts \\ []) do
+    opts = Keyword.validate!(opts, [:provider, :provider_options, :guard, :event_sink, :policy])
     provider = Keyword.get(opts, :provider, System.get_env("PARLORA_PROVIDER", "openai"))
 
-    provider_adapter =
-      provider(
-        provider,
-        Keyword.get(opts, :provider_options, []),
-        Keyword.get(opts, :phonic_native_conversation, true)
-      )
+    provider_adapter = provider(provider, Keyword.get(opts, :provider_options, []))
 
     {channel_module, channel_opts} = channel
     {outer_observer, channel_opts} = Keyword.pop(channel_opts, :audio_observer)
@@ -100,7 +96,7 @@ defmodule BookingDesk do
 
   def limits(_), do: [job_timeout_ms: 35_000, policy_timeout_ms: 5_000]
 
-  def provider(name, overrides \\ [], native_conversation \\ true) do
+  def provider(name, overrides \\ []) do
     {module, variable} =
       case name do
         "openai" -> {Parlora.Providers.OpenAI, "OPENAI_API_KEY"}
@@ -111,7 +107,7 @@ defmodule BookingDesk do
 
     options =
       Keyword.put(
-        BookingDesk.PhonicSettings.options(name, native_conversation),
+        BookingDesk.PhonicSettings.options(name),
         :api_key,
         System.fetch_env!(variable)
       )
