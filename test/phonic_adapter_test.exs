@@ -197,6 +197,100 @@ defmodule Parlora.PhonicAdapterTest do
     refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
   end
 
+  for order <- [
+        :caption_before_handoff,
+        :caption_after_result_start,
+        :ack_ends_before_result_start
+      ] do
+    @handoff_order order
+    @tag :handoff_boundaries
+    test "native handoff preserves result audio with acknowledgment #{@handoff_order}", context do
+      state = ready_busy(context)
+      ack = :binary.copy(<<1, 0>>, 240)
+      result = :binary.copy(<<2, 0>>, 240)
+      state = deliver(context, state, started())
+
+      state =
+        if @handoff_order == :caption_before_handoff do
+          state = deliver(context, state, audio(ack, "Okay."))
+          {:reply, {:ok, [_]}, state} = Phonic.handle_call({:read, 960}, nil, state)
+          state
+        else
+          state
+        end
+
+      state = deliver(context, state, call("tool", "check appointment"))
+      state = deliver(context, state, audio(ack, ""))
+
+      {:reply, :ok, state} =
+        Phonic.handle_call({:append, update("verified", "tool")}, nil, state)
+
+      assert_receive {:phonic_command, %{"type" => "tool_call_output", "tool_call_id" => "tool"}}
+
+      state =
+        if @handoff_order == :ack_ends_before_result_start do
+          watch = state.response_watch
+          assert watch != nil
+          state = deliver(context, state, finished())
+          assert state.response_watch == watch
+          state
+        else
+          state
+        end
+
+      state = deliver(context, state, started())
+
+      state =
+        if @handoff_order == :caption_after_result_start,
+          do: deliver(context, state, audio(ack, "Let me check.")),
+          else: state
+
+      state =
+        if @handoff_order == :ack_ends_before_result_start,
+          do: state,
+          else: deliver(context, state, finished())
+
+      state = deliver(context, state, audio(result, "Verified result"))
+      state = deliver(context, state, finished())
+
+      assert_receive {:parlora_event,
+                      %Event{type: :transcript_delta, payload: %{delta: "Verified result"}}}
+
+      {:reply, {:ok, frames}, state} = Phonic.handle_call({:read, 960}, nil, state)
+      expected = if @handoff_order == :caption_after_result_start, do: ack <> result, else: result
+      assert Enum.map_join(frames, & &1.data) == expected
+      assert state.speech == :idle and state.speech_ends_pending == 0
+      refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 10
+    end
+  end
+
+  @tag :handoff_boundaries
+  test "one-word interruption clears outstanding ends while a native handoff is locally idle",
+       context do
+    state = ready_busy(context)
+    state = deliver(context, state, started())
+    state = deliver(context, state, call("tool", "check appointment"))
+    assert state.speech == :idle
+    state = deliver(context, state, %{"type" => "user_started_speaking"})
+    assert state.speech_ends_pending == 0
+    assert_receive {:parlora_event, %Event{type: :output_interrupted, payload: %{token: 1}}}
+    {:reply, :ok, state} = Phonic.handle_call({:resume_output, 1}, nil, state)
+    state = deliver(context, state, finished())
+    state = deliver(context, state, %{"type" => "input_text", "text" => "No"})
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{speaker: :user, delta: "No "}}}
+
+    state = deliver(context, state, %{"type" => "user_finished_speaking"})
+    state = deliver(context, state, started())
+    bytes = :binary.copy(<<3, 0>>, 240)
+    state = deliver(context, state, audio(bytes, "Understood."))
+    state = deliver(context, state, finished())
+    {:reply, {:ok, frames}, state} = Phonic.handle_call({:read, 960}, nil, state)
+    assert Enum.map_join(frames, & &1.data) == bytes
+    assert state.speech == :idle and state.speech_ends_pending == 0
+  end
+
   @tag :cancelled_input
   test "cancelled non-speech releases a queued native result without inventing a caller turn",
        context do

@@ -30,7 +30,11 @@
   false speech starts even when their punctuation transcripts were discarded.
 - Preserve native Phonic result audio when its speech starts before an earlier
   acknowledgment finishes. Track outstanding speech ends until all open speech
-  boundaries settle; interruptions reset them. Punctuation-only input remains
+  boundaries settle, including across native tool handoffs. Late-caption recovery
+  reuses an outstanding boundary instead of counting another start. This also
+  handles short acknowledgments whose last caption precedes the handoff or arrives
+  after the result starts. Caller interruptions reset the accounting.
+  Punctuation-only input remains
   available as a discarded-transcript diagnostic rather than a caller turn.
 - Keep current verified facts in native Phonic tool outputs when a later call
   associates with completed work. Previously, an acknowledgment ending the prior

@@ -265,6 +265,56 @@ defmodule Parlora.PhonicSessionTest do
     assert map_size(Parlora.status(session).jobs) == 1
   end
 
+  @tag :handoff_boundaries
+  test "an acknowledgment ending after a native association cannot drop its verified session audio",
+       context do
+    {session, server, channel, backend} =
+      boot(context.port, %AudioFormat{}, AssociationPolicy, :default)
+
+    emit(server, %{"type" => "input_text", "text" => "order 124"})
+    emit(server, call("original"))
+    assert_receive {:submitted, request}
+    :ok = FakeBackend.complete(backend, request, "Current verified order 124")
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "original"}}
+
+    emit(server, %{"type" => "tool_call_output_processed", "tool_call_id" => "original"})
+    assert_receive {:parlora_event, %Event{type: :result_delivery, payload: %{stage: :accepted}}}
+    emit(server, %{"type" => "assistant_started_speaking"})
+    ack = :binary.copy(<<1, 0>>, 240)
+    emit(server, %{"type" => "audio_chunk", "audio" => Base.encode64(ack), "text" => "Okay."})
+    assert_receive {:audio_written, ^channel, %Parlora.AudioFrame{data: ^ack}}
+    emit(server, call("alias"))
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "alias", "output" => output}}
+
+    assert output["result"] == "Current verified order 124"
+    emit(server, %{"type" => "assistant_started_speaking"})
+    emit(server, %{"type" => "assistant_finished_speaking"})
+    verified = :binary.copy(<<2, 0>>, 240)
+
+    emit(server, %{
+      "type" => "audio_chunk",
+      "audio" => Base.encode64(verified),
+      "text" => output["result"]
+    })
+
+    emit(server, %{"type" => "assistant_finished_speaking"})
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :transcript_delta,
+                      payload: %{speaker: :assistant, delta: "Current verified order 124"}
+                    }}
+
+    assert_receive {:audio_written, ^channel, %Parlora.AudioFrame{data: ^verified}}
+    refute_receive {:phonic_command, %{"type" => "generate_reply"}}, 20
+    refute_receive {:submitted, _duplicate}, 20
+    assert map_size(Parlora.status(session).jobs) == 1
+  end
+
   test "a native association to existing work remains busy until that task's verified result",
        context do
     {session, server, _channel, backend} =

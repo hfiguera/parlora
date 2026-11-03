@@ -308,6 +308,10 @@ Native acknowledgments and result replies can have overlapping speech boundaries
 An earlier finish does not close a later reply: output stays open until every
 outstanding speech end arrives. Caller interruption resets this accounting, and
 unmatched starts are bounded by `limits.max_records`.
+Local handoff retirement preserves those native boundaries even while local
+output is idle. Late-caption recovery reuses an outstanding boundary, and an
+acknowledgment ending before the result starts leaves the result watchdog intact.
+Local speech state changes alone do not consume provider speech ends.
 
 Applications must account for busy mode holding further voice tools. BookingDesk
 allows only validated availability read corrections to revise an existing

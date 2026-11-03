@@ -715,22 +715,7 @@ defmodule Parlora.Providers.Phonic do
        do: fail(state, :speech_boundary_overflow)
 
   defp event(%{"type" => "assistant_started_speaking"}, state) do
-    overlap = if state.caller_speaking, do: state.caller_segment_id
-    state = if overlap, do: state, else: clear_response_watch(state)
-
-    speech(
-      %{
-        state
-        | caption_id: ID.new(),
-          speech_ends_pending: state.speech_ends_pending + 1,
-          speech_user_segment_id: overlap,
-          accepting_output?: true,
-          interrupted?: false,
-          native_handoff?: false,
-          auto_response_pending: overlap != nil and state.auto_response_pending
-      },
-      :speaking
-    )
+    start_speech(state, state.speech_ends_pending + 1)
   end
 
   defp event(
@@ -740,7 +725,8 @@ defmodule Parlora.Providers.Phonic do
        when count > 1,
        do: %{state | speech_ends_pending: count - 1}
 
-  defp event(%{"type" => "assistant_finished_speaking"}, %{speech: :idle} = state), do: state
+  defp event(%{"type" => "assistant_finished_speaking"}, %{speech: :idle} = state),
+    do: %{state | speech_ends_pending: 0}
 
   defp event(
          %{"type" => "assistant_finished_speaking"},
@@ -750,6 +736,7 @@ defmodule Parlora.Providers.Phonic do
     state
     |> Map.merge(%{
       accepting_output?: false,
+      speech_ends_pending: 0,
       caption_id: nil,
       speech_user_segment_id: nil,
       native_handoff?: false
@@ -766,6 +753,7 @@ defmodule Parlora.Providers.Phonic do
     |> Map.merge(%{
       accepting_output?: false,
       auto_response_pending: false,
+      speech_ends_pending: 0,
       caption_id: nil,
       speech_user_segment_id: nil,
       native_handoff?: false
@@ -784,7 +772,7 @@ defmodule Parlora.Providers.Phonic do
          } = state
        )
        when is_binary(text) and byte_size(text) in 1..16_384 do
-    state = event(%{"type" => "assistant_started_speaking"}, state)
+    state = start_speech(state, max(1, state.speech_ends_pending))
     event(event, state)
   end
 
@@ -865,6 +853,25 @@ defmodule Parlora.Providers.Phonic do
 
   defp event(_event, state), do: state
 
+  defp start_speech(state, pending_ends) do
+    overlap = if state.caller_speaking, do: state.caller_segment_id
+    state = if overlap, do: state, else: clear_response_watch(state)
+
+    speech(
+      %{
+        state
+        | caption_id: ID.new(),
+          speech_ends_pending: pending_ends,
+          speech_user_segment_id: overlap,
+          accepting_output?: true,
+          interrupted?: false,
+          native_handoff?: false,
+          auto_response_pending: overlap != nil and state.auto_response_pending
+      },
+      :speaking
+    )
+  end
+
   defp admit_tool(state, id, args, calls) do
     emit(state, :delegation_requested, %{
       id: id,
@@ -901,12 +908,17 @@ defmodule Parlora.Providers.Phonic do
     arm_timer(state, :tool_timers, id, :phonic_tool_timeout, state.tool_timeout_ms, %{})
   end
 
-  # Native tool handoff ends the current generation, including partial audio.
+  # Retire local output without consuming native speech ends still in flight.
   # Manual mode retains its existing empty-generation handoff behavior.
   defp settle_yielded_reply(state, true) do
     state
     |> finish_reply()
-    |> Map.merge(%{accepting_output?: false, caption_id: nil, speech_user_segment_id: nil})
+    |> Map.merge(%{
+      accepting_output?: false,
+      caption_id: nil,
+      speech_user_segment_id: nil,
+      speech_ends_pending: if(state.native_busy?, do: state.speech_ends_pending, else: 0)
+    })
     |> speech(:idle)
   end
 
@@ -1005,6 +1017,7 @@ defmodule Parlora.Providers.Phonic do
           waiter: nil,
           caption_id: nil,
           speech_user_segment_id: nil,
+          speech_ends_pending: 0,
           native_handoff?: false,
           reply_active?: false,
           reply_spoke?: false,
@@ -1020,11 +1033,7 @@ defmodule Parlora.Providers.Phonic do
     emit(state, :provider_speech, %{state: value})
     emit(state, :provider_activity, %{state: if(value == :idle, do: :idle, else: :in_progress)})
 
-    %{
-      state
-      | speech: value,
-        speech_ends_pending: if(value == :idle, do: 0, else: state.speech_ends_pending)
-    }
+    %{state | speech: value}
   end
 
   defp input_tick(%{status: :ready} = state) do
