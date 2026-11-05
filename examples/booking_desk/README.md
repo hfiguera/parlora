@@ -64,12 +64,10 @@ Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second
 tool timeout, speech speed `1.0`, a 600-ms end-of-turn silence threshold, and
-one-word interruptions. Speech detection uses threshold `0.7` and a 120-ms
-minimum speech duration to reduce false turns from café chatter without
-requiring multiple words to interrupt. Recognition keywords include Cedarwood,
-Dr. Lee and Dr. Patel. Booking approval, number verification and reminder consent remain
-application-controlled. The example supplies only its clinic keywords; other
-speech providers are unchanged.
+one-word interruptions. BookingDesk sets the speech detection threshold to `0.8`
+and keeps the library's 120-ms minimum speech duration. Recognition keywords
+include Cedarwood, Dr. Lee and Dr. Patel. Booking approval, number verification
+and reminder consent remain application-controlled.
 
 No extra flag is needed with `PARLORA_PROVIDER=phonic`. Use `provider_options` in
 `BookingDesk.start/2` or `BookingDesk.Run.run/3` to override individual settings:
@@ -82,10 +80,31 @@ BookingDesk.start(channel,
 ```
 
 This selects manual result delivery and disables listening acknowledgments while
-retaining other library defaults. Set `require_speech_before_tool_call: false` too
+retaining the other settings. Set `require_speech_before_tool_call: false` too
 if pre-tool speech should be optional. Recorded `provider_defaults` and
 `provider_options` distinguish the library defaults from the app's overrides.
 API keys are omitted from recorded overrides.
+
+Grok uses a booking-specific profile: Ara, normal synthesis speed (`1.0`),
+English transcription with Cedarwood/Dr. Lee/Dr. Patel recognition hints, high
+reasoning, no pronunciation substitutions, and no automatic idle questions.
+Its prompt follows the provider's [recommended structure](https://docs.x.ai/developers/model-capabilities/audio/speech-to-speech/prompting-guide) and everyday
+receptionist wording while sharing the existing clinic, confirmation and
+consent rules. Routine replies remain model-generated. These settings apply
+only to BookingDesk; Parlora's library defaults are unchanged.
+
+Override individual Grok settings through the same `provider_options` argument:
+
+```elixir
+BookingDesk.start(channel,
+  provider: "grok",
+  provider_options: [voice: "iris", speed: 1.0]
+)
+```
+
+Voice and synthesis speed affect delivery; transcription hints affect
+recognition. Choose pronunciation substitutions only for a demonstrated problem,
+and keep consent wording, phone digits and confirmation identifiers exact.
 
 ## Talk through your microphone
 
@@ -139,7 +158,10 @@ mix run run.exs "runs/replay-$(date +%Y%m%d-%H%M%S)" clips
 ```
 
 Generation uses the ElevenLabs v4 model and voice in `priv/caller.json`, verifies
-compatibility, and reuses matching clips. The replay itself needs the same speech,
+model availability, and reuses matching clips. Select another voice available to
+your account with `--voice VOICE_ID`. Instant clones can have an empty model list;
+the generator then requests v4 explicitly and stops if synthesis fails, with no
+model fallback. The replay itself needs the same speech,
 JEV and extraction keys as microphone mode. Its summary includes workflow checks.
 
 To add the bundled café loop continuously to caller input before the provider:

@@ -32,8 +32,8 @@
     },
     {
       "id": "choose",
-      "text": "Ten fifteen, please.",
-      "speech_text": "[conversational] Ten fifteen, please."
+      "text": "The morning one, please.",
+      "speech_text": "[conversational] The morning one, please."
     },
     {
       "id": "confirm",
@@ -54,9 +54,9 @@
     },
     {
       "id": "phone_confirm",
-      "text": "Yep, that's my cell.",
-      "speech_text": "[relaxed, conversational] Yep, that's my cell.",
-      "previous_text": "Can we send it to your cell number ending in zero one eight eight?"
+      "text": "Yep, that's the right number.",
+      "speech_text": "[relaxed, conversational] Yep, that's the right number.",
+      "previous_text": "Can we send it to the number ending in zero one eight eight?"
     },
     {
       "id": "goodbye",
