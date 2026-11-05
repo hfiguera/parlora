@@ -8,7 +8,7 @@ defmodule Parlora.PhonicDefaultsTest do
       assert {:ok, config} = Protocol.start([api_key: "test"], format)
       assert config.enable_assistant_backchannel
       assert config.assistant_backchannel_aggressiveness == 0.3
-      assert config.audio_speed == 1.05
+      assert config.audio_speed == 1.0
       assert config.vad_threshold == 0.7
       assert config.vad_min_speech_duration_ms == 120
       assert config.vad_min_silence_duration_ms == 600
@@ -25,6 +25,22 @@ defmodule Parlora.PhonicDefaultsTest do
       assert tool.tool_call_output_timeout_ms == 60_000
       assert tool.execution_mode == "async" and tool.forbid_speech_after_tool_call
       refute tool.allow_tool_chaining or tool.can_run_during_user_speech
+    end
+  end
+
+  test "normal speed is explicit and app speed overrides change no other native settings" do
+    assert Phonic.default_options()[:audio_speed] == 1.0
+
+    for format <- [%AudioFormat{}, AudioFormat.pcmu()] do
+      assert {:ok, baseline} = Protocol.start([api_key: "test"], format)
+      assert {:ok, ^baseline} = Protocol.start([api_key: "test", audio_speed: 1.0], format)
+
+      for speed <- [0.5, 1.05, 1.5] do
+        assert {:ok, custom} = Protocol.start([api_key: "test", audio_speed: speed], format)
+        assert custom == %{baseline | audio_speed: speed}
+      end
+
+      assert {:ok, ^baseline} = Protocol.start([api_key: "test"], format)
     end
   end
 
