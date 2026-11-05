@@ -148,6 +148,12 @@ defmodule Parlora do
   Controls include `{:input_muted, boolean}`, `{:suppress_output, boolean}`, and
   `{:clear_output, :next}`. Mute, suppression, clearing, and backend cancellation
   are independent. Reuse the command ID when reconciling an uncertain admission.
+
+  Gemini also supports `{:user_activity, :start | :end}` when automatic activity
+  detection is explicitly disabled. The application owns these speech boundaries.
+  Ending a manual turn drains admitted input at normal pace before its end marker;
+  observe `:control_completed` before starting the next turn. Audio outside an
+  active manual turn is discarded. These controls never authorize backend work.
   """
   @spec control(pid(), term(), String.t()) :: :ok | {:error, Error.t()}
   def control(session, control, id \\ ID.new()), do: Session.control(session, id, control)

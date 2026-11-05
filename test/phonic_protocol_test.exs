@@ -190,7 +190,7 @@ defmodule Parlora.PhonicProtocolTest do
       refute config.stream_ahead_of_real_time
       refute Map.has_key?(config, :data_retention_policy)
       assert config.enable_assistant_backchannel
-      assert config.audio_speed == 1.05
+      assert config.audio_speed == 1.0
       assert config.vad_min_silence_duration_ms == 600
       assert [tool] = config.tools
       assert tool.execution_mode == "async" and tool.wait_for_response

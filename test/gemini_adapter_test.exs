@@ -1,6 +1,6 @@
 defmodule Parlora.GeminiAdapterTest do
   use ExUnit.Case, async: true
-  alias Parlora.{AdapterInit, AudioFormat, ContextUpdate, Event, Limits}
+  alias Parlora.{AdapterInit, AudioFormat, AudioFrame, ContextUpdate, Event, Limits}
   alias Parlora.Provider.OutputBuffer
   alias Parlora.Providers.Gemini
   alias Parlora.Providers.Gemini.{Connection, Protocol}
@@ -50,6 +50,162 @@ defmodule Parlora.GeminiAdapterTest do
     state = %{state | socket: socket, status: :starting}
     on_exit(fn -> Gemini.terminate(:normal, state) end)
     %{state: state, server: server, port: port}
+  end
+
+  test "manual activity is rejected in automatic mode without changing the socket", context do
+    state = %{context.state | status: :ready}
+
+    assert {:reply, {:error, %{code: :unsupported}}, next} =
+             Gemini.handle_call({:control, "start", {:user_activity, :start}}, nil, state)
+
+    assert next.user_activity == :idle
+    refute_receive {:command, _}, 20
+  end
+
+  test "interim captions and native activity cannot enter caller history or authorize work",
+       context do
+    state =
+      deliver(context, %{context.state | status: :ready}, %{
+        "serverContent" => %{
+          "interimInputTranscription" => %{
+            "text" => "Yes",
+            "startOffset" => "1s",
+            "endOffset" => "1.2s"
+          }
+        },
+        "voiceActivity" => %{"type" => "ACTIVITY_START", "audioOffset" => "1s"}
+      })
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :extension,
+                      payload: %{
+                        kind: :interim_transcript,
+                        delta: "Yes",
+                        start_ms: 1000,
+                        end_ms: 1200.0
+                      }
+                    }}
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :extension,
+                      payload: %{kind: :caller_speech, state: :started, evidence: :provider_vad}
+                    }}
+
+    refute_receive {:parlora_event, %Event{type: :transcript_delta}}, 20
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 20
+    assert state.response_watch == nil
+
+    _state =
+      deliver(context, state, %{
+        "serverContent" => %{
+          "inputTranscription" => %{"text" => "Yes, but don't book it", "finished" => true}
+        }
+      })
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :transcript_delta,
+                      payload: %{delta: "Yes, but don't book it", finished: true}
+                    }}
+  end
+
+  test "manual end is paced after admitted caller audio and command retries cannot repeat boundaries",
+       context do
+    state = %{context.state | status: :ready, manual_activity?: true}
+    frame = AudioFrame.pcm(:binary.copy(<<1, 0>>, 480), "provider", 0)
+    assert {:reply, :ok, state} = Gemini.handle_call({:write, frame}, nil, state)
+    assert state.outbound.bytes == 0
+
+    assert {:reply, :ok, state} =
+             Gemini.handle_call({:control, "start", {:user_activity, :start}}, nil, state)
+
+    assert_receive {:command, %{"realtimeInput" => %{"activityStart" => %{}}}}
+
+    assert {:reply, :ok, state} =
+             Gemini.handle_call({:control, "start", {:user_activity, :start}}, nil, state)
+
+    refute_receive {:command, _}, 20
+
+    assert {:reply, :ok, state} = Gemini.handle_call({:write, frame}, nil, state)
+    assert {:reply, :ok, state} = Gemini.handle_call({:write, %{frame | sequence: 1}}, nil, state)
+    assert state.outbound.bytes == 1920
+
+    assert {:reply, :ok, state} =
+             Gemini.handle_call({:control, "end", {:user_activity, :end}}, nil, state)
+
+    assert state.user_activity == :ending
+    assert {:reply, :ok, state} = Gemini.handle_call({:write, %{frame | sequence: 2}}, nil, state)
+    assert state.outbound.bytes == 1920
+    refute_receive {:command, _}, 20
+
+    assert {:noreply, state} = Gemini.handle_info(:send_audio, state)
+    assert_receive {:command, %{"realtimeInput" => %{"audio" => _}}}
+    assert state.outbound.bytes == 960
+    refute_receive {:command, %{"realtimeInput" => %{"activityEnd" => _}}}, 20
+    assert {:noreply, state} = Gemini.handle_info(:send_audio, state)
+    assert_receive {:command, %{"realtimeInput" => %{"audio" => _}}}
+    assert_receive {:command, %{"realtimeInput" => %{"activityEnd" => %{}}}}
+    assert_receive {:parlora_event, %Event{type: :control_completed, command_id: "end"}}
+    assert state.user_activity == :idle
+
+    assert {:reply, :ok, state} =
+             Gemini.handle_call({:control, "end", {:user_activity, :end}}, nil, state)
+
+    assert {:noreply, state} = Gemini.handle_info(:send_audio, state)
+    refute_receive {:command, _}, 20
+
+    assert {:reply, {:error, _}, _state} =
+             Gemini.handle_call({:control, "bad-end", {:user_activity, :end}}, nil, state)
+  end
+
+  test "speech observations and conditional one-word caption fragments retain their evidence",
+       context do
+    state =
+      deliver(context, %{context.state | status: :ready}, %{
+        "voiceActivity" => %{"type" => "ACTIVITY_START", "audioOffset" => "1.25s"},
+        "serverContent" => %{
+          "inputTranscription" => %{
+            "text" => "Yep",
+            "startOffset" => "1.25s",
+            "endOffset" => "1.5s",
+            "finished" => false
+          }
+        }
+      })
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :extension,
+                      payload: %{
+                        kind: :caller_speech,
+                        state: :started,
+                        offset_ms: 1250.0,
+                        evidence: :provider_vad
+                      }
+                    }}
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :transcript_delta,
+                      payload: %{delta: "Yep", start_ms: 1250.0, end_ms: 1500.0, finished: false}
+                    }}
+
+    _state =
+      deliver(context, state, %{
+        "serverContent" => %{
+          "inputTranscription" => %{"text" => ", if it's free", "finished" => true}
+        }
+      })
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :transcript_delta,
+                      payload: %{delta: ", if it's free", finished: true}
+                    }}
+
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 20
   end
 
   for {name, bytes} <- [truncated: ~s({"private":), invalid_unicode: ~S({"private":"\uD800"})] do

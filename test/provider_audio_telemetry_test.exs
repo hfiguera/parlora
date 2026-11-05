@@ -75,7 +75,11 @@ defmodule Parlora.ProviderAudioTelemetryTest do
         System.monotonic_time(:microsecond)
       )
 
-    for {provider, config} <- [{OpenAI, %{}}, {Gemini, %{setup: %{}, history: []}}, {Grok, %{}}] do
+    for {provider, config} <- [
+          {OpenAI, %{}},
+          {Gemini, %{setup: %{}, history: [], manual_activity?: false}},
+          {Grok, %{}}
+        ] do
       {:ok, state, _continue} = provider.init({init, [api_key: "private-test-key"], config})
       state = %{state | status: :ready, inbound: queue}
       {:reply, {:ok, frames}, next} = provider.handle_call({:read, 960}, nil, state)

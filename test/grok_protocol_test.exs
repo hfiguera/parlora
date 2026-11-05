@@ -24,7 +24,7 @@ defmodule Parlora.GrokProtocolTest do
 
     refute Protocol.capabilities().usage?
     refute Protocol.capabilities().context_acknowledgment?
-    assert Protocol.capabilities().context_update_kinds == [:speakable]
+    assert Protocol.capabilities().context_update_kinds == [:speakable, :verbatim]
   end
 
   test "configuration and context reject unsupported or stale settings" do

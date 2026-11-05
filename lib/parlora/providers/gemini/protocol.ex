@@ -3,6 +3,7 @@ defmodule Parlora.Providers.Gemini.Protocol do
   alias Parlora.{AudioFormat, ContextUpdate, Error}
   alias Parlora.Provider.Capabilities
   alias Parlora.Provider.History
+  alias Parlora.Providers.Gemini.Options
 
   @model "gemini-3.8-live"
   @function "delegate_to_backend"
@@ -20,12 +21,14 @@ defmodule Parlora.Providers.Gemini.Protocol do
   end
 
   def start(options, format) do
-    if Keyword.get(options, :response_timeout_ms, 12_000) in 1..60_000,
-      do: configure(options, format),
-      else: Error.tuple(:invalid_argument, "response_timeout_ms must be between 1 and 60000")
+    with {:ok, native} <- Options.resolve(options) do
+      if Keyword.get(options, :response_timeout_ms, 12_000) in 1..60_000,
+        do: configure(options, format, native),
+        else: Error.tuple(:invalid_argument, "response_timeout_ms must be between 1 and 60000")
+    end
   end
 
-  defp configure(options, format) do
+  defp configure(options, format, native) do
     key = Keyword.get(options, :api_key)
     version = Keyword.get(options, :api_version, :v1beta)
     instructions = Keyword.get(options, :instructions, "Keep replies brief.")
@@ -52,7 +55,7 @@ defmodule Parlora.Providers.Gemini.Protocol do
         Error.tuple(:invalid_argument, "Invalid instructions, voice, or text history")
 
       true ->
-        {:ok, setup(instructions, voice, history)}
+        {:ok, setup(instructions, voice, history, native)}
     end
   end
 
@@ -90,6 +93,9 @@ defmodule Parlora.Providers.Gemini.Protocol do
     }
   end
 
+  def user_activity(:start), do: %{realtimeInput: %{activityStart: %{}}}
+  def user_activity(:end), do: %{realtimeInput: %{activityEnd: %{}}}
+
   def validate_update(%ContextUpdate{} = update, generation) do
     cond do
       update.kind != :speakable ->
@@ -119,12 +125,14 @@ defmodule Parlora.Providers.Gemini.Protocol do
 
     setup_events(message) ++
       flag(content, "interrupted", :interrupted) ++
+      interim_transcripts(content) ++
       captions(content) ++
       parts(content) ++
       calls(message) ++
       flag(content, "generationComplete", :generation_complete) ++
       utterance_boundary(content) ++
       activity(content, message) ++
+      voice_activity(message) ++
       optional(message, "usageMetadata", :usage) ++
       optional(message, "sessionResumptionUpdate", :resumption) ++
       optional(message, "goAway", :go_away) ++ optional(message, "error", :error)
@@ -161,12 +169,67 @@ defmodule Parlora.Providers.Gemini.Protocol do
 
   defp captions(content) do
     for {key, speaker} <- [{"inputTranscription", :user}, {"outputTranscription", :assistant}],
-        %{"text" => text} <- [content[key]],
+        %{"text" => text} = part <- [content[key]],
         is_binary(text) and text != "" do
-      {:transcript,
-       %{speaker: speaker, delta: text, start_ms: nil, end_ms: nil, timing: :unavailable}}
+      {:transcript, Map.merge(%{speaker: speaker, delta: text}, transcript_metadata(part))}
     end
   end
+
+  defp interim_transcripts(%{"interimInputTranscription" => %{"text" => text} = part})
+       when is_binary(text) and text != "" do
+    [{:interim_transcript, Map.merge(%{speaker: :user, delta: text}, transcript_metadata(part))}]
+  end
+
+  defp interim_transcripts(_), do: []
+
+  defp transcript_metadata(part) do
+    first = offset_ms(part["startOffset"])
+    last = offset_ms(part["endOffset"])
+    timed? = is_number(first) and is_number(last) and last >= first
+
+    %{
+      start_ms: if(timed?, do: first),
+      end_ms: if(timed?, do: last),
+      timing: if(timed?, do: :provider_audio_stream, else: :unavailable)
+    }
+    |> metadata(part, "languageCode", :language_code, &is_binary/1)
+    |> metadata(part, "speakerLabel", :speaker_label, &is_binary/1)
+    |> metadata(part, "finished", :finished, &is_boolean/1)
+  end
+
+  defp metadata(result, part, field, key, valid?) do
+    value = part[field]
+    if valid?.(value), do: Map.put(result, key, value), else: result
+  end
+
+  defp voice_activity(%{"voiceActivity" => %{"type" => type} = activity})
+       when type in ["ACTIVITY_START", "ACTIVITY_END"] do
+    [
+      {:caller_speech,
+       %{
+         state: if(type == "ACTIVITY_START", do: :started, else: :finished),
+         offset_ms: offset_ms(activity["audioOffset"])
+       }}
+    ]
+  end
+
+  defp voice_activity(_), do: []
+
+  defp offset_ms(value) when is_binary(value) and byte_size(value) <= 32 do
+    case Regex.run(~r/^(\d{1,8})(?:\.(\d{1,9}))?s$/, value) do
+      [_, seconds] ->
+        String.to_integer(seconds) * 1000
+
+      [_, seconds, fraction] ->
+        String.to_integer(seconds) * 1000 +
+          String.to_integer(String.pad_trailing(fraction, 9, "0")) / 1_000_000
+
+      _ ->
+        nil
+    end
+  end
+
+  defp offset_ms(_), do: nil
 
   defp parts(content) do
     for %{"inlineData" => data} <- get_in(content, ["modelTurn", "parts"]) || [],
@@ -179,7 +242,7 @@ defmodule Parlora.Providers.Gemini.Protocol do
     calls ++ Enum.map(cancellations, &{:cancel_call, &1})
   end
 
-  defp setup(instructions, voice, history) do
+  defp setup(instructions, voice, history, native) do
     developers =
       for %{"role" => "developer", "content" => [%{"text" => text}]} <- history, do: text
 
@@ -198,17 +261,15 @@ defmodule Parlora.Providers.Gemini.Protocol do
         parts: Enum.map([instructions | developers] ++ [delegation_instruction()], &%{text: &1})
       },
       tools: [%{functionDeclarations: [declaration()]}],
-      inputAudioTranscription: %{},
-      outputAudioTranscription: %{},
-      realtimeInputConfig: %{
-        automaticActivityDetection: %{disabled: false, silenceDurationMs: 700}
-      },
+      inputAudioTranscription: native.input,
+      outputAudioTranscription: native.output,
+      realtimeInputConfig: native.realtime,
       sessionResumption: %{},
       contextWindowCompression: %{slidingWindow: %{}},
       historyConfig: %{initialHistoryInClientContent: turns != []}
     }
 
-    %{setup: config, history: turns}
+    %{setup: config, history: turns, manual_activity?: native.manual_activity?}
   end
 
   defp declaration do

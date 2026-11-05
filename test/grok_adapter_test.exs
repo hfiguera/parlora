@@ -1,7 +1,7 @@
 defmodule Parlora.GrokAdapterTest do
   use ExUnit.Case, async: true
   alias Parlora.{AdapterInit, AudioFormat, AudioFrame, ContextUpdate, Event, Limits}
-  alias Parlora.Provider.WebSocketConnection
+  alias Parlora.Provider.{OutputBuffer, WebSocketConnection}
   alias Parlora.Providers.Grok
   alias Parlora.Providers.Grok.Protocol
   alias Parlora.TestSupport.TwilioPeer
@@ -100,6 +100,223 @@ defmodule Parlora.GrokAdapterTest do
   test "startup rejects missing model evidence", context do
     state = deliver(context, context.state, %{"type" => "session.updated"})
     assert_configuration_failure(state)
+  end
+
+  test "readiness requires the requested native settings to be acknowledged", context do
+    {:ok, config} =
+      Protocol.start(
+        [
+          api_key: "private-test",
+          language_hint: "en",
+          keyterms: ["Cedarwood"],
+          replace: %{"Cedarwood" => "Cedar wood"},
+          speed: 1.05,
+          idle_timeout_ms: 8_000
+        ],
+        %AudioFormat{}
+      )
+
+    state = %{context.state | config: config}
+
+    event =
+      %{type: "session.updated", session: Map.put(config.setup.session, :model, Protocol.model())}
+      |> JSON.encode!()
+      |> JSON.decode!()
+
+    state = deliver(context, state, event)
+    assert state.status == :ready
+    assert_receive {:parlora_event, %Event{type: :ready}}
+  end
+
+  test "ignored native settings fail before readiness", context do
+    {:ok, config} = Protocol.start([api_key: "private-test", speed: 1.05], %AudioFormat{})
+
+    state =
+      deliver(context, %{context.state | config: config}, acknowledged(Protocol.model(), "high"))
+
+    assert_configuration_failure(state)
+  end
+
+  for setting <- [:speed, :idle, :missing_speed] do
+    test "default #{setting} must be acknowledged before readiness", context do
+      event = acknowledged(Protocol.model(), "high")
+
+      event =
+        case unquote(setting) do
+          :speed -> put_in(event, ["session", "audio", "output", "speed"], 1.2)
+          :idle -> put_in(event, ["session", "turn_detection"], %{"idle_timeout_ms" => 8_000})
+          :missing_speed -> update_in(event, ["session"], &Map.delete(&1, "audio"))
+        end
+
+      state = deliver(context, context.state, event)
+      assert_configuration_failure(state)
+    end
+  end
+
+  test "verbatim speech sends one interruptible native turn without model continuation",
+       context do
+    state = ready(context)
+    update = verbatim("exact-readback")
+    {:reply, :ok, state} = Grok.handle_call({:append, update}, nil, state)
+
+    assert_receive {:grok_command,
+                    %{
+                      "type" => "conversation.item.create",
+                      "event_id" => "exact-readback",
+                      "item" => %{
+                        "type" => "force_message",
+                        "interruptible" => true,
+                        "content" => [%{"text" => "Zero one eight eight."}]
+                      }
+                    }}
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :context_submitted,
+                      command_id: "exact-readback",
+                      payload: %{outcome: :unconfirmed}
+                    }}
+
+    assert state.response == :requested
+    {:reply, :ok, ^state} = Grok.handle_call({:append, update}, nil, state)
+
+    assert {:reply, {:error, %{code: :invalid_argument}}, ^state} =
+             Grok.handle_call({:append, %{update | content: "Other digits"}}, nil, state)
+
+    refute_receive {:grok_command, _}, 10
+    state = deliver(context, state, created("verbatim"))
+    assert state.request_timer == nil
+    pcm = :binary.copy(<<1, 2>>, 240)
+    state = deliver(context, state, audio("verbatim", pcm))
+    state = deliver(context, state, done("verbatim"))
+    assert {:reply, {:ok, [frame]}, state} = Grok.handle_call({:read, 960}, nil, state)
+    assert frame.data == pcm
+    {:reply, :ok, _state} = Grok.handle_call({:append, update}, nil, state)
+    refute_receive {:grok_command, _}, 10
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 10
+    refute_receive {:parlora_event, %Event{type: :context_acknowledged}}, 10
+  end
+
+  test "busy exact speech is rejected without queueing and can retry the same command ID",
+       context do
+    state = ready(context)
+
+    {:ok, {audio, _seq}} =
+      OutputBuffer.push(
+        state.inbound,
+        :binary.copy(<<1, 2>>, 240),
+        state.init,
+        0,
+        System.monotonic_time(:microsecond)
+      )
+
+    pending = deliver(context, state, call("pending", "book an appointment"))
+    update = verbatim("try-when-idle")
+
+    for busy <- [
+          %{state | response: "speaking"},
+          %{state | caller_speaking: true},
+          %{state | auto_response_pending: true},
+          %{state | output_blocked: true},
+          %{state | inbound: audio},
+          %{state | want_response: MapSet.new([nil])},
+          pending
+        ] do
+      assert {:reply, {:error, %{code: :backpressure, details: %{execution: :never_submitted}}},
+              ^busy} =
+               Grok.handle_call({:append, update}, nil, busy)
+
+      refute Map.has_key?(busy.commands.entries, update.id)
+    end
+
+    refute_receive {:grok_command, _}, 10
+    assert {:reply, :ok, _state} = Grok.handle_call({:append, update}, nil, state)
+
+    assert_receive {:grok_command,
+                    %{"event_id" => "try-when-idle", "item" => %{"type" => "force_message"}}}
+  end
+
+  test "one-word interruptions discard exact speech without replaying it", context do
+    state = ready(context)
+    {:reply, :ok, state} = Grok.handle_call({:append, verbatim("interruptible")}, nil, state)
+
+    assert_receive {:grok_command,
+                    %{"item" => %{"type" => "force_message", "interruptible" => true}}}
+
+    state = deliver(context, state, created("exact"))
+    state = deliver(context, state, audio("exact", :binary.copy(<<1, 2>>, 240)))
+    state = deliver(context, state, %{"type" => "input_audio_buffer.speech_started"})
+    assert_receive {:parlora_event, %Event{type: :output_interrupted, payload: %{token: 1}}}
+    assert state.inbound.bytes == 0
+    state = deliver(context, state, audio("exact", :binary.copy(<<1, 2>>, 240)))
+    assert state.inbound.bytes == 0
+    state = deliver(context, state, %{"type" => "input_audio_buffer.speech_stopped"})
+
+    state =
+      deliver(context, state, %{"type" => "input_audio_buffer.committed", "item_id" => "stop"})
+
+    state =
+      deliver(context, state, %{
+        "type" => "conversation.item.input_audio_transcription.completed",
+        "item_id" => "stop",
+        "transcript" => "Stop."
+      })
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{speaker: :user, delta: "Stop."}}}
+
+    state = deliver(context, state, created("fresh"))
+    state = deliver(context, state, audio("fresh", :binary.copy(<<3, 4>>, 240)))
+    assert {:reply, {:ok, []}, ^state} = Grok.handle_call({:read, 960}, nil, state)
+    {:reply, :ok, state} = Grok.handle_call({:resume_output, 1}, nil, state)
+    assert {:reply, {:ok, [_frame]}, _state} = Grok.handle_call({:read, 960}, nil, state)
+    refute_receive {:grok_command, %{"item" => %{"type" => "force_message"}}}, 10
+    refute_receive {:grok_command, %{"type" => "response.create"}}, 10
+  end
+
+  test "idle followups are native turns and never synthetic caller consent", context do
+    state = ready(context)
+    state = deliver(context, state, %{"type" => "input_audio_buffer.timeout_triggered"})
+    assert state.response == :requested and state.auto_response_pending
+    {token, _timer} = state.request_timer
+
+    assert {:reply, {:error, %{code: :backpressure}}, ^state} =
+             Grok.handle_call({:append, verbatim("not-over-idle")}, nil, state)
+
+    state =
+      deliver(context, state, %{"type" => "input_audio_buffer.committed", "item_id" => "silence"})
+
+    state =
+      deliver(context, state, %{
+        "type" => "conversation.item.input_audio_transcription.completed",
+        "item_id" => "silence",
+        "transcript" => ""
+      })
+
+    state = deliver(context, state, created("idle-followup"))
+    assert state.request_timer == nil and not state.auto_response_pending
+    state = deliver(context, state, done("idle-followup"))
+    assert {:noreply, ^state} = Grok.handle_info({:grok_response_timeout, token}, state)
+    assert state.response == nil
+    refute_receive {:grok_command, %{"type" => "response.create"}}, 10
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 10
+
+    refute_receive {:parlora_event, %Event{type: :transcript_delta, payload: %{speaker: :user}}},
+                   10
+  end
+
+  test "missing native speech lifecycle fails within the response deadline", context do
+    state = ready(context)
+    state = deliver(context, state, %{"type" => "input_audio_buffer.timeout_triggered"})
+    {token, _timer} = state.request_timer
+    {:noreply, state} = Grok.handle_info({:grok_response_timeout, token}, state)
+    assert state.status == :closed
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :failed,
+                      payload: %{error: %{details: %{reason: :response_timeout}}}
+                    }}
   end
 
   test "startup rejects an unacknowledged reasoning selection", context do
@@ -464,7 +681,11 @@ defmodule Parlora.GrokAdapterTest do
   defp acknowledged(model, effort),
     do: %{
       "type" => "session.updated",
-      "session" => %{"model" => model, "reasoning" => %{"effort" => effort}}
+      "session" => %{
+        "model" => model,
+        "reasoning" => %{"effort" => effort},
+        "audio" => %{"output" => %{"speed" => 1.0}}
+      }
     }
 
   defp assert_configuration_failure(state) do
@@ -507,6 +728,14 @@ defmodule Parlora.GrokAdapterTest do
       kind: :speakable,
       content: "Verified result",
       delegation_id: call,
+      provider_generation: 0
+    }
+
+  defp verbatim(id),
+    do: %ContextUpdate{
+      id: id,
+      kind: :verbatim,
+      content: "Zero one eight eight.",
       provider_generation: 0
     }
 

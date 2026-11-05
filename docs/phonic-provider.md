@@ -207,7 +207,7 @@ defaults, based on the BookingDesk conversation and café-input validation:
 | --- | --- |
 | `enable_assistant_backchannel` | `true` |
 | `assistant_backchannel_aggressiveness` | `0.3` |
-| `audio_speed` | `1.05` |
+| `audio_speed` | `1.0` |
 | `vad_threshold` | `0.7` |
 | `vad_min_speech_duration_ms` | `120` |
 | `vad_min_silence_duration_ms` | `600` |
@@ -224,6 +224,11 @@ credentials or application data. Pass only your overrides in the provider tuple;
 explicit `false`, zero and supported `nil` values take precedence. Unknown names
 and duplicates are rejected before merging. Invalid types, out-of-range values
 and incompatible effective combinations return a startup error before connecting.
+
+Normal speech speed (`audio_speed: 1.0`) is the library default. Applications can
+choose their own pacing, for example `provider: {Parlora.Providers.Phonic,
+api_key: key, audio_speed: 1.05}`. This changes synthesis speed without changing
+the listening, interruption or tool-execution settings.
 
 Setting `enable_assistant_backchannel: false` removes inherited aggressiveness.
 Explicitly supplying aggressiveness while disabling backchannels is an error.

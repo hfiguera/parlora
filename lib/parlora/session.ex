@@ -118,10 +118,11 @@ defmodule Parlora.Session do
   end
 
   def handle_call(
-        {:control, id, {:input_muted, _flag} = control},
+        {:control, id, {kind, _value} = control},
         from,
         %{status: :ready} = state
-      ) do
+      )
+      when kind in [:input_muted, :user_activity] do
     {module, pid} = state.adapters.provider
     Commands.public(state, :provider, fn -> module.control(pid, id, control) end, from)
   end

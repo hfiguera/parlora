@@ -6,7 +6,7 @@ defmodule Parlora.Providers.Phonic do
   boundaries delimit assistant captions and interruption epochs. Speakable
   updates wait locally for the current turn and receive queue drain. By default,
   native busy mode owns correlated tool-result speech, with listening backchannels,
-  pre-tool acknowledgments and tuned voice pacing and speech detection. Apps can
+  pre-tool acknowledgments, normal speech speed and tuned speech detection. Apps can
   override individual provider options. `wait_for_response: false` keeps concurrent
   voice tools available and uses explicit result replies instead. Backend validation
   and execution remain application-owned.

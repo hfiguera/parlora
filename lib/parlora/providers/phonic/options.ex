@@ -17,7 +17,7 @@ defmodule Parlora.Providers.Phonic.Options do
     wait_for_speech_before_tool_call: false,
     wait_for_response: true,
     forbid_speech_after_tool_call: true,
-    audio_speed: 1.05,
+    audio_speed: 1.0,
     vad_threshold: 0.7,
     vad_min_speech_duration_ms: 120,
     vad_min_silence_duration_ms: 600,

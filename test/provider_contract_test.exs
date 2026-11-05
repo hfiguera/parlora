@@ -24,7 +24,7 @@ defmodule Parlora.ProviderContractTest do
 
       assert {:error, %{code: :unsupported}} = Parlora.control(session, {:input_muted, true})
 
-      for kind <- [:quiet, :instruction] do
+      for kind <- [:quiet, :instruction, :verbatim] do
         assert {:error, %{code: :unsupported}} =
                  Parlora.append_context(session, %ContextUpdate{
                    id: Atom.to_string(kind),

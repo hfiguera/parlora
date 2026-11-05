@@ -2,6 +2,7 @@ defmodule Parlora.Providers.Grok.Protocol do
   @moduledoc false
   alias Parlora.{AudioFormat, ContextUpdate, Error}
   alias Parlora.Provider.{Capabilities, History}
+  alias Parlora.Providers.Grok.Settings
 
   @model "grok-voice-3.0"
   @function "delegate_to_backend"
@@ -10,8 +11,11 @@ defmodule Parlora.Providers.Grok.Protocol do
   def function, do: @function
   def path, do: "/v1/realtime?model=" <> @model
 
-  def configured?(%{"model" => @model, "reasoning" => %{"effort" => effort}}, expected_effort),
-    do: effort == expected_effort
+  def configured?(
+        %{"model" => @model, "reasoning" => %{"effort" => effort}} = actual,
+        %{reasoning: %{effort: effort}} = expected
+      ),
+      do: Settings.configured?(actual, expected)
 
   def configured?(_session, _expected_effort), do: false
 
@@ -21,16 +25,21 @@ defmodule Parlora.Providers.Grok.Protocol do
       full_duplex?: true,
       transcripts: [:user, :assistant],
       delegation_modes: [:client],
-      context_update_kinds: [:speakable],
+      context_update_kinds: [:speakable, :verbatim],
       input_mute?: true
     }
   end
 
   def start(options, format) do
+    with :ok <- Settings.validate(options),
+         do: start_validated(Keyword.merge(Settings.defaults(), options), format)
+  end
+
+  defp start_validated(options, format) do
     instructions = Keyword.get(options, :instructions, "Keep replies brief.")
     voice = Keyword.get(options, :voice, "eve")
     history = Keyword.get(options, :history, [])
-    reasoning = Keyword.get(options, :reasoning_effort, :high)
+    reasoning = Keyword.fetch!(options, :reasoning_effort)
     key = Keyword.get(options, :api_key)
 
     cond do
@@ -53,7 +62,7 @@ defmodule Parlora.Providers.Grok.Protocol do
         Error.tuple(:invalid_argument, "Invalid instructions, voice, or bounded text history")
 
       true ->
-        {:ok, configure(instructions, voice, reasoning, history, format)}
+        {:ok, configure(instructions, voice, reasoning, history, format, options)}
     end
   end
 
@@ -69,14 +78,20 @@ defmodule Parlora.Providers.Grok.Protocol do
 
   def validate(%ContextUpdate{} = update, generation) do
     cond do
-      update.kind != :speakable ->
-        Error.tuple(:unsupported, "Grok supports speakable context only")
+      update.kind not in [:speakable, :verbatim] ->
+        Error.tuple(:unsupported, "Grok supports speakable and verbatim context only")
 
       update.provider_generation != generation ->
         Error.tuple(:invalid_argument, "Stale provider generation")
 
       not is_binary(update.content) or not is_binary(update.id) or update.id == "" ->
         Error.tuple(:invalid_argument, "Context requires text and a command ID")
+
+      not valid_verbatim?(update) ->
+        Error.tuple(
+          :invalid_argument,
+          "Verbatim speech requires bounded nonempty UTF-8 text and no delegation"
+        )
 
       true ->
         :ok
@@ -85,6 +100,13 @@ defmodule Parlora.Providers.Grok.Protocol do
 
   def validate(_update, _generation),
     do: Error.tuple(:invalid_argument, "Expected a ContextUpdate")
+
+  defp valid_verbatim?(%ContextUpdate{kind: :verbatim} = update),
+    do:
+      update.delegation_id == nil and byte_size(update.content) in 1..16_384 and
+        String.valid?(update.content) and String.trim(update.content) != ""
+
+  defp valid_verbatim?(_update), do: true
 
   def text(content),
     do: %{
@@ -106,7 +128,18 @@ defmodule Parlora.Providers.Grok.Protocol do
   def respond, do: %{type: "response.create"}
   def cancel, do: %{type: "response.cancel"}
 
-  defp configure(instructions, voice, reasoning, history, format) do
+  def verbatim(content),
+    do: %{
+      type: "conversation.item.create",
+      item: %{
+        type: "force_message",
+        role: "assistant",
+        interruptible: true,
+        content: [%{type: "output_text", text: content}]
+      }
+    }
+
+  defp configure(instructions, voice, reasoning, history, format, options) do
     developers =
       for %{"role" => "developer", "content" => [%{"text" => text}]} <- history, do: text
 
@@ -124,31 +157,36 @@ defmodule Parlora.Providers.Grok.Protocol do
       history: history,
       setup: %{
         type: "session.update",
-        session: %{
-          voice: voice,
-          reasoning: %{effort: Atom.to_string(reasoning)},
-          instructions:
-            Enum.join([instructions | developers] ++ [delegation_instruction()], "\n"),
-          turn_detection: %{type: "server_vad"},
-          resumption: %{enabled: false},
-          audio: %{
-            input: %{format: codec, transcription: %{model: "grok-transcribe"}},
-            output: %{format: codec}
-          },
-          tools: [
+        session:
+          Settings.configure(
             %{
-              type: "function",
-              name: @function,
-              description: "Ask the application to handle the caller's request or correction.",
-              parameters: %{
-                type: "object",
-                properties: %{request: %{type: "string"}},
-                required: ["request"],
-                additionalProperties: false
-              }
-            }
-          ]
-        }
+              voice: voice,
+              reasoning: %{effort: Atom.to_string(reasoning)},
+              instructions:
+                Enum.join([instructions | developers] ++ [delegation_instruction()], "\n"),
+              turn_detection: %{type: "server_vad"},
+              resumption: %{enabled: false},
+              audio: %{
+                input: %{format: codec, transcription: %{model: "grok-transcribe"}},
+                output: %{format: codec}
+              },
+              tools: [
+                %{
+                  type: "function",
+                  name: @function,
+                  description:
+                    "Ask the application to handle the caller's request or correction.",
+                  parameters: %{
+                    type: "object",
+                    properties: %{request: %{type: "string"}},
+                    required: ["request"],
+                    additionalProperties: false
+                  }
+                }
+              ]
+            },
+            options
+          )
       }
     }
   end

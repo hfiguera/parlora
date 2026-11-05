@@ -63,7 +63,7 @@ live calls. Keep keys out of source files and recordings.
 Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second
-tool timeout, speech speed `1.05`, a 600-ms end-of-turn silence threshold, and
+tool timeout, speech speed `1.0`, a 600-ms end-of-turn silence threshold, and
 one-word interruptions. Speech detection uses threshold `0.7` and a 120-ms
 minimum speech duration to reduce false turns from café chatter without
 requiring multiple words to interrupt. Recognition keywords include Cedarwood,

@@ -11,7 +11,27 @@ defmodule Parlora.Providers.Gemini do
   use Parlora.ProviderClient, protocol: Parlora.Providers.Gemini.Protocol
   alias Parlora.{Adapter, AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, Pacer}
   alias Parlora.Provider.OutputBuffer
-  alias Parlora.Providers.Gemini.{Audio, Calls, Connection, Protocol, ResponseWatch}
+  alias Parlora.Providers.Gemini.{Audio, Calls, Connection, Options, Protocol, ResponseWatch}
+
+  @doc "Returns neutral conversational defaults, merged field by field at provider startup."
+  @spec default_options() :: keyword()
+  def default_options, do: Options.defaults()
+
+  @doc """
+  Merges application options with per-session overrides and validates native settings.
+
+  Supported nested option groups merge field by field. Lists of languages or
+  vocabulary replace the entire field; an empty list clears those hints. Explicit
+  `false` values are retained. Disabling automatic detection removes inherited
+  automatic tuning, but explicitly combining manual and automatic controls fails.
+  Re-enabling detection requires `disabled: false`.
+
+  Returns `{:ok, options}` or `{:error, %Parlora.Error{}}`. Credentials and other
+  session requirements are checked at startup; credentials need not be supplied
+  to compose options. Library defaults are applied separately at startup.
+  """
+  @spec merge_options(keyword(), keyword()) :: {:ok, keyword()} | {:error, Error.t()}
+  def merge_options(base, overrides), do: Options.merge(base, overrides)
 
   @doc "Finite session limits for generated audio bursts; pass as session :limits, with optional overrides."
   @impl true
@@ -51,6 +71,9 @@ defmodule Parlora.Providers.Gemini do
       interruption: 0,
       output_blocked: false,
       muted: false,
+      manual_activity?: config.manual_activity?,
+      user_activity: :idle,
+      activity_end: nil,
       commands: %CommandLog{limit: init.limits.max_records},
       calls: Calls.new(init.limits.max_records),
       sequence: 0,
@@ -158,7 +181,14 @@ defmodule Parlora.Providers.Gemini do
       }
 
       emit(next, :control_completed, %{muted: flag, scope: :local_input_gate}, id)
-      {:reply, :ok, next}
+      {:reply, :ok, finish_activity(next)}
+    end)
+  end
+
+  def handle_call({:control, id, {:user_activity, phase} = command}, _from, state)
+      when phase in [:start, :end] do
+    CommandLog.run(state, id, command, fn state, id, _command ->
+      activity_command(state, id, phase)
     end)
   end
 
@@ -221,6 +251,10 @@ defmodule Parlora.Providers.Gemini do
     Audio.close(state.audio)
     :ok
   end
+
+  defp accept_audio(%{manual_activity?: true, user_activity: phase} = state, _frame)
+       when phase != :active,
+       do: {:reply, :ok, state}
 
   defp accept_audio(%{status: :ready, muted: false} = state, frame) do
     case AudioQueue.push(state.outbound, frame) do
@@ -341,6 +375,13 @@ defmodule Parlora.Providers.Gemini do
 
   defp event(:interrupted, state), do: interrupt(state)
 
+  defp event({:interim_transcript, observation}, state) do
+    # Revisions and partial consent stay observational. Only the provider's
+    # committed inputTranscription enters the policy's caller history.
+    emit(state, :extension, Map.put(observation, :kind, :interim_transcript))
+    state
+  end
+
   defp event({:transcript, %{speaker: :assistant} = transcript}, state) do
     state = state |> ResponseWatch.clear(:progress_observed) |> speech(:speaking)
     id = state.caption_id || Parlora.ID.new()
@@ -433,6 +474,16 @@ defmodule Parlora.Providers.Gemini do
     maybe_resume(%{state | activity: activity})
   end
 
+  defp event({:caller_speech, observation}, state) do
+    emit(
+      state,
+      :extension,
+      Map.merge(observation, %{kind: :caller_speech, evidence: :provider_vad})
+    )
+
+    state
+  end
+
   defp event({:usage, usage}, state) do
     # Preserve each provider report rather than assuming its counters are deltas
     # or cumulative billing. A local close never makes the last report final.
@@ -493,6 +544,8 @@ defmodule Parlora.Providers.Gemini do
     %{state | speech: value}
   end
 
+  defp send_audio(%{manual_activity?: true, user_activity: :idle} = state), do: state
+
   defp send_audio(state) do
     size = AudioFormat.bytes_for_ms(state.init.audio_format, 20)
     {data, queue} = AudioQueue.take_bytes(state.outbound, size)
@@ -500,7 +553,65 @@ defmodule Parlora.Providers.Gemini do
     pcm = data <> binary_part(silence, 0, size - byte_size(data))
     {bytes, audio} = Audio.input(state.audio, pcm)
     next = %{state | outbound: queue, audio: audio}
-    if bytes == <<>>, do: next, else: transmit(next, Protocol.audio(bytes, 16_000))
+    next = if bytes == <<>>, do: next, else: transmit(next, Protocol.audio(bytes, 16_000))
+    finish_activity(next)
+  end
+
+  defp activity_command(%{manual_activity?: false} = state, _id, _phase),
+    do:
+      {:reply,
+       Error.tuple(:unsupported, "User activity controls require disabled automatic detection"),
+       state}
+
+  defp activity_command(%{user_activity: :idle, muted: false} = state, id, :start) do
+    next =
+      transmit(
+        %{state | user_activity: :active, audio: Audio.reset_input(state.audio)},
+        Protocol.user_activity(:start)
+      )
+
+    activity_reply(next, id, :start)
+  end
+
+  defp activity_command(%{user_activity: :active} = state, id, :end) do
+    # Keep the end marker behind every already-admitted caller sample. New input
+    # is ignored until the application starts the next manual turn.
+    next = finish_activity(%{state | user_activity: :ending, activity_end: id})
+
+    if next.status == :closed,
+      do: {:reply, Error.tuple(:closed, "Activity submission failed"), next},
+      else: {:reply, :ok, next}
+  end
+
+  defp activity_command(state, _id, _phase),
+    do:
+      {:reply, Error.tuple(:invalid_argument, "Invalid user activity transition or muted input"),
+       state}
+
+  defp finish_activity(%{status: :ready, user_activity: :ending, outbound: %{bytes: 0}} = state) do
+    next =
+      transmit(%{state | user_activity: :idle, activity_end: nil}, Protocol.user_activity(:end))
+
+    if next.status != :closed,
+      do:
+        emit(
+          next,
+          :control_completed,
+          %{activity: :end, scope: :provider_input},
+          state.activity_end
+        )
+
+    next
+  end
+
+  defp finish_activity(state), do: state
+
+  defp activity_reply(%{status: :closed} = state, _id, _phase),
+    do: {:reply, Error.tuple(:closed, "Activity submission failed"), state}
+
+  defp activity_reply(state, id, phase) do
+    emit(state, :control_completed, %{activity: phase, scope: :provider_input}, id)
+    {:reply, :ok, state}
   end
 
   defp notify(state), do: OutputBuffer.notify(state)
@@ -513,6 +624,7 @@ defmodule Parlora.Providers.Gemini do
   defp safe_resume?(state),
     do:
       state.ever_ready and state.resumable and state.activity == :idle and
+        state.user_activity == :idle and
         not Calls.pending?(state.calls) and state.reconnects < 2
 
   defp reconnect_or_fail(state, reason),

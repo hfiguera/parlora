@@ -29,7 +29,11 @@ defmodule Parlora.Provider do
               {:ok, [Parlora.AudioFrame.t()]} | {:error, Parlora.Error.t()}
   @callback write_audio(pid(), Parlora.AudioFrame.t()) :: :ok | {:error, Parlora.Error.t()}
   @callback append_context(pid(), Parlora.ContextUpdate.t()) :: :ok | {:error, Parlora.Error.t()}
-  @callback control(pid(), String.t(), {:input_muted, boolean()}) ::
+  @callback control(
+              pid(),
+              String.t(),
+              {:input_muted, boolean()} | {:user_activity, :start | :end}
+            ) ::
               :ok | {:error, Parlora.Error.t()}
 
   @doc "Optional snapshot of generated audio waiting for the output pipeline, in bytes."

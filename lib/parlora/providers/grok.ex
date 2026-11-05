@@ -9,9 +9,24 @@ defmodule Parlora.Providers.Grok do
   """
   use GenServer
   use Parlora.ProviderClient, protocol: Parlora.Providers.Grok.Protocol, client_tools: true
-  alias Parlora.{AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, Pacer}
+
+  alias Parlora.{
+    AudioFormat,
+    AudioFrame,
+    AudioQueue,
+    CommandLog,
+    ContextUpdate,
+    Error,
+    Event,
+    Pacer
+  }
+
   alias Parlora.Provider.{OutputBuffer, WebSocketConnection}
-  alias Parlora.Providers.Grok.{Calls, Protocol, Transcripts}
+  alias Parlora.Providers.Grok.{Calls, Protocol, Settings, Transcripts}
+
+  @doc "Returns neutral conversational defaults; provider tuple options override each field."
+  @spec default_options() :: keyword()
+  def default_options, do: Settings.defaults()
 
   @doc "Finite receive limits for generated speech bursts, in the selected pipeline format."
   @impl true
@@ -108,7 +123,13 @@ defmodule Parlora.Providers.Grok do
       {:reply, Error.tuple(:not_ready, "Grok session has not acknowledged configuration"), state}
 
   def handle_call({:append, update}, _from, state),
-    do: Parlora.ProviderClient.context(state, update, &Protocol.validate/2, &submit_context/3)
+    do:
+      Parlora.ProviderClient.context(
+        state,
+        update,
+        &validate_context(state, &1, &2),
+        &submit_context/3
+      )
 
   def handle_call({:resolve_delegation, id, outcome}, _from, state) when is_map(outcome) do
     case Calls.complete(state.calls, id, outcome) do
@@ -178,6 +199,43 @@ defmodule Parlora.Providers.Grok do
   @impl true
   def terminate(_reason, state), do: WebSocketConnection.close(state.socket)
 
+  defp validate_context(state, update, generation) do
+    with :ok <- Protocol.validate(update, generation), do: available(state, update)
+  end
+
+  defp available(state, %ContextUpdate{kind: :verbatim} = update) do
+    case CommandLog.admit(state.commands, update.id, {:context, update}) do
+      {:duplicate, _log} ->
+        :ok
+
+      {:new, _log} ->
+        if verbatim_idle?(state),
+          do: :ok,
+          else:
+            Error.tuple(:backpressure, "Verbatim speech requires an idle provider", %{
+              execution: :never_submitted
+            })
+
+      error ->
+        error
+    end
+  end
+
+  defp available(_state, _update), do: :ok
+
+  defp verbatim_idle?(state),
+    do:
+      state.response == nil and not state.caller_speaking and not state.auto_response_pending and
+        not state.output_blocked and state.inbound.bytes == 0 and
+        MapSet.size(state.want_response) == 0 and
+        not Enum.any?(state.calls.records, fn {_id, call} -> call.status == :pending end)
+
+  defp submit_context(state, id, {:context, %ContextUpdate{kind: :verbatim} = update}) do
+    state
+    |> request_response(Map.put(Protocol.verbatim(update.content), :event_id, id))
+    |> submitted(id)
+  end
+
   defp submit_context(state, id, {:context, update}) do
     case Calls.context(state.calls, update.delegation_id, update.content) do
       {:ok, command, calls} ->
@@ -193,15 +251,18 @@ defmodule Parlora.Providers.Grok do
             command
           )
 
-        if next.status == :ready,
-          do:
-            emit(next, :context_submitted, %{outcome: :unconfirmed, evidence: :socket_write}, id)
-
-        {:reply, submission_reply(next), continue_response(next)}
+        submitted(next, id)
 
       error ->
         {:reply, error, state}
     end
+  end
+
+  defp submitted(state, id) do
+    if state.status == :ready,
+      do: emit(state, :context_submitted, %{outcome: :unconfirmed, evidence: :socket_write}, id)
+
+    {:reply, submission_reply(state), continue_response(state)}
   end
 
   defp submission_reply(%{status: :closed}),
@@ -236,28 +297,31 @@ defmodule Parlora.Providers.Grok do
     if ready == [] do
       state
     else
-      token = make_ref()
-
-      timer =
-        Process.send_after(
-          self(),
-          {:grok_response_timeout, token},
-          state.init.limits.startup_timeout_ms
-        )
-
-      transmit(
-        %{
-          state
-          | want_response: MapSet.difference(state.want_response, MapSet.new(ready)),
-            response: :requested,
-            request_timer: {token, timer}
-        },
+      request_response(
+        %{state | want_response: MapSet.difference(state.want_response, MapSet.new(ready))},
         Protocol.respond()
       )
     end
   end
 
   defp continue_response(state), do: state
+
+  defp request_response(state, command) do
+    transmit(await_response(state), command)
+  end
+
+  defp await_response(state) do
+    token = make_ref()
+
+    timer =
+      Process.send_after(
+        self(),
+        {:grok_response_timeout, token},
+        state.init.limits.startup_timeout_ms
+      )
+
+    %{state | response: :requested, request_timer: {token, timer}}
+  end
 
   defp frame(_frame, %{status: :closed} = state), do: state
   defp frame(:open, state), do: transmit(%{state | status: :starting}, state.config.setup)
@@ -288,13 +352,16 @@ defmodule Parlora.Providers.Grok do
   end
 
   defp event(%{"type" => "session.updated"} = event, %{status: :starting} = state) do
-    if Protocol.configured?(event["session"], state.config.setup.session.reasoning.effort),
+    if Protocol.configured?(event["session"], state.config.setup.session),
       do: ready(state),
       else: fail(state, :configuration_mismatch)
   end
 
   defp event(%{"type" => "input_audio_buffer.speech_started"}, state),
     do: interrupt(%{state | caller_speaking: true, auto_response_pending: true})
+
+  defp event(%{"type" => "input_audio_buffer.timeout_triggered"}, %{response: nil} = state),
+    do: await_response(%{state | auto_response_pending: true})
 
   defp event(%{"type" => "input_audio_buffer.speech_stopped"}, state),
     do: continue_response(%{state | caller_speaking: false})
