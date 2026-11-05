@@ -95,8 +95,56 @@ defmodule BookingDesk.ConfirmationRunnerTest do
     assert BookingDesk.Run.advance(full).stage == :progress
     refute_receive {:played, _, _}, 10
     :ok = GenServer.call(channel, {:drained, true})
+    assert BookingDesk.Run.advance(%{full | speech: :speaking}).stage == :progress
     assert BookingDesk.Run.advance(full).stage == :reminder
     assert_receive {:played, "reminder", ^pcm}
+  end
+
+  test "the replay may answer a drained options question while native speech remains active" do
+    directory =
+      Path.join(System.tmp_dir!(), "booking-choice-#{System.unique_integer([:positive])}")
+
+    File.mkdir_p!(directory)
+    on_exit(fn -> File.rm_rf!(directory) end)
+    pcm = :binary.copy(<<123::signed-little-16>>, 240)
+    File.write!(Path.join(directory, "choose.pcm"), pcm)
+    channel = start_supervised!({BookingDesk.ConfirmationRunnerTest.Channel, self()})
+
+    recorder =
+      start_supervised!({BookingDesk.Recorder, directory: Path.join(directory, "capture")})
+
+    readback = start_supervised!({BookingDesk.Readback, []})
+    now = System.monotonic_time(:millisecond)
+
+    s = %{
+      mode: :replay,
+      stage: :correction,
+      stage_at: now - 10_000,
+      stage_due: 4_000,
+      speech: :speaking,
+      last_audio_at: now - 2_000,
+      text: "Thursday has 10:15 AM or 2:00 PM. Which time works for you?",
+      channel: channel,
+      recorder: recorder,
+      readback: readback,
+      clips: directory,
+      readback_revision: 0,
+      confirmation_readback: false,
+      greeting_completed: true
+    }
+
+    assert BookingDesk.Run.advance(s).stage == :correction
+    :ok = GenServer.call(channel, {:drained, true})
+    assert BookingDesk.Run.advance(%{s | last_audio_at: now}).stage == :correction
+    assert BookingDesk.Run.advance(%{s | text: "Thursday has 10:15 AM or"}).stage == :correction
+    assert BookingDesk.Run.advance(%{s | stage_at: now}).stage == :correction
+    assert BookingDesk.Run.advance(s).stage == :choose
+    assert_receive {:played, "choose", ^pcm}
+
+    # Replying to an available-time question does not relax number consent.
+    reminder = Map.merge(s, %{stage: :reminder, reminder: %{status: "verify_existing"}})
+    assert BookingDesk.Run.advance(reminder).stage == :reminder
+    refute_receive {:played, "phone_confirm", _}, 10
   end
 
   test "insurance playback waits for the actual record question and drained assistant audio" do

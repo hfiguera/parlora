@@ -92,6 +92,10 @@ defmodule BookingDesk.ReminderPolicyTest do
     for offer <- [
           "Would you like a text reminder?",
           "Would you like a text reminder 24 hours before the appointment?",
+          "Would you like a text reminder 24 hours before?",
+          "Would you like a text reminder twenty-four hours before?",
+          "Would you like a text reminder twenty four hours before your appointment?",
+          "Your appointment is booked. Would you like a text reminder twenty-four hours before?",
           "Would you like a SMS reminder for this appointment?"
         ],
         reply <- ["Yes", "Yeah, that'd be helpful.", "Yes, that would be helpful!", "Yes, please"] do
@@ -109,9 +113,70 @@ defmodule BookingDesk.ReminderPolicyTest do
           "Would you not like a text reminder?",
           "Would you like marketing texts?",
           "Would you like a text reminder if you pay?",
+          "Would you like a text reminder twenty-four hours before if you pay?",
+          "Would you like a text reminder 48 hours before?",
+          "You asked: Would you like a text reminder twenty-four hours before?",
+          "Would you like a text reminder twenty-four hours before? Can we send it to 0188?",
           "Can we send the reminder to 0188?"
         ] do
       assert {:clarify, _} = ReminderPolicy.interpret(snapshot(offer, "Yes"), state, uncertain)
+    end
+  end
+
+  test "the recorded Grok offer and acknowledgment admit only reminder opt-in without a model" do
+    offer = "Your appointment is booked. Would you like a text reminder twenty-four hours before?"
+    state = %{status: "offered", patient: "p", original_phone: "2025550188"}
+    s = snapshot(offer, "Yeah, that'd be helpful.")
+
+    s = %{
+      s
+      | transcripts: [
+          %{speaker: :assistant, delta: "Checking the reminder option.", arrival_order: 3},
+          hd(s.transcripts),
+          List.last(s.transcripts)
+        ]
+    }
+
+    assert BookingDesk.Run.reminder_offer?(offer)
+    assert BookingDesk.Reminders.offer_question?(offer)
+
+    assert {:input, %{operation: "reminder_opt_in"} = input} =
+             ReminderPolicy.interpret(s, state,
+               reminder_judge: fn _ ->
+                 flunk("the captured clear opt-in must not depend on JEV confidence")
+               end,
+               phone_extractor: fn _ -> flunk("opt-in must not supply number consent") end
+             )
+
+    refute Map.has_key?(input, :destination)
+    refute Map.has_key?(input, :readback_verified)
+  end
+
+  test "a fresh clear answer to the policy's own clarification needs no semantic fallback" do
+    state = %{status: "offered", patient: "p", original_phone: "2025550188"}
+    question = ReminderPolicy.question(state)
+    assert question =~ "separate readback and confirmation"
+
+    assert {:input, %{operation: "reminder_opt_in"}} =
+             ReminderPolicy.interpret(snapshot(question, "Yeah, that'd be helpful."), state,
+               reminder_judge: fn _ ->
+                 flunk("a fresh clear answer must recover without another model judgment")
+               end
+             )
+  end
+
+  test "the spoken-time offer cannot turn a conditional or refused reply into consent" do
+    state = %{status: "offered", patient: "p", original_phone: "2025550188"}
+
+    for question <- [
+          "Would you like a text reminder twenty-four hours before?",
+          ReminderPolicy.question(state)
+        ],
+        reply <- ["Yes, if it is free", "Yes, but wait", "No, don't send it", "Maybe"] do
+      assert :associate =
+               ReminderPolicy.interpret(snapshot(question, reply), state,
+                 reminder_judge: fn _ -> {:ok, "opt_in"} end
+               )
     end
   end
 
@@ -213,6 +278,148 @@ defmodule BookingDesk.ReminderPolicyTest do
                new,
                opts
              )
+  end
+
+  test "neutral number wording requires the exact destination and fresh unconditional consent" do
+    state = %{
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p",
+      original_phone: "2025550188"
+    }
+
+    question = "Can we send it to the number ending in zero one eight eight?"
+    reply = "Yep, that's the right number."
+
+    assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+             ReminderPolicy.interpret(snapshot(question, reply), state,
+               reminder_judge: fn _ -> flunk("the exact neutral reply needs no model") end
+             )
+
+    opts = [
+      reminder_judge: fn _ -> {:ok, "confirm_number"} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for answer <- [
+          "Yep, that's the right number if it's free.",
+          "Yep, that's the right number, but don't text me.",
+          "Yep, that's the right number?",
+          "Yep, that's the right number. Wait, use a different one.",
+          "Maybe that's the right number."
+        ] do
+      assert {:clarify, _} = ReminderPolicy.interpret(snapshot(question, answer), state, opts)
+    end
+
+    for spoken <- [
+          "Can we send it to the number ending in four two eight nine?",
+          "Can we send it to the number ending in zero one eight?",
+          "Would you like a text reminder 24 hours before your appointment?"
+        ] do
+      assert {:clarify, _} = ReminderPolicy.interpret(snapshot(spoken, reply), state, opts)
+    end
+
+    new = %{state | status: "verify_new", destination: "+12025550199"}
+    assert {:clarify, _} = ReminderPolicy.interpret(snapshot(question, reply), new, opts)
+
+    assert {:input, %{operation: "reminder_confirm", destination: "+12025550199"}} =
+             ReminderPolicy.interpret(
+               snapshot(
+                 "Can we send it to the number two zero two five five five zero one nine nine?",
+                 reply
+               ),
+               new,
+               reminder_judge: fn _ -> flunk("full new number confirmation needs no model") end
+             )
+  end
+
+  test "natural number confirmations use semantic judgment while state and consent vetoes remain strict" do
+    state = %{
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p",
+      original_phone: "2025550188"
+    }
+
+    for reply <- [
+          "Yes, that's the one I use for texts.",
+          "Sure, please use that number.",
+          "That's the right number.",
+          "That is the number I use for texts."
+        ] do
+      question = "May we send the reminder to the number ending in zero one eight eight?"
+
+      judge = fn input ->
+        assert input.latest_user == reply
+        assert List.last(input.dialogue) == %{speaker: :user, text: reply}
+        assert input.reminder.destination == state.destination
+        send(self(), :semantic_number_confirmation)
+        {:ok, "confirm_number"}
+      end
+
+      assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+               ReminderPolicy.interpret(snapshot(question, reply), state, reminder_judge: judge)
+
+      assert_receive :semantic_number_confirmation
+    end
+
+    for {question, reply} <- [
+          {"Can we send it to the number ending in 4289?", "Yes, that's the one I use."},
+          {"Can we send it to the number ending in 018?", "Yes, that's the one I use."},
+          {"Can we send it to the number ending in 0188?", "Yes, if there's no charge."},
+          {"Can we send it to the number ending in 0188?",
+           "Sure, but use my new number instead."},
+          {"Can we send it to the number ending in 0188?", "Yes, is that the right number?"}
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(snapshot(question, reply), state,
+                 reminder_judge: fn _ -> {:ok, "confirm_number"} end
+               )
+    end
+  end
+
+  test "a semantic number confirmation survives a short acknowledgment between separate caller turns" do
+    current = %{
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p",
+      original_phone: "2025550188"
+    }
+
+    question = "Can we send the reminder to the number ending in zero one eight eight?"
+
+    for {ack, reply, allowed} <- [
+          {"Got ", "that's the right number.", true},
+          {"Got ", "that's the right number if it is free.", false},
+          {"Got ", "that's the right number, but don't send it.", false},
+          {"The number is now 0199.", "that's the right number.", false},
+          {"Would you like a text reminder?", "that's the right number.", false}
+        ] do
+      s = snapshot(question, reply)
+
+      s = %{
+        s
+        | transcripts: [
+            %{speaker: :user, delta: reply, arrival_order: 4, segment_id: "second"},
+            %{speaker: :assistant, delta: ack, arrival_order: 3, segment_id: "ack"},
+            %{speaker: :user, delta: "Yep. ", arrival_order: 2, segment_id: "first"},
+            %{speaker: :assistant, delta: question, arrival_order: 1, segment_id: "question"}
+          ]
+      }
+
+      result =
+        ReminderPolicy.interpret(s, current, reminder_judge: fn _ -> {:ok, "confirm_number"} end)
+
+      if allowed,
+        do:
+          assert(
+            match?(
+              {:input, %{operation: "reminder_confirm", destination: "+12025550188"}},
+              result
+            )
+          ),
+        else: assert(match?({:clarify, _}, result))
+    end
   end
 
   test "booking yes cannot stand in for reminder consent" do

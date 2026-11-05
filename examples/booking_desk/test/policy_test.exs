@@ -879,7 +879,7 @@ defmodule BookingDesk.PolicyTest do
     s = %{
       s
       | transcripts: [
-          %{speaker: :user, delta: "The morning one", arrival_order: 8},
+          %{speaker: :user, delta: "The morning one, please.", arrival_order: 8},
           %{
             speaker: :assistant,
             delta: "Dr. Lee has 10:15 AM or 2 PM. Which would you prefer?",
@@ -894,7 +894,7 @@ defmodule BookingDesk.PolicyTest do
                %{date: "2026-11-05", time: "14:00", clinician: "lee"}
              ]
 
-      assert state.latest_user == "The morning one"
+      assert state.latest_user == "The morning one, please."
 
       {:ok,
        %{

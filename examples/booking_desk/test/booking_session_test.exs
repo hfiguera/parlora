@@ -784,7 +784,7 @@ defmodule BookingDesk.BookingSessionTest do
     {:ok, %{"intent" => intent, "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
   end
 
-  defp start_reminder_flow(policy_opts \\ []) do
+  defp start_reminder_flow(policy_opts) do
     owner = self()
 
     judge = &reminder_flow_judgment(&1, owner)
@@ -826,24 +826,34 @@ defmodule BookingDesk.BookingSessionTest do
     {session, provider, backend}
   end
 
-  test "resuming with opt-in asks the destination once and still waits for separate number consent" do
-    {session, provider, backend} = start_reminder_flow()
+  test "neutral reminder wording resumes with opt-in and still waits for separate number consent" do
+    {session, provider, backend} =
+      start_reminder_flow(
+        reminder_judge: fn state ->
+          if state.latest_user == "Is it booked yet?",
+            do: {:ok, "appointment"},
+            else: flunk("the recorded offer and clear consent must not need a reminder model")
+        end
+      )
 
-    assistant(provider, "Would you like a text reminder 24 hours before the appointment?", 12_000)
+    assistant(provider, "Would you like a text reminder twenty-four hours before?", 12_000)
     caller(provider, "Yeah, that'd be helpful", 14_000, "opt-in")
     assert_receive {:submitted, optin}, 4_000
     assert optin.input.operation == "reminder_opt_in"
 
     refute_receive {:context,
-                    %{content: "Would you like a text reminder for this appointment?" <> _}},
+                    %{
+                      content:
+                        "Would you like a text reminder 24 hours before your appointment?" <> _
+                    }},
                    100
 
     assert BookingDesk.Store.reminder_jobs() == []
     Provider.complete(backend, optin)
     assert_receive {:context, destination}, 2_000
-    assert destination.content =~ "zero one eight eight"
+    assert destination.content =~ "Can we send it to the number ending in zero one eight eight?"
 
-    for text <- ["Can we send the reminder to your cell ending in zero one ", "eight eight?"] do
+    for text <- ["Can we send it to the number ending in zero one ", "eight eight?"] do
       Provider.inject(provider, :transcript_delta, %{
         speaker: :assistant,
         delta: text,
@@ -863,7 +873,7 @@ defmodule BookingDesk.BookingSessionTest do
     refute_receive {:context, _}, 100
     refute_receive {:submitted, _}, 100
     assert BookingDesk.Store.reminder_jobs() == []
-    caller(provider, "Yep, that's my cell", 18_000, "number-consent")
+    caller(provider, "Yep, that's the right number", 18_000, "number-consent")
     assert_receive {:submitted, confirmation}, 4_000
     assert confirmation.input.operation == "reminder_confirm"
     assert confirmation.input.destination == "+12025550188"
@@ -885,7 +895,7 @@ defmodule BookingDesk.BookingSessionTest do
               {:ok, "appointment"}
 
             "Yeah, that'd be helpful" ->
-              {:ok, "opt_in"}
+              flunk("a fresh clear answer to the clarification must not need JEV")
 
             "That sounds useful, I guess" ->
               if Agent.get_and_update(count, &{&1, &1 + 1}) == 0,

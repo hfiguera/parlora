@@ -141,9 +141,16 @@ defmodule BookingDesk.ReminderPolicy do
 
     accept =
       BookingDesk.Reply.simple(text) == :accept or
-        text in ["yep that's my cell", "yes that's my cell", "yeah that's my cell"]
+        text in [
+          "yep that's my cell",
+          "yes that's my cell",
+          "yeah that's my cell",
+          "yep that's the right number",
+          "yes that's the right number",
+          "yeah that's the right number"
+        ]
 
-    question = state.dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+    question = confirmation_question(state.dialogue)
 
     expected =
       if status == "verify_existing", do: String.slice(destination, -4, 4), else: destination
@@ -189,7 +196,7 @@ defmodule BookingDesk.ReminderPolicy do
   defp accept_offer(dialogue, text) do
     question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
 
-    if question && BookingDesk.Run.reminder_offer?(question.text) && affirmative?(text),
+    if question && BookingDesk.Reminders.possible_offer?(question.text) && affirmative?(text),
       do: {:input, %{operation: "reminder_opt_in"}},
       else: :associate
   end
@@ -230,7 +237,7 @@ defmodule BookingDesk.ReminderPolicy do
       {:ok, %{phone: phone}} -> {:input, %{operation: "reminder_number", phone: phone}}
       :pending -> :wait
       {:incomplete, _, _} -> {:clarify, partial_number_question()}
-      _ -> {:clarify, "What cell number should we use? Please include all ten digits."}
+      _ -> {:clarify, "What phone number should we use? Please include all ten digits."}
     end
   end
 
@@ -249,8 +256,7 @@ defmodule BookingDesk.ReminderPolicy do
   defp phone_evidence(%{phone: phone}, _), do: [phone]
 
   defp uncertainty_question(%{status: "offered"}, _),
-    do:
-      "Would you like a text reminder for this appointment? Any number you supplied still needs a separate readback and confirmation."
+    do: BookingDesk.Reminders.offer_question()
 
   defp uncertainty_question(current, phone)
        when is_binary(phone) and phone != current.destination,
@@ -266,7 +272,7 @@ defmodule BookingDesk.ReminderPolicy do
 
   defp uncertainty_question(%{status: "need_number"}, _),
     do:
-      "What cell number should we use? Please include all ten digits. Your appointment remains booked."
+      "What phone number should we use? Please include all ten digits. Your appointment remains booked."
 
   defp uncertainty_question(_, _),
     do:
@@ -276,11 +282,11 @@ defmodule BookingDesk.ReminderPolicy do
 
   defp pending_number_question(_phone),
     do:
-      "I've kept the cell number you supplied. Would you like to use that number for the reminder? It still needs a complete readback and confirmation. Your appointment remains booked."
+      "I've kept the phone number you supplied. Would you like to use that number for the reminder? It still needs a complete readback and confirmation. Your appointment remains booked."
 
   defp partial_number_question,
     do:
-      "I've kept the digits you supplied. Please finish the cell number. Nothing will be sent until you confirm its complete readback."
+      "I've kept the digits you supplied. Please finish the phone number. Nothing will be sent until you confirm its complete readback."
 
   defp confirm_number(_, _, %{phone_evidence: [_ | _]}, _),
     do: {:clarify, partial_number_question()}
@@ -293,22 +299,42 @@ defmodule BookingDesk.ReminderPolicy do
        do: {:clarify, pending_number_question(phone)}
 
   defp confirm_destination(current, dialogue, _, text) do
-    question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
+    question = confirmation_question(dialogue)
 
     expected =
       if current.status == "verify_existing",
         do: String.slice(current.destination, -4, 4),
         else: current.destination
 
-    if question && BookingDesk.Reminders.readback?(question.text, expected) && affirmative?(text),
-      do:
-        {:input,
-         %{
-           operation: "reminder_confirm",
-           destination: current.destination,
-           readback_verified: true
-         }},
-      else: {:clarify, "Can we send the reminder to #{BookingDesk.Reminders.spoken(expected)}?"}
+    # The literal path or confident semantic judgment has established positive
+    # intent. Keep deterministic destination and refusal/condition checks without
+    # requiring a second lexical "yes" in a naturally phrased confirmation.
+    if question && BookingDesk.Reminders.readback?(question.text, expected) &&
+         BookingDesk.Consent.unconditional?(text),
+       do:
+         {:input,
+          %{
+            operation: "reminder_confirm",
+            destination: current.destination,
+            readback_verified: true
+          }},
+       else: {:clarify, "Can we send the reminder to #{BookingDesk.Reminders.spoken(expected)}?"}
+  end
+
+  defp confirmation_question(dialogue) do
+    {acknowledgments, questions} =
+      dialogue
+      |> Enum.filter(&(&1.speaker == :assistant))
+      |> Enum.reverse()
+      |> Enum.split_while(&(not String.contains?(&1.text, "?")))
+
+    safe? =
+      Enum.all?(acknowledgments, fn turn ->
+        BookingDesk.Reminders.readback_digits(turn.text) == "" &&
+          BookingDesk.Consent.unconditional?(turn.text)
+      end)
+
+    if safe?, do: List.first(questions)
   end
 
   defp affirmative?(text) do
@@ -345,7 +371,7 @@ defmodule BookingDesk.ReminderPolicy do
           %{
             "opt_in" => "Accept the text reminder",
             "confirm_number" => "Approve the current destination readback",
-            "number" => "Supply a cell number",
+            "number" => "Supply a phone number",
             "change" => "Request a different number",
             "decline" => "Decline text reminders",
             "none" => "No reminder action",

@@ -64,7 +64,7 @@ defmodule BookingDesk.ReminderReadback do
 
   defp question(_, _),
     do:
-      "I'm having trouble verifying the number readback. Your appointment remains booked. What cell number should we use? Please include all ten digits."
+      "I'm having trouble verifying the number readback. Your appointment remains booked. What phone number should we use? Please include all ten digits."
 
   defp scope(snapshot, current) do
     ReadbackScope.current(snapshot, Map.get(current, :request_id), :reminder_readback)

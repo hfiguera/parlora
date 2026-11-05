@@ -1,5 +1,5 @@
 defmodule BookingDesk.CallGuard do
-  alias BookingDesk.CallGuard.Classifier
+  alias BookingDesk.CallGuard.{Announcement, Classifier, NativeReply}
   @moduledoc "Per-call, fail-closed task gate, scope redirects and caller-conduct lifecycle."
   use GenServer, restart: :temporary
   alias Parlora.ContextUpdate
@@ -20,6 +20,8 @@ defmodule BookingDesk.CallGuard do
        reported_drops: 0,
        transport: Keyword.get(opts, :transport, Parlora),
        instruction_updates: Keyword.get(opts, :instruction_updates, false),
+       native_result_replies: Keyword.get(opts, :native_result_replies, false),
+       native_reply: %NativeReply{},
        evaluator: Keyword.get(opts, :evaluator, &Classifier.classify/1),
        debounce_ms: Keyword.get(opts, :debounce_ms, 650),
        timeout_ms: Keyword.get(opts, :timeout_ms, 2_500),
@@ -82,6 +84,7 @@ defmodule BookingDesk.CallGuard do
 
   def handle_info({:parlora_event, event} = message, s) do
     if is_pid(s.sink), do: send(s.sink, message)
+    s = %{s | native_reply: NativeReply.observe(s.native_reply, event, s.key)}
 
     s =
       case event do
@@ -89,14 +92,15 @@ defmodule BookingDesk.CallGuard do
           %{s | serial: s.serial + 1}
 
         %{type: :transcript_delta, payload: %{speaker: :assistant}} when s.announcement != nil ->
-          text = String.slice(s.announcement.text <> event.payload.delta, -2_000, 2_000)
-
-          caption = caption_complete?(s, text)
-
-          %{s | announcement: %{s.announcement | caption: caption, text: text}}
+          %{s | announcement: Announcement.caption(s.announcement, event)}
 
         %{type: :provider_speech, payload: %{state: speech}} ->
-          %{s | speech: speech}
+          announcement =
+            if speech == :speaking and s.speech != :speaking and s.announcement,
+              do: Announcement.reset(s.announcement),
+              else: s.announcement
+
+          %{s | speech: speech, announcement: announcement}
 
         _ ->
           s
@@ -112,7 +116,7 @@ defmodule BookingDesk.CallGuard do
 
     s =
       if direction == :output and s.announcement != nil and audible?(pcm) do
-        %{s | announcement: %{s.announcement | heard: true, last_voice: now()}}
+        %{s | announcement: Announcement.audible(s.announcement, now())}
       else
         s
       end
@@ -208,7 +212,7 @@ defmodule BookingDesk.CallGuard do
   end
 
   defp schedule_check(s, snapshot, key) do
-    s = cancel_job(s)
+    s = %{cancel_job(s) | native_reply: NativeReply.check(s.native_reply, key)}
     dialogue = BookingDesk.Dialogue.build(snapshot.transcripts, limit: 6)
 
     source = %{
@@ -225,16 +229,6 @@ defmodule BookingDesk.CallGuard do
       {:reply, :wait, %{s | key: key, source: source, verdict: nil, timer: {token, timer}}}
     end
   end
-
-  defp caption_complete?(%{closing: reason}, text) when not is_nil(reason),
-    do: Regex.match?(~r/\bgoodbye\b/i, text)
-
-  defp caption_complete?(%{announcement: %{reason: :abuse_warning}}, text),
-    do:
-      String.contains?(String.downcase(text), "abusive") and
-        String.contains?(String.downcase(text), "end")
-
-  defp caption_complete?(_, _), do: true
 
   defp playout_drained?(s, a),
     do:
@@ -286,21 +280,67 @@ defmodule BookingDesk.CallGuard do
   defp apply_result(s, {:ok, :off_topic}) do
     s = %{s | verdict: :blocked}
 
-    if s.announcement != nil do
-      s
-    else
-      s = %{s | off_topic: s.off_topic + 1}
-      announce(s, if(s.off_topic < 3, do: :scope_redirect, else: :scope_close), s.off_topic >= 3)
+    cond do
+      s.announcement != nil ->
+        s
+
+      s.off_topic < 2 and native_reply?(s) ->
+        coalesce_boundary(s, :off_topic)
+
+      true ->
+        s = %{s | off_topic: s.off_topic + 1}
+
+        announce(
+          s,
+          if(s.off_topic < 3, do: :scope_redirect, else: :scope_close),
+          s.off_topic >= 3
+        )
     end
   end
 
   defp apply_result(s, {:ok, :medical_question}),
     do: announce(%{s | verdict: :blocked}, :medical_redirect, false)
 
-  defp apply_result(s, {:error, :uncertain}),
-    do: announce(%{s | verdict: :blocked}, :clarify_scope, false)
+  defp apply_result(s, {:error, :uncertain}) do
+    s = %{s | verdict: :blocked}
+
+    if native_reply?(s),
+      do: coalesce_boundary(s, :uncertain),
+      else: announce(s, :clarify_scope, false)
+  end
 
   defp apply_result(s, _), do: announce(%{s | verdict: :blocked}, :unavailable, true)
+
+  defp native_reply?(s),
+    do: s.native_result_replies and NativeReply.active?(s.native_reply, s.key)
+
+  defp coalesce_boundary(s, reason) do
+    emit(s, :boundary_coalesced)
+
+    update = %ContextUpdate{
+      id: "call-guard-#{System.unique_integer([:positive])}",
+      kind: :quiet,
+      provider_generation: elem(s.key, 0),
+      content:
+        "Application call-boundary decision: the latest caller turn is #{reason}. " <>
+          "Do not answer unrelated topics or start new work from that turn. " <>
+          "Continue the single current verified result or pending question once. " <>
+          "Do not repeat a question already spoken. This update requests no extra spoken turn " <>
+          "and grants no booking approval or reminder consent. Wait for the caller's answer."
+    }
+
+    async(s, fn ->
+      current = s.transport.snapshot(s.session)
+
+      cond do
+        key(current) != s.key -> emit(s, :stale_boundary_action)
+        s.transport.append_context(s.session, update) != :ok -> emit(s, :message_rejected)
+        true -> :ok
+      end
+    end)
+
+    s
+  end
 
   def message(:emergency),
     do:
@@ -342,7 +382,6 @@ defmodule BookingDesk.CallGuard do
     s = undo_warning(s, s.announcement)
 
     emit(s, reason)
-    token = make_ref()
     started = now()
     session = s.session
     transport = s.transport
@@ -362,20 +401,13 @@ defmodule BookingDesk.CallGuard do
 
     async(s, fn -> deliver_announcement(s, session, transport, update, state_instruction) end)
 
-    Process.send_after(self(), {:guard_tick, token}, 100)
+    announcement = Announcement.new(reason, message(reason), generation, started)
+    Process.send_after(self(), {:guard_tick, announcement.token}, 100)
 
     %{
       s
       | closing: if(close?, do: reason),
-        announcement: %{
-          token: token,
-          reason: reason,
-          text: "",
-          started: started,
-          last_voice: started,
-          heard: false,
-          caption: false
-        }
+        announcement: announcement
     }
   end
 

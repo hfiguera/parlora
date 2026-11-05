@@ -91,6 +91,39 @@ defmodule BookingDesk.RecorderTest do
     GenServer.stop(recorder)
   end
 
+  test "Gemini timing and interim observations stay auditable through the recorder allowlist", %{
+    recorder: recorder
+  } do
+    payload = %{
+      kind: :interim_transcript,
+      speaker: :user,
+      delta: "Yes",
+      start_ms: 1200,
+      end_ms: 1400,
+      timing: :provider_audio_stream,
+      language_code: "en-US",
+      finished: false,
+      api_key: "private-test"
+    }
+
+    Recorder.event(recorder, %Parlora.Event{
+      id: "interim",
+      session_id: "test",
+      source: :provider,
+      adapter_id: "gemini",
+      generation: 0,
+      type: :extension,
+      observed_at_us: System.monotonic_time(:microsecond),
+      payload: payload
+    })
+
+    report = Recorder.finish(recorder, %{})
+    assert [%{name: :extension, data: data}] = report.events
+    assert data == Map.delete(payload, :api_key)
+    refute JSON.encode!(report) =~ "private-test"
+    GenServer.stop(recorder)
+  end
+
   test "separate audio tracks retain offsets, count credits, and omit credentials", %{
     recorder: recorder,
     path: path

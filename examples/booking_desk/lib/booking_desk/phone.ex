@@ -24,7 +24,7 @@ defmodule BookingDesk.Phone do
       %{
         role: :system,
         content: """
-        Extract the caller-supplied US cell phone number for the current reminder.
+        Extract the caller-supplied US phone number for the current reminder.
         retained_phone_evidence contains exact caller excerpts from earlier replies in this call. Use these
         with the latest reply to complete a split number. Respect explicit corrections; never combine different
         people or infer missing digits. For multiple replies return evidence as one to four exact number excerpts

@@ -41,7 +41,7 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert {Parlora.Providers.Phonic, options} = BookingDesk.provider("phonic")
 
     assert Keyword.drop(options, [:api_key]) ==
-             [boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"]]
+             [boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"], vad_threshold: 0.8]
 
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
 
@@ -50,7 +50,7 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert config.enable_assistant_backchannel
     assert config.assistant_backchannel_aggressiveness == 0.3
     assert config.audio_speed == 1.0
-    assert config.vad_threshold == 0.7
+    assert config.vad_threshold == 0.8
     assert config.vad_min_speech_duration_ms == 120
     assert config.vad_min_silence_duration_ms == 600
     assert config.min_words_to_interrupt == 1
@@ -81,13 +81,16 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert hd(config.tools).require_speech_before_tool_call
   end
 
-  test "other booking providers retain their existing options even when the environment is Phonic" do
+  test "each provider retains its own profile even when the environment is Phonic" do
     System.put_env("PARLORA_PROVIDER", "phonic")
 
     for {name, module, expected} <- [
           {"openai", Parlora.Providers.OpenAI, %{api_key: "booking-test-key"}},
-          {"gemini", Parlora.Providers.Gemini, %{api_key: "booking-test-key", voice: "Sulafat"}},
-          {"grok", Parlora.Providers.Grok, %{api_key: "booking-test-key", voice: "ara"}}
+          {"gemini", Parlora.Providers.Gemini,
+           Map.merge(Map.new(BookingDesk.GeminiSettings.options()), %{
+             api_key: "booking-test-key",
+             voice: "Sulafat"
+           })}
         ] do
       assert {^module, options} = BookingDesk.provider(name)
       assert Map.new(options) == expected
@@ -112,7 +115,7 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert tool.tool_call_output_timeout_ms == 60_000
   end
 
-  test "explicit options select manual responses without duplicating library listening defaults" do
+  test "explicit manual responses retain the booking speech threshold and library duration" do
     assert {Parlora.Providers.Phonic, options} =
              BookingDesk.provider("phonic",
                enable_assistant_backchannel: false,
@@ -126,7 +129,8 @@ defmodule BookingDesk.PhonicSettingsTest do
     refute config.enable_assistant_backchannel
     refute Map.has_key?(config, :assistant_backchannel_aggressiveness)
     assert config.audio_speed == baseline.audio_speed
-    assert config.vad_threshold == baseline.vad_threshold
+    assert config.vad_threshold == 0.8
+    assert baseline.vad_threshold == 0.7
     assert config.vad_min_speech_duration_ms == baseline.vad_min_speech_duration_ms
     assert [tool] = config.tools
     refute tool.wait_for_response
@@ -134,11 +138,24 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert tool.tool_call_output_timeout_ms == 60_000
   end
 
+  test "the clinic speech threshold is the only change to library conversation defaults" do
+    {_, options} = BookingDesk.provider("phonic")
+    assert {:ok, config} = Protocol.start(options, %AudioFormat{})
+    assert {:ok, baseline} = Protocol.start([api_key: "booking-test-key"], %AudioFormat{})
+
+    assert baseline.vad_threshold == 0.7
+
+    assert Map.drop(config, [:vad_threshold, :boosted_keywords]) ==
+             Map.drop(baseline, [:vad_threshold, :boosted_keywords])
+  end
+
   test "disabling backchannels does not implicitly disable busy mode or pre-tool speech" do
     {_, options} =
       BookingDesk.provider("phonic", audio_speed: 1.1, enable_assistant_backchannel: false)
 
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
+    assert config.vad_threshold == 0.8
+    assert config.min_words_to_interrupt == 1
     assert config.audio_speed == 1.1
     refute config.enable_assistant_backchannel
     assert hd(config.tools).wait_for_response
@@ -152,6 +169,7 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert hd(config.tools).wait_for_response
     assert {BookingDesk.Policy, policy} = state.policy
     assert policy[:phonic_busy]
+    assert :sys.get_state(policy[:call_guard]).native_result_replies
   end
 
   test "session startup derives busy mode only from the explicit setting and library default" do
@@ -166,6 +184,7 @@ defmodule BookingDesk.PhonicSettingsTest do
       assert hd(config.tools).wait_for_response == busy?
       assert {BookingDesk.Policy, policy} = state.policy
       assert policy[:phonic_busy] == busy?
+      assert :sys.get_state(policy[:call_guard]).native_result_replies == busy?
     end
   end
 

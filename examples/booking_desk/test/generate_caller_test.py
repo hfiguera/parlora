@@ -25,6 +25,22 @@ class VoiceCompatibilityTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 validate_voice(models, voice, "eleven_v4")
 
+    def test_instant_clone_without_model_metadata_can_reach_explicit_v4_synthesis(self):
+        for listed in [[], None]:
+            voice = {**self.voice, "category": "cloned", "high_quality_base_model_ids": listed}
+            metadata = validate_voice(self.models, voice, "eleven_v4")
+            self.assertIsNone(metadata["listed_model"])
+            payload, _ = generation_input({"text": "Ten fifteen, please."}, "eleven_v4", "clone-id")
+            self.assertEqual(payload["model_id"], "eleven_v4")
+            self.assertEqual(payload["inputs"][0]["voice_id"], "clone-id")
+
+    def test_clone_exception_does_not_allow_an_unavailable_model_or_conflicting_model_list(self):
+        voice = {**self.voice, "category": "cloned", "high_quality_base_model_ids": []}
+        with self.assertRaisesRegex(RuntimeError, "not available"):
+            validate_voice([], voice, "eleven_v4")
+        with self.assertRaisesRegex(RuntimeError, "explicitly listed"):
+            validate_voice(self.models, {**voice, "high_quality_base_model_ids": ["eleven_multilingual_v2"]}, "eleven_v4")
+
     def test_delivery_cues_reach_synthesis_without_changing_spoken_words(self):
         row = {"text": "Actually, Thursday would work better.", "speech_text": "[thoughtful] Actually... [pause] Thursday would work better."}
         self.assertEqual(synthesis_text(row), row['speech_text'])

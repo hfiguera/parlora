@@ -2,6 +2,8 @@ defmodule BookingDesk.Reminders do
   @moduledoc "Appointment-scoped SMS consent and a simulated reminder outbox. No messages are sent."
   alias Exqlite.Sqlite3, as: SQL
 
+  @number_consent_notice "Any number you supplied still needs a separate readback and confirmation."
+
   def init(db) do
     SQL.execute(db, """
     CREATE TABLE IF NOT EXISTS reminder_reviews(appointment TEXT PRIMARY KEY,session TEXT,lookup_request TEXT,patient TEXT,status TEXT,destination TEXT,original_phone TEXT,request_id TEXT);
@@ -23,10 +25,10 @@ defmodule BookingDesk.Reminders do
 
     contact =
       if last_four,
-        do: "Verified contact reference: the cell on file ends in #{spoken(last_four)}.",
-        else: "There is no usable cell number on file; never invent one."
+        do: "Verified contact reference: the number on file ends in #{spoken(last_four)}.",
+        else: "There is no usable phone number on file; never invent one."
 
-    {"Ask whether they would like a text reminder 24 hours before the appointment. #{contact} This is reference data, not consent. Wait for their answer, delegate opt-in, and use the current backend destination question before asking for separate number confirmation.",
+    {"Ask: Would you like a text reminder 24 hours before your appointment? #{contact} This is reference data, not consent. Wait for their answer, delegate opt-in, and use the current backend destination question before asking for separate number confirmation.",
      %{status: "offered", last_four: last_four}}
   end
 
@@ -112,9 +114,8 @@ defmodule BookingDesk.Reminders do
 
     question =
       if destination,
-        do:
-          "Can we send it to your cell number ending in #{spoken(String.slice(destination, -4, 4))}?",
-        else: "What cell number should we use for the reminder?"
+        do: "Can we send it to the number ending in #{spoken(String.slice(destination, -4, 4))}?",
+        else: "What phone number should we use for the reminder?"
 
     ok(
       "The caller opted in to a simulated text reminder 24 hours before this appointment. #{question} Wait for their confirmation; nothing is scheduled yet.",
@@ -137,7 +138,7 @@ defmodule BookingDesk.Reminders do
     save(db, %{s | original_phone: actual}, input, id, "need_number", nil)
 
     ok(
-      "Ask what cell number to use for the reminder. Do not change the number on file until the caller confirms its complete readback.",
+      "Ask what phone number to use for the reminder. Do not change the number on file until the caller confirms its complete readback.",
       %{status: "need_number"}
     )
   end
@@ -148,12 +149,12 @@ defmodule BookingDesk.Reminders do
       save(db, s, input, id, "verify_new", candidate)
 
       ok(
-        "Read back the complete cell number #{spoken(candidate)} and ask if it is correct. Wait for explicit confirmation before saving or scheduling.",
+        "Read back the complete phone number #{spoken(candidate)} and ask if it is correct. Wait for explicit confirmation before saving or scheduling.",
         %{status: "verify_new", destination: candidate, reminder_revision: id}
       )
     else
       fail(
-        "That is not a complete supported US cell number. Ask for all ten digits. No phone or appointment was changed."
+        "That is not a complete supported US phone number. Ask for all ten digits. No phone or appointment was changed."
       )
     end
   end
@@ -277,16 +278,34 @@ defmodule BookingDesk.Reminders do
 
     readback?(text, expected) and
       Regex.match?(
-        ~r/^(?:can|could|may) (?:we|I) (?:send (?:it|the reminder|that reminder|the text reminder)|text) to (?:your )?(?:(?:cell|phone)(?: number)?(?: ending in)? )?(?:[0-9+() .-]|zero|oh|one|two|three|four|five|six|seven|eight|nine)+\?$/i,
+        ~r/^(?:can|could|may) (?:we|I) (?:send (?:it|the reminder|that reminder|the text reminder)|text) to (?:(?:your|the) )?(?:(?:(?:cell|phone)(?: number)?|number)(?: ending in)? )?(?:[0-9+() .-]|zero|oh|one|two|three|four|five|six|seven|eight|nine)+\?$/i,
         question
       )
   end
 
+  @doc "Conversation cue for replay or a semantically classified reply; not proof of consent."
+  def possible_offer?(text),
+    do:
+      Regex.match?(~r/text|SMS/i, text) && Regex.match?(~r/remind/i, text) &&
+        String.contains?(text, "?")
+
+  def offer_question,
+    do:
+      "Would you like a text reminder 24 hours before your appointment? " <>
+        @number_consent_notice
+
   def offer_question?(text) do
-    question = text |> String.trim() |> String.split(~r/(?<=[.!?])\s+/u) |> List.last()
+    question =
+      text
+      |> String.trim()
+      |> String.replace_suffix(" " <> @number_consent_notice, "")
+      |> String.split(~r/(?<=[.!?])\s+/u)
+      |> List.last()
+      |> String.replace(~r/\s+/u, " ")
+      |> String.replace(~r/\btwenty[- ]four\b/i, "24")
 
     Regex.match?(
-      ~r/^Would you like a (?:text|SMS) reminder(?: (?:24 hours before (?:your|the) appointment|for this appointment))?\?$/i,
+      ~r/^Would you like a (?:text|SMS) reminder(?: (?:24 hours before(?: (?:your|the) appointment)?|for this appointment))?\?$/i,
       question
     )
   end

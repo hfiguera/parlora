@@ -59,10 +59,12 @@ def validate_voice(models, voice, model):
         raise RuntimeError("The caller demonstration requires eleven_v4; no model fallback is allowed")
     if not any(m.get("model_id") == model and m.get("can_do_text_to_speech") for m in models):
         raise RuntimeError("Eleven v4 is not available for speech synthesis")
-    if model not in voice.get("high_quality_base_model_ids", []):
+    listed_models = voice.get("high_quality_base_model_ids") or []
+    unlisted_clone = voice.get("category") == "cloned" and not listed_models
+    if model not in listed_models and not unlisted_clone:
         raise RuntimeError("Choose a voice with explicitly listed Eleven v4 support")
     labels = voice.get("labels", {})
-    return {"name": voice.get("name"), "accent": labels.get("accent"), "language": labels.get("language"), "listed_model": model}
+    return {"name": voice.get("name"), "accent": labels.get("accent"), "language": labels.get("language"), "listed_model": model if model in listed_models else None}
 
 def synthesis_text(row):
     text = row.get("speech_text", row["text"])

@@ -34,6 +34,7 @@ defmodule BookingDesk.SlotChoiceTest do
           {"The first one", "2026-11-05/lee/10:15", "10:15"},
           {"The first option", "2026-11-05/lee/10:15", "10:15"},
           {"The morning one", "2026-11-05/lee/10:15", "10:15"},
+          {"The morning one, please.", "2026-11-05/lee/10:15", "10:15"},
           {"The second option", "2026-11-05/lee/13:00", "13:00"},
           {"The last one", "2026-11-05/lee/14:30", "14:30"},
           {"The later one", "2026-11-05/lee/14:30", "14:30"}

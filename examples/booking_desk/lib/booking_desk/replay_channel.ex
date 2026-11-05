@@ -29,6 +29,7 @@ defmodule BookingDesk.ReplayChannel do
        owner: Keyword.fetch!(opts, :owner),
        input: %AudioQueue{capacity: init.limits.audio_queue_bytes},
        output: %AudioQueue{capacity: init.limits.audio_queue_bytes},
+       output_pcm: <<>>,
        pending: <<>>,
        pending_label: nil,
        pending_bytes: 0,
@@ -77,8 +78,7 @@ defmodule BookingDesk.ReplayChannel do
         _ -> s.input
       end
 
-    {output, queue, playout} =
-      Playout.take(s.playout, s.output, 480, System.monotonic_time(:microsecond))
+    {output, s} = output_tick(s)
 
     Parlora.AudioObserver.send_audio(s.observer, :input, pcm)
     Parlora.AudioObserver.send_audio(s.observer, :output, output)
@@ -93,8 +93,6 @@ defmodule BookingDesk.ReplayChannel do
      %{
        s
        | input: input,
-         output: queue,
-         playout: playout,
          pending: rest,
          pending_label: nil,
          ambience: ambience,
@@ -108,7 +106,8 @@ defmodule BookingDesk.ReplayChannel do
 
   def handle_call(:ambience_info, _, s), do: {:reply, BookingDesk.Ambience.info(s.ambience), s}
 
-  def handle_call(:output_drained, _, s), do: {:reply, output_drained?(s.output), s}
+  def handle_call(:output_drained, _, s),
+    do: {:reply, output_drained?(s.output) and not audible?(s.output_pcm), s}
 
   def handle_call({:read, budget}, _, s) do
     {frames, queue} = AudioQueue.pop(s.input, budget)
@@ -118,7 +117,7 @@ defmodule BookingDesk.ReplayChannel do
   def handle_call({:write, frame}, _, s) do
     with :ok <- AudioFrame.validate(frame, s.init.audio_format, s.init.limits),
          true <- frame.playback_epoch == s.epoch,
-         {:ok, queue} <- AudioQueue.push(s.output, frame) do
+         {:ok, queue} <- queue_output(s, frame) do
       {:reply, :ok,
        %{
          s
@@ -143,7 +142,13 @@ defmodule BookingDesk.ReplayChannel do
     )
 
     {:reply, :ok,
-     %{s | output: AudioQueue.clear(s.output), playout: Playout.reset(s.playout), epoch: epoch}}
+     %{
+       s
+       | output: AudioQueue.clear(s.output),
+         output_pcm: <<>>,
+         playout: Playout.reset(s.playout),
+         epoch: epoch
+     }}
   end
 
   def handle_call({:control, id, {:suppress_output, flag}}, _, s) do
@@ -157,6 +162,33 @@ defmodule BookingDesk.ReplayChannel do
   end
 
   def capabilities, do: Capabilities.buffered_pcm()
+
+  defp queue_output(s, frame) do
+    if s.output.bytes + byte_size(s.output_pcm) + byte_size(frame.data) <= s.output.capacity,
+      do: AudioQueue.push(s.output, frame),
+      else: Error.tuple(:backpressure, "Audio queue is full")
+  end
+
+  defp output_tick(s) do
+    s = fill_output(s, System.monotonic_time(:microsecond))
+    size = min(480, byte_size(s.output_pcm))
+    <<pcm::binary-size(^size), rest::binary>> = s.output_pcm
+    {pcm <> :binary.copy(<<0>>, 480 - size), %{s | output_pcm: rest}}
+  end
+
+  # A network chunk can end inside a playback tick. Carry its remainder into
+  # the next chunk instead of inserting silence at each network boundary.
+  defp fill_output(%{output_pcm: pcm} = s, _now) when byte_size(pcm) >= 480, do: s
+
+  defp fill_output(%{output_pcm: pcm, output: %{bytes: 0}} = s, _now)
+       when byte_size(pcm) > 0,
+       do: s
+
+  defp fill_output(s, now) do
+    {pcm, queue, playout} = Playout.take(s.playout, s.output, s.init.limits.max_frame_bytes, now)
+
+    fill_output(%{s | output_pcm: s.output_pcm <> pcm, output: queue, playout: playout}, now)
+  end
 
   defp audible?(pcm) do
     for <<sample::signed-little-16 <- pcm>>, reduce: false do

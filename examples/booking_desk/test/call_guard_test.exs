@@ -18,6 +18,9 @@ defmodule BookingDesk.CallGuardTest do
     def append_context(pid, %{kind: :instruction} = value),
       do: GenServer.call(pid, {:action, {:instruction, value.content}})
 
+    def append_context(pid, %{kind: :quiet} = value),
+      do: GenServer.call(pid, {:action, {:quiet, value}})
+
     def append_context(pid, value), do: GenServer.call(pid, {:action, {:message, value.content}})
     def close(pid, value), do: GenServer.call(pid, {:action, {:closed, value}})
     def handle_call(:snapshot, _, s), do: {:reply, s.snapshot, s}
@@ -105,11 +108,180 @@ defmodule BookingDesk.CallGuardTest do
   defp answer(choice, probability \\ 0.99),
     do: %{choice: choice, probabilities: %{choice => probability}}
 
+  defp pending_native_result(guard, transport, cursor \\ 1) do
+    first = snapshot("Continue", cursor)
+    check(guard, transport, first)
+    eventually(fn -> CallGuard.check(guard, first) == :allow end)
+
+    for stage <- [:awaiting_provider, :unconfirmed, :accepted] do
+      send(
+        guard,
+        {:parlora_event,
+         %Event{
+           type: :result_delivery,
+           request_id: "reminder-result",
+           payload: %{stage: stage}
+         }}
+      )
+    end
+  end
+
+  test "a false off-topic turn during a native result updates context without another spoken reply" do
+    {g, t} =
+      start(
+        fn %{latest_user: text} ->
+          {:ok, if(text == "I'm your interview rep.", do: :off_topic, else: :allowed)}
+        end,
+        native_result_replies: true
+      )
+
+    pending_native_result(g, t)
+    latest = snapshot("I'm your interview rep.", 2)
+    check(g, t, latest)
+    assert_receive {:guard_action, {:quiet, update}}
+    assert update.kind == :quiet
+    assert update.content =~ "single current verified result"
+    assert update.content =~ "grants no booking approval or reminder consent"
+    assert :blocked = CallGuard.check(g, latest)
+    assert :sys.get_state(g).off_topic == 0
+    assert :sys.get_state(g).announcement == nil
+    refute_receive {:guard_action, {:message, _}}, 30
+    refute_receive {:guard_action, {:control, _}}, 30
+
+    next = snapshot("No", 3)
+    check(g, t, next)
+    eventually(fn -> CallGuard.check(g, next) == :allow end)
+  end
+
+  test "a late scope classification cannot queue speech after the native question has already ended" do
+    owner = self()
+
+    {g, t} =
+      start(
+        fn %{latest_user: text} ->
+          if text == "Continue" do
+            {:ok, :allowed}
+          else
+            send(owner, {:scope_worker, self()})
+
+            receive do
+              :classify_now -> {:ok, :off_topic}
+            end
+          end
+        end,
+        native_result_replies: true
+      )
+
+    pending_native_result(g, t)
+    check(g, t, snapshot("Background words", 2))
+    assert_receive {:scope_worker, worker}
+
+    for state <- [:speaking, :idle] do
+      send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: state}}})
+    end
+
+    assert :sys.get_state(g).native_reply.request_id == nil
+    send(worker, :classify_now)
+    assert_receive {:guard_action, {:quiet, _}}
+    refute_receive {:guard_action, {:message, _}}, 30
+  end
+
+  test "an uncertain turn also cannot multiply a pending native question or grant task admission" do
+    {g, t} =
+      start(
+        fn %{latest_user: text} ->
+          if text == "Continue", do: {:ok, :allowed}, else: {:error, :uncertain}
+        end,
+        native_result_replies: true
+      )
+
+    pending_native_result(g, t)
+    latest = snapshot("Unclear words", 2)
+    check(g, t, latest)
+    assert_receive {:guard_action, {:quiet, _}}
+    assert CallGuard.check(g, latest) == :blocked
+    refute_receive {:guard_action, {:message, _}}, 30
+  end
+
+  test "native response ownership never defers emergency guidance or an abuse warning" do
+    for {kind, reason} <- [{:emergency, :emergency}, {:abuse, :abuse_warning}] do
+      {g, t} =
+        start(
+          fn %{latest_user: text} ->
+            {:ok, if(text == "Continue", do: :allowed, else: kind)}
+          end,
+          native_result_replies: true
+        )
+
+      pending_native_result(g, t)
+      latest = snapshot("Urgent caller words", 2)
+      check(g, t, latest)
+      assert_receive {:guard_action, {:message, text}}
+      assert text =~ CallGuard.message(reason)
+      assert :blocked = CallGuard.check(g, latest)
+      refute_receive {:guard_action, {:quiet, _}}, 30
+    end
+  end
+
+  test "unrelated captions and earlier audio cannot count as a delivered scope redirect" do
+    {g, t} = start(fn _ -> {:ok, :off_topic} end, delivery_ms: 300)
+    check(g, t, snapshot("Unrelated request", 1))
+    assert_receive {:guard_action, {:message, _}}
+    caption(g, "Can we send the reminder to the number ending in zero one eight eight?")
+    voice(g)
+    refute :sys.get_state(g).announcement.caption
+    refute :sys.get_state(g).announcement.heard
+    caption(g, CallGuard.message(:scope_redirect))
+    refute :sys.get_state(g).announcement.heard
+    eventually(fn -> :sys.get_state(g).announcement == nil end)
+    assert :sys.get_state(g).off_topic == 0
+  end
+
+  test "manual response mode still asks a scope question when a result is submitted" do
+    {g, t} =
+      start(
+        fn %{latest_user: text} ->
+          {:ok, if(text == "Continue", do: :allowed, else: :off_topic)}
+        end,
+        native_result_replies: false
+      )
+
+    pending_native_result(g, t)
+    check(g, t, snapshot("Unrelated request", 2))
+    assert_receive {:guard_action, {:message, text}}
+    assert text =~ CallGuard.message(:scope_redirect)
+    refute_receive {:guard_action, {:quiet, _}}, 30
+  end
+
+  test "two delivered scope warnings still require closure even when a native result is pending" do
+    {g, t} =
+      start(
+        fn %{latest_user: text} ->
+          {:ok, if(text == "Continue", do: :allowed, else: :off_topic)}
+        end,
+        native_result_replies: true
+      )
+
+    for cursor <- 1..2 do
+      check(g, t, snapshot("Unrelated request", cursor))
+      assert_receive {:guard_action, {:message, _}}
+      finish_message(g, CallGuard.message(:scope_redirect))
+    end
+
+    pending_native_result(g, t, 3)
+    check(g, t, snapshot("Still unrelated", 4))
+    assert_receive {:guard_action, {:message, text}}
+    assert text =~ CallGuard.message(:scope_close)
+    assert :sys.get_state(g).closing == :scope_close
+    refute_receive {:guard_action, {:quiet, _}}, 30
+  end
+
   test "replay software playout reaches the guard and its existing recording tap" do
     outer = %{pid: self(), credits: :atomics.new(2, [])}
     {g, t} = start(fn _ -> {:ok, :emergency} end, audio_observer: outer)
     check(g, t, snapshot("I need emergency help", 1))
     assert_receive {:guard_action, {:message, _}}
+    caption(g, CallGuard.message(:emergency))
 
     init = %Parlora.AdapterInit{
       session_id: "guard-replay",
@@ -192,7 +364,7 @@ defmodule BookingDesk.CallGuardTest do
     assert_receive {:guard_action, {:message, closing}}
     assert closing =~ "ending this call"
     refute_receive {:guard_action, {:closed, _}}, 40
-    caption(g, "Goodbye.")
+    caption(g, CallGuard.message(:abuse_close))
 
     for _ <- 1..8 do
       voice(g)
@@ -230,7 +402,7 @@ defmodule BookingDesk.CallGuardTest do
     assert :sys.get_state(g).closing == :emergency
     assert_receive {:guard_action, {:control, {:input_muted, true}}}
     assert :blocked = check(g, t, snapshot("Book it anyway", 4))
-    finish_message(g, text)
+    finish_message(g, CallGuard.message(:emergency))
     assert_receive {:guard_action, {:closed, :finish}}, 500
   end
 
@@ -325,7 +497,7 @@ defmodule BookingDesk.CallGuardTest do
     assert_receive {:guard_action, {:message, text}}
     assert text =~ "ending the call"
     refute_receive {:guard_action, {:closed, _}}, 30
-    caption(g, "Goodbye.")
+    caption(g, CallGuard.message(:scope_close))
     voice(g)
     assert_receive {:guard_action, {:closed, :finish}}, 500
   end
@@ -472,7 +644,7 @@ defmodule BookingDesk.CallGuardTest do
 
     assert :sys.get_state(g).announcement.token == token
     assert :sys.get_state(g).evaluations == 1
-    caption(g, "Please hang up and call 911. Goodbye.")
+    caption(g, CallGuard.message(:emergency))
     voice(g)
     assert_receive {:guard_action, {:closed, :finish}}, 500
   end

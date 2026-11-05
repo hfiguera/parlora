@@ -145,7 +145,7 @@ defmodule BookingDesk.Confirmation do
 
     tail =
       if current.reminder_status == "offered",
-        do: " Would you like a text reminder 24 hours before the appointment?",
+        do: " Would you like a text reminder 24 hours before your appointment?",
         else: " Your appointment remains booked."
 
     "#{introduction} Your appointment is already booked. Your full confirmation code is #{current.readout}.#{tail}"

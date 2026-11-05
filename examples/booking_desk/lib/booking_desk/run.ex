@@ -32,8 +32,8 @@ defmodule BookingDesk.Run do
            owner: self(), audio_observer: observer, recorder: recorder, ambience: ambience}
 
     provider_options =
-      Keyword.merge(
-        BookingDesk.PhonicSettings.options(System.get_env("PARLORA_PROVIDER", "openai")),
+      BookingDesk.provider_options(
+        System.get_env("PARLORA_PROVIDER", "openai"),
         Keyword.get(opts, :provider_options, [])
       )
 
@@ -345,8 +345,8 @@ defmodule BookingDesk.Run do
   defp advance_stage(%{stage: stage} = s, settled, _age) when stage in [:insurance, :clinician],
     do: advance_clinician(s, settled)
 
-  defp advance_stage(%{stage: :correction} = s, settled, _age) do
-    if settled &&
+  defp advance_stage(%{stage: :correction} = s, settled, age) do
+    if (settled || options_interruption?(s, age)) &&
          Regex.match?(~r/10.?15|ten.?fifteen|two|2.?00|available|openings/i, s.text) do
       play(s, "choose")
     else
@@ -403,6 +403,15 @@ defmodule BookingDesk.Run do
 
   defp advance_stage(s, _settled, _age), do: s
 
+  # The scripted caller can answer a completed options question through native
+  # barge-in when playout is drained but the provider still reports speech active.
+  # Booking approval and reminder consent continue to require their own gates.
+  defp options_interruption?(s, age) do
+    age >= s.stage_due && age > 2_000 && String.contains?(s.text, "?") &&
+      System.monotonic_time(:millisecond) - s.last_audio_at > 1_000 &&
+      s.channel != nil && ReplayChannel.output_drained?(s.channel)
+  end
+
   defp advance_clinician(s, true) do
     answered = Map.get(s, :clinician_replies, MapSet.new())
 
@@ -446,10 +455,7 @@ defmodule BookingDesk.Run do
   end
 
   @doc false
-  def reminder_offer?(text),
-    do:
-      Regex.match?(~r/text|SMS/i, text) && Regex.match?(~r/remind/i, text) &&
-        String.contains?(text, "?")
+  defdelegate reminder_offer?(text), to: BookingDesk.Reminders, as: :possible_offer?
 
   def confirmation_ready?(s) do
     BookingDesk.Confirmation.complete?(s.text, s.expected_confirmation) and
@@ -622,7 +628,11 @@ defmodule BookingDesk.Run do
             provider: System.get_env("PARLORA_PROVIDER", "openai"),
             model: model(),
             assistant_voice:
-              BookingDesk.assistant_voice(System.get_env("PARLORA_PROVIDER", "openai")),
+              Map.get(
+                s.provider_options,
+                :voice,
+                BookingDesk.assistant_voice(System.get_env("PARLORA_PROVIDER", "openai"))
+              ),
             jev_model: Application.fetch_env!(:booking_desk, :jev_model),
             opening: %{
               kind: "assistant_first",

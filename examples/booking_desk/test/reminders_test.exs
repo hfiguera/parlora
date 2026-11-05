@@ -100,7 +100,7 @@ defmodule BookingDesk.RemindersTest do
     Exqlite.Sqlite3.execute(db, "UPDATE patients SET phone=NULL WHERE id='p_1002'")
     {summary, offer} = Reminders.offer(db, "p_1002")
     assert offer.last_four == nil
-    assert summary =~ "no usable cell number"
+    assert summary =~ "no usable phone number"
   end
 
   test "confirmation readout and recovery data come from the exact booking receipt", ctx do
