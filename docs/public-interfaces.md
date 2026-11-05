@@ -90,7 +90,7 @@ The shared structs below describe session data. Fields documented as optional us
 | `Parlora.ContextSnapshot` | `session_id`, `provider_generation`, `revision`, `transcripts`, `application_context`, `pending_delegations`, `tasks`. This is an immutable runtime input, not a persistence/export format. |
 | `Parlora.BackendRequest` | `id`, `task_id`, `task_revision`, `provider_generation`, `delegation_id`, `input` (map defined by the application), `context` (`ContextSnapshot`), `deadline_at_us` (optional), `metadata`. |
 | `Parlora.BackendResult` | `request_id`, `task_id`, `task_revision`, `provider_generation`, `status` (`:completed`, `:failed`, or `:cancelled`), `facts` (map), `summary` (optional concise verified text), `error` (optional), `metadata`. A cancelled computation does not establish that prior side effects were undone. |
-| `Parlora.ContextUpdate` | `id`, `kind` (`:quiet`, `:speakable`, or `:instruction`), `content` (string), `delegation_id` (optional), `provider_generation`, `task_id` (optional), `task_revision` (optional). The provider adapter translates kinds into its supported commands. |
+| `Parlora.ContextUpdate` | `id`, `kind` (`:quiet`, `:speakable`, `:instruction`, or optional `:verbatim`), `content` (string), `delegation_id` (optional), `provider_generation`, `task_id` (optional), `task_revision` (optional). The provider adapter translates kinds into its supported commands. |
 
 Transcript entries retain `speaker`, `delta`, `start_ms`, `end_ms`, `provider_generation`, and local arrival order. Delegation entries retain their opaque `id`, `provider_generation`, `offset_ms`, and handling status. Task entries retain `id`, `revision`, active request IDs, input, status, and references to confirmations and actions controlled by the application. Preserve original transcript spaces, overlaps, and late fragments.
 
@@ -1089,10 +1089,19 @@ for the mapping and limitations.
 ## Grok contract additions
 
 Grok uses the same required capabilities, interruption barrier, and callback for completing function calls as Gemini. It supports direct PCM24 and PCMU8, both transcript speakers,
-speakable updates, and a local input mute gate. It does not advertise quiet or
+speakable and optional verbatim updates, and a local input mute gate. Verbatim
+updates use native interruptible TTS, accept no delegation ID, and return
+`:backpressure` while the provider has an active or pending turn, buffered audio,
+or unresolved backend calls. Rejected busy commands are not queued or recorded;
+the same ID can be retried after the application rechecks its task revision.
+Accepted IDs are not replayed, including after interruption. They remain
+unconfirmed socket submissions, never evidence of playback or caller consent.
+It does not advertise quiet or
 instruction updates, usage, individual context acknowledgments, or transparent
 resumption. `session.updated` establishes configuration readiness. Explicit
-continuations have a finite deadline based on the startup limit while awaiting response creation.
+continuations, verbatim speech and native idle followups have a finite deadline
+based on the startup limit while awaiting response creation. Requested native
+conversation settings must also match the effective configuration acknowledgment.
 
 Caller transcription candidates are cumulative, including pre-commit `completed`
 events observed with `grok-transcribe`. The adapter emits one finalized caller

@@ -203,6 +203,39 @@ defmodule Parlora.RuntimeCommandsTest do
     assert_down(state, pid)
   end
 
+  test "queued verbatim speech rechecks task revision before reaching the provider" do
+    {pid, state} = boot(provider: :control)
+    {client, owner} = hold_provider(pid)
+    delegate(state)
+    assert_receive {:submitted, first}
+
+    speech = %ContextUpdate{
+      id: "old-readback",
+      kind: :verbatim,
+      content: "Old verified readback",
+      provider_generation: first.provider_generation,
+      task_id: first.task_id,
+      task_revision: first.task_revision
+    }
+
+    caller = Task.async(fn -> Parlora.append_context(pid, speech) end)
+    eventually(fn -> map_size(:sys.get_state(pid).commands.records) == 2 end)
+
+    MemoryAudio.inject(elem(state.adapters.provider, 1), :transcript_delta, %{
+      speaker: :user,
+      delta: " actually order 124"
+    })
+
+    assert_receive {:submitted, second}
+    assert second.task_revision == first.task_revision + 1
+    send(owner, {:release, :control})
+    assert Task.await(client) == :ok
+    assert {:error, %{details: %{execution: :never_submitted}}} = Task.await(caller)
+    refute_received {:invoked, :append, _owner, %{kind: :verbatim}}
+    assert :ok = Parlora.close(pid)
+    assert_down(state, pid)
+  end
+
   test "early backend results and acknowledgements cannot be overwritten by admission replies" do
     {pid, state} = boot([])
     delegate(state)
