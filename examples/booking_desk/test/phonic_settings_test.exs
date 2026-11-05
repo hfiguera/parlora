@@ -49,7 +49,7 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert config.voice_id == "sabrina"
     assert config.enable_assistant_backchannel
     assert config.assistant_backchannel_aggressiveness == 0.3
-    assert config.audio_speed == 1.05
+    assert config.audio_speed == 1.0
     assert config.vad_threshold == 0.7
     assert config.vad_min_speech_duration_ms == 120
     assert config.vad_min_silence_duration_ms == 600
