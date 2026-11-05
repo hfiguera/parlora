@@ -137,6 +137,22 @@ defmodule Parlora.GrokAdapterTest do
     assert_configuration_failure(state)
   end
 
+  for setting <- [:speed, :idle, :missing_speed] do
+    test "default #{setting} must be acknowledged before readiness", context do
+      event = acknowledged(Protocol.model(), "high")
+
+      event =
+        case unquote(setting) do
+          :speed -> put_in(event, ["session", "audio", "output", "speed"], 1.2)
+          :idle -> put_in(event, ["session", "turn_detection"], %{"idle_timeout_ms" => 8_000})
+          :missing_speed -> update_in(event, ["session"], &Map.delete(&1, "audio"))
+        end
+
+      state = deliver(context, context.state, event)
+      assert_configuration_failure(state)
+    end
+  end
+
   test "verbatim speech sends one interruptible native turn without model continuation",
        context do
     state = ready(context)
@@ -665,7 +681,11 @@ defmodule Parlora.GrokAdapterTest do
   defp acknowledged(model, effort),
     do: %{
       "type" => "session.updated",
-      "session" => %{"model" => model, "reasoning" => %{"effort" => effort}}
+      "session" => %{
+        "model" => model,
+        "reasoning" => %{"effort" => effort},
+        "audio" => %{"output" => %{"speed" => 1.0}}
+      }
     }
 
   defp assert_configuration_failure(state) do

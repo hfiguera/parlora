@@ -18,9 +18,13 @@ Do not pass `thinking_level:` or `thinking_config:`.
 
 Native settings are validated keyword lists. Unknown keys, duplicates, invalid
 values and incompatible manual/automatic detection settings return an error
-before connecting. With no overrides, the library keeps automatic detection and
-its existing 700 ms silence duration; it leaves sensitivity and transcription
-hints to the service defaults.
+before connecting. With no overrides, Parlora explicitly enables automatic
+detection, a 700 ms silence duration, native caller interruptions and verbatim
+input transcription. Sensitivity and prefix padding remain service defaults;
+language, vocabulary and interim timestamps remain opt-in. Voices remain
+application choices, with `Puck` as the existing fallback.
+`Parlora.Providers.Gemini.default_options/0` returns the neutral conversational
+defaults. Provider tuple options override nested fields individually.
 
 ```elixir
 provider: {Parlora.Providers.Gemini,
@@ -77,9 +81,37 @@ sending the end marker; wait for its `:control_completed` event before starting
 another turn. Automatic-mode sessions reject these controls. This option supplies
 protocol boundaries, not a local VAD or background-speaker classifier.
 
-The booking example selects lower onset sensitivity and English clinic vocabulary;
-applications can replace either nested option group. These controls can reduce
-false starts but do not guarantee rejection of intelligible background speech.
+To combine your application's profile with per-session overrides, use the
+validated merge helper rather than a shallow `Keyword.merge/2`:
+
+```elixir
+{:ok, options} = Parlora.Providers.Gemini.merge_options(app_options,
+  realtime_input_config: [
+    automatic_activity_detection: [prefix_padding_ms: 200]
+  ],
+  input_audio_transcription: [language_codes: []])
+
+provider = {Parlora.Providers.Gemini, Keyword.put(options, :api_key, key)}
+```
+
+The helper preserves unrelated fields at every supported nesting level. Language
+and vocabulary lists replace their whole field; `[]` clears those hints. An empty
+nested option group preserves inherited fields. Explicit `false` is honored;
+`nil` is invalid for native Gemini fields. Invalid values and duplicate or unknown
+keys in either input return `{:error, %Parlora.Error{}}`, even if an override would
+otherwise hide them. Credentials are checked at provider startup.
+
+Setting `automatic_activity_detection: [disabled: true]` removes inherited
+automatic tuning. Explicitly supplying tuning alongside `disabled: true` remains
+an error. Re-enable detection with `disabled: false`; discarded tuning is not
+restored. Library defaults are applied separately at startup. Options are
+per-session; an override never changes another session's defaults.
+
+The booking example selects lower speech sensitivity and English clinic
+vocabulary. Its clean run passed, but the café run still failed; that profile is
+not promoted to library defaults. These controls do not guarantee rejection of
+intelligible background speech. Native activity and interim transcripts remain
+observations, never caller consent or authorization to execute backend work.
 
 ## Audio and lifecycle
 

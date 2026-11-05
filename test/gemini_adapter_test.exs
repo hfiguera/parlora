@@ -62,7 +62,7 @@ defmodule Parlora.GeminiAdapterTest do
     refute_receive {:command, _}, 20
   end
 
-  test "interim captions are observations and cannot enter caller history or arm a reply",
+  test "interim captions and native activity cannot enter caller history or authorize work",
        context do
     state =
       deliver(context, %{context.state | status: :ready}, %{
@@ -72,7 +72,8 @@ defmodule Parlora.GeminiAdapterTest do
             "startOffset" => "1s",
             "endOffset" => "1.2s"
           }
-        }
+        },
+        "voiceActivity" => %{"type" => "ACTIVITY_START", "audioOffset" => "1s"}
       })
 
     assert_receive {:parlora_event,
@@ -86,7 +87,14 @@ defmodule Parlora.GeminiAdapterTest do
                       }
                     }}
 
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :extension,
+                      payload: %{kind: :caller_speech, state: :started, evidence: :provider_vad}
+                    }}
+
     refute_receive {:parlora_event, %Event{type: :transcript_delta}}, 20
+    refute_receive {:parlora_event, %Event{type: :delegation_requested}}, 20
     assert state.response_watch == nil
 
     _state =

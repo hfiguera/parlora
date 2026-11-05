@@ -2,6 +2,14 @@ defmodule Parlora.Providers.Gemini.Options do
   @moduledoc false
   alias Parlora.Error
 
+  @defaults [
+    realtime_input_config: [
+      automatic_activity_detection: [disabled: false, silence_duration_ms: 700],
+      activity_handling: :start_of_activity_interrupts
+    ],
+    input_audio_transcription: [mode: :verbatim]
+  ]
+  @nested ~w(realtime_input_config automatic_activity_detection input_audio_transcription output_audio_transcription)a
   @base ~w(api_key api_version model instructions voice history response_timeout_ms thinking_level thinking_config)a
   @activity [
     disabled: :boolean,
@@ -47,7 +55,41 @@ defmodule Parlora.Providers.Gemini.Options do
     custom_vocabulary: :customVocabulary
   }
 
+  def defaults, do: @defaults
+
   def resolve(options) do
+    with {:ok, resolved} <- merge(@defaults, options),
+         {:ok, native} <- encode_options(resolved) do
+      {:ok,
+       Map.put(
+         native,
+         :manual_activity?,
+         native.realtime.automaticActivityDetection[:disabled] == true
+       )}
+    end
+  end
+
+  def merge(base, overrides) do
+    with {:ok, _} <- encode_options(base),
+         {:ok, _} <- encode_options(overrides) do
+      merged = Keyword.merge(base, overrides, &merge_value/3)
+
+      with {:ok, _} <- encode_options(merged), do: {:ok, merged}
+    end
+  end
+
+  defp merge_value(:automatic_activity_detection, base, overrides) do
+    if Keyword.get(overrides, :disabled) == true,
+      do: overrides,
+      else: Keyword.merge(base, overrides)
+  end
+
+  defp merge_value(key, base, overrides) when key in @nested,
+    do: Keyword.merge(base, overrides, &merge_value/3)
+
+  defp merge_value(_key, _base, override), do: override
+
+  defp encode_options(options) do
     known =
       @base ++ ~w(realtime_input_config input_audio_transcription output_audio_transcription)a
 
@@ -58,20 +100,7 @@ defmodule Parlora.Providers.Gemini.Options do
          {:ok, output} <-
            encode(Keyword.get(options, :output_audio_transcription, []), @transcription),
          :ok <- activity_dependencies(realtime) do
-      detection = Map.get(realtime, :automaticActivityDetection, %{})
-
-      detection =
-        if detection[:disabled] == true,
-          do: detection,
-          else: Map.merge(%{disabled: false, silenceDurationMs: 700}, detection)
-
-      {:ok,
-       %{
-         realtime: Map.put(realtime, :automaticActivityDetection, detection),
-         input: input,
-         output: output,
-         manual_activity?: detection[:disabled] == true
-       }}
+      {:ok, %{realtime: realtime, input: input, output: output}}
     end
   end
 

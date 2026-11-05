@@ -31,14 +31,15 @@ defmodule Parlora.Providers.Grok.Protocol do
   end
 
   def start(options, format) do
-    with :ok <- Settings.validate(options), do: start_validated(options, format)
+    with :ok <- Settings.validate(options),
+         do: start_validated(Keyword.merge(Settings.defaults(), options), format)
   end
 
   defp start_validated(options, format) do
     instructions = Keyword.get(options, :instructions, "Keep replies brief.")
     voice = Keyword.get(options, :voice, "eve")
     history = Keyword.get(options, :history, [])
-    reasoning = Keyword.get(options, :reasoning_effort, :high)
+    reasoning = Keyword.fetch!(options, :reasoning_effort)
     key = Keyword.get(options, :api_key)
 
     cond do

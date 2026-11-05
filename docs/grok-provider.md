@@ -21,8 +21,11 @@ backend work.
 
 ## Native conversational settings
 
-All of these settings are opt-in. Omitting them preserves the existing wire
-configuration and provider defaults. Apps pass them in the Grok provider tuple:
+Parlora explicitly defaults to normal speed (`speed: 1.0`), no automatic idle
+prompts (`idle_timeout_ms: nil`), and high reasoning (`reasoning_effort: :high`).
+`Parlora.Providers.Grok.default_options/0` returns these neutral defaults.
+Language hints, vocabulary and pronunciation replacements remain opt-in. Apps
+override each setting directly in the Grok provider tuple:
 
 ```elixir
 provider: {Parlora.Providers.Grok,
@@ -39,10 +42,10 @@ provider: {Parlora.Providers.Grok,
 | `language_hint` | `nil` or a documented Grok language code, normalized to its canonical casing. Supported codes: `en`, `ar-EG`, `ar-SA`, `ar-AE`, `bn`, `zh`, `fr`, `de`, `hi`, `id`, `it`, `ja`, `ko`, `pt-BR`, `pt-PT`, `ru`, `es-MX`, `es-ES`, `tr`, `vi`. Spanish and Portuguese require a region. Omitted/`nil` leaves automatic detection enabled. |
 | `keyterms` | At most 100 nonempty UTF-8 strings, each at most 50 Unicode codepoints. These bias transcription; they are not facts, instructions or permissions. |
 | `replace` | Nonempty UTF-8 phrase-to-pronunciation strings. Parlora bounds the encoded replacement map to 65,536 JSON bytes. This is a local configuration bound, not an asserted provider limit. |
-| `speed` | Number from `0.7` through `1.5`; the provider default is `1.0`. This controls synthesis speed, not PCM playback rate. |
+| `speed` | Number from `0.7` through `1.5`; Parlora explicitly sends `1.0` by default. This controls synthesis speed, not PCM playback rate. |
 | `idle_timeout_ms` | Positive integer milliseconds or `nil` to disable. Omitted defaults to disabled. The native server re-engages after silence following its response and re-arms after each response, so it can ask repeatedly. Choose this per application and close inactive calls according to application policy. |
 
-The adapter rejects invalid and unknown options before connecting, and fails
+The adapter rejects invalid, duplicate and unknown options before connecting, and fails
 readiness if effective requested settings differ in `session.updated`. The
 server may omit empty replacements and a disabled idle timeout.
 The model and reasoning acknowledgment checks remain in place. No undocumented

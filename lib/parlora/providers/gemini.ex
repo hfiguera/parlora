@@ -11,7 +11,27 @@ defmodule Parlora.Providers.Gemini do
   use Parlora.ProviderClient, protocol: Parlora.Providers.Gemini.Protocol
   alias Parlora.{Adapter, AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, Pacer}
   alias Parlora.Provider.OutputBuffer
-  alias Parlora.Providers.Gemini.{Audio, Calls, Connection, Protocol, ResponseWatch}
+  alias Parlora.Providers.Gemini.{Audio, Calls, Connection, Options, Protocol, ResponseWatch}
+
+  @doc "Returns neutral conversational defaults, merged field by field at provider startup."
+  @spec default_options() :: keyword()
+  def default_options, do: Options.defaults()
+
+  @doc """
+  Merges application options with per-session overrides and validates native settings.
+
+  Supported nested option groups merge field by field. Lists of languages or
+  vocabulary replace the entire field; an empty list clears those hints. Explicit
+  `false` values are retained. Disabling automatic detection removes inherited
+  automatic tuning, but explicitly combining manual and automatic controls fails.
+  Re-enabling detection requires `disabled: false`.
+
+  Returns `{:ok, options}` or `{:error, %Parlora.Error{}}`. Credentials and other
+  session requirements are checked at startup; credentials need not be supplied
+  to compose options. Library defaults are applied separately at startup.
+  """
+  @spec merge_options(keyword(), keyword()) :: {:ok, keyword()} | {:error, Error.t()}
+  def merge_options(base, overrides), do: Options.merge(base, overrides)
 
   @doc "Finite session limits for generated audio bursts; pass as session :limits, with optional overrides."
   @impl true

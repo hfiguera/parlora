@@ -8,7 +8,7 @@ defmodule Parlora.GeminiProtocolTest do
     assert setup.model == "models/gemini-3.8-live"
     refute Map.has_key?(setup.generationConfig, :thinkingConfig)
     assert [%{functionDeclarations: [%{behavior: "NON_BLOCKING"}]}] = setup.tools
-    assert setup.inputAudioTranscription == %{}
+    assert setup.inputAudioTranscription == %{mode: "VERBATIM"}
     assert setup.outputAudioTranscription == %{}
     assert setup.realtimeInputConfig.automaticActivityDetection.disabled == false
     refute Map.has_key?(setup, :proactivity)

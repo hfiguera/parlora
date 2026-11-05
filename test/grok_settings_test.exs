@@ -1,6 +1,7 @@
 defmodule Parlora.GrokSettingsTest do
   use ExUnit.Case, async: true
   alias Parlora.{AudioFormat, ContextUpdate}
+  alias Parlora.Providers.Grok
   alias Parlora.Providers.Grok.Protocol
 
   @settings [
@@ -30,11 +31,17 @@ defmodule Parlora.GrokSettingsTest do
     end
   end
 
-  test "defaults do not send new settings and explicit disabling remains available" do
+  test "neutral defaults are explicit without imposing language, vocabulary or pronunciation" do
     {:ok, %{setup: %{session: session}}} = Protocol.start([api_key: "test"], %AudioFormat{})
     assert session.audio.input.transcription == %{model: "grok-transcribe"}
-    assert session.audio.output == %{format: %{type: "audio/pcm", rate: 24_000}}
-    assert session.turn_detection == %{type: "server_vad"}
+    assert session.audio.output == %{format: %{type: "audio/pcm", rate: 24_000}, speed: 1.0}
+    assert session.turn_detection == %{type: "server_vad", idle_timeout_ms: nil}
+    assert session.reasoning.effort == "high"
+    assert session.voice == "eve"
+
+    assert Grok.default_options() ==
+             [reasoning_effort: :high, speed: 1.0, idle_timeout_ms: nil]
+
     refute Map.has_key?(session, :replace)
 
     {:ok, %{setup: %{session: session}}} =
@@ -92,6 +99,9 @@ defmodule Parlora.GrokSettingsTest do
     for options <- [nil, %{}, [:invalid], [{:api_key, "test"} | :invalid]] do
       assert {:error, %{code: :invalid_argument}} = Protocol.start(options, %AudioFormat{})
     end
+
+    assert {:error, %{code: :invalid_argument}} =
+             Protocol.start([api_key: "test", speed: 1.0, speed: 1.5], %AudioFormat{})
   end
 
   test "documented boundaries accept unicode keyterms and regional language codes" do

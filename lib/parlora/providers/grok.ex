@@ -22,7 +22,11 @@ defmodule Parlora.Providers.Grok do
   }
 
   alias Parlora.Provider.{OutputBuffer, WebSocketConnection}
-  alias Parlora.Providers.Grok.{Calls, Protocol, Transcripts}
+  alias Parlora.Providers.Grok.{Calls, Protocol, Settings, Transcripts}
+
+  @doc "Returns neutral conversational defaults; provider tuple options override each field."
+  @spec default_options() :: keyword()
+  def default_options, do: Settings.defaults()
 
   @doc "Finite receive limits for generated speech bursts, in the selected pipeline format."
   @impl true

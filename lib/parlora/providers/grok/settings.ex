@@ -2,14 +2,18 @@ defmodule Parlora.Providers.Grok.Settings do
   @moduledoc false
   alias Parlora.Error
 
+  @defaults [reasoning_effort: :high, speed: 1.0, idle_timeout_ms: nil]
   @options ~w(api_key model delegation instructions voice history reasoning_effort language_hint keyterms replace speed idle_timeout_ms)a
   @languages ~w(en ar-EG ar-SA ar-AE bn zh fr de hi id it ja ko pt-BR pt-PT ru es-MX es-ES tr vi)
   @language_codes Map.new(@languages, &{String.downcase(&1), &1})
 
+  def defaults, do: @defaults
+
   def validate(options) when is_list(options) do
-    if Keyword.keyword?(options) and Keyword.keys(options) -- @options == [],
-      do: validate_settings(options),
-      else: invalid("Grok options must be a keyword list of supported options")
+    if Keyword.keyword?(options) and Keyword.keys(options) -- @options == [] and
+         length(options) == length(Enum.uniq_by(options, &elem(&1, 0))),
+       do: validate_settings(options),
+       else: invalid("Grok options must be a keyword list of supported options")
   end
 
   def validate(_options), do: invalid("Grok options must be a keyword list")

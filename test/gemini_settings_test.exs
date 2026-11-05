@@ -1,7 +1,175 @@
 defmodule Parlora.GeminiSettingsTest do
   use ExUnit.Case, async: true
   alias Parlora.AudioFormat
+  alias Parlora.Providers.Gemini
   alias Parlora.Providers.Gemini.Protocol
+
+  @app_options [
+    voice: "Sulafat",
+    realtime_input_config: [
+      automatic_activity_detection: [
+        start_of_speech_sensitivity: :low,
+        end_of_speech_sensitivity: :low,
+        prefix_padding_ms: 120
+      ],
+      interim_transcript_timestamp_enabled: true
+    ],
+    input_audio_transcription: [language_codes: ["en-US"], custom_vocabulary: ["Dr. Lee"]],
+    output_audio_transcription: [mode: :verbatim, language_codes: ["en-US"]]
+  ]
+
+  test "neutral defaults preserve native interruptions without selecting an app noise profile" do
+    for format <- [%AudioFormat{}, AudioFormat.pcmu()] do
+      assert {:ok, %{setup: setup, manual_activity?: false}} =
+               Protocol.start([api_key: "test"], format)
+
+      assert setup.realtimeInputConfig == %{
+               automaticActivityDetection: %{disabled: false, silenceDurationMs: 700},
+               activityHandling: "START_OF_ACTIVITY_INTERRUPTS"
+             }
+
+      assert setup.inputAudioTranscription == %{mode: "VERBATIM"}
+      assert setup.outputAudioTranscription == %{}
+
+      assert setup.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName ==
+               "Puck"
+    end
+
+    assert {:ok, options} =
+             Gemini.merge_options(Gemini.default_options(),
+               realtime_input_config: [automatic_activity_detection: [disabled: true]]
+             )
+
+    assert {:ok, %{manual_activity?: true, setup: manual}} =
+             Protocol.start([api_key: "test"] ++ options, %AudioFormat{})
+
+    assert manual.realtimeInputConfig.automaticActivityDetection == %{disabled: true}
+  end
+
+  test "a single nested override preserves app siblings and library defaults" do
+    assert {:ok, options} =
+             Gemini.merge_options(@app_options,
+               realtime_input_config: [automatic_activity_detection: [prefix_padding_ms: 200]],
+               input_audio_transcription: [language_codes: ["es-MX"]]
+             )
+
+    assert {:ok, %{setup: setup}} = Protocol.start([api_key: "test"] ++ options, %AudioFormat{})
+
+    assert setup.realtimeInputConfig.automaticActivityDetection == %{
+             disabled: false,
+             silenceDurationMs: 700,
+             startOfSpeechSensitivity: "START_SENSITIVITY_LOW",
+             endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
+             prefixPaddingMs: 200
+           }
+
+    assert setup.realtimeInputConfig.interimTranscriptTimestampEnabled
+    assert setup.realtimeInputConfig.activityHandling == "START_OF_ACTIVITY_INTERRUPTS"
+
+    assert setup.inputAudioTranscription == %{
+             mode: "VERBATIM",
+             languageCodes: ["es-MX"],
+             customVocabulary: ["Dr. Lee"]
+           }
+
+    assert setup.outputAudioTranscription == %{mode: "VERBATIM", languageCodes: ["en-US"]}
+    assert options[:voice] == "Sulafat"
+
+    assert {:ok, original} = Gemini.merge_options(@app_options, [])
+    assert original == @app_options
+  end
+
+  test "false flags, empty hint lists and explicit modes win over inherited settings" do
+    assert {:ok, options} =
+             Gemini.merge_options(@app_options,
+               voice: "Puck",
+               realtime_input_config: [
+                 interim_transcript_timestamp_enabled: false,
+                 activity_handling: :no_interruption
+               ],
+               input_audio_transcription: [
+                 language_codes: [],
+                 custom_vocabulary: [],
+                 mode: :smart
+               ],
+               output_audio_transcription: [language_codes: []]
+             )
+
+    assert {:ok, %{setup: setup}} = Protocol.start([api_key: "test"] ++ options, %AudioFormat{})
+    refute setup.realtimeInputConfig.interimTranscriptTimestampEnabled
+    assert setup.realtimeInputConfig.activityHandling == "NO_INTERRUPTION"
+
+    assert setup.inputAudioTranscription == %{
+             languageCodes: [],
+             customVocabulary: [],
+             mode: "SMART"
+           }
+
+    assert setup.outputAudioTranscription == %{mode: "VERBATIM", languageCodes: []}
+    assert options[:voice] == "Puck"
+
+    assert {:ok, %{setup: fresh}} = Protocol.start([api_key: "test"], %AudioFormat{})
+    assert fresh.inputAudioTranscription == %{mode: "VERBATIM"}
+    assert fresh.realtimeInputConfig.activityHandling == "START_OF_ACTIVITY_INTERRUPTS"
+    refute Map.has_key?(fresh.realtimeInputConfig, :interimTranscriptTimestampEnabled)
+  end
+
+  test "switching detection mode discards inherited automatic tuning and requires explicit re-enable" do
+    assert {:ok, manual} =
+             Gemini.merge_options(@app_options,
+               realtime_input_config: [automatic_activity_detection: [disabled: true]]
+             )
+
+    assert {:ok, %{manual_activity?: true, setup: setup}} =
+             Protocol.start([api_key: "test"] ++ manual, %AudioFormat{})
+
+    assert setup.realtimeInputConfig.automaticActivityDetection == %{disabled: true}
+    assert setup.realtimeInputConfig.interimTranscriptTimestampEnabled
+    assert setup.inputAudioTranscription.customVocabulary == ["Dr. Lee"]
+
+    assert {:error, %{code: :invalid_argument}} =
+             Gemini.merge_options(manual,
+               realtime_input_config: [automatic_activity_detection: [prefix_padding_ms: 200]]
+             )
+
+    assert {:ok, automatic} =
+             Gemini.merge_options(manual,
+               realtime_input_config: [
+                 automatic_activity_detection: [disabled: false, silence_duration_ms: 500]
+               ]
+             )
+
+    assert {:ok, %{manual_activity?: false, setup: setup}} =
+             Protocol.start([api_key: "test"] ++ automatic, %AudioFormat{})
+
+    assert setup.realtimeInputConfig.automaticActivityDetection == %{
+             disabled: false,
+             silenceDurationMs: 500
+           }
+  end
+
+  test "merging rejects invalid or duplicate native fields before they can be hidden by overrides" do
+    for invalid <- [
+          nil,
+          %{},
+          [:invalid],
+          [{:voice, "Puck"} | :invalid],
+          [voice: "Puck", voice: "Sulafat"],
+          [invented: true],
+          [input_audio_transcription: [mode: nil]],
+          [input_audio_transcription: [mode: :smart, mode: :verbatim]],
+          [input_audio_transcription: [invented: true]],
+          [realtime_input_config: nil],
+          [
+            realtime_input_config: [
+              automatic_activity_detection: [disabled: true, prefix_padding_ms: 120]
+            ]
+          ]
+        ] do
+      assert {:error, %{code: :invalid_argument}} = Gemini.merge_options(@app_options, invalid)
+      assert {:error, %{code: :invalid_argument}} = Gemini.merge_options(invalid, @app_options)
+    end
+  end
 
   test "native speech detection and transcription settings reach both wire formats" do
     options = [
