@@ -31,16 +31,73 @@ const crypto = require('node:crypto');
       const actual = await root.locator('audio').evaluate(a=>a.src);
       const bytes = await (await page.request.get(actual)).body();
       assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),data.audio_sha256,`${name} audio hash`);
+      assert.equal(data.caller.voice_id,'h25UPLYkx8kiKcfh16Ha',`${name} still uses the previous caller`);
+      assert.equal(data.caller.model,'eleven_v4');
+      assert.equal(data.caller.utterances.find(clip=>clip.id==='choose').text,'The morning one, please.');
+      assert.equal(data.input_integrity.passed,true);
       if(name.startsWith('clean/')) assert(!data.ambience,`${name} contains café ambience`);
       assert.equal(await root.locator('svg[data-waveform]').count(),2);
       assert.equal(await root.locator('[data-replay-activity-list] [data-state]').count(),0,'No future facts');
       assert(await root.locator('[data-replay-transcript] li').count()>0);
-      if(!data.passed&&name==='gemini') assert.equal(await root.locator('[data-event="booking_confirmed"]').count(),0);
+      if(!data.passed) assert.match(await root.locator('[data-replay-status]').textContent(),/workflow did not complete/);
+      assert.equal(await root.locator('[data-event="booking_confirmed"]').count(),data.metrics.new_bookings);
+      assert.equal(await root.locator('[data-event="reminder_saved"]').count(),data.metrics.simulated_reminders);
       return data;
     }
     for(const provider of ['gemini','grok','phonic','openai']) {
-      await selectRecording(clean,'clean/'+provider);
-      await selectRecording(cafe,provider);
+      const cleanData=await selectRecording(clean,'clean/'+provider);
+      const cafeData=await selectRecording(cafe,provider);
+      if(provider==='gemini') {
+        assert.ok(cleanData.source_revision_base);
+        assert.ok(cafeData.source_revision_base);
+        assert.deepEqual(cleanData.provider_options,cafeData.provider_options);
+        for(const [root,data] of [[clean,cleanData],[cafe,cafeData]]) {
+          assert.equal(data.assistant_voice,'Sulafat');
+          assert.equal(data.provider_options.input_audio_transcription.mode,'verbatim');
+          assert.deepEqual(await root.locator('[data-replay-transcript] li > span:last-child').allTextContents(),data.captions.map(c=>c.text.trim()));
+          assert.match(await root.locator('[data-replay-summary]').textContent(),new RegExp(`${data.metrics.workflow_checks_passed}/${data.metrics.workflow_checks_total}`));
+        }
+      }
+      if(provider==='phonic') {
+        assert.equal(await cafe.locator('option[value="phonic"]').textContent(),'Phonic-1');
+        assert.equal(cafeData.caller_turn_audit.passed,true);
+        assert.deepEqual(cafeData.caller_turn_audit.unexpected_speech_starts,[]);
+        assert.deepEqual(cafeData.caller_turn_audit.untranscribed_speech_starts,[]);
+        assert.deepEqual(cafeData.caller_turn_audit.unexpected_output_interruptions,[]);
+        assert.equal(cleanData.caller_turn_audit.passed,true);
+        assert.deepEqual(cafeData.caller_turn_audit.unexpected_caller_turns,[]);
+        assert.equal(cafeData.captions.filter(c=>c.speaker==='assistant'&&/number.*(?:zero one eight eight|0188)/i.test(c.text)).length,1);
+        const cafeOptions={...cafeData.provider_defaults,...cafeData.provider_options};
+        const cleanOptions={...cleanData.provider_defaults,...cleanData.provider_options};
+        assert.equal(cafeOptions.vad_threshold,0.8);
+        assert.equal(cleanOptions.vad_threshold,0.8);
+        delete cafeOptions.vad_threshold;
+        delete cleanOptions.vad_threshold;
+        assert.deepEqual(cafeOptions,cleanOptions);
+        assert.equal(cleanData.provider_defaults.audio_speed,1.0);
+        assert.equal(Object.hasOwn(cleanData.provider_options,'audio_speed'),false);
+        for(const [root,data] of [[clean,cleanData],[cafe,cafeData]]) {
+          assert.equal(data.provider_options.audio_speed??data.provider_defaults.audio_speed,1.0);
+          assert.deepEqual(await root.locator('[data-replay-transcript] li > span:last-child').allTextContents(),data.captions.map(c=>c.text.trim()));
+        }
+      }
+      const refreshed=['grok','phonic'].includes(provider) ? [[clean,cleanData],[cafe,cafeData]] : provider==='gemini' ? [[clean,cleanData]] : [];
+      if(refreshed.length) {
+        for(const [root,data] of refreshed) {
+          assert.equal(data.passed,true);
+          assert.equal(Object.values(data.checks).filter(Boolean).length,14);
+          if(provider==='grok') {
+            assert.equal(data.assistant_voice,'ara');
+            assert.equal(data.provider_options.speed,1.0);
+            assert.equal(data.provider_options.idle_timeout_ms,null);
+          }
+          await root.locator('[data-event="reminder_saved"]').click();
+          const saved=data.backend_activity.find(job=>job.result?.facts?.reminder?.status==='scheduled').result.at;
+          const actual=await root.locator('audio').evaluate(a=>a.currentTime*1000);
+          assert(actual>=saved&&actual-saved<=1,`${provider} jump precedes its fractional event timestamp`);
+          await root.locator('[data-replay-activity-list]').filter({hasText:/simulated reminder was saved/}).waitFor();
+        }
+      }
       assert.equal(await clean.locator('select').inputValue(),'clean/'+provider,'Café selection changed clean selection');
     }
     await clean.locator('audio').evaluate(a=>{a.currentTime=15;});
