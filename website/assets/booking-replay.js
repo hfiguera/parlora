@@ -28,7 +28,7 @@
     const jump = (at, text) => {
       const button = node('button', 'replay-jump', text);
       button.type = 'button';
-      button.addEventListener('click', () => { audio.currentTime = at / 1000; update(); });
+      button.addEventListener('click', () => { audio.currentTime = (Math.floor(at) + 1) / 1000; update(); });
       return button;
     };
     const speakerName = (speaker, data) => data.caption_labels?.[speaker] || (speaker === 'user' ? 'Caller' : 'Assistant');

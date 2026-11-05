@@ -140,6 +140,37 @@ spans. The example’s [README](../examples/booking_desk/README.md) explains how
 a new microphone or scripted call. Raw recordings and databases stay in ignored
 local directories.
 
+To refresh a recording, run the BookingDesk replay with a fixed caller clip
+directory, then export the captured PCM and events. The exporter uses ElevenLabs
+Scribe v2 for audio-timed captions from separate caller/assistant channels;
+provider captions remain diagnostic evidence. Exporting a new transcription needs
+`ELEVENLABS_API_KEY`. Matching cached transcriptions can be exported offline.
+
+```sh
+python3 website/booking_recordings.py examples/booking_desk/runs/YOUR_RUN \
+  --clips examples/booking_desk/clips/YOUR_CALLER \
+  --output website/assets/booking/openai.json
+```
+
+Use `clean/PROVIDER.json` for clean calls and `PROVIDER.json` for café calls.
+The exporter rejects dropped capture data, mismatched caller clips, unexpected
+foreground samples and clipped café mixing. It aligns output by captured tick
+order, subtracts the declared café PCM to verify caller input, and records measured
+backend durations. Phonic exports also retain a caller-boundary/noise audit;
+workflow completion and noise rejection are separate results.
+
+Both article graphs must use the same café GPT Live-1 report as the player.
+With `matplotlib`, `fonttools` and `brotli` installed in a separate tooling
+environment, regenerate them with:
+
+```sh
+python3 website/booking_charts.py examples/booking_desk/runs/YOUR_CAFE_OPENAI_RUN
+```
+
+Update the article’s static transcripts, audio cache hashes, outcome notes and
+recording metrics from those same exports. Keep incomplete attempts accurately
+labelled. The site build and preview do not need the chart dependencies or keys.
+
 After building and starting the preview, run the browser checks with Playwright
 installed in the existing `validation/browser` project:
 

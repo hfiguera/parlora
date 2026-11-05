@@ -30,18 +30,17 @@
       <li><a href="#reproduce">Run it yourself</a></li>
     </ol></nav></details></aside>
     <article class="prose" aria-label="Keep talking while we book it">
-      <p>A caller asks for an appointment with Dr. Lee on Wednesday. While the calendar lookup runs, they ask what to bring. Then they change their mind: Thursday would be better.</p>
-      <p>The conversation has moved on, but Wednesday’s lookup is still working. When it finishes, the application needs to know whether that result still belongs in the conversation.</p>
-      <p><strong>BookingDesk</strong> makes that coordination visible. The voice model listens and speaks, Parlora coordinates audio and backend tasks, and application rules decide what may actually change. The clinic and patient records are fictional; the speech connections, Jido actions, and SQLite writes are real.</p>
+      <p>A caller asks for an appointment with Dr. Lee on Wednesday. While the assistant checks the calendar, they ask what to bring, then ask if Thursday would work instead. By the time Wednesday’s results come back, the conversation has already moved on.</p>
+      <p>That’s the scenario in <strong>BookingDesk</strong>, Parlora’s example app for scheduling clinic appointments by voice. The clinic and patient records are fictional. You’ll find the source code and setup instructions in <a href="#reproduce">Run it yourself</a>.</p>
 
       <h2 id="listen">Start with a clean call</h2>
-      <p>These calls were recorded using a fixed caller script synthesized with ElevenLabs v4. The assistant generated its replies during each session, while backend actions and database writes executed. Choose a model, press Play, or jump directly to the date correction. The two waveforms show the caller and assistant separately, while the activity panel follows the backend work at the playhead.</p>
-      <p>The first availability lookup includes an intentional <strong>25-second delay</strong>. The corrected lookup takes 1.2 seconds, and booking includes a 5-second delay. These injected waits create room for follow-up questions and corrections; they are not measurements of a production calendar service.</p>
+      <p>The calls use a fixed caller script synthesized in my voice. The assistant generates its replies live while the backend runs and writes to the database. Choose a model, press Play, or jump directly to the date correction. The two waveforms show the caller and assistant separately, and the activity panel follows the backend work as the call plays.</p>
+      <p>The demo deliberately waits <strong>25 seconds</strong> for the first lookup, 1.2 seconds for the Thursday lookup, and 5 seconds to book. Those waits let you hear how the assistant handles questions and corrections while the backend is still working.</p>
       <figure id="booking-clean" class="booking-replay" data-booking-replay="{{BASE}}assets/booking/" data-condition="clean" aria-labelledby="booking-clean-title">
         <h3 id="booking-clean-title">A conversation while the calendar works</h3>
         <p class="replay-source" data-replay-status role="status" aria-live="polite">Recorded call · fixed caller script · model-generated replies · clean input</p>
-        <div class="replay-provider"><label for="booking-clean-recording">Voice model</label><select id="booking-clean-recording"><option value="clean/openai">OpenAI GPT-Live-1</option><option value="clean/phonic">Phonic-1</option><option value="clean/grok">Grok Voice 3.0</option><option value="clean/gemini">Gemini 3.8 Live</option></select></div>
-        <audio controls preload="metadata" aria-label="Clean booking conversation"><source src="{{BASE}}assets/booking/clean/openai.mp3?v=05512171a433" type="audio/mpeg">This browser does not support the audio player. Read the transcript below.</audio>
+        <div class="replay-provider"><label for="booking-clean-recording">Voice model</label><select id="booking-clean-recording"><option value="clean/openai">GPT Live-1</option><option value="clean/phonic">Phonic-1</option><option value="clean/grok">Grok Voice 3.0</option><option value="clean/gemini">Gemini 3.8 Live</option></select></div>
+        <audio controls preload="metadata" aria-label="Clean booking conversation"><source src="{{BASE}}assets/booking/clean/openai.mp3?v=50a55ea32e9d" type="audio/mpeg">This browser does not support the audio player. Read the transcript below.</audio>
         <noscript><p>The recording and transcript work without JavaScript. The synchronized timeline requires it.</p></noscript>
         <div class="replay-plot" data-replay-plot role="group" aria-label="Captured conversation and execution timeline"></div>
         <p class="replay-wave-note" data-replay-wave-note></p>
@@ -53,55 +52,52 @@
         <div class="replay-moments" data-replay-moments aria-label="Jump to a moment"></div>
         <p class="replay-summary" data-replay-summary></p>
         <details><summary>Read the transcript</summary><ol data-replay-transcript><!-- booking-transcript:clean:start -->
-<li class="replay-caption-row"><span>0:01</span><strong>Assistant</strong><span>Hi, thank you for calling Cedarwood Family Clinic.</span></li>
-<li class="replay-caption-row"><span>0:04</span><strong>Assistant</strong><span>This is Ava speaking.</span></li>
+<li class="replay-caption-row"><span>0:02</span><strong>Assistant</strong><span>Hi, this is Ava at Cedar Wood Family Clinic.</span></li>
 <li class="replay-caption-row"><span>0:05</span><strong>Assistant</strong><span>How can I help?</span></li>
-<li class="replay-caption-row"><span>0:07</span><strong>Caller</strong><span>Hi.</span></li>
+<li class="replay-caption-row"><span>0:06</span><strong>Caller</strong><span>Hi.</span></li>
 <li class="replay-caption-row"><span>0:07</span><strong>Caller</strong><span>I&#x27;d like an appointment with Dr. Lee on Wednesday, November fourth.</span></li>
-<li class="replay-caption-row"><span>0:12</span><strong>Assistant</strong><span>Sure.</span></li>
-<li class="replay-caption-row"><span>0:13</span><strong>Assistant</strong><span>Can I get your full name and date of birth?</span></li>
-<li class="replay-caption-row"><span>0:16</span><strong>Caller</strong><span>Sure.</span></li>
-<li class="replay-caption-row"><span>0:17</span><strong>Caller</strong><span>It&#x27;s Jamie Rivera, March twelfth, nineteen ninety.</span></li>
-<li class="replay-caption-row"><span>0:22</span><strong>Assistant</strong><span>All right, I&#x27;ll check your file.</span></li>
-<li class="replay-caption-row"><span>0:26</span><strong>Assistant</strong><span>Okay, I&#x27;ve got Aetna on file.</span></li>
-<li class="replay-caption-row"><span>0:28</span><strong>Assistant</strong><span>Is that still your insurance?</span></li>
-<li class="replay-caption-row"><span>0:31</span><strong>Caller</strong><span>Yep, that&#x27;s still the same.</span></li>
-<li class="replay-caption-row"><span>0:34</span><strong>Assistant</strong><span>Okay, one moment.</span></li>
-<li class="replay-caption-row"><span>0:37</span><strong>Assistant</strong><span>Thanks, that&#x27;s confirmed.</span></li>
-<li class="replay-caption-row"><span>0:37</span><strong>Caller</strong><span>While you&#x27;re checking, what should I bring to the appointment?</span></li>
-<li class="replay-caption-row"><span>0:41</span><strong>Assistant</strong><span>Bring a photo ID and your insurance card,</span></li>
-<li class="replay-caption-row"><span>0:44</span><strong>Assistant</strong><span>and arrive ten to fifteen minutes early.</span></li>
-<li class="replay-caption-row"><span>0:47</span><strong>Caller</strong><span>Actually, could we do Thursday instead?</span></li>
-<li class="replay-caption-row"><span>0:51</span><strong>Assistant</strong><span>Sure, let me see what we have on Thursday.</span></li>
-<li class="replay-caption-row"><span>0:54</span><strong>Assistant</strong><span>Dr. Lee has openings at ten fifteen AM or two PM that day.</span></li>
-<li class="replay-caption-row"><span>0:58</span><strong>Assistant</strong><span>Which works better for you?</span></li>
-<li class="replay-caption-row"><span>1:01</span><strong>Caller</strong><span>Ten fifteen, please.</span></li>
-<li class="replay-caption-row"><span>1:04</span><strong>Assistant</strong><span>Sure.</span></li>
-<li class="replay-caption-row"><span>1:05</span><strong>Assistant</strong><span>Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
-<li class="replay-caption-row"><span>1:08</span><strong>Assistant</strong><span>Shall I book that?</span></li>
-<li class="replay-caption-row"><span>1:11</span><strong>Caller</strong><span>Yeah, go ahead and book it.</span></li>
-<li class="replay-caption-row"><span>1:14</span><strong>Assistant</strong><span>All right.</span></li>
-<li class="replay-caption-row"><span>1:15</span><strong>Caller</strong><span>Is it booked yet?</span></li>
-<li class="replay-caption-row"><span>1:17</span><strong>Assistant</strong><span>It&#x27;s still processing.</span></li>
-<li class="replay-caption-row"><span>1:19</span><strong>Assistant</strong><span>Just another second.</span></li>
-<li class="replay-caption-row"><span>1:20</span><strong>Assistant</strong><span>Okay, you&#x27;re booked.</span></li>
-<li class="replay-caption-row"><span>1:22</span><strong>Assistant</strong><span>Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
-<li class="replay-caption-row"><span>1:26</span><strong>Assistant</strong><span>Your confirmation code is BD dash</span></li>
-<li class="replay-caption-row"><span>1:28</span><strong>Assistant</strong><span>AB8B31FD.</span></li>
-<li class="replay-caption-row"><span>1:30</span><strong>Assistant</strong><span>Would you like a text reminder twenty-four hours before the appointment?</span></li>
-<li class="replay-caption-row"><span>1:35</span><strong>Caller</strong><span>Yeah, that&#x27;d be helpful.</span></li>
-<li class="replay-caption-row"><span>1:37</span><strong>Assistant</strong><span>Great.</span></li>
-<li class="replay-caption-row"><span>1:39</span><strong>Assistant</strong><span>I&#x27;ve got a number ending in zero one eight eight.</span></li>
-<li class="replay-caption-row"><span>1:43</span><strong>Assistant</strong><span>Is that your cell, and can we send the reminder there?</span></li>
-<li class="replay-caption-row"><span>1:46</span><strong>Caller</strong><span>Yep, that&#x27;s my cell.</span></li>
-<li class="replay-caption-row"><span>1:49</span><strong>Assistant</strong><span>Perfect.</span></li>
-<li class="replay-caption-row"><span>1:51</span><strong>Assistant</strong><span>All set.</span></li>
-<li class="replay-caption-row"><span>1:52</span><strong>Assistant</strong><span>Your text reminder is scheduled for twenty-four hours before your appointment.</span></li>
-<li class="replay-caption-row"><span>1:57</span><strong>Caller</strong><span>Great.</span></li>
-<li class="replay-caption-row"><span>1:57</span><strong>Caller</strong><span>Thanks.</span></li>
-<li class="replay-caption-row"><span>1:58</span><strong>Caller</strong><span>See you then.</span></li>
-<li class="replay-caption-row"><span>2:00</span><strong>Assistant</strong><span>Thanks.</span></li>
-<li class="replay-caption-row"><span>2:00</span><strong>Assistant</strong><span>Take care.</span></li>
+<li class="replay-caption-row"><span>0:13</span><strong>Assistant</strong><span>Sure.</span></li>
+<li class="replay-caption-row"><span>0:14</span><strong>Assistant</strong><span>Could I get your full name and date of birth to get started?</span></li>
+<li class="replay-caption-row"><span>0:17</span><strong>Caller</strong><span>Sure.</span></li>
+<li class="replay-caption-row"><span>0:18</span><strong>Caller</strong><span>It&#x27;s Jamie Rivera, March twelfth, nineteen ninety.</span></li>
+<li class="replay-caption-row"><span>0:24</span><strong>Assistant</strong><span>Thanks.</span></li>
+<li class="replay-caption-row"><span>0:24</span><strong>Assistant</strong><span>I&#x27;ll pull that up.</span></li>
+<li class="replay-caption-row"><span>0:28</span><strong>Assistant</strong><span>I have Aetna on file.</span></li>
+<li class="replay-caption-row"><span>0:29</span><strong>Assistant</strong><span>Is that still your insurance?</span></li>
+<li class="replay-caption-row"><span>0:32</span><strong>Caller</strong><span>Yep, that&#x27;s still the same.</span></li>
+<li class="replay-caption-row"><span>0:35</span><strong>Assistant</strong><span>Okay.</span></li>
+<li class="replay-caption-row"><span>0:38</span><strong>Assistant</strong><span>Great.</span></li>
+<li class="replay-caption-row"><span>0:39</span><strong>Assistant</strong><span>Thanks.</span></li>
+<li class="replay-caption-row"><span>0:39</span><strong>Caller</strong><span>While you&#x27;re checking, what should I bring to the appointment?</span></li>
+<li class="replay-caption-row"><span>0:39</span><strong>Assistant</strong><span>I&#x27;ll check.</span></li>
+<li class="replay-caption-row"><span>0:43</span><strong>Assistant</strong><span>Bring a photo ID and your insurance card and arrive about ten to fifteen minutes early.</span></li>
+<li class="replay-caption-row"><span>0:49</span><strong>Caller</strong><span>Actually, could we do Thursday instead?</span></li>
+<li class="replay-caption-row"><span>0:54</span><strong>Assistant</strong><span>Sure.</span></li>
+<li class="replay-caption-row"><span>0:56</span><strong>Assistant</strong><span>On Thursday, Dr. Lee has ten fifteen AM or two PM available.</span></li>
+<li class="replay-caption-row"><span>1:02</span><strong>Assistant</strong><span>Which would you prefer?</span></li>
+<li class="replay-caption-row"><span>1:04</span><strong>Caller</strong><span>The morning one, please.</span></li>
+<li class="replay-caption-row"><span>1:07</span><strong>Assistant</strong><span>Sure.</span></li>
+<li class="replay-caption-row"><span>1:10</span><strong>Assistant</strong><span>That&#x27;s Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
+<li class="replay-caption-row"><span>1:14</span><strong>Assistant</strong><span>Shall I book that?</span></li>
+<li class="replay-caption-row"><span>1:16</span><strong>Caller</strong><span>Yeah, go ahead and book it.</span></li>
+<li class="replay-caption-row"><span>1:20</span><strong>Assistant</strong><span>Okay.</span></li>
+<li class="replay-caption-row"><span>1:22</span><strong>Caller</strong><span>Is it booked yet?</span></li>
+<li class="replay-caption-row"><span>1:25</span><strong>Assistant</strong><span>It&#x27;s still processing.</span></li>
+<li class="replay-caption-row"><span>1:26</span><strong>Assistant</strong><span>Just another moment.</span></li>
+<li class="replay-caption-row"><span>1:28</span><strong>Assistant</strong><span>Okay, you&#x27;re booked and your confirmation is B as in Bravo, D as in Delta dash three eight, A as in Alpha, E as in Echo, one, B as in Bravo, one, D as in Delta.</span></li>
+<li class="replay-caption-row"><span>1:40</span><strong>Assistant</strong><span>Would you like a text reminder twenty-four hours before your appointment?</span></li>
+<li class="replay-caption-row"><span>1:44</span><strong>Caller</strong><span>Yeah, that&#x27;d be helpful.</span></li>
+<li class="replay-caption-row"><span>1:48</span><strong>Assistant</strong><span>Great.</span></li>
+<li class="replay-caption-row"><span>1:50</span><strong>Assistant</strong><span>Can we send it to the number ending in zero one eight eight?</span></li>
+<li class="replay-caption-row"><span>1:54</span><strong>Caller</strong><span>Yep, that&#x27;s the right number.</span></li>
+<li class="replay-caption-row"><span>1:58</span><strong>Assistant</strong><span>Perfect.</span></li>
+<li class="replay-caption-row"><span>2:00</span><strong>Assistant</strong><span>You&#x27;re all set.</span></li>
+<li class="replay-caption-row"><span>2:01</span><strong>Assistant</strong><span>The reminder is scheduled.</span></li>
+<li class="replay-caption-row"><span>2:03</span><strong>Caller</strong><span>Great.</span></li>
+<li class="replay-caption-row"><span>2:04</span><strong>Caller</strong><span>Thanks.</span></li>
+<li class="replay-caption-row"><span>2:05</span><strong>Caller</strong><span>See you then.</span></li>
+<li class="replay-caption-row"><span>2:06</span><strong>Assistant</strong><span>You&#x27;re welcome.</span></li>
+<li class="replay-caption-row"><span>2:07</span><strong>Assistant</strong><span>Take care.</span></li>
 <!-- booking-transcript:clean:end --></ol></details>
         <figcaption>Separate waveforms show recorded caller input and assistant output. Audio is captured at software playout; automatic transcripts may contain recognition errors.</figcaption>
       </figure>
@@ -113,29 +109,27 @@
         <li><strong>The caller asks for Thursday instead.</strong> BookingDesk interprets the correction, and Parlora tracks a replacement task revision. The new lookup can return while the old one is still running.</li>
         <li><strong>Wednesday’s result arrives later.</strong> It is no longer current, so it is filtered before it can be returned to the voice model.</li>
       </ol>
-      <p>Wednesday’s availability may be factually correct and still be the wrong answer now. Parlora coordinates task revisions and result delivery so that the application can keep returning work aligned with the caller’s current request.</p>
-      <p>Speaking, interruption, and database execution have separate lifecycles. Clearing queued speech does not undo a booking. Replacing a search does not prove that its earlier backend operation stopped. The player shows that distinction: an obsolete lookup can keep running until its actual finish event.</p>
+      <p>Wednesday’s availability can still be accurate and no longer answer the caller’s question. Parlora tracks which lookup is current. The earlier lookup can finish in the background, and Parlora filters its result before it reaches the voice model.</p>
 
       <h2 id="application-work">Who decides what?</h2>
       <table class="booking-rules"><thead><tr><th scope="col">Component</th><th scope="col">Responsibility in this example</th></tr></thead><tbody>
         <tr><th scope="row">Speech provider</th><td>Listen to caller audio and generate the assistant’s spoken replies.</td></tr>
-        <tr><th scope="row">Parlora</th><td>Coordinate audio, independent backend tasks, revisions, result delivery, and session lifecycle.</td></tr>
-        <tr><th scope="row">JEV and ReqLLM</th><td>Interpret bounded intent/readback questions and extract structured fields from caller speech.</td></tr>
+        <tr><th scope="row">Parlora</th><td>Coordinate audio and backend tasks, and deliver results for the current request.</td></tr>
+        <tr><th scope="row">JEV and ReqLLM</th><td>JEV helps interpret caller intent. ReqLLM extracts details such as name and date of birth.</td></tr>
         <tr><th scope="row">BookingDesk and Jido</th><td>Validate the request and execute deterministic scheduling actions against SQLite.</td></tr>
       </tbody></table>
-      <p>The assistant asks for name and date of birth, matches a fictional record, and confirms the insurer on file before searching. This is demo record matching and registration review, not production identity authentication or insurance eligibility verification.</p>
-      <p>Choosing a time creates a proposal; it does not book it. The assistant reads back the exact appointment and asks for approval. The application checks the current proposal and reserves the slot transactionally. Repeating a request ID returns its stored result instead of creating another booking.</p>
-      <p>After the verified booking, the caller can opt in to a reminder and confirm the cell number’s last four digits. The backend saves a <strong>simulated reminder</strong> for 24 hours before the appointment. No real SMS is sent, and a reminder failure leaves the booking intact.</p>
-      <p>JEV’s interpretation and a speech model’s tool arguments are inputs to these decisions. Permission to change records remains in application code. The <a href="https://github.com/hfiguera/parlora/tree/114a6fcda04e49524ae65fe85e2a3d58b68a687f/examples/booking_desk">example source</a> contains the policy, structured extraction, and Jido actions.</p>
+      <p>BookingDesk looks up the patient by name and date of birth. Before searching for appointments, the assistant asks whether the insurance on file is still current.</p>
+      <p>Offered 10:15 AM or 2 PM, the caller says, “The morning one, please.” BookingDesk matches that choice to the only morning slot on offer and creates a proposal. The assistant reads back the exact appointment and asks for approval. BookingDesk checks that the proposal is still current and reserves the slot in a database transaction. If a request is retried with the same ID, BookingDesk returns the original result.</p>
+      <p>Once the booking is confirmed, the caller can opt in to a text reminder. The assistant reads back the last four digits and asks permission to send the reminder to that number. The backend saves the reminder for 24 hours before the appointment. If saving the reminder fails, the booking stays in place.</p>
+      <p>JEV’s interpretation and a speech model’s tool arguments are inputs to these decisions. Permission to change records remains in application code. The <a href="https://github.com/hfiguera/parlora/tree/54446bbf8a7df2386eb5d77916f3a4de42cf96b5/examples/booking_desk">example source</a> contains the policy, structured extraction, and Jido actions.</p>
 
       <h2 id="real-conditions">Then add a café background</h2>
-      <p>People also call from busy places. This second set mixes a continuous café recording into caller input <em>before</em> it reaches the speech provider, including while the assistant is talking. It uses the same caller clips and scheduling workflow, with a fixed background level.</p>
-      <p id="providers">Both sets exercise OpenAI GPT-Live-1, Phonic-1, Grok Voice 3.0, and Gemini 3.8 Live. Their adapters preserve different delegation and continuation protocols while using the same application policy. These are individual application runs, not a controlled model ranking.</p>
+      <p id="providers">The café calls use the same caller clips, booking workflow, and four voice models as the clean calls. This time, a café recording is mixed into the audio sent to the speech provider. It stays at a fixed level throughout the call, including while the assistant is speaking.</p>
       <figure id="booking-cafe" class="booking-replay" data-booking-replay="{{BASE}}assets/booking/" data-condition="cafe" aria-labelledby="booking-cafe-title">
         <h3 id="booking-cafe-title">The same workflow with café background</h3>
         <p class="replay-source" data-replay-status role="status" aria-live="polite">Recorded call · fixed caller script · model-generated replies · café background</p>
-        <div class="replay-provider"><label for="booking-cafe-recording">Voice model</label><select id="booking-cafe-recording"><option value="openai">OpenAI GPT-Live-1</option><option value="phonic">Phonic-1</option><option value="grok">Grok Voice 3.0</option><option value="gemini">Gemini 3.8 Live · failed noisy trial</option></select></div>
-        <audio controls preload="metadata" aria-label="Café booking conversation"><source src="{{BASE}}assets/booking/openai.mp3?v=5a98f1f9c8d5" type="audio/mpeg">This browser does not support the audio player. Read the transcript below.</audio>
+        <div class="replay-provider"><label for="booking-cafe-recording">Voice model</label><select id="booking-cafe-recording"><option value="openai">GPT Live-1</option><option value="phonic">Phonic-1</option><option value="grok">Grok Voice 3.0</option><option value="gemini">Gemini 3.8 Live · incomplete trial</option></select></div>
+        <audio controls preload="metadata" aria-label="Café booking conversation"><source src="{{BASE}}assets/booking/openai.mp3?v=43267aba72dd" type="audio/mpeg">This browser does not support the audio player. Read the transcript below.</audio>
         <noscript><p>The recording and transcript work without JavaScript. The synchronized timeline requires it.</p></noscript>
         <div class="replay-plot" data-replay-plot role="group" aria-label="Captured conversation and execution timeline"></div>
         <p class="replay-wave-note" data-replay-wave-note></p>
@@ -147,74 +141,88 @@
         <div class="replay-moments" data-replay-moments aria-label="Jump to a moment"></div>
         <p class="replay-summary" data-replay-summary></p>
         <details><summary>Read the transcript</summary><ol data-replay-transcript><!-- booking-transcript:cafe:start -->
-<li class="replay-caption-row"><span>0:01</span><strong>Assistant</strong><span>Hi, this is Ava at Cedarwood Family Clinic.</span></li>
-<li class="replay-caption-row"><span>0:04</span><strong>Assistant</strong><span>How can I help?</span></li>
-<li class="replay-caption-row"><span>0:06</span><strong>Caller</strong><span>Hi.</span></li>
-<li class="replay-caption-row"><span>0:06</span><strong>Caller</strong><span>I&#x27;d like an appointment with Dr. Lee on Wednesday, November fourth.</span></li>
-<li class="replay-caption-row"><span>0:12</span><strong>Assistant</strong><span>Okay, could I get your full name and your date of birth, please?</span></li>
-<li class="replay-caption-row"><span>0:13</span><strong>Caller</strong><span>Sure.</span></li>
-<li class="replay-caption-row"><span>0:17</span><strong>Caller</strong><span>It&#x27;s Jamie Rivera, March twelfth, nineteen ninety.</span></li>
-<li class="replay-caption-row"><span>0:22</span><strong>Assistant</strong><span>Okay.</span></li>
-<li class="replay-caption-row"><span>0:26</span><strong>Assistant</strong><span>Thanks.</span></li>
-<li class="replay-caption-row"><span>0:27</span><strong>Assistant</strong><span>I have Aetna on file.</span></li>
-<li class="replay-caption-row"><span>0:28</span><strong>Assistant</strong><span>Is that still your insurance?</span></li>
-<li class="replay-caption-row"><span>0:30</span><strong>Caller</strong><span>Yep.</span></li>
-<li class="replay-caption-row"><span>0:31</span><strong>Caller</strong><span>That&#x27;s still the same.</span></li>
-<li class="replay-caption-row"><span>0:34</span><strong>Assistant</strong><span>Okay, thanks.</span></li>
-<li class="replay-caption-row"><span>0:35</span><strong>Assistant</strong><span>I&#x27;ll check that.</span></li>
-<li class="replay-caption-row"><span>0:36</span><strong>Assistant</strong><span>All right.</span></li>
-<li class="replay-caption-row"><span>0:37</span><strong>Caller</strong><span>While you&#x27;re checking, what should I bring to the appointment?</span></li>
-<li class="replay-caption-row"><span>0:37</span><strong>Assistant</strong><span>For that day with Dr. Lee,</span></li>
-<li class="replay-caption-row"><span>0:41</span><strong>Assistant</strong><span>bring a photo ID and your insurance card,</span></li>
-<li class="replay-caption-row"><span>0:43</span><strong>Assistant</strong><span>and arrive about ten to fifteen minutes early.</span></li>
-<li class="replay-caption-row"><span>0:47</span><strong>Caller</strong><span>Actually, could we do Thursday instead?</span></li>
-<li class="replay-caption-row"><span>0:51</span><strong>Assistant</strong><span>Sure, I&#x27;ll check Thursday.</span></li>
-<li class="replay-caption-row"><span>0:54</span><strong>Assistant</strong><span>She has ten fifteen AM or two PM that day.</span></li>
-<li class="replay-caption-row"><span>0:57</span><strong>Assistant</strong><span>Which would you prefer?</span></li>
-<li class="replay-caption-row"><span>0:59</span><strong>Caller</strong><span>Ten fifteen, please.</span></li>
-<li class="replay-caption-row"><span>1:02</span><strong>Assistant</strong><span>Okay, I&#x27;ll take care of that.</span></li>
-<li class="replay-caption-row"><span>1:05</span><strong>Assistant</strong><span>Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
-<li class="replay-caption-row"><span>1:09</span><strong>Assistant</strong><span>Shall I book that?</span></li>
-<li class="replay-caption-row"><span>1:11</span><strong>Caller</strong><span>Yeah, go ahead and book it.</span></li>
-<li class="replay-caption-row"><span>1:14</span><strong>Assistant</strong><span>All right.</span></li>
-<li class="replay-caption-row"><span>1:15</span><strong>Assistant</strong><span>One moment while I get that confirmed.</span></li>
-<li class="replay-caption-row"><span>1:16</span><strong>Caller</strong><span>Is it booked yet?</span></li>
-<li class="replay-caption-row"><span>1:18</span><strong>Assistant</strong><span>It&#x27;s still processing.</span></li>
-<li class="replay-caption-row"><span>1:20</span><strong>Assistant</strong><span>I&#x27;ll let you know as soon as it&#x27;s confirmed.</span></li>
-<li class="replay-caption-row"><span>1:22</span><strong>Assistant</strong><span>All set.</span></li>
-<li class="replay-caption-row"><span>1:23</span><strong>Assistant</strong><span>You&#x27;re booked for Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
-<li class="replay-caption-row"><span>1:27</span><strong>Assistant</strong><span>Your confirmation number is BD</span></li>
-<li class="replay-caption-row"><span>1:30</span><strong>Assistant</strong><span>one two A five four B three two.</span></li>
-<li class="replay-caption-row"><span>1:33</span><strong>Assistant</strong><span>Would you like a text reminder twenty-four hours before?</span></li>
-<li class="replay-caption-row"><span>1:37</span><strong>Caller</strong><span>Yeah, that&#x27;d be helpful.</span></li>
-<li class="replay-caption-row"><span>1:40</span><strong>Assistant</strong><span>Okay, I&#x27;ll set that up.</span></li>
-<li class="replay-caption-row"><span>1:42</span><strong>Assistant</strong><span>Can we send that reminder to your cell ending in zero one eight eight?</span></li>
-<li class="replay-caption-row"><span>1:47</span><strong>Caller</strong><span>Yep, that&#x27;s my cell.</span></li>
-<li class="replay-caption-row"><span>1:50</span><strong>Assistant</strong><span>Great.</span></li>
-<li class="replay-caption-row"><span>1:50</span><strong>Assistant</strong><span>Thanks for confirming.</span></li>
-<li class="replay-caption-row"><span>1:52</span><strong>Assistant</strong><span>You&#x27;re set up for a text reminder twenty-four hours before your appointment.</span></li>
-<li class="replay-caption-row"><span>1:56</span><strong>Caller</strong><span>Great.</span></li>
-<li class="replay-caption-row"><span>1:57</span><strong>Caller</strong><span>Thanks.</span></li>
-<li class="replay-caption-row"><span>1:57</span><strong>Caller</strong><span>See you then.</span></li>
-<li class="replay-caption-row"><span>1:59</span><strong>Assistant</strong><span>You&#x27;re welcome.</span></li>
-<li class="replay-caption-row"><span>2:00</span><strong>Assistant</strong><span>Take care.</span></li>
+<li class="replay-caption-row"><span>0:02</span><strong>Assistant</strong><span>Hi, this is Ava at Cedarwood Family Clinic.</span></li>
+<li class="replay-caption-row"><span>0:04</span><strong>Assistant</strong><span>How can I help with your appointment today?</span></li>
+<li class="replay-caption-row"><span>0:07</span><strong>Caller input</strong><span>Hi.</span></li>
+<li class="replay-caption-row"><span>0:08</span><strong>Caller input</strong><span>I&#x27;d like an appointment with Dr. Lee on Wednesday, November fourth.</span></li>
+<li class="replay-caption-row"><span>0:14</span><strong>Assistant</strong><span>Sure.</span></li>
+<li class="replay-caption-row"><span>0:14</span><strong>Assistant</strong><span>Can I get your full name and date of birth to pull up your file?</span></li>
+<li class="replay-caption-row"><span>0:18</span><strong>Caller input</strong><span>Sure.</span></li>
+<li class="replay-caption-row"><span>0:19</span><strong>Caller input</strong><span>It&#x27;s Jamie Rivera, March twelfth, nineteen ninety.</span></li>
+<li class="replay-caption-row"><span>0:24</span><strong>Assistant</strong><span>All right, Jamie Rivera.</span></li>
+<li class="replay-caption-row"><span>0:29</span><strong>Assistant</strong><span>Thanks.</span></li>
+<li class="replay-caption-row"><span>0:30</span><strong>Assistant</strong><span>I&#x27;ve got your file.</span></li>
+<li class="replay-caption-row"><span>0:31</span><strong>Assistant</strong><span>I have Aetna on file.</span></li>
+<li class="replay-caption-row"><span>0:32</span><strong>Assistant</strong><span>Is that still your insurance?</span></li>
+<li class="replay-caption-row"><span>0:35</span><strong>Caller input</strong><span>Yep.</span></li>
+<li class="replay-caption-row"><span>0:35</span><strong>Caller input</strong><span>That&#x27;s still the same.</span></li>
+<li class="replay-caption-row"><span>0:38</span><strong>Assistant</strong><span>Okay, thanks.</span></li>
+<li class="replay-caption-row"><span>0:41</span><strong>Assistant</strong><span>Great, thanks for confirming.</span></li>
+<li class="replay-caption-row"><span>0:42</span><strong>Caller input</strong><span>While you&#x27;re checking, what should I bring to the appointment?</span></li>
+<li class="replay-caption-row"><span>0:42</span><strong>Assistant</strong><span>I&#x27;ll check that.</span></li>
+<li class="replay-caption-row"><span>0:46</span><strong>Assistant</strong><span>Please bring a photo ID and your insurance card, and</span></li>
+<li class="replay-caption-row"><span>0:50</span><strong>Assistant</strong><span>plan to arrive about ten to fifteen minutes early for check-in.</span></li>
+<li class="replay-caption-row"><span>0:54</span><strong>Caller input</strong><span>Actually, could we do Thursday instead?</span></li>
+<li class="replay-caption-row"><span>0:58</span><strong>Assistant</strong><span>Yeah.</span></li>
+<li class="replay-caption-row"><span>1:01</span><strong>Assistant</strong><span>For Thursday, November fifth, Dr. Lee has ten fifteen AM or two PM.</span></li>
+<li class="replay-caption-row"><span>1:07</span><strong>Assistant</strong><span>Which would you prefer?</span></li>
+<li class="replay-caption-row"><span>1:09</span><strong>Caller input</strong><span>The morning one, please.</span></li>
+<li class="replay-caption-row"><span>1:12</span><strong>Assistant</strong><span>All right.</span></li>
+<li class="replay-caption-row"><span>1:15</span><strong>Assistant</strong><span>So Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
+<li class="replay-caption-row"><span>1:20</span><strong>Assistant</strong><span>Shall I book that?</span></li>
+<li class="replay-caption-row"><span>1:22</span><strong>Caller input</strong><span>Yeah.</span></li>
+<li class="replay-caption-row"><span>1:23</span><strong>Caller input</strong><span>Go ahead and book it.</span></li>
+<li class="replay-caption-row"><span>1:26</span><strong>Assistant</strong><span>Sure thing.</span></li>
+<li class="replay-caption-row"><span>1:28</span><strong>Caller input</strong><span>Is it booked yet?</span></li>
+<li class="replay-caption-row"><span>1:31</span><strong>Assistant</strong><span>It&#x27;s still processing.</span></li>
+<li class="replay-caption-row"><span>1:34</span><strong>Assistant</strong><span>You&#x27;re booked for Thursday, November fifth at ten fifteen AM with Dr. Lee.</span></li>
+<li class="replay-caption-row"><span>1:39</span><strong>Assistant</strong><span>Your confirmation number is B as in Bravo, D as in Delta, dash six</span></li>
+<li class="replay-caption-row"><span>1:45</span><strong>Assistant</strong><span>eight C as in Charlie, seven seven B as in Bravo, B as in Bravo, C as in Charlie.</span></li>
+<li class="replay-caption-row"><span>1:53</span><strong>Assistant</strong><span>Would you like a text reminder twenty-four hours before your appointment?</span></li>
+<li class="replay-caption-row"><span>1:58</span><strong>Caller input</strong><span>Yeah.</span></li>
+<li class="replay-caption-row"><span>1:58</span><strong>Caller input</strong><span>That&#x27;d be helpful.</span></li>
+<li class="replay-caption-row"><span>2:01</span><strong>Assistant</strong><span>Great.</span></li>
+<li class="replay-caption-row"><span>2:03</span><strong>Assistant</strong><span>Okay, can we send it to the number ending in zero one eight eight?</span></li>
+<li class="replay-caption-row"><span>2:08</span><strong>Caller input</strong><span>Yep.</span></li>
+<li class="replay-caption-row"><span>2:09</span><strong>Caller input</strong><span>That&#x27;s the right number.</span></li>
+<li class="replay-caption-row"><span>2:11</span><strong>Assistant</strong><span>All right.</span></li>
+<li class="replay-caption-row"><span>2:14</span><strong>Assistant</strong><span>Perfect.</span></li>
+<li class="replay-caption-row"><span>2:15</span><strong>Assistant</strong><span>Your reminder&#x27;s scheduled.</span></li>
+<li class="replay-caption-row"><span>2:16</span><strong>Assistant</strong><span>You&#x27;ll get a text twenty-four hours before.</span></li>
+<li class="replay-caption-row"><span>2:19</span><strong>Caller input</strong><span>Great.</span></li>
+<li class="replay-caption-row"><span>2:20</span><strong>Caller input</strong><span>Thanks.</span></li>
+<li class="replay-caption-row"><span>2:21</span><strong>Caller input</strong><span>See you then.</span></li>
+<li class="replay-caption-row"><span>2:23</span><strong>Assistant</strong><span>You&#x27;re welcome.</span></li>
+<li class="replay-caption-row"><span>2:24</span><strong>Assistant</strong><span>Take care.</span></li>
 <!-- booking-transcript:cafe:end --></ol></details>
         <figcaption>The café background is part of the input heard by the speech model. Incoming-track captions can include background conversation.</figcaption>
       </figure>
-      <p><strong>Gemini’s café trial does not complete the booking.</strong> Its incoming transcriptions include background chatter, and the application loses the scheduling context. The failed trial is retained above; the clean Gemini recording completes the workflow. This trial shows what happened with this café background and setup. It does not establish how Gemini performs in other noisy conditions.</p>
+      <!-- booking-results:start -->
+      <h3>Recorded outcomes</h3>
+      <p>Seven of the eight calls complete both the booking and the simulated reminder.</p>
+      <p><strong>Grok café.</strong> The booking and simulated reminder both completed, despite two replies cutting off at 0:58 and 1:34 after apparent false detections of caller speech.</p>
+      <p><strong>Gemini café.</strong> The assistant proposes the morning slot. Gemini then picks up background speech as caller input, and BookingDesk detects a possible emergency and ends the call before booking.</p>
+      <table class="booking-rules booking-metrics"><caption>Recorded duration and scripted workflow checks</caption><thead><tr><th scope="col">Voice model</th><th scope="col">Clean input</th><th scope="col">Café input</th></tr></thead><tbody>
+      <tr><th scope="row">GPT Live-1</th><td><strong>2:10</strong><br>14/14 checks<br><small>Completed</small></td><td><strong>2:26</strong><br>14/14 checks<br><small>Completed</small></td></tr>
+      <tr><th scope="row">Phonic-1</th><td><strong>2:44</strong><br>14/14 checks<br><small>Completed</small></td><td><strong>2:40</strong><br>14/14 checks<br><small>Completed</small></td></tr>
+      <tr><th scope="row">Grok Voice 3.0</th><td><strong>2:04</strong><br>14/14 checks<br><small>Completed</small></td><td><strong>2:01</strong><br>14/14 checks<br><small>Completed</small></td></tr>
+      <tr><th scope="row">Gemini 3.8 Live</th><td><strong>2:19</strong><br>14/14 checks<br><small>Completed</small></td><td><strong>3:02</strong><br>7/14 checks<br><small>Workflow incomplete</small></td></tr>
+      </tbody></table>
+      <p>Each result comes from one scripted run. Durations include the deliberate calendar and booking waits.</p>
+      <!-- booking-results:end -->
       <p>The background comes from <a href="https://freesound.org/people/moxobna/sounds/46310/">moxobna’s CC0 coffeehouse recording</a>.</p>
 
       <h2 id="observations">See conversation and work together</h2>
       <p>A trace is easier to understand beside the conversation it belongs to. These two views align captured caller and assistant audio levels with backend work and application events from the <strong>café GPT Live-1 call</strong>.</p>
       <figure class="booking-observability">
         <h3>A new date while the old lookup runs</h3>
-        <div class="booking-chart-scroll" tabindex="0" role="group" aria-label="Date correction trace; scroll horizontally on small screens"><img src="{{BASE}}assets/booking/lookup-correction.svg" alt="Caller and assistant audio above two lookup spans. The caller asks what to bring, then changes to Thursday. Thursday’s lookup returns first; Wednesday’s work continues and its result is later filtered." loading="lazy" width="900" height="500"></div>
+        <div class="booking-chart-scroll" tabindex="0" role="group" aria-label="Date correction trace; scroll horizontally on small screens"><img src="{{BASE}}assets/booking/lookup-correction.svg?v=e776a39d9a7d" alt="Caller and assistant audio above two lookup spans. The caller asks what to bring, then changes to Thursday. Thursday’s lookup returns first; Wednesday’s work continues and its result is later filtered." loading="lazy" width="900" height="500"></div>
         <figcaption>The assistant answers the preparation question while Wednesday’s lookup runs. After the caller changes the date, Thursday’s lookup finishes first. The earlier operation keeps running, shown with a dotted outline; its result is filtered when it is no longer current.</figcaption>
       </figure>
       <figure class="booking-observability">
         <h3>A progress reply while booking finishes</h3>
-        <div class="booking-chart-scroll" tabindex="0" role="group" aria-label="Booking progress trace; scroll horizontally on small screens"><img src="{{BASE}}assets/booking/booking-progress.svg" alt="Caller and assistant audio aligned with the booking backend span. The caller asks whether it is booked, the assistant says it is still processing, then the backend confirms and the assistant says All set." loading="lazy" width="900" height="500"></div>
-        <figcaption>“Is it booked yet?” arrives while the booking action is still running. The assistant answers “It’s still processing.” Only after the backend confirms does it say “All set.”</figcaption>
+        <div class="booking-chart-scroll" tabindex="0" role="group" aria-label="Booking progress trace; scroll horizontally on small screens"><img src="{{BASE}}assets/booking/booking-progress.svg?v=e8ff01bc02dc" alt="Caller and assistant audio aligned with the booking backend span. The caller asks whether it is booked, the assistant says it is still processing, then the backend confirms and the assistant says the appointment is booked." loading="lazy" width="900" height="500"></div>
+        <figcaption>“Is it booked yet?” arrives while the booking action is still running. The assistant gives a progress update and announces the booking after the backend confirms it.</figcaption>
       </figure>
       <p>The waveforms show captured audio levels, including the caller’s café background. Timings come from this recorded call and include the configured 25-second lookup and 5-second booking waits.</p>
 
@@ -222,14 +230,14 @@
       <p>Try BookingDesk with your own microphone. It records the call using fictional patient records and appointments. Text reminders are simulated; no SMS is sent. The microphone flow below was tested on macOS.</p>
 
       <h3>1. Get the example</h3>
-      <p>From the directory where you keep your projects, clone Parlora and select the <a href="https://github.com/hfiguera/parlora/tree/114a6fcda04e49524ae65fe85e2a3d58b68a687f/examples/booking_desk">tested revision</a>:</p>
+      <p>From the directory where you keep your projects, clone Parlora and select the <a href="https://github.com/hfiguera/parlora/tree/54446bbf8a7df2386eb5d77916f3a4de42cf96b5/examples/booking_desk">tested revision</a>:</p>
       <pre><code class="language-shell">git clone https://github.com/hfiguera/parlora.git
 cd parlora
-git checkout 114a6fcda04e49524ae65fe85e2a3d58b68a687f
+git checkout 54446bbf8a7df2386eb5d77916f3a4de42cf96b5
 cd examples/booking_desk</code></pre>
 
       <h3>2. Install and verify</h3>
-      <p>Install a compatible Elixir 1.18+/Erlang OTP 27+ pair and the <a href="https://github.com/hfiguera/parlora/blob/114a6fcda04e49524ae65fe85e2a3d58b68a687f/docs/beam-compatibility.md">native prerequisites for your operating system</a>. Then, from <code>examples/booking_desk</code>, run:</p>
+      <p>Install a compatible Elixir 1.18+/Erlang OTP 27+ pair and the <a href="https://github.com/hfiguera/parlora/blob/54446bbf8a7df2386eb5d77916f3a4de42cf96b5/docs/beam-compatibility.md">native prerequisites for your operating system</a>. Then, from <code>examples/booking_desk</code>, run:</p>
       <pre><code class="language-shell">mix deps.get --check-locked
 mix test --warnings-as-errors</code></pre>
       <p>The tests run without API keys or paid model calls.</p>
@@ -244,7 +252,8 @@ export TYPESAFE_API_KEY="your-typesafe-key"</code></pre>
       <p>Use headphones, allow microphone access if prompted, and run:</p>
       <pre><code class="language-shell">PARLORA_PROVIDER=openai BOOKING_DATABASE=:memory: \
 mix run run.exs "runs/microphone-$(date +%Y%m%d-%H%M%S)" clips --microphone</code></pre>
-      <p>Wait for the assistant’s greeting before speaking. Ask for Dr. Lee on November 4, 2026. When asked for your details, use <strong>Jamie Rivera, March 12, 1990</strong>, or <strong>Alex Morgan, July 24, 1985</strong>, then confirm the insurance on file. Both name and DOB must match a demo record.</p>
+      <p>Keep <code>clips</code> in the command as a placeholder. BookingDesk uses your microphone in this mode, so you can run it without a clips directory or prerecorded caller audio.</p>
+      <p>The demo calendar has slots on November 4 and 5, 2026. Wait for the assistant’s greeting, then ask for Dr. Lee on November 4. When asked for your details, use <strong>Jamie Rivera, March 12, 1990</strong>, or <strong>Alex Morgan, July 24, 1985</strong>, then confirm the insurance on file. Both name and DOB must match a demo record.</p>
       <p>To try the correction flow, change to November 5 while the lookup runs. Choose an offered time and approve the appointment readback. You can also opt into a simulated text reminder.</p>
       <p><strong>Press Enter to save the recording and stop.</strong> A final summary of <code>outcome: stopped</code> is normal. A completed booking appears as <code>booked_appointments: 1</code>; a saved reminder appears as <code>simulated_reminders: 1</code>.</p>
       <p>Each call starts a fresh in-memory database. Its appointments and reminders disappear when it exits; the audio and report remain in the timestamped <code>runs/microphone-…</code> directory.</p>
@@ -252,5 +261,5 @@ mix run run.exs "runs/microphone-$(date +%Y%m%d-%H%M%S)" clips --microphone</cod
       <p>For background on the library, read <a href="{{BASE}}blog/introducing-parlora/">the session model</a> and <a href="{{BASE}}blog/observability-in-parlora/">the observability guide</a>.</p>
     </article>
   </div>
-  <aside class="article-next"><h2>Build the work behind the conversation.</h2><p>Start with the scheduling example, then replace its fictional calendar with your application’s services.</p><a href="https://github.com/hfiguera/parlora/tree/114a6fcda04e49524ae65fe85e2a3d58b68a687f/examples/booking_desk">Explore BookingDesk</a></aside>
+  <aside class="article-next"><h2>Build the work behind the conversation.</h2><p>Start with the scheduling example, then replace its fictional calendar with your application’s services.</p><a href="https://github.com/hfiguera/parlora/tree/54446bbf8a7df2386eb5d77916f3a4de42cf96b5/examples/booking_desk">Explore BookingDesk</a></aside>
 </main>
