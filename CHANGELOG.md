@@ -1,48 +1,75 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
+
+Adds rolling transcript retention and more controls for Phonic, Gemini and Grok.
+Session startup validates options earlier, and shutdown tracks owned processes
+directly. The minimum requirements are Elixir 1.18 and Erlang/OTP 27.
+
+### Session and provider upgrade notes
+
+- **Transcript retention.** Sessions now keep a rolling window of recent
+  transcript entries, bounded by `max_transcripts` (8,192 entries) and
+  `max_transcript_bytes` (1 MiB of encoded entries) by default. Keep durable facts
+  in application context or storage. Set `transcript_retention: :close` in the
+  session options if your app relies on closing at capacity. The lifetime
+  `max_records` budget still applies to request and command identity, and provider
+  context and duration limits apply independently.
+- **Phonic.** Native busy mode holds other voice-tool calls while a result is
+  pending. Set `wait_for_response: false` in the provider options to restore
+  concurrent voice tools with explicit result replies. Pre-tool speech and
+  listening backchannels are enabled by default. Set
+  `require_speech_before_tool_call: false` and
+  `enable_assistant_backchannel: false` to disable those requirements and
+  backchannels. The [Phonic guide](docs/phonic-provider.md) lists the defaults and
+  overrides.
+- **Gemini and Grok.** Gemini defaults to automatic speech detection with 700 ms
+  of end-of-turn silence, native interruptions and verbatim input transcription.
+  Apps can override individual nested settings. Grok defaults to normal synthesis
+  speed, high reasoning and automatic idle prompts disabled. See the
+  [Gemini guide](docs/gemini-provider.md) and [Grok guide](docs/grok-provider.md)
+  for override options.
+
+### Added
+
+- Report retained and dropped transcript entries in session status and snapshots,
+  and emit a compaction event and telemetry when older entries are dropped.
+- Expose Phonic's native speech, listening and tool timing settings, including
+  backchannels, one-word interruptions and overlapping pre-tool speech.
+- Expose Gemini speech detection, activity handling and transcription settings,
+  including language hints, vocabulary and optional interim timestamps. Merge
+  nested overrides one field at a time.
+- Expose Grok synthesis speed, pronunciation replacements, transcription hints
+  and keyterms, idle prompts and optional interruptible verbatim speech.
 
 ### Changed
 
-- Support optional Sagents `~> 0.20.0` while retaining `~> 0.19.2` compatibility.
-  Development, OrderDesk and isolated backend consumers now use `0.20.0`.
-- Phonic now defaults to native busy-mode result delivery, listening backchannels
-  at aggressiveness `0.3`, required pre-tool speech with overlapping backend work,
-  normal speed `1.0`, speech threshold `0.7`, minimum speech `120 ms`, end-of-turn silence
-  `600 ms`, one-word interruptions and a 60-second tool-output timeout. Artificial
-  background noise remains disabled. App overrides take precedence and are
-  validated after defaults are resolved. Disabling backchannels removes inherited
-  aggressiveness. `Parlora.Providers.Phonic.default_options/0` exposes the defaults.
-- **Phonic upgrade:** native busy mode holds other voice tool calls while a
-  result is pending. Apps requiring the previous concurrent voice-tool behavior
-  should set `wait_for_response: false`. Set `require_speech_before_tool_call: false`
-  and `enable_assistant_backchannel: false` to disable the new speech behaviors.
-  Backend job deadlines and application-owned validation and consent are unchanged.
-- BookingDesk inherits Phonic conversation defaults from Parlora and retains only
-  its clinic keywords. Apps override individual settings through `provider_options`;
-  the combined example-only conversation toggle has been removed.
+- Support optional Sagents `~> 0.20.0` alongside `~> 0.19.2`. The development
+  lockfile, OrderDesk and isolated Sagents consumer use `0.20.1`. Update the
+  WebSock Adapter locks to `0.7.1`.
+- Separate session startup, shutdown, recovery and task handling into focused
+  modules. Track session-owned process trees for cleanup instead of scanning
+  every process in the VM.
+- Improve BookingDesk's recovery across uncertain turns, date and slot selection,
+  recording, spoken confirmation readbacks and reminder consent. Refresh the
+  example article's clean and café recordings, captions and charts.
 
 ### Fixed
 
-- Raise Phonic's default VAD threshold to `0.7` to reduce false interruptions from
-  café activity while retaining one-word interruptions and native conversation.
-  Explicit app overrides still take precedence. Handle provider-cancelled input
-  without leaving verified results queued or timing out a cancelled automatic
-  response. Expose caller speech boundaries for audits; BookingDesk now rejects
-  false speech starts even when their punctuation transcripts were discarded.
-- Preserve native Phonic result audio when its speech starts before an earlier
-  acknowledgment finishes. Track outstanding speech ends until all open speech
-  boundaries settle, including across native tool handoffs. Late-caption recovery
-  reuses an outstanding boundary instead of counting another start. This also
-  handles short acknowledgments whose last caption precedes the handoff or arrives
-  after the result starts. Caller interruptions reset the accounting.
-  Punctuation-only input remains
-  available as a discarded-transcript diagnostic rather than a caller turn.
-- Keep current verified facts in native Phonic tool outputs when a later call
-  associates with completed work. Previously, an acknowledgment ending the prior
-  reply could cause deduplication to remove the result and strand the conversation.
-  Native response ownership and the instruction against repeated announcements
-  are preserved; no backend work is repeated.
+- Return an argument error for invalid startup audio formats and limits before
+  computing provider limits.
+- Preserve verified Phonic result audio and facts across overlapping
+  acknowledgments, provider cancellations and native tool handoffs.
+- Update the example apps to Finch 0.24 to avoid HTTP/1 connection reuse failures
+  after timed-out requests.
+
+### Security
+
+- Update the repository's development and example lockfiles to Ecto `3.14.3`
+  and JSV `0.26.2` for [CVE-2026-118391](https://cna.erlef.org/cves/CVE-2026-118391.html)
+  and [CVE-2026-117680](https://cna.erlef.org/cves/CVE-2026-117680.html).
+  Apps that resolve either package through their own dependencies should check
+  their lockfiles, update affected versions and run `mix hex.audit`.
 
 ## 0.4.0
 
