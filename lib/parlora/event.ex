@@ -185,8 +185,19 @@ defmodule Parlora.Event do
               cause: :output_overflow | :output_stale
             })
           | t(:output_recovered, %{required(:token) => pos_integer(), optional(atom()) => term()})
-          | t(:output_interrupted, %{token: non_neg_integer()})
-          | t(:provider_activity, %{state: :in_progress | :idle})
+          | t(:output_interrupted, %{
+              required(:token) => non_neg_integer(),
+              optional(atom()) => term()
+            })
+          | t(:output_truncated, %{
+              stream_id: String.t(),
+              played_ms: non_neg_integer(),
+              kept_text: String.t() | nil
+            })
+          | t(:provider_activity, %{
+              required(:state) => :in_progress | :idle,
+              optional(atom()) => term()
+            })
           | t(:provider_speech, %{state: :speaking | :idle})
           | t(:response_status, %{
               status: atom(),

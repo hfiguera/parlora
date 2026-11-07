@@ -2,6 +2,44 @@ defmodule Parlora.PlayoutRecoveryTest do
   use ExUnit.Case, async: true
   alias Parlora.{AudioFrame, AudioQueue, Playout}
 
+  test "opt-in startup cleaning removes the isolated lead-in without dropping frames or speech" do
+    transient = :binary.copy(<<4_000::little-signed-16>>, 1_440)
+    decay = :binary.copy(<<400::little-signed-16>>, 480)
+    quiet = :binary.copy(<<0>>, 1_920)
+    speech = :binary.copy(<<4_000::little-signed-16>>, 1_440)
+    audio = transient <> decay <> quiet <> speech
+
+    queue =
+      for <<pcm::binary-size(960) <- audio>>, reduce: %AudioQueue{} do
+        queue ->
+          {:ok, next} = AudioQueue.push(queue, AudioFrame.pcm(pcm, "startup", queue.bytes))
+          next
+      end
+
+    playout = Playout.new(120, 9_600, trim_playback_lead_in: true)
+
+    {rendered, next} =
+      Enum.reduce(0..8, {[], {queue, playout}}, fn tick, {parts, {pending, state}} ->
+        {pcm, remaining, state} = Playout.take(state, pending, 960, tick * 20_000)
+        {[pcm | parts], {remaining, state}}
+      end)
+
+    {empty, state} = next
+    assert IO.iodata_to_binary(Enum.reverse(rendered)) == :binary.copy(<<0>>, 5_760) <> speech
+    assert empty.bytes == 0
+    assert state.source_bytes == byte_size(audio)
+    assert state.starvations == 0
+
+    assert {^audio, _, _} = Playout.take(Playout.new(120, 9_600, []), queue, 9_600, 0)
+
+    continuous = :binary.copy(<<4_000::little-signed-16>>, 2_880)
+
+    {:ok, continuous_queue} =
+      AudioQueue.push(%AudioQueue{}, AudioFrame.pcm(continuous, "voice", 0))
+
+    assert {^continuous, _, _} = Playout.take(Playout.reset(state), continuous_queue, 9_600, 0)
+  end
+
   test "adaptive recovery rebuilds learned headroom but releases short tails by the deadline" do
     state = %{Playout.new(120, 9_600, playback_buffering: :adaptive) | playing?: true}
     state = %{state | target: %{state.target | target_ms: 145}}

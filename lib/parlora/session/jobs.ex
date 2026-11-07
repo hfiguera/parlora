@@ -284,7 +284,8 @@ defmodule Parlora.Session.Jobs do
       delegation_id: delivery_delegation(state, request),
       provider_generation: result.provider_generation,
       task_id: result.task_id,
-      task_revision: result.task_revision
+      task_revision: result.task_revision,
+      origin: :backend_result
     }
 
     {module, pid} = state.adapters.provider

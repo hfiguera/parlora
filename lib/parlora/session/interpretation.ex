@@ -1,6 +1,6 @@
 defmodule Parlora.Session.Interpretation do
   @moduledoc false
-  alias Parlora.{AdapterOwner, Error, ProcessTree, SessionSupervisor, Telemetry}
+  alias Parlora.{AdapterOwner, ContextDecision, Error, ProcessTree, SessionSupervisor, Telemetry}
   alias Parlora.Session.{Decisions, State}
 
   @type transition :: {:ok, State.t()} | {:close, State.t()}
@@ -10,23 +10,42 @@ defmodule Parlora.Session.Interpretation do
     ref = work.ref
     Process.demonitor(ref, [:flush])
     Process.cancel_timer(work.timer)
-    outcome = if match?({:ok, _}, result), do: :ok, else: :error
+    freshness = freshness(state, work, result)
 
     outcome =
-      if match?({:ok, _}, result) and state.context.revision != work.revision,
-        do: :superseded,
-        else: outcome
+      cond do
+        freshness != :current -> :superseded
+        match?({:ok, _}, result) -> :ok
+        true -> :error
+      end
 
     Telemetry.stop(work.telemetry, outcome)
     state = %{state | policy_task: nil}
 
-    if state.status == :ready and
-         (state.context.revision == work.revision or not match?({:ok, _}, result)) do
-      apply_policy(state, result)
-    else
-      {:ok, start(state, state.policy_trigger)}
+    cond do
+      state.status == :ready and freshness == :current -> apply_policy(state, result)
+      freshness == :caller_pending -> {:ok, state}
+      true -> {:ok, start(state, state.policy_trigger)}
     end
   end
+
+  defp freshness(
+         state,
+         work,
+         {:ok, [%ContextDecision{kind: kind, allow_assistant_updates: true}]}
+       )
+       when kind in [:start_task, :supersede_task] do
+    cond do
+      state.policy_status.input_pending? -> :caller_pending
+      state.policy_status.revision == work.policy_revision -> :current
+      true -> :stale
+    end
+  end
+
+  defp freshness(state, work, {:ok, _}),
+    do: if(state.context.revision == work.revision, do: :current, else: :stale)
+
+  defp freshness(_state, _work, _error), do: :current
 
   @spec timeout(State.t()) :: transition()
   def timeout(%{policy_task: work} = state) do
@@ -83,6 +102,7 @@ defmodule Parlora.Session.Interpretation do
           ref: task.ref,
           pid: task.pid,
           revision: snapshot.revision,
+          policy_revision: state.policy_status.revision,
           timer: timer,
           telemetry: telemetry
         },
@@ -102,7 +122,8 @@ defmodule Parlora.Session.Interpretation do
             &(&1.kind in [:wait_for_context, :request_clarification] and is_binary(&1.task_id))
           )
 
-        {:ok, %{next | context_resolved?: not unresolved, policy_failures: 0}}
+        next = put_in(next.policy_status.failures, 0)
+        {:ok, %{next | context_resolved?: not unresolved}}
 
       {:error, error} ->
         State.emit(state, :policy_rejected, %{error: error})
@@ -120,7 +141,7 @@ defmodule Parlora.Session.Interpretation do
   defp policy_failed(%{status: status} = state, _error) when status != :ready, do: {:ok, state}
 
   defp policy_failed(state, error) do
-    failures = state.policy_failures + 1
+    failures = state.policy_status.failures + 1
     retry? = failures == 1
 
     State.emit(state, :policy_failed, %{
@@ -129,7 +150,7 @@ defmodule Parlora.Session.Interpretation do
       retry?: retry?
     })
 
-    state = %{state | policy_failures: failures}
+    state = put_in(state.policy_status.failures, failures)
 
     if retry? do
       # Reinterpret the latest context only. Never submit/replay backend work or

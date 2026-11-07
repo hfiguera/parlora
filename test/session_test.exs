@@ -57,6 +57,102 @@ defmodule Parlora.SessionTest do
     MemoryAudio.inject(provider, :delegation_requested, %{id: id, offset_ms: 50, target: :client})
   end
 
+  test "a read that tolerates assistant captions still waits for a new caller turn" do
+    {_pid, _channel, provider, _backend} =
+      session(context_policy: {Parlora.TestSupport.ControlledPolicy, observer: self()})
+
+    delegate(provider)
+    assert_receive {:policy, previous, _, _}
+
+    decision = %Parlora.ContextDecision{
+      kind: :start_task,
+      delegation_id: "delegation-1",
+      input: %{date: "2026-11-04"},
+      allow_assistant_updates: true
+    }
+
+    MemoryAudio.inject(provider, :extension, %{kind: :caller_speech, state: :started})
+    assert_receive {:parlora_event, %Event{type: :extension, payload: %{kind: :caller_speech}}}
+    send(previous, {:decisions, [decision]})
+    refute_receive {:submitted, _}, 50
+    refute_received {:policy, _, _, _}
+
+    transcript(provider, "Actually, check November fifth.")
+    assert_receive {:policy, current, _, _}
+    send(current, {:decisions, [%{decision | input: %{date: "2026-11-05"}}]})
+    assert_receive {:submitted, %{input: %{date: "2026-11-05"}}}
+  end
+
+  for corrected? <- [true, false] do
+    @corrected corrected?
+    test "result recovery waits for the caller's date decision (corrected: #{corrected?})" do
+      {pid, _channel, provider, backend} =
+        session(context_policy: {Parlora.TestSupport.ControlledPolicy, observer: self()})
+
+      delegate(provider)
+      assert_receive {:policy, worker, _, _}
+
+      start = %Parlora.ContextDecision{
+        kind: :start_task,
+        delegation_id: "delegation-1",
+        input: %{date: "2026-11-04"}
+      }
+
+      send(worker, {:decisions, [start]})
+      assert_receive {:submitted, request}
+      :ok = FakeBackend.complete(backend, request, "November fourth has 10:15 AM.")
+      assert_receive {:context, %Parlora.ContextUpdate{origin: :backend_result} = update}
+
+      transcript(provider, "Actually, can we check a different day?")
+      assert_receive {:policy, deciding, _, _}
+      first_check = make_ref()
+      send(pid, {:parlora_check_delivery, provider, first_check, update})
+      refute_receive {:parlora_delivery_current, ^first_check, _}, 50
+
+      hold = %Parlora.ContextDecision{
+        kind: :wait_for_context,
+        task_id: request.task_id,
+        expected_task_revision: request.task_revision
+      }
+
+      send(deciding, {:decisions, [hold]})
+
+      eventually(fn ->
+        state = :sys.get_state(pid)
+        state.policy_task == nil and not state.context_resolved?
+      end)
+
+      refute_receive {:parlora_delivery_current, ^first_check, _}, 50
+
+      transcript(
+        provider,
+        if(@corrected, do: "November fifth instead.", else: "Keep November fourth.")
+      )
+
+      assert_receive {:policy, resolving, _, _}
+      latest_check = make_ref()
+      send(pid, {:parlora_check_delivery, provider, latest_check, update})
+
+      decisions =
+        if @corrected do
+          [%{hold | kind: :supersede_task, input: %{date: "2026-11-05"}}]
+        else
+          []
+        end
+
+      send(resolving, {:decisions, decisions})
+      assert_receive {:parlora_delivery_current, ^latest_check, current?}
+      assert current? == not @corrected
+      refute_received {:parlora_delivery_current, ^first_check, _}
+
+      if @corrected do
+        assert_receive {:submitted, replacement}
+        assert replacement.task_revision == 2
+        assert replacement.input.date == "2026-11-05"
+      end
+    end
+  end
+
   test "overflow recovery preserves the media connection and an in-flight backend action" do
     {pid, channel, provider, backend} = session()
     transcript(provider, "order 123")

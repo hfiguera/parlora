@@ -149,6 +149,16 @@ defmodule Parlora do
   `{:clear_output, :next}`. Mute, suppression, clearing, and backend cancellation
   are independent. Reuse the command ID when reconciling an uncertain admission.
 
+  `{:hold_output, :hold}` buffers new output in the pipeline for up to 20 seconds
+  of audio. `:play` releases those frames in order and `:discard` drops them
+  before resuming playback. Clearing or interrupting playback empties the hold.
+  Providers that support it accept `{:output_discarded, response_id}` after the
+  application has discarded all audio for that response before playback.
+
+  `{:replace_output, format, data}` replaces held output with up to 20 seconds
+  of application audio in the session format. Provider audio is discarded until
+  the session closes or the application calls `{:clear_output, :next}`.
+
   Gemini also supports `{:user_activity, :start | :end}` when automatic activity
   detection is explicitly disabled. The application owns these speech boundaries.
   Ending a manual turn drains admitted input at normal pace before its end marker;

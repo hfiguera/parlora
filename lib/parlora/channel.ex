@@ -19,4 +19,13 @@ defmodule Parlora.Channel do
   @callback arm_output_space(pid(), pid(), reference(), pos_integer(), non_neg_integer()) ::
               :ok | {:error, Parlora.Error.t()}
   @optional_callbacks arm_output_space: 5
+
+  @type playback_position ::
+          %{stream_id: String.t(), played_ms: non_neg_integer()}
+          | %{last_handed_off_sequence: non_neg_integer() | nil}
+          | %{last_forwarded_sequence: non_neg_integer() | nil}
+  @doc "Clear output and return the played position or the last frame handed to playback, when known."
+  @callback clear_output_with_playback(pid(), String.t(), non_neg_integer()) ::
+              {:ok, playback_position() | nil} | {:error, Parlora.Error.t()}
+  @optional_callbacks clear_output_with_playback: 3
 end

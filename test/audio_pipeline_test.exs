@@ -58,6 +58,49 @@ defmodule Parlora.AudioPipelineTest do
     assert [%{stream_id: "fresh", playback_epoch: 1}] = MemoryAudio.drain(context.destination)
   end
 
+  test "replacement plays through provider interruptions and discards late provider audio", ctx do
+    {:reply, :ok, state} =
+      AudioPipeline.handle_call({:control, "hold", {:hold_output, :hold}}, nil, ctx.state)
+
+    fill(ctx.source, "held")
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+    assert MemoryAudio.drain(ctx.destination) == []
+
+    audio = :binary.copy(<<7, 0>>, 480)
+    replace = {:replace_output, state.init.audio_format, audio}
+
+    assert {:reply, :ok, state} =
+             AudioPipeline.handle_call({:control, "clip", replace}, nil, state)
+
+    assert_receive :tick
+
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+
+    assert {:reply, {:ok, %{last_forwarded_sequence: nil}}, state} =
+             AudioPipeline.handle_call(
+               {:control, "interrupt", {:provider_interrupted, :token, :position}},
+               nil,
+               state
+             )
+
+    fill(ctx.source, "late")
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+
+    assert [first, last] = MemoryAudio.drain(ctx.destination)
+    assert %{stream_id: "clip", sequence: 0, playback_epoch: 1} = first
+    assert %{stream_id: "clip", sequence: 1, playback_epoch: 1} = last
+    assert first.data <> last.data == audio
+
+    assert {:reply, :ok, state} =
+             AudioPipeline.handle_call({:control, "clear", {:clear_output, :next}}, nil, state)
+
+    fresh = AudioFrame.pcm(:binary.copy(<<2, 0>>, 240), "fresh", 42)
+    :ok = MemoryAudio.audio(ctx.source, fresh)
+    {:noreply, _state} = AudioPipeline.handle_info(:tick, state)
+    assert [%{stream_id: "fresh", playback_epoch: 2}] = MemoryAudio.drain(ctx.destination)
+  end
+
   test "channel-paced output refills promptly but retains frames on bounded backpressure",
        context do
     fill(context.source, "burst")
@@ -118,6 +161,39 @@ defmodule Parlora.AudioPipelineTest do
     :ok = MemoryAudio.audio(context.source, fresh)
     {:noreply, _state} = AudioPipeline.handle_info(:tick, state)
     assert [%{stream_id: "fresh"}] = MemoryAudio.drain(context.destination)
+  end
+
+  test "held output is inaudible and can be released in order or discarded", context do
+    state = %{context.state | output_pacing: :channel}
+
+    {:reply, :ok, state} =
+      AudioPipeline.handle_call({:control, "hold", {:hold_output, :hold}}, nil, state)
+
+    fill(context.source, "allowed", 40)
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+    assert MemoryAudio.drain(context.destination) == []
+
+    {:reply, :ok, state} =
+      AudioPipeline.handle_call({:control, "play", {:hold_output, :play}}, nil, state)
+
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+    assert Enum.map(MemoryAudio.drain(context.destination), & &1.sequence) == Enum.to_list(0..19)
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+    assert Enum.map(MemoryAudio.drain(context.destination), & &1.sequence) == Enum.to_list(20..39)
+
+    {:reply, :ok, state} =
+      AudioPipeline.handle_call({:control, "hold-again", {:hold_output, :hold}}, nil, state)
+
+    fill(context.source, "discarded")
+    {:noreply, state} = AudioPipeline.handle_info(:tick, state)
+
+    {:reply, :ok, state} =
+      AudioPipeline.handle_call({:control, "discard", {:hold_output, :discard}}, nil, state)
+
+    fresh = AudioFrame.pcm(:binary.copy(<<2, 0>>, 240), "goodbye", 50)
+    :ok = MemoryAudio.audio(context.source, fresh)
+    {:noreply, _state} = AudioPipeline.handle_info(:tick, state)
+    assert [%{stream_id: "goodbye"}] = MemoryAudio.drain(context.destination)
   end
 
   test "only channel-paced output under upstream pressure sends a recovery hint", context do
@@ -188,8 +264,8 @@ defmodule Parlora.AudioPipelineTest do
     pid
   end
 
-  defp fill(source, stream) do
-    for index <- 0..69 do
+  defp fill(source, stream, count \\ 70) do
+    for index <- 0..(count - 1) do
       :ok = MemoryAudio.audio(source, AudioFrame.pcm(:binary.copy(<<1, 0>>, 240), stream, index))
     end
   end

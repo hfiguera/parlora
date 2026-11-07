@@ -52,6 +52,9 @@ defmodule Parlora.Provider do
   @callback arm_output_ready(pid(), pid(), reference()) :: :ok | {:error, Parlora.Error.t()}
   @doc "Release new output after the coordinator cleared interrupted playback."
   @callback resume_output(pid(), non_neg_integer()) :: :ok | {:error, Parlora.Error.t()}
+  @doc "Release output with the interrupted stream's playback position when the channel supplies one."
+  @callback resume_output(pid(), non_neg_integer(), Parlora.Channel.playback_position() | nil) ::
+              :ok | {:error, Parlora.Error.t()}
   @doc "Resolve a provider function call that was associated, rejected, or superseded without a new result."
   @callback resolve_delegation(pid(), String.t(), map()) :: :ok | {:error, Parlora.Error.t()}
   @doc "Resolve with coordinator-owned task identity, revision and provider generation; adapters may keep this metadata local."
@@ -67,6 +70,7 @@ defmodule Parlora.Provider do
                       output_buffer_status: 1,
                       arm_output_ready: 3,
                       resume_output: 2,
+                      resume_output: 3,
                       resolve_delegation: 3,
                       resolve_delegation: 4
 end
