@@ -14,6 +14,7 @@ defmodule BookingDesk.CallGuardTest do
     def snapshot(pid), do: GenServer.call(pid, :snapshot)
     def put(pid, snapshot), do: GenServer.call(pid, {:put, snapshot})
     def control(pid, value), do: GenServer.call(pid, {:action, {:control, value}})
+    def reject_next_message(pid, error), do: GenServer.call(pid, {:reject_next_message, error})
 
     def append_context(pid, %{kind: :instruction} = value),
       do: GenServer.call(pid, {:action, {:instruction, value.content}})
@@ -25,6 +26,14 @@ defmodule BookingDesk.CallGuardTest do
     def close(pid, value), do: GenServer.call(pid, {:action, {:closed, value}})
     def handle_call(:snapshot, _, s), do: {:reply, s.snapshot, s}
     def handle_call({:put, snapshot}, _, s), do: {:reply, :ok, %{s | snapshot: snapshot}}
+
+    def handle_call({:reject_next_message, error}, _, s),
+      do: {:reply, :ok, Map.put(s, :message_error, error)}
+
+    def handle_call({:action, {:message, _} = action}, _, %{message_error: error} = s) do
+      send(s.owner, {:guard_action, action})
+      {:reply, error, Map.delete(s, :message_error)}
+    end
 
     def handle_call({:action, action}, _, s) do
       send(s.owner, {:guard_action, action})
@@ -216,7 +225,7 @@ defmodule BookingDesk.CallGuardTest do
       pending_native_result(g, t)
       latest = snapshot("Urgent caller words", 2)
       check(g, t, latest)
-      assert_receive {:guard_action, {:message, text}}
+      assert_receive {:guard_action, {:message, text}}, 500
       assert text =~ CallGuard.message(reason)
       assert :blocked = CallGuard.check(g, latest)
       refute_receive {:guard_action, {:quiet, _}}, 30
@@ -268,9 +277,20 @@ defmodule BookingDesk.CallGuardTest do
       finish_message(g, CallGuard.message(:scope_redirect))
     end
 
+    assert_receive {:guard_action, {:control, {:hold_output, :hold}}}
     pending_native_result(g, t, 3)
+    assert_receive {:guard_action, {:control, {:hold_output, :play}}}
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :transcript_delta, payload: %{speaker: :user, delta: "Still unrelated"}}}
+    )
+
+    assert_receive {:guard_action, {:control, {:hold_output, :hold}}}
     check(g, t, snapshot("Still unrelated", 4))
-    assert_receive {:guard_action, {:message, text}}
+    assert_receive {:guard_action, {:control, {:input_muted, true}}}
+    assert_receive {:guard_action, {:message, text}}, 500
     assert text =~ CallGuard.message(:scope_close)
     assert :sys.get_state(g).closing == :scope_close
     refute_receive {:guard_action, {:quiet, _}}, 30
@@ -280,7 +300,7 @@ defmodule BookingDesk.CallGuardTest do
     outer = %{pid: self(), credits: :atomics.new(2, [])}
     {g, t} = start(fn _ -> {:ok, :emergency} end, audio_observer: outer)
     check(g, t, snapshot("I need emergency help", 1))
-    assert_receive {:guard_action, {:message, _}}
+    assert_receive {:guard_action, {:message, _}}, 500
     caption(g, CallGuard.message(:emergency))
 
     init = %Parlora.AdapterInit{
@@ -348,6 +368,225 @@ defmodule BookingDesk.CallGuardTest do
     refute_receive {:guard_action, {:closed, _}}, 30
   end
 
+  test "Prism's current redirect finishes playing and counts once without a second announcement" do
+    {g, t} = start(fn _ -> {:ok, :off_topic} end)
+    question = "Hi, Ava. What do you know about soccer?"
+    redirect = "I can help with clinic scheduling. What appointment help do you need?"
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :transcript_delta, generation: 0, payload: %{speaker: :user, delta: question}}}
+    )
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+    caption(g, redirect)
+    voice(g)
+
+    turn = snapshot(question, 1)
+    assert :wait = check(g, t, turn)
+    eventually(fn -> CallGuard.check(g, turn) == :blocked end)
+    refute_receive {:guard_action, _}, 120
+    assert :sys.get_state(g).off_topic == 0
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
+    eventually(fn -> :sys.get_state(g).off_topic == 1 end)
+    assert :blocked = CallGuard.check(g, turn)
+    assert :sys.get_state(g).scope_reply == nil
+    refute_receive {:guard_action, _}, 30
+  end
+
+  test "provider idle before the channel drains does not repeat the native baseball redirect" do
+    {g, t} = start(fn _ -> {:ok, :off_topic} end, quiet_ms: 500)
+    question = "Hi, Eva. What do you know about baseball?"
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :transcript_delta, generation: 0, payload: %{speaker: :user, delta: question}}}
+    )
+
+    turn = snapshot(question, 1)
+    assert :wait = check(g, t, turn)
+    eventually(fn -> CallGuard.check(g, turn) == :blocked end)
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+    send(g, {:parlora_event, %Event{type: :provider_activity, payload: %{state: :in_progress}}})
+    caption(g, CallGuard.message(:scope_redirect))
+    voice(g)
+    assert %{scope_reply: %{token: token, caption: true, has_audio: true}} = :sys.get_state(g)
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
+    send(g, {:parlora_event, %Event{type: :provider_activity, payload: %{state: :idle}}})
+    send(g, {:scope_tick, token})
+
+    assert %{scope_reply: %{token: ^token}, announcement: nil, off_topic: 0} = :sys.get_state(g)
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{
+         source: :channel,
+         type: :audio_discontinuity,
+         observed_at_us: System.monotonic_time(:microsecond),
+         payload: %{cause: :playback_starved}
+       }}
+    )
+
+    eventually(fn -> :sys.get_state(g).off_topic == 1 end)
+    refute_received {:guard_action, {:message, _}}
+  end
+
+  test "Prism scope fallback waits for idle and leaves its current output alone" do
+    {g, t} = start(fn _ -> {:ok, :off_topic} end)
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :provider_speech, payload: %{state: :idle, typed_ready: true}}}
+    )
+
+    caption(g, CallGuard.message(:scope_redirect))
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+    turn = snapshot("Soccer again?", 1)
+    check(g, t, turn)
+    eventually(fn -> CallGuard.check(g, turn) == :blocked end)
+
+    caption(g, CallGuard.message(:scope_redirect) <> " Here's a soccer fact.")
+    voice(g)
+    refute_receive {:guard_action, _}, 120
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :provider_speech, payload: %{state: :idle, typed_ready: true}}}
+    )
+
+    expected = CallGuard.message(:scope_redirect)
+    assert_receive {:guard_action, {:message, text}}, 500
+    assert text =~ expected
+    refute_receive {:guard_action, {:control, _}}, 30
+    finish_message(g, expected)
+    assert :sys.get_state(g).off_topic == 1
+  end
+
+  test "Prism counts a played warning before typed readiness and says goodbye on the third off-topic turn" do
+    {g, t} =
+      start(fn %{latest_user: text} ->
+        {:ok, if(text == "Schedule an appointment", do: :allowed, else: :off_topic)}
+      end)
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :provider_speech, payload: %{state: :idle, typed_ready: true}}}
+    )
+
+    warning = CallGuard.message(:scope_redirect)
+
+    for {question, cursor} <- [{"Baseball?", 1}, {"Soccer?", 2}] do
+      send(
+        g,
+        {:parlora_event,
+         %Event{
+           type: :transcript_delta,
+           generation: 0,
+           payload: %{speaker: :user, delta: question}
+         }}
+      )
+
+      send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+      turn = snapshot(question, cursor)
+      check(g, t, turn)
+      eventually(fn -> CallGuard.check(g, turn) == :blocked end)
+      caption(g, warning)
+      voice(g)
+
+      send(
+        g,
+        {:parlora_event,
+         %Event{type: :provider_activity, payload: %{state: :idle, status: "completed"}}}
+      )
+
+      at = System.monotonic_time(:microsecond)
+
+      send(
+        g,
+        {:parlora_event,
+         %Event{
+           source: :channel,
+           type: :audio_discontinuity,
+           observed_at_us: at,
+           payload: %{cause: :playback_starved}
+         }}
+      )
+
+      send(g, {:parlora_event, %Event{type: :output_interrupted, observed_at_us: at + 100_000}})
+      assert :sys.get_state(g).off_topic == cursor
+    end
+
+    assert_receive {:guard_action, {:control, {:hold_output, :hold}}}
+    allowed = snapshot("Schedule an appointment", 3)
+    check(g, t, allowed)
+    assert_receive {:guard_action, {:control, {:hold_output, :play}}}
+    assert :allow = CallGuard.check(g, allowed)
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{
+         type: :extension,
+         payload: %{kind: :caller_speech, state: :started, segment_id: "hockey"}
+       }}
+    )
+
+    assert_receive {:guard_action, {:control, {:hold_output, :hold}}}
+    assert :wait = CallGuard.check(g, allowed)
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{
+         type: :transcript_delta,
+         generation: 0,
+         payload: %{speaker: :user, segment_id: "hockey", delta: "Hockey?"}
+       }}
+    )
+
+    turn = snapshot("Hockey?", 4)
+    check(g, t, turn)
+    eventually(fn -> :sys.get_state(g).closing == :scope_close end)
+    assert_receive {:guard_action, {:control, {:input_muted, true}}}
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
+    refute_receive {:guard_action, _}, 120
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{
+         type: :provider_activity,
+         payload: %{state: :idle, status: "completed", response_id: "held-redirect"}
+       }}
+    )
+
+    assert_receive {:guard_action, {:control, {:clear_output, :next}}}, 500
+    assert_receive {:guard_action, {:control, {:output_discarded, "held-redirect"}}}
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :provider_speech, payload: %{state: :idle, typed_ready: true}}}
+    )
+
+    goodbye = CallGuard.message(:scope_close)
+    assert_receive {:guard_action, {:control, {:hold_output, :discard}}}, 500
+    assert_receive {:guard_action, {:message, text}}, 500
+    assert text =~ goodbye
+    refute_receive {:guard_action, {:control, _}}, 30
+    caption(g, goodbye)
+    voice(g)
+    assert_receive {:guard_action, {:closed, :finish}}, 500
+  end
+
   test "caller-fragment rechecks cannot multiply abuse warnings; repeated abuse closes after playout" do
     {g, t} = start(fn _ -> {:ok, :abuse} end)
     first = snapshot("Directed insult", 1)
@@ -364,14 +603,12 @@ defmodule BookingDesk.CallGuardTest do
     assert_receive {:guard_action, {:message, closing}}
     assert closing =~ "ending this call"
     refute_receive {:guard_action, {:closed, _}}, 40
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
     caption(g, CallGuard.message(:abuse_close))
+    voice(g)
 
-    for _ <- 1..8 do
-      voice(g)
-      Process.sleep(15)
-    end
-
-    refute_receive {:guard_action, {:closed, _}}, 5
+    refute_receive {:guard_action, {:closed, _}}, 120
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
     assert_receive {:guard_action, {:closed, :finish}}, 500
   end
 
@@ -396,7 +633,7 @@ defmodule BookingDesk.CallGuardTest do
     check(g, t, snapshot("Another insult", 2))
     assert_receive {:guard_action, {:message, _}}
     check(g, t, snapshot("I cannot breathe", 3))
-    assert_receive {:guard_action, {:message, text}}
+    assert_receive {:guard_action, {:message, text}}, 500
     assert text =~ "call 911 now"
     assert text =~ "cannot call or transfer"
     assert :sys.get_state(g).closing == :emergency
@@ -483,7 +720,7 @@ defmodule BookingDesk.CallGuardTest do
     assert :atomics.get(observer.credits, 1) == 0
   end
 
-  test "two delivered off-topic redirects are followed by an announced closure" do
+  test "after two delivered redirects, the generic hold drops the reply before the goodbye" do
     {g, t} = start(fn _ -> {:ok, :off_topic} end)
 
     for cursor <- 1..2 do
@@ -493,11 +730,20 @@ defmodule BookingDesk.CallGuardTest do
       finish_message(g, CallGuard.message(:scope_redirect))
     end
 
+    assert_receive {:guard_action, {:control, {:hold_output, :hold}}}
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
     check(g, t, snapshot("Still baseball", 3))
-    assert_receive {:guard_action, {:message, text}}
+    assert_receive {:guard_action, {:control, {:input_muted, true}}}
+    refute_receive {:guard_action, {:control, {:hold_output, :discard}}}, 120
+    refute_received {:guard_action, {:message, _}}
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
+    assert_receive {:guard_action, {:control, {:hold_output, :discard}}}, 500
+    assert_receive {:guard_action, {:message, text}}, 500
     assert text =~ "ending the call"
     refute_receive {:guard_action, {:closed, _}}, 30
-    caption(g, CallGuard.message(:scope_close))
+    goodbye = CallGuard.message(:scope_close) |> String.replace("I am", "I’m")
+    caption(g, goodbye)
     voice(g)
     assert_receive {:guard_action, {:closed, :finish}}, 500
   end
@@ -584,10 +830,10 @@ defmodule BookingDesk.CallGuardTest do
   test "emergency latch survives provider reconnection and holds existing result delivery" do
     {g, t} = start(fn _ -> {:ok, :emergency} end)
     check(g, t, snapshot("An emergency", 1))
-    assert_receive {:guard_action, {:message, _}}
+    assert_receive {:guard_action, {:message, _}}, 500
     reconnect = snapshot("Book it", 2, 1)
     assert :blocked = check(g, t, reconnect)
-    assert_receive {:guard_action, {:message, message}}
+    assert_receive {:guard_action, {:message, message}}, 500
     assert message =~ "call 911"
 
     s = %{
@@ -628,11 +874,11 @@ defmodule BookingDesk.CallGuardTest do
     {g, t} = start(fn _ -> {:ok, :emergency} end, instruction_updates: true)
     check(g, t, snapshot("Help, this is an emergency", 1))
     assert_receive {:guard_action, {:control, {:input_muted, true}}}
-    assert_receive {:guard_action, {:instruction, instruction}}
+    assert_receive {:guard_action, {:instruction, instruction}}, 500
     assert instruction =~ "EMERGENCY CLOSING MODE"
     assert instruction =~ "Do not collect name/DOB"
     assert instruction =~ "patient lookups are blocked"
-    assert_receive {:guard_action, {:message, guidance}}
+    assert_receive {:guard_action, {:message, guidance}}, 500
     assert guidance =~ "hang up and call 911"
     refute_receive {:guard_action, {:closed, _}}, 40
     token = :sys.get_state(g).announcement.token
@@ -647,5 +893,190 @@ defmodule BookingDesk.CallGuardTest do
     caption(g, CallGuard.message(:emergency))
     voice(g)
     assert_receive {:guard_action, {:closed, :finish}}, 500
+  end
+
+  test "verified emergency guidance already in progress drains and closes without a replacement" do
+    {g, t} =
+      start(fn _ -> {:ok, :possible_emergency} end, delivery_ms: 100, instruction_updates: true)
+
+    turn = snapshot("This is an emergency", 1)
+
+    part = %{
+      speaker: :assistant,
+      delta: CallGuard.message(:possible_emergency),
+      provider_generation: 0,
+      arrival_order: 2
+    }
+
+    turn = %{turn | transcripts: [part | turn.transcripts]}
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+    check(g, t, turn)
+    assert_receive {:guard_action, {:control, {:input_muted, true}}}
+    assert :blocked = CallGuard.check(g, turn)
+    voice(g)
+    refute_receive {:guard_action, _}, 120
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
+    assert_receive {:guard_action, {:closed, :finish}}, 500
+    refute_received {:guard_action, _}
+  end
+
+  test "emergency fallback waits for current speech and retries busy or superseded replies" do
+    {g, t} = start(fn _ -> {:ok, :possible_emergency} end)
+    busy = Parlora.Error.new(:backpressure, "Provider is busy")
+    Transport.reject_next_message(t, {:error, busy})
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+    check(g, t, snapshot("This is an emergency", 1))
+    assert_receive {:guard_action, {:control, {:input_muted, true}}}
+    caption(g, "If this is an emergency, please call 911.")
+    voice(g)
+    refute_receive {:guard_action, _}, 120
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :idle}}})
+    assert_receive {:guard_action, {:message, _}}, 500
+    assert_receive {:guard_action, {:message, text}}, 500
+    assert text =~ CallGuard.message(:possible_emergency)
+
+    eventually(fn -> :sys.get_state(g).announcement.phase == :submitted end)
+    command = :sys.get_state(g).announcement.command_id
+
+    superseded =
+      Parlora.Error.new(:backpressure, "Prism did not start the reply", %{
+        provider_code: "nudge_superseded"
+      })
+
+    send(g, {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}})
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :context_rejected, command_id: command, payload: %{error: superseded}}}
+    )
+
+    refute_receive {:guard_action, _}, 120
+
+    send(
+      g,
+      {:parlora_event,
+       %Event{type: :provider_speech, payload: %{state: :idle, typed_ready: true}}}
+    )
+
+    assert_receive {:guard_action, {:message, ^text}}, 500
+    refute :sys.get_state(g).announcement.command_id == command
+
+    spoken =
+      "Please hang up and call 911 now, or your local emergency number outside the United States. I cannot contact emergency services for you. Goodbye."
+
+    finish_message(g, spoken)
+    assert_receive {:guard_action, {:closed, :finish}}, 500
+    refute_received {:guard_action, _}
+  end
+
+  test "retries accepted emergency guidance interrupted before audio and closes after the retry plays" do
+    {g, t} = start(fn _ -> {:ok, :emergency} end)
+    assert :wait = check(g, t, snapshot("I cannot breathe", 1))
+    assert_receive {:guard_action, {:control, {:input_muted, true}}}
+    assert_receive {:guard_action, {:message, guidance}}, 500
+    assert guidance =~ CallGuard.message(:emergency)
+    eventually(fn -> :sys.get_state(g).announcement.phase == :submitted end)
+    first = :sys.get_state(g).announcement.command_id
+
+    for event <- [
+          %Event{
+            type: :context_acknowledged,
+            command_id: first,
+            payload: %{acceptance: :response_created}
+          },
+          %Event{
+            type: :provider_activity,
+            payload: %{state: :in_progress, response_id: "guidance"}
+          },
+          %Event{type: :output_interrupted, payload: %{token: 1, response_id: "guidance"}},
+          %Event{
+            type: :provider_activity,
+            payload: %{state: :idle, response_id: "guidance", status: "cancelled"}
+          },
+          %Event{type: :provider_speech, payload: %{state: :idle, typed_ready: true}}
+        ] do
+      send(g, {:parlora_event, event})
+    end
+
+    assert_receive {:guard_action, {:message, ^guidance}}, 500
+    eventually(fn -> :sys.get_state(g).announcement.phase == :submitted end)
+    assert :sys.get_state(g).announcement.command_id != first
+    refute_receive {:guard_action, {:closed, _}}, 40
+
+    finish_message(g, CallGuard.message(:emergency))
+    assert_receive {:guard_action, {:closed, :finish}}, 500
+    refute_received {:guard_action, _}
+  end
+
+  for trigger <- [:provider_timeout, :guard_deadline] do
+    @timeout_trigger trigger
+    test "retries timed-out emergency guidance once when #{trigger} arrives first" do
+      {g, t} = start(fn _ -> {:ok, :emergency} end, delivery_ms: 450)
+      assert :wait = check(g, t, snapshot("I cannot breathe", 1))
+      assert_receive {:guard_action, {:control, {:input_muted, true}}}
+      assert_receive {:guard_action, {:message, guidance}}, 500
+      assert guidance =~ CallGuard.message(:emergency)
+
+      accept = fn response_id ->
+        eventually(fn -> :sys.get_state(g).announcement.phase == :submitted end)
+        command = :sys.get_state(g).announcement.command_id
+
+        send(
+          g,
+          {:parlora_event,
+           %Event{
+             type: :context_acknowledged,
+             command_id: command,
+             payload: %{acceptance: :response_created, response_id: response_id}
+           }}
+        )
+
+        command
+      end
+
+      timeout = fn response_id ->
+        send(
+          g,
+          {:parlora_event,
+           %Event{
+             type: :provider_activity,
+             payload: %{
+               state: :idle,
+               response_id: response_id,
+               status: "failed",
+               reason: "response_timeout"
+             }
+           }}
+        )
+      end
+
+      first = accept.("first")
+
+      if @timeout_trigger == :provider_timeout do
+        timeout.("unrelated")
+        refute_receive {:guard_action, _}, 130
+        timeout.("first")
+      end
+
+      assert_receive {:guard_action, {:message, ^guidance}}, 900
+      assert accept.("retry") != first
+
+      timeout.("first")
+      refute_receive {:guard_action, _}, 130
+
+      if @timeout_trigger == :provider_timeout do
+        finish_message(g, CallGuard.message(:emergency))
+      else
+        timeout.("retry")
+      end
+
+      assert_receive {:guard_action, {:closed, :finish}}, 700
+      refute_received {:guard_action, _}
+    end
   end
 end

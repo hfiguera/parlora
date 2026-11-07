@@ -20,7 +20,8 @@ defmodule BookingDesk.PhonicSettingsTest do
       "PHONIC_API_KEY",
       "OPENAI_API_KEY",
       "GEMINI_API_KEY",
-      "XAI_API_KEY"
+      "XAI_API_KEY",
+      "RIME_API_KEY"
     ]
 
     saved = Map.new(variables, &{&1, System.get_env(&1)})
@@ -34,6 +35,7 @@ defmodule BookingDesk.PhonicSettingsTest do
     System.put_env("PARLORA_PROVIDER", "openai")
 
     for variable <- tl(variables), do: System.put_env(variable, "booking-test-key")
+    System.put_env("RIME_API_KEY", "rime-test-key")
     :ok
   end
 
@@ -41,7 +43,11 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert {Parlora.Providers.Phonic, options} = BookingDesk.provider("phonic")
 
     assert Keyword.drop(options, [:api_key]) ==
-             [boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"], vad_threshold: 0.8]
+             [
+               boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"],
+               vad_threshold: 0.8,
+               wait_for_speech_before_tool_call: true
+             ]
 
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
 
@@ -58,7 +64,7 @@ defmodule BookingDesk.PhonicSettingsTest do
 
     assert [tool] = config.tools
     assert tool.require_speech_before_tool_call
-    refute tool.wait_for_speech_before_tool_call
+    assert tool.wait_for_speech_before_tool_call
     assert tool.wait_for_response
     assert tool.tool_call_output_timeout_ms == 60_000
     assert tool.execution_mode == "async"
@@ -90,7 +96,8 @@ defmodule BookingDesk.PhonicSettingsTest do
            Map.merge(Map.new(BookingDesk.GeminiSettings.options()), %{
              api_key: "booking-test-key",
              voice: "Sulafat"
-           })}
+           })},
+          {"prism", Parlora.Providers.Prism, %{api_key: "rime-test-key", voice: "astra"}}
         ] do
       assert {^module, options} = BookingDesk.provider(name)
       assert Map.new(options) == expected
@@ -138,15 +145,17 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert tool.tool_call_output_timeout_ms == 60_000
   end
 
-  test "the clinic speech threshold is the only change to library conversation defaults" do
+  test "the clinic speech profile changes recognition and finishes the acknowledgment before tools" do
     {_, options} = BookingDesk.provider("phonic")
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
     assert {:ok, baseline} = Protocol.start([api_key: "booking-test-key"], %AudioFormat{})
 
     assert baseline.vad_threshold == 0.7
 
-    assert Map.drop(config, [:vad_threshold, :boosted_keywords]) ==
-             Map.drop(baseline, [:vad_threshold, :boosted_keywords])
+    assert Map.drop(config, [:vad_threshold, :boosted_keywords, :tools]) ==
+             Map.drop(baseline, [:vad_threshold, :boosted_keywords, :tools])
+
+    assert config.tools == [Map.put(hd(baseline.tools), :wait_for_speech_before_tool_call, true)]
   end
 
   test "disabling backchannels does not implicitly disable busy mode or pre-tool speech" do

@@ -19,6 +19,8 @@ defmodule BookingDesk do
         native_result_replies: native_result_replies?(provider_adapter),
         instruction_updates: provider in ["openai", "phonic"]
       )
+      |> Keyword.put_new(:scope_close_audio, BookingDesk.CallGuard.scope_close_audio())
+      |> Keyword.put_new(:farewell_audio, BookingDesk.CallGuard.farewell_audio())
 
     with {:ok, guard} <-
            DynamicSupervisor.start_child(
@@ -185,5 +187,6 @@ defmodule BookingDesk do
   end
 
   def instructions("grok"), do: BookingDesk.Instructions.grok()
+
   def instructions(_provider), do: instructions()
 end

@@ -98,7 +98,13 @@ defmodule BookingDesk.ReminderPolicyTest do
           "Your appointment is booked. Would you like a text reminder twenty-four hours before?",
           "Would you like a SMS reminder for this appointment?"
         ],
-        reply <- ["Yes", "Yeah, that'd be helpful.", "Yes, that would be helpful!", "Yes, please"] do
+        reply <- [
+          "Yes",
+          "Yeah, that'd be helpful.",
+          "Yes, that would be helpful!",
+          "Yes, please",
+          "Yes, that will be great"
+        ] do
       assert {:input, %{operation: "reminder_opt_in"}} =
                ReminderPolicy.interpret(snapshot(offer, reply), state, opts)
     end
@@ -172,7 +178,13 @@ defmodule BookingDesk.ReminderPolicyTest do
           "Would you like a text reminder twenty-four hours before?",
           ReminderPolicy.question(state)
         ],
-        reply <- ["Yes, if it is free", "Yes, but wait", "No, don't send it", "Maybe"] do
+        reply <- [
+          "Yes, if it is free",
+          "Yes, but wait",
+          "No, don't send it",
+          "Maybe",
+          "Yes, that will be great if it's free"
+        ] do
       assert :associate =
                ReminderPolicy.interpret(snapshot(question, reply), state,
                  reminder_judge: fn _ -> {:ok, "opt_in"} end
@@ -193,9 +205,17 @@ defmodule BookingDesk.ReminderPolicyTest do
     for question <- [
           "Great. I'll set that up now. Could we send it to your cell ending in zero one eight eight?",
           "Would you like a text reminder for this appointment? Can we send it to your cell number ending in zero one eight eight?",
+          "Can we send the reminder to the number ending in zero, one, eight, eight?",
+          "Can we send the reminder to the number on file ending in zero one eight eight?",
           "Can we send the reminder to 0188?"
         ],
-        answer <- ["Yep, that's my cell", "Yes, please", "Yep, that’s my cell."] do
+        answer <- [
+          "Yep, that's my cell",
+          "Yes, please",
+          "Yep, that’s my cell.",
+          "Yes. That is my cell phone number.",
+          "Yes. That is my number."
+        ] do
       assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
                ReminderPolicy.interpret(snapshot(question, answer), state, opts)
     end
@@ -207,6 +227,8 @@ defmodule BookingDesk.ReminderPolicyTest do
 
     for question <- [
           "Can we send the reminder to 4289?",
+          "Can we send the reminder to the number ending in zero, one, eight, nine?",
+          "Can we send the reminder to the number on file ending in zero one eight nine?",
           "Is 0188 your cell?",
           "Can we send marketing texts to 0188?",
           "Can we not send the reminder to 0188?",
@@ -215,18 +237,25 @@ defmodule BookingDesk.ReminderPolicyTest do
         ] do
       assert {:clarify, _} =
                ReminderPolicy.interpret(
-                 snapshot(question, "Yep, that's my cell"),
+                 snapshot(question, "Yes. That is my number."),
                  state,
                  uncertain
                )
     end
 
-    assert {:clarify, _} =
-             ReminderPolicy.interpret(
-               snapshot("Can we send the reminder to 0188?", "Yes, if it is free"),
-               state,
-               uncertain
-             )
+    for answer <- [
+          "Yes, if it is free",
+          "Yes. That is my cell phone number, but don't text me.",
+          "Yes. That is my cell phone number if it ends in 4289.",
+          "Yes. That is my number, but don't text me."
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(
+                 snapshot("Can we send the reminder to 0188?", answer),
+                 state,
+                 uncertain
+               )
+    end
   end
 
   test "only the exact current destination readback can authorize scheduling" do
@@ -278,6 +307,56 @@ defmodule BookingDesk.ReminderPolicyTest do
                new,
                opts
              )
+  end
+
+  test "a garbled reply reasks the exact question and a repeated yes confirms it" do
+    current = %{status: "verify_existing", destination: "+12025550188"}
+    question = "Can we send the reminder to the number ending in zero one eight eight?"
+    no_extraction = fn _ -> flunk("there are no caller digits to extract") end
+
+    assert {:clarify, "Can we send the reminder to zero one eight eight?" <> _} =
+             ReminderPolicy.interpret(
+               snapshot(question, "Just... is my cell phone number."),
+               current,
+               reminder_judge: fn _ -> {:error, :uncertain} end,
+               phone_extractor: no_extraction
+             )
+
+    for reply <- ["Yes. I already tell you.", "Yeah, I already told you that.", "Yes, as I said."] do
+      assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+               ReminderPolicy.interpret(snapshot(question, reply), current,
+                 reminder_judge: fn _ -> flunk("a clear yes to this readback needs no model") end,
+                 phone_extractor: no_extraction
+               )
+    end
+
+    uncertain = [
+      reminder_judge: fn _ -> {:error, :uncertain} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for reply <- [
+          "I already told you.",
+          "Yes. I already told you not to send it.",
+          "Yes. I already told you to use my work number.",
+          "Yes. I already told you, if there is no charge."
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(snapshot(question, reply), current, uncertain)
+    end
+
+    for wrong_question <- [
+          "Can we send the reminder to 0189?",
+          "Would you like a text reminder?",
+          "Can we send marketing texts to 0188?"
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(
+                 snapshot(wrong_question, "Yes. I already tell you."),
+                 current,
+                 uncertain
+               )
+    end
   end
 
   test "neutral number wording requires the exact destination and fresh unconditional consent" do

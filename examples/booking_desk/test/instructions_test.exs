@@ -47,4 +47,18 @@ defmodule BookingDesk.InstructionsTest do
       assert prompt =~ rule
     end
   end
+
+  test "every provider describes a date correction as an availability search" do
+    for provider <- ~w(openai gemini grok phonic prism) do
+      prompt = BookingDesk.instructions(provider)
+      assert prompt =~ "delegate a search for openings on the new date"
+      assert prompt =~ ~s(say "Sure, one moment" or wait)
+      assert prompt =~ "Once the revised availability arrives, lead with the verified options."
+      assert prompt =~ "start your next reply by naming its month and day"
+      assert prompt =~ "do not repeat the offer or the booking receipt"
+
+      assert prompt =~
+               "Reserve cancellation and rescheduling language for explicit requests to change an existing booked appointment."
+    end
+  end
 end

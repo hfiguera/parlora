@@ -28,7 +28,7 @@ defmodule BookingDesk.Reminders do
         do: "Verified contact reference: the number on file ends in #{spoken(last_four)}.",
         else: "There is no usable phone number on file; never invent one."
 
-    {"Ask: Would you like a text reminder 24 hours before your appointment? #{contact} This is reference data, not consent. Wait for their answer, delegate opt-in, and use the current backend destination question before asking for separate number confirmation.",
+    {"Ask once: Would you like a text reminder 24 hours before your appointment? #{contact} This is reference data, not consent. Wait for their answer. On a yes, delegate opt-in and wait for the verified destination question. Do not repeat the offer. Ask for separate number confirmation.",
      %{status: "offered", last_four: last_four}}
   end
 
@@ -278,7 +278,7 @@ defmodule BookingDesk.Reminders do
 
     readback?(text, expected) and
       Regex.match?(
-        ~r/^(?:can|could|may) (?:we|I) (?:send (?:it|the reminder|that reminder|the text reminder)|text) to (?:(?:your|the) )?(?:(?:(?:cell|phone)(?: number)?|number)(?: ending in)? )?(?:[0-9+() .-]|zero|oh|one|two|three|four|five|six|seven|eight|nine)+\?$/i,
+        ~r/^(?:can|could|may) (?:we|I) (?:send (?:it|the reminder|that reminder|the text reminder)|text) to (?:(?:your|the) )?(?:(?:(?:cell|phone)(?: number)?|number)(?: on file)?(?: ending in)? )?(?:[0-9+() ,.-]|zero|oh|one|two|three|four|five|six|seven|eight|nine)+\?$/i,
         question
       )
   end

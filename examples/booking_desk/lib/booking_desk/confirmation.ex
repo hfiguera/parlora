@@ -34,6 +34,7 @@ defmodule BookingDesk.Confirmation do
     "seven" => "7",
     "eight" => "8",
     "nine" => "9",
+    "niner" => "9",
     "ay" => "A",
     "bee" => "B",
     "see" => "C",

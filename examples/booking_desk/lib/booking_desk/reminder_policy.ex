@@ -122,13 +122,31 @@ defmodule BookingDesk.ReminderPolicy do
       |> String.replace(~r/[.,!]/u, "")
       |> String.trim()
 
+  @doc false
+  def explicit_opt_in?(snapshot, %{status: "offered"} = current) do
+    dialogue = BookingDesk.ReminderReadback.turns(snapshot, current)
+
+    case List.last(dialogue) do
+      %{speaker: :user, text: text} ->
+        literal_opt_in?(current, %{dialogue: dialogue, latest_user: text})
+
+      _ ->
+        false
+    end
+  end
+
+  def explicit_opt_in?(_snapshot, _current), do: false
+
   defp literal_opt_in?(%{status: "offered"}, state) do
     text = normalized_reply(state.latest_user)
     question = state.dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
 
     accept =
       BookingDesk.Reply.simple(text) == :accept or
-        text in ["yeah that'd be helpful", "yes that'd be helpful", "yes that would be helpful"]
+        Regex.match?(
+          ~r/\A(?:yes|yeah|yep) that(?:'d| (?:would|will)) be (?:great|helpful)\z/u,
+          text
+        )
 
     accept and question != nil and BookingDesk.Reminders.offer_question?(question.text)
   end
@@ -141,14 +159,10 @@ defmodule BookingDesk.ReminderPolicy do
 
     accept =
       BookingDesk.Reply.simple(text) == :accept or
-        text in [
-          "yep that's my cell",
-          "yes that's my cell",
-          "yeah that's my cell",
-          "yep that's the right number",
-          "yes that's the right number",
-          "yeah that's the right number"
-        ]
+        Regex.match?(
+          ~r/\A(?:yes|yep|yeah)\s+that(?:'s|\s+is)\s+(?:my\s+(?:number|(?:cell(?:\s+phone)?|mobile(?:\s+phone)?|phone)(?:\s+number)?)|the\s+right\s+number)\z/u,
+          text
+        ) or repeated_yes?(text)
 
     question = confirmation_question(state.dialogue)
 
@@ -160,6 +174,14 @@ defmodule BookingDesk.ReminderPolicy do
   end
 
   defp literal_confirmation?(_, _), do: false
+
+  # A restatement adds no destination or condition to the explicit yes.
+  defp repeated_yes?(text) do
+    Regex.match?(
+      ~r/\A(?:yes|yep|yeah)\s+(?:i\s+(?:already\s+)?(?:said(?:\s+so)?|(?:told|tell)\s+you)(?:\s+(?:yes|that|earlier|already|before))?|(?:as|like)\s+i\s+said(?:\s+(?:earlier|before))?)\z/u,
+      text
+    )
+  end
 
   defp interpret_reply(result, snapshot, current, state, opts) do
     dialogue = state.dialogue
@@ -189,7 +211,7 @@ defmodule BookingDesk.ReminderPolicy do
         :associate
 
       _ ->
-        retain_number(snapshot, current, state, opts)
+        clarify_uncertain(snapshot, current, state, opts)
     end
   end
 
@@ -238,6 +260,18 @@ defmodule BookingDesk.ReminderPolicy do
       :pending -> :wait
       {:incomplete, _, _} -> {:clarify, partial_number_question()}
       _ -> {:clarify, "What phone number should we use? Please include all ten digits."}
+    end
+  end
+
+  defp clarify_uncertain(snapshot, current, state, opts) do
+    if current.status in ["verify_existing", "verify_new"] and
+         BookingDesk.Reminders.readback_digits(state.latest_user) == "" do
+      case state.conversation do
+        %{phone_evidence: [_ | _]} -> {:clarify, partial_number_question()}
+        %{phone: phone} -> {:clarify, uncertainty_question(current, phone)}
+      end
+    else
+      retain_number(snapshot, current, state, opts)
     end
   end
 

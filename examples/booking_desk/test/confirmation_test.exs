@@ -86,6 +86,21 @@ defmodule BookingDesk.ConfirmationTest do
     assert correction(%{snapshot("Confirmation BD-A4FA4A.") | provider_generation: 1}) == nil
   end
 
+  test "the spoken niner is the same digit as nine in the recorded GPT-Live receipt" do
+    code = "BD-94C40748"
+
+    readout =
+      "B as in Bravo, D as in Delta, dash niner four C as in Charlie, four, zero, seven, four, eight"
+
+    text =
+      "Your confirmation number is #{readout}. Would you like a text reminder 24 hours before your appointment?"
+
+    assert Confirmation.complete?(text, code)
+    refute Confirmation.complete?(text, "BD-84C40748")
+
+    assert correction(snapshot(text), %{current() | confirmation: code}) == nil
+  end
+
   test "a later booking acknowledgment does not repeat an already correct code" do
     s = snapshot("Your appointment remains booked.")
 

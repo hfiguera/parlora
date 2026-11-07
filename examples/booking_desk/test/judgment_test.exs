@@ -129,6 +129,57 @@ defmodule BookingDesk.JudgmentTest do
              |> Judgment.decode()
   end
 
+  test "a focused date-change answer can resolve uncertain intent for an active search" do
+    state = %{
+      active: %{operation: "availability", date: "2026-11-04", clinician: "lee"},
+      proposal: nil,
+      insurance: %{confirmed: true},
+      conversation: %{goal: "availability"}
+    }
+
+    answers = %{
+      "intent" => answer("replace_search", 0.84),
+      "date_change" => answer("replace"),
+      "date" => answer("2026-11-05"),
+      "clinician" => answer("unknown"),
+      "time" => answer("unknown")
+    }
+
+    assert Map.has_key?(Judgment.questions(state), "date_change")
+
+    assert {:ok,
+            %{"intent" => "replace_search", "date" => "2026-11-05", "clinician" => "lee"} =
+              judgment} = Judgment.decode(answers, state)
+
+    refute Map.has_key?(judgment, "date_change")
+
+    for {field, value} <- [
+          {"date_change", answer("other")},
+          {"date_change", answer("replace", 0.84)},
+          {"date", answer("2026-11-04")},
+          {"date", answer("2026-11-05", 0.84)},
+          {"date", answer("2026-11-07")},
+          {"clinician", answer("patel")},
+          {"time", answer("10:15")}
+        ] do
+      result = Judgment.decode(Map.put(answers, field, value), state)
+      assert match?({:incomplete, _, ["intent"]}, result) or result == {:error, :uncertain}
+    end
+
+    for ineligible <- [
+          %{state | active: nil},
+          %{state | proposal: %{change: "book"}},
+          %{state | insurance: %{confirmed: false}},
+          %{state | conversation: %{goal: "reschedule"}}
+        ] do
+      refute Map.has_key?(Judgment.questions(ineligible), "date_change")
+      assert {:incomplete, _, ["intent"]} = Judgment.decode(answers, ineligible)
+    end
+
+    assert {:ok, %{"intent" => "additional_search"}} =
+             Judgment.decode(Map.put(answers, "intent", answer("additional_search")), state)
+  end
+
   test "a period without verified offers cannot invent a slot" do
     answers = %{
       "intent" => answer("choose_slot"),

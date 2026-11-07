@@ -184,6 +184,7 @@ defmodule BookingDesk.Recorder do
           :request_id,
           :task_id,
           :task_revision,
+          :delivery,
           :outcome,
           :reason,
           :field
