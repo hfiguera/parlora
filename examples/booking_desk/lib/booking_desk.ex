@@ -104,6 +104,7 @@ defmodule BookingDesk do
         "gemini" -> {Parlora.Providers.Gemini, "GEMINI_API_KEY"}
         "grok" -> {Parlora.Providers.Grok, "XAI_API_KEY"}
         "phonic" -> {Parlora.Providers.Phonic, "PHONIC_API_KEY"}
+        "prism" -> {Parlora.Providers.Prism, "RIME_API_KEY"}
       end
 
     options =
@@ -136,6 +137,7 @@ defmodule BookingDesk do
 
   def assistant_voice("gemini"), do: "Sulafat"
   def assistant_voice("grok"), do: BookingDesk.GrokSettings.voice()
+  def assistant_voice("prism"), do: "astra"
   def assistant_voice(_provider), do: nil
 
   def map_result(%{result: result}) do

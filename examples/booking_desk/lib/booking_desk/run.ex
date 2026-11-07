@@ -721,7 +721,8 @@ defmodule BookingDesk.Run do
         "openai" => "gpt-live-1",
         "gemini" => "gemini-3.8-live",
         "grok" => "grok-voice-3.0",
-        "phonic" => "phonic-1"
+        "phonic" => "phonic-1",
+        "prism" => "prism"
       }[System.get_env("PARLORA_PROVIDER", "openai")]
 
   defp check_booked_exact_slot(s, appointments) do
