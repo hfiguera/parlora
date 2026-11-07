@@ -464,6 +464,8 @@ defmodule Parlora.PrismAdapterTest do
     @path path
     @ordering ordering
     @playout playout
+    @pipeline_playout playout in [:held_in_pipeline, :microphone_queued, :microphone_playing]
+    @recover_reply playout not in [:handed_off, :microphone_playing]
     test "handles interruption after #{path} is accepted (#{ordering}, playout: #{playout})",
          %{state: state, peer: peer} do
       update = %{
@@ -529,7 +531,7 @@ defmodule Parlora.PrismAdapterTest do
         end
 
       {state, pipeline} =
-        if @playout in [:held_in_pipeline, :microphone_queued, :microphone_playing],
+        if @pipeline_playout,
           do: start_pipeline_playout(state, @playout),
           else: {state, nil}
 
@@ -572,7 +574,7 @@ defmodule Parlora.PrismAdapterTest do
 
       state = final_transcript(state, peer, "caller", "What should I bring?")
 
-      if @playout not in [:handed_off, :microphone_playing] do
+      if @recover_reply do
         assert_receive {:parlora_check_delivery, _, ref, ^update}
         {:noreply, state} = Prism.handle_info({:parlora_delivery_current, ref, true}, state)
 

@@ -50,12 +50,13 @@ defmodule BookingDesk.CallGuard.Announcement do
   def scope_redirect?(%{caption: true}, _caller), do: true
 
   def scope_redirect?(%{text: text}, caller) do
-    with %{"topic" => topic, "offer" => offer} <-
-           Regex.named_captures(@scope_refusal, normalize(text)) do
-      String.contains?(" #{normalize(caller)} ", " #{topic} ") and
-        Regex.match?(@clinic_offer, offer)
-    else
-      nil -> false
+    case Regex.named_captures(@scope_refusal, normalize(text)) do
+      %{"topic" => topic, "offer" => offer} ->
+        String.contains?(" #{normalize(caller)} ", " #{topic} ") and
+          Regex.match?(@clinic_offer, offer)
+
+      nil ->
+        false
     end
   end
 

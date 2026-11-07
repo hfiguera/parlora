@@ -83,14 +83,7 @@ defmodule BookingDesk.CallGuard do
         {:reply, :wait, s}
 
       s.emergency ->
-        s =
-          if key != nil and elem(key, 0) != elem(s.key, 0) do
-            start_emergency(%{s | key: key}, s.closing, snapshot)
-          else
-            s
-          end
-
-        {:reply, :blocked, s}
+        {:reply, :blocked, check_emergency_turn(s, snapshot, key)}
 
       s.scope_input_item != nil ->
         {:reply, :wait, s}
@@ -113,29 +106,7 @@ defmodule BookingDesk.CallGuard do
     s = observe_scope_input(s, event)
     s = observe_emergency(s, event)
 
-    s =
-      case event do
-        %{type: :transcript_delta, payload: %{speaker: :user}} ->
-          %{s | serial: s.serial + 1}
-
-        %{type: :transcript_delta, payload: %{speaker: :assistant}}
-        when s.announcement != nil and not is_map_key(s.announcement, :local_duration_ms) ->
-          %{s | announcement: Announcement.caption(s.announcement, event)}
-
-        %{type: :provider_speech, payload: %{state: speech}} ->
-          announcement =
-            if speech == :speaking and s.speech != :speaking and s.announcement != nil and
-                 not is_map_key(s.announcement, :local_duration_ms) and not s.emergency,
-               do: Announcement.reset(s.announcement),
-               else: s.announcement
-
-          %{s | speech: speech, announcement: announcement}
-
-        _ ->
-          s
-      end
-
-    {:noreply, s}
+    {:noreply, observe_announcement(s, event)}
   end
 
   def handle_info({:parlora_audio, direction, at, pcm}, s) do
@@ -251,56 +222,20 @@ defmodule BookingDesk.CallGuard do
 
   def handle_info({:scope_tick, token}, %{scope_reply: %{token: token, key: key} = a} = s)
       when key == s.key or s.closing == :scope_close do
-    elapsed = now() - a.requested_at
+    expired = now() - a.requested_at >= s.delivery_ms
     last_output = max(a.last_voice, a.last_reply_at)
     quiet = now() - max(last_output, a.requested_at) >= s.quiet_ms
     ready = scope_ready?(s, a, quiet)
 
-    cond do
-      a.reason == :scope_close and s.scope_held and elapsed >= s.delivery_ms and not ready ->
-        emit(s, :message_unconfirmed)
-        finish_announcement(%{s | scope_reply: nil}, a, false)
-
-      a.reason == :scope_close and not s.scope_input_pending and
-          (ready or elapsed >= s.delivery_ms) ->
-        {:noreply, announce(s, :scope_close, true, false)}
-
-      a.reason == :scope_close and is_boolean(s.scope_ready) and s.scope_held and
-        not s.scope_input_pending and is_binary(a.response_id) ->
-        # The entire reply is still held. Discard it before telling the provider
-        # it can stop waiting for playback and accept the goodbye.
-        if s.transport.control(s.session, {:clear_output, :next}) == :ok do
-          s.transport.control(s.session, {:output_discarded, a.response_id})
-        end
-
-        reschedule_scope(%{s | scope_reply: %{a | response_id: nil}}, token)
-
-      a.reason == :scope_close ->
-        reschedule_scope(s, token)
-
-      scope_played?(s, a) and (scope_drained?(a) or (quiet and scope_idle?(s, a))) ->
-        {:noreply, count_scope_reply(s)}
-
-      ready ->
-        {:noreply, announce(%{s | off_topic: s.off_topic + 1}, :scope_redirect, false, false)}
-
-      elapsed >= s.delivery_ms ->
-        emit(s, :message_unconfirmed)
-        {:noreply, %{s | scope_reply: nil}}
-
-      true ->
-        reschedule_scope(s, token)
-    end
+    check_scope_delivery(s, a, expired, quiet, ready)
   end
 
   def handle_info({:guard_tick, token}, %{announcement: %{token: token} = a} = s) do
-    drained = a[:phase] != :preparing and playout_drained?(s, a)
+    drained = playout_drained?(s, a)
 
     started = a[:sent_at] || a[:retry_started_at] || a.started
-    confirmed_emergency_audio = s.emergency and a.caption and a.heard
-    timed_out = now() - started >= s.delivery_ms and not confirmed_emergency_audio
-    settled = s.job == nil and s.timer == nil
-    hard_deadline = now() - started >= s.delivery_ms + s.debounce_ms + s.timeout_ms + 1_000
+    timed_out = announcement_timed_out?(s, a, started)
+    finished = announcement_finished?(s, started, drained or timed_out)
 
     cond do
       timed_out and retry_emergency_timeout?(a) ->
@@ -308,7 +243,7 @@ defmodule BookingDesk.CallGuard do
         Process.send_after(self(), {:guard_tick, token}, 100)
         {:noreply, retry_emergency(s, %{a | timeout_retried: true})}
 
-      ((drained or timed_out) and settled) or hard_deadline ->
+      finished ->
         emit(s, if(drained, do: :software_playout_quiet, else: :message_unconfirmed))
         finish_announcement(s, a, drained)
 
@@ -325,6 +260,76 @@ defmodule BookingDesk.CallGuard do
     cancel_job(s)
     :ok
   end
+
+  defp check_emergency_turn(s, snapshot, key) do
+    if key != nil and elem(key, 0) != elem(s.key, 0),
+      do: start_emergency(%{s | key: key}, s.closing, snapshot),
+      else: s
+  end
+
+  defp observe_announcement(s, %{type: :transcript_delta, payload: %{speaker: :user}}),
+    do: %{s | serial: s.serial + 1}
+
+  defp observe_announcement(
+         s,
+         %{type: :transcript_delta, payload: %{speaker: :assistant}} = event
+       )
+       when s.announcement != nil and not is_map_key(s.announcement, :local_duration_ms),
+       do: %{s | announcement: Announcement.caption(s.announcement, event)}
+
+  defp observe_announcement(s, %{type: :provider_speech, payload: %{state: :speaking}})
+       when s.speech != :speaking and s.announcement != nil and
+              not is_map_key(s.announcement, :local_duration_ms) and not s.emergency,
+       do: %{s | speech: :speaking, announcement: Announcement.reset(s.announcement)}
+
+  defp observe_announcement(s, %{type: :provider_speech, payload: %{state: speech}}),
+    do: %{s | speech: speech}
+
+  defp observe_announcement(s, _event), do: s
+
+  defp check_scope_delivery(s, %{reason: :scope_close} = a, expired, _quiet, ready) do
+    cond do
+      s.scope_held and expired and not ready ->
+        emit(s, :message_unconfirmed)
+        finish_announcement(%{s | scope_reply: nil}, a, false)
+
+      not s.scope_input_pending and (ready or expired) ->
+        {:noreply, announce(s, :scope_close, true, false)}
+
+      true ->
+        discard_held_scope_reply(s, a)
+    end
+  end
+
+  defp check_scope_delivery(s, a, expired, quiet, ready) do
+    cond do
+      scope_played?(s, a) and (scope_drained?(a) or (quiet and scope_idle?(s, a))) ->
+        {:noreply, count_scope_reply(s)}
+
+      ready ->
+        {:noreply, announce(%{s | off_topic: s.off_topic + 1}, :scope_redirect, false, false)}
+
+      expired ->
+        emit(s, :message_unconfirmed)
+        {:noreply, %{s | scope_reply: nil}}
+
+      true ->
+        reschedule_scope(s, a.token)
+    end
+  end
+
+  defp discard_held_scope_reply(s, a)
+       when is_boolean(s.scope_ready) and s.scope_held and not s.scope_input_pending and
+              is_binary(a.response_id) do
+    # Discard the held reply before telling the provider it can accept the goodbye.
+    if s.transport.control(s.session, {:clear_output, :next}) == :ok do
+      s.transport.control(s.session, {:output_discarded, a.response_id})
+    end
+
+    reschedule_scope(%{s | scope_reply: %{a | response_id: nil}}, a.token)
+  end
+
+  defp discard_held_scope_reply(s, a), do: reschedule_scope(s, a.token)
 
   defp observe_scope_reply(
          s,
@@ -597,6 +602,8 @@ defmodule BookingDesk.CallGuard do
     end
   end
 
+  defp playout_drained?(_s, %{phase: :preparing}), do: false
+
   defp playout_drained?(s, %{local_duration_ms: duration, first_voice: first} = a) do
     at = now()
     first != nil and at >= first + duration and at - a.last_voice >= s.quiet_ms
@@ -606,6 +613,17 @@ defmodule BookingDesk.CallGuard do
     do:
       a.heard and a.caption and s.speech != :speaking and
         now() - a.last_voice >= s.quiet_ms and now() - a.started >= s.quiet_ms
+
+  defp announcement_timed_out?(s, a, started) do
+    confirmed_emergency_audio = s.emergency and a.caption and a.heard
+    now() - started >= s.delivery_ms and not confirmed_emergency_audio
+  end
+
+  defp announcement_finished?(s, started, delivered_or_expired) do
+    settled = s.job == nil and s.timer == nil
+    hard_deadline = now() - started >= s.delivery_ms + s.debounce_ms + s.timeout_ms + 1_000
+    (delivered_or_expired and settled) or hard_deadline
+  end
 
   defp finish_announcement(%{closing: reason} = s, _a, _drained) when not is_nil(reason) do
     async(s, fn -> s.transport.close(s.session, :finish) end)
@@ -743,40 +761,44 @@ defmodule BookingDesk.CallGuard do
 
   defp maybe_send_emergency(%{speech: speech} = s, %{phase: :waiting} = a)
        when speech != :speaking do
+    # Preserve a safe reply the provider started before classification. Only
+    # offer the fallback once its playout is quiet.
     if now() - a.last_voice >= s.quiet_ms do
-      # The provider may have started a safe reply before the application classified the turn.
-      # Preserve its audio and only offer the fallback after the software playout is quiet.
-      owner = self()
-      instruction = emergency_instruction()
-      update = announcement_update(a.reason, a.generation, instruction)
-
-      async(s, fn ->
-        if not a.instruction_sent do
-          set_emergency_instruction(s, s.session, s.transport, update, instruction)
-        end
-
-        result = s.transport.append_context(s.session, update)
-        send(owner, {:emergency_submitted, update.id, result})
-      end)
-
-      a = Announcement.reset(a)
-
-      %{
-        s
-        | announcement: %{
-            a
-            | phase: :sending,
-              command_id: update.id,
-              sent_at: now(),
-              instruction_sent: true
-          }
-      }
+      send_emergency(s, a)
     else
       s
     end
   end
 
   defp maybe_send_emergency(s, _), do: s
+
+  defp send_emergency(s, a) do
+    owner = self()
+    instruction = emergency_instruction()
+    update = announcement_update(a.reason, a.generation, instruction)
+
+    async(s, fn ->
+      if not a.instruction_sent do
+        set_emergency_instruction(s, s.session, s.transport, update, instruction)
+      end
+
+      result = s.transport.append_context(s.session, update)
+      send(owner, {:emergency_submitted, update.id, result})
+    end)
+
+    a = Announcement.reset(a)
+
+    %{
+      s
+      | announcement: %{
+          a
+          | phase: :sending,
+            command_id: update.id,
+            sent_at: now(),
+            instruction_sent: true
+        }
+    }
+  end
 
   defp observe_emergency(
          %{emergency: true, announcement: %{command_id: id, phase: phase} = a} = s,
