@@ -39,7 +39,7 @@ defmodule Parlora.Provider.OutputBuffer do
 
   def notify(state), do: state
 
-  def push(queue, pcm, init, sequence, now) do
+  def push(queue, pcm, init, sequence, now, stream_id \\ nil) do
     result =
       cond do
         not AudioFormat.aligned?(init.audio_format, pcm) ->
@@ -52,7 +52,7 @@ defmodule Parlora.Provider.OutputBuffer do
           Error.tuple(:output_overflow, "Generated audio exceeded its receive capacity")
 
         true ->
-          {:ok, enqueue(queue, pcm, init, sequence, now)}
+          {:ok, enqueue(queue, pcm, init, sequence, now, stream_id || init.adapter_id)}
       end
 
     received(result, queue, pcm, init, now)
@@ -136,20 +136,20 @@ defmodule Parlora.Provider.OutputBuffer do
     end
   end
 
-  defp enqueue(queue, <<>>, _init, sequence, _now), do: {queue, sequence}
+  defp enqueue(queue, <<>>, _init, sequence, _now, _stream_id), do: {queue, sequence}
 
-  defp enqueue(queue, pcm, init, sequence, now) do
+  defp enqueue(queue, pcm, init, sequence, now, stream_id) do
     bytes = min(AudioFormat.bytes_for_ms(init.audio_format, 10), byte_size(pcm))
     <<part::binary-size(^bytes), rest::binary>> = pcm
 
     frame =
-      AudioFrame.new(part, init.audio_format, init.adapter_id, sequence,
+      AudioFrame.new(part, init.audio_format, stream_id, sequence,
         generation: init.generation,
         clock: :local_monotonic,
         timestamp_us: now
       )
 
     {:ok, queue} = AudioQueue.push(queue, frame)
-    enqueue(queue, rest, init, sequence + 1, now)
+    enqueue(queue, rest, init, sequence + 1, now, stream_id)
   end
 end

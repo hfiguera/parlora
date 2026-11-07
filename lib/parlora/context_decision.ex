@@ -16,6 +16,10 @@ defmodule Parlora.ContextDecision do
   references are validated; the task retains the clarification for later replies.
   Anchor fields are only valid for `:start_task`. Mixed/legacy start targets are
   rejected; they are not silently reinterpreted.
+
+  A single read-only `:start_task` or `:supersede_task` may set
+  `:allow_assistant_updates` when its evidence does not depend on new assistant
+  captions or speech boundaries. Caller and application changes still invalidate it.
   """
   @type kind ::
           :start_task
@@ -36,7 +40,8 @@ defmodule Parlora.ContextDecision do
           message: String.t() | nil,
           clarification_key: String.t() | nil,
           recheck_after_ms: 1..60_000 | nil,
-          recheck_key: String.t() | nil
+          recheck_key: String.t() | nil,
+          allow_assistant_updates: boolean()
         }
   defstruct [
     :kind,
@@ -49,6 +54,7 @@ defmodule Parlora.ContextDecision do
     :clarification_key,
     :recheck_after_ms,
     :recheck_key,
-    input: %{}
+    input: %{},
+    allow_assistant_updates: false
   ]
 end

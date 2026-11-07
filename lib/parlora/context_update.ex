@@ -15,8 +15,18 @@ defmodule Parlora.ContextUpdate do
           content: String.t(),
           delegation_id: String.t() | nil,
           provider_generation: non_neg_integer(),
+          origin: :backend_result | nil,
           task_id: String.t() | nil,
           task_revision: pos_integer() | nil
         }
-  defstruct [:id, :kind, :content, :delegation_id, :provider_generation, :task_id, :task_revision]
+  defstruct [
+    :id,
+    :kind,
+    :content,
+    :delegation_id,
+    :provider_generation,
+    :task_id,
+    :task_revision,
+    :origin
+  ]
 end

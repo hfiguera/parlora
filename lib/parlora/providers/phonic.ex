@@ -707,6 +707,24 @@ defmodule Parlora.Providers.Phonic do
     state
   end
 
+  # In this mode the tool is dispatched after the pre-tool speech. Ignore
+  # stray speech in the same turn until a native result or a requested reply.
+  defp event(
+         %{"type" => type},
+         %{
+           config: %{
+             tools: [
+               %{wait_for_speech_before_tool_call: true, forbid_speech_after_tool_call: true}
+             ]
+           },
+           busy_call_id: call,
+           turn_delegated?: true,
+           reply_active?: false
+         } = state
+       )
+       when is_binary(call) and type in ["assistant_started_speaking", "audio_chunk"],
+       do: state
+
   defp event(
          %{"type" => "assistant_started_speaking"},
          %{speech_ends_pending: count, init: %{limits: %{max_records: limit}}} = state

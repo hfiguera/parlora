@@ -1,7 +1,7 @@
 defmodule Parlora.Playout do
   @moduledoc false
   alias Parlora.AudioQueue
-  alias Parlora.Playout.{QuietRefill, Target}
+  alias Parlora.Playout.{LeadIn, QuietRefill, Target}
 
   # Measured refill target; independent of queue capacity and provider packet boundaries.
   @recovery_target_ms 100
@@ -11,6 +11,7 @@ defmodule Parlora.Playout do
             recovery_bytes: nil,
             target: nil,
             quiet: nil,
+            lead_in: nil,
             independent_recovery?: false,
             recovering?: false,
             playing?: false,
@@ -44,6 +45,7 @@ defmodule Parlora.Playout do
       state
       | recovery_ms: recovery,
         independent_recovery?: true,
+        lead_in: if(Keyword.get(options, :trim_playback_lead_in, false), do: :armed),
         target: if(mode == :adaptive and buffer_ms > 0, do: Target.new(buffer_ms, ceiling)),
         quiet: if(mode == :adaptive and buffer_ms > 0, do: %QuietRefill{})
     }
@@ -54,7 +56,8 @@ defmodule Parlora.Playout do
     recovery = Keyword.get(options, :playback_recovery_ms, 120)
 
     is_integer(buffer) and buffer in 0..200 and buffer * 48 <= capacity and
-      mode in [:fixed, :adaptive] and is_integer(recovery) and recovery in 0..200
+      mode in [:fixed, :adaptive] and is_integer(recovery) and recovery in 0..200 and
+      is_boolean(Keyword.get(options, :trim_playback_lead_in, false))
   end
 
   def observe(%{target: nil} = state, _frame), do: state
@@ -137,6 +140,7 @@ defmodule Parlora.Playout do
         release_reason: nil,
         speech_recovery_debt_us: 0,
         quiet_restore_since_us: nil,
+        lead_in: if(state.lead_in != nil, do: :armed),
         target: if(state.target, do: Target.reset(state.target)),
         quiet: QuietRefill.reset(state.quiet)
     }
@@ -185,11 +189,11 @@ defmodule Parlora.Playout do
       reason = release_reason(state, queue)
       debt = recovery_debt(state, queue, now - since)
 
-      {frames, queue} = AudioQueue.pop(queue, budget)
-      pcm = Enum.map_join(frames, & &1.data)
+      {frames, remaining} = AudioQueue.pop(queue, budget)
+      {pcm, lead_in} = LeadIn.render(state.lead_in, queue, Enum.map_join(frames, & &1.data))
       quiet = QuietRefill.observe(state.quiet, pcm, state.source_bytes + byte_size(pcm))
 
-      {pcm, queue,
+      {pcm, remaining,
        %{
          state
          | playing?: true,
@@ -200,6 +204,7 @@ defmodule Parlora.Playout do
            waiting_since_us: nil,
            empty_since_us: nil,
            source_bytes: state.source_bytes + byte_size(pcm),
+           lead_in: lead_in,
            quiet: QuietRefill.finish(quiet)
        }}
     end

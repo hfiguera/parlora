@@ -19,6 +19,8 @@ defmodule BookingDesk do
         native_result_replies: native_result_replies?(provider_adapter),
         instruction_updates: provider in ["openai", "phonic"]
       )
+      |> Keyword.put_new(:scope_close_audio, BookingDesk.CallGuard.scope_close_audio())
+      |> Keyword.put_new(:farewell_audio, BookingDesk.CallGuard.farewell_audio())
 
     with {:ok, guard} <-
            DynamicSupervisor.start_child(
@@ -104,6 +106,7 @@ defmodule BookingDesk do
         "gemini" -> {Parlora.Providers.Gemini, "GEMINI_API_KEY"}
         "grok" -> {Parlora.Providers.Grok, "XAI_API_KEY"}
         "phonic" -> {Parlora.Providers.Phonic, "PHONIC_API_KEY"}
+        "prism" -> {Parlora.Providers.Prism, "RIME_API_KEY"}
       end
 
     options =
@@ -136,6 +139,7 @@ defmodule BookingDesk do
 
   def assistant_voice("gemini"), do: "Sulafat"
   def assistant_voice("grok"), do: BookingDesk.GrokSettings.voice()
+  def assistant_voice("prism"), do: "astra"
   def assistant_voice(_provider), do: nil
 
   def map_result(%{result: result}) do
@@ -183,5 +187,6 @@ defmodule BookingDesk do
   end
 
   def instructions("grok"), do: BookingDesk.Instructions.grok()
+
   def instructions(_provider), do: instructions()
 end

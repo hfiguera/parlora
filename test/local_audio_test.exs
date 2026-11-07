@@ -58,6 +58,19 @@ defmodule Parlora.LocalAudioTest do
     assert {:ok, _} = LocalAudio.capabilities(pid)
   end
 
+  test "echo cancellation uses the device reference and leaves the capture path open" do
+    pid = open(echo_cancellation: true)
+    await(fn -> :sys.get_state(pid).inbound.bytes > 0 end)
+    assert {:ok, [frame | _]} = LocalAudio.read_audio(pid, 960)
+    assert frame.duration_us == 10_000
+    assert :ok = LocalAudio.write_audio(pid, %{frame | playback_epoch: 0})
+    assert :ok = LocalAudio.control(pid, "clear-echo", {:clear_output, 1})
+    await(fn -> :sys.get_state(pid).inbound.bytes > 0 end)
+    assert {:ok, [_frame | _]} = LocalAudio.read_audio(pid, 960)
+    assert :ok = LocalAudio.close(pid, ID.new(), :test)
+    assert_receive {:parlora_event, %Event{type: :closed}}
+  end
+
   test "clear adopts a native epoch and old writes are rejected, capture continues on suppression" do
     pid = open()
     frame = AudioFrame.pcm(:binary.copy(<<1, 0>>, 240), "test", 0, playback_epoch: 0)

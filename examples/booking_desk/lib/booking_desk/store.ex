@@ -584,7 +584,11 @@ defmodule BookingDesk.Store do
           "#{name} has #{Enum.map_join(items, " or ", &time_label(&1.id))}"
         end)
 
-      "Verified availability for #{date_label(date)}: #{options}. Offer the actual returned doctors and times and ask which the caller prefers. No booking has been made."
+      day = date_label(date)
+
+      "Verified availability for #{day}: #{options}. " <>
+        "Start the next reply with this question: For #{day}, #{options}. Which time works for you? " <>
+        "Say the month and day aloud with the times. Skip any further acknowledgment or search for this request. No booking has been made."
     end
   end
 

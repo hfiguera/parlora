@@ -698,6 +698,36 @@ defmodule BookingDesk.PolicyTest do
     assert search.input.clinician == "lee"
   end
 
+  test "a clear date-only correction revises the active search without a clarification turn" do
+    text = "Is it possible to change the day to November fifth?"
+    s = %{snapshot() | transcripts: [%{speaker: :user, delta: text, arrival_order: 8}]}
+
+    assert {:ok, [search]} =
+             BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
+               coalesce_ms: 0,
+               judge: fn state ->
+                 assert state.latest_user == text
+
+                 answers =
+                   Map.new(
+                     %{"date" => "2026-11-05", "date_change" => "replace", "time" => "unknown"},
+                     fn {field, value} ->
+                       {field, %{choice: value, probabilities: %{value => 0.99}}}
+                     end
+                   )
+
+                 BookingDesk.Judgment.decode(answers, state)
+               end
+             )
+
+    assert search.kind == :supersede_task
+    assert search.delegation_id == "d"
+    assert search.expected_task_revision == 1
+    assert search.input.operation == "availability"
+    assert search.input.date == "2026-11-05"
+    assert search.input.clinician == "lee"
+  end
+
   test "successive uncertain replies merge validated preferences and remain bound to the patient" do
     s = snapshot()
 

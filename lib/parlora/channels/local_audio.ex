@@ -10,6 +10,12 @@ defmodule Parlora.Channels.LocalAudio do
   by queue duration. `:playback_recovery_ms` independently caps recovery waiting
   (default 120, range 0–200), with early release under upstream pressure.
   Zero initial cushion disables buffering.
+  Opt-in `:trim_playback_lead_in` mutes a short, isolated burst at startup or
+  after an output clear when the existing cushion contains enough audio to
+  detect its quiet tail. It preserves frame timing.
+  Set `:echo_cancellation` to `true` to remove acoustic echo from the uplink
+  using the samples rendered by the output callback. The input observer still
+  receives converted microphone PCM before echo cancellation.
   Opt-in `:audio_observer` accepts `%{pid: pid, credits: atomics}` with a two-slot
   atomics reference. It receives `{:parlora_audio, direction, at_us, pcm}` for
   converted microphone PCM and software playout PCM before device conversion.
@@ -38,6 +44,7 @@ defmodule Parlora.Channels.LocalAudio do
   }
 
   alias Parlora.Channel.Capabilities
+  alias Parlora.Channels.LocalAudio.PlaybackProgress
   alias Parlora.Native.Device
   alias Parlora.Native.Resampler
 
@@ -46,8 +53,10 @@ defmodule Parlora.Channels.LocalAudio do
     capacity = Keyword.get(options, :native_capacity_frames, 4_800)
     target = Keyword.get(options, :target_buffer_ms, 30)
     playback = Keyword.get(options, :playback_buffer_ms, 120)
+    echo? = Keyword.get(options, :echo_cancellation, false)
 
-    if is_integer(capacity) and capacity in 16..48_000 and is_integer(target) and
+    if is_boolean(echo?) and is_integer(capacity) and capacity in 16..48_000 and
+         is_integer(target) and
          target in 1..200 and
          Playout.valid_options?(playback, init.limits.audio_queue_bytes, options),
        do: GenServer.start_link(__MODULE__, {init, options}),
@@ -60,6 +69,10 @@ defmodule Parlora.Channels.LocalAudio do
 
   @doc "Queue and callback counters; rendered frames are not confirmed playback."
   def observations(pid), do: Adapter.call(pid, :observations)
+
+  @impl true
+  def clear_output_with_playback(pid, id, epoch),
+    do: Adapter.call(pid, {:control, id, {:clear_output_with_playback, epoch}})
 
   @impl true
   def release_output_recovery(pid, epoch),
@@ -207,12 +220,15 @@ defmodule Parlora.Channels.LocalAudio do
 
     input_converter = AudioConverter.new(stats.input_rate, 24_000, stats.input_channels, 1)
     output_converter = AudioConverter.new(24_000, stats.output_rate, 1, stats.output_channels)
+    {_, _, output_delay, _, _} = Resampler.info(output_converter.resource) |> Native.unwrap!()
 
     Map.merge(state, %{
       device: device,
       audio_observer: Keyword.get(state.options, :audio_observer),
       input_converter: input_converter,
       output_converter: output_converter,
+      playback_progress: PlaybackProgress.new(stats.handed_off, output_delay),
+      echo: open_echo(state.options, stats.output_rate),
       status: :ready,
       input_pcm: <<>>,
       output_pcm: <<>>,
@@ -241,14 +257,23 @@ defmodule Parlora.Channels.LocalAudio do
   end
 
   defp open_device(options, capacity) do
+    echo? = Keyword.get(options, :echo_cancellation, false)
+
     if Keyword.get(options, :device) == :synthetic do
-      Device.open_test(capacity) |> Native.unwrap!()
+      Device.open_test(capacity, echo?) |> Native.unwrap!()
     else
       host = Keyword.get(options, :host, default_host())
       devices = Device.devices(host) |> Native.unwrap!()
       input = Keyword.get_lazy(options, :input_device, fn -> selected_id(devices, :input) end)
       output = Keyword.get_lazy(options, :output_device, fn -> selected_id(devices, :output) end)
-      Device.open(host, input, output, capacity) |> Native.unwrap!()
+      Device.open(host, input, output, capacity, echo?) |> Native.unwrap!()
+    end
+  end
+
+  defp open_echo(options, output_rate) do
+    if Keyword.get(options, :echo_cancellation, false) do
+      {:ok, filter} = Device.echo_new() |> Native.unwrap!()
+      %{filter: filter, converter: AudioConverter.new(output_rate, 24_000, 1, 1), pending: <<>>}
     end
   end
 
@@ -301,7 +326,7 @@ defmodule Parlora.Channels.LocalAudio do
     case Native.call(fn -> apply_control(state, control) end) do
       {:ok, {:ok, next, payload}} ->
         Event.emit(state.init, :channel, :control_completed, payload, command_id: id)
-        {:reply, :ok, next}
+        {:reply, control_reply(control, next), next}
 
       {:ok, {:error, error}} ->
         {:reply, {:error, error}, state}
@@ -314,6 +339,11 @@ defmodule Parlora.Channels.LocalAudio do
     end
   end
 
+  defp control_reply({:clear_output_with_playback, _epoch}, state),
+    do: {:ok, Map.take(state.playback_progress, [:last_handed_off_sequence])}
+
+  defp control_reply(_control, _state), do: :ok
+
   defp apply_control(state, {:suppress_output, flag}) when is_boolean(flag),
     do:
       {:ok,
@@ -324,10 +354,12 @@ defmodule Parlora.Channels.LocalAudio do
            playout: Playout.reset_timing(state.playout)
        }, %{control: :suppress_output, suppressed: flag}}
 
-  defp apply_control(state, {:clear_output, epoch})
-       when is_integer(epoch) and epoch > state.epoch do
+  defp apply_control(state, {control, epoch})
+       when control in [:clear_output, :clear_output_with_playback] and is_integer(epoch) and
+              epoch > state.epoch do
     converter = AudioConverter.reset(state.output_converter)
     count = Device.clear(state.device, epoch) |> Native.unwrap!()
+    stats = Device.stats(state.device) |> Native.unwrap!()
 
     next = %{
       state
@@ -335,6 +367,7 @@ defmodule Parlora.Channels.LocalAudio do
         output_pcm: <<>>,
         output_waiter: nil,
         output_converter: converter,
+        playback_progress: PlaybackProgress.clear(state.playback_progress, stats.handed_off),
         playout: Playout.reset(state.playout),
         epoch: epoch
     }
@@ -352,6 +385,8 @@ defmodule Parlora.Channels.LocalAudio do
     do: Error.tuple(:unsupported, "Unsupported playback control")
 
   defp capture(state) do
+    state = capture_reference(state)
+
     {:ok, pcm, _frames} =
       Device.read(state.device, min(state.native_capacity, div(state.stats.input_rate, 50)))
       |> Native.unwrap!()
@@ -361,9 +396,34 @@ defmodule Parlora.Channels.LocalAudio do
     frame_input(%{state | input_converter: converter, input_pcm: state.input_pcm <> converted})
   end
 
+  defp capture_reference(%{echo: nil} = state), do: state
+
+  defp capture_reference(state) do
+    frames = min(state.native_capacity, div(state.stats.output_rate, 50))
+    {:ok, reference} = Device.read_reference(state.device, frames) |> Native.unwrap!()
+    echo = state.echo
+    {pcm, converter} = AudioConverter.convert(echo.converter, reference)
+    pending = feed_reference(echo.filter, echo.pending <> pcm)
+    %{state | echo: %{echo | converter: converter, pending: pending}}
+  end
+
+  defp feed_reference(filter, <<pcm::binary-size(480), rest::binary>>) do
+    :ok = Device.echo_render(filter, pcm) |> Native.unwrap!()
+    feed_reference(filter, rest)
+  end
+
+  defp feed_reference(_filter, pending), do: pending
+
+  defp cancel_echo(nil, pcm), do: pcm
+
+  defp cancel_echo(echo, pcm) do
+    {:ok, clean} = Device.echo_capture(echo.filter, pcm) |> Native.unwrap!()
+    clean
+  end
+
   defp frame_input(%{input_pcm: <<pcm::binary-size(480), rest::binary>>} = state) do
     frame =
-      AudioFrame.pcm(pcm, state.init.adapter_id, state.sequence,
+      AudioFrame.pcm(cancel_echo(state.echo, pcm), state.init.adapter_id, state.sequence,
         generation: state.init.generation,
         clock: :local_monotonic,
         timestamp_us: System.monotonic_time(:microsecond)
@@ -429,12 +489,23 @@ defmodule Parlora.Channels.LocalAudio do
 
     Parlora.AudioObserver.send_audio(state.audio_observer, :output, pcm)
     {output, converter} = AudioConverter.convert(state.output_converter, pcm)
+    {frames, _remaining} = AudioQueue.pop(state.outbound, state.outbound.bytes - queue.bytes)
+
+    progress =
+      PlaybackProgress.append(
+        state.playback_progress,
+        frames,
+        byte_size(pcm),
+        byte_size(converter.pending),
+        div(byte_size(output), state.stats.output_channels * 2)
+      )
 
     flush_output(
       OutputSpace.notify(%{
         state
         | outbound: queue,
           output_converter: converter,
+          playback_progress: progress,
           output_pcm: output,
           playout: playout
       })
@@ -511,7 +582,8 @@ defmodule Parlora.Channels.LocalAudio do
       })
     end
 
-    %{state | stats: stats, clock: clock}
+    progress = PlaybackProgress.observe(state.playback_progress, stats.handed_off)
+    %{state | stats: stats, clock: clock, playback_progress: progress}
   end
 
   defp poll_evidence(state, stats) do
@@ -547,6 +619,12 @@ defmodule Parlora.Channels.LocalAudio do
   defp cleanup(%{device: device} = state) do
     Device.close(device) |> Native.unwrap!()
     AudioConverter.close(state.input_converter)
+
+    if state.echo do
+      Device.echo_close(state.echo.filter) |> Native.unwrap!()
+      AudioConverter.close(state.echo.converter)
+    end
+
     AudioConverter.close(state.output_converter)
   end
 

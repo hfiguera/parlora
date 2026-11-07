@@ -73,6 +73,14 @@ defmodule Parlora.Provider.WebSocketConnection do
 
   defp decode(socket, [], frames), do: {:ok, socket, Enum.reverse(frames)}
 
+  # Mint emits bytes coalesced with a 101 response as data before the upgrade is done.
+  defp decode(
+         %{ws: nil, status: 101} = socket,
+         [{:data, ref, _} = data, {:done, ref} = done | rest],
+         frames
+       ),
+       do: decode(socket, [done, data | rest], frames)
+
   defp decode(socket, [response | rest], frames) do
     case response(socket, response) do
       {:ok, next, more} -> decode(next, rest, Enum.reverse(more, frames))

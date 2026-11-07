@@ -122,7 +122,7 @@ defmodule Parlora.Session do
         from,
         %{status: :ready} = state
       )
-      when kind in [:input_muted, :user_activity] do
+      when kind in [:input_muted, :user_activity, :output_discarded] do
     {module, pid} = state.adapters.provider
     Commands.public(state, :provider, fn -> module.control(pid, id, control) end, from)
   end
@@ -190,6 +190,25 @@ defmodule Parlora.Session do
     end
   end
 
+  def handle_info(
+        {:parlora_check_delivery, provider, ref,
+         %ContextUpdate{origin: :backend_result} = update},
+        %{status: :ready, adapters: %{provider: {_module, provider}}} = state
+      )
+      when is_pid(provider) and is_reference(ref) do
+    state = put_in(state.commands.delivery_check, {provider, ref, update})
+    {:noreply, settle_delivery_check(state)}
+  end
+
+  def handle_info(
+        {:parlora_check_delivery, provider, ref, %ContextUpdate{origin: :backend_result}},
+        state
+      )
+      when is_pid(provider) and is_reference(ref) do
+    send(provider, {:parlora_delivery_current, ref, false})
+    {:noreply, state}
+  end
+
   def handle_info({:progress_deadline, token}, %{status: :ready} = state) do
     {action, health} = Health.expire(state.health, token)
     state = State.update_health(state, health)
@@ -213,7 +232,8 @@ defmodule Parlora.Session do
        state
        |> Interpretation.result(result)
        |> policy_transition()
-       |> Jobs.deliver_pending()}
+       |> Jobs.deliver_pending()
+       |> settle_delivery_check()}
 
   def handle_info({:policy_timeout, ref}, %{policy_task: %{ref: ref}} = state),
     do: {:noreply, state |> Interpretation.timeout() |> policy_transition()}
@@ -286,6 +306,25 @@ defmodule Parlora.Session do
   defp policy_transition({:ok, state}), do: state
   defp policy_transition({:close, state}), do: Shutdown.begin(state, :cancel)
 
+  defp settle_delivery_check(%{commands: %{delivery_check: nil}} = state), do: state
+
+  defp settle_delivery_check(%{commands: %{delivery_check: {provider, ref, update}}} = state) do
+    current? =
+      state.status == :ready and match?({_module, ^provider}, state.adapters[:provider]) and
+        State.current_delivery?(state, update)
+
+    # A revision can still be current while policy interprets a caller correction.
+    settled? =
+      state.context_resolved? and is_nil(state.policy_task) and is_nil(state.output_recovery)
+
+    if current? and not settled? do
+      state
+    else
+      send(provider, {:parlora_delivery_current, ref, current?})
+      put_in(state.commands.delivery_check, nil)
+    end
+  end
+
   defp current_adapter?(state, event) do
     case Keyword.get(state.options, event.source) do
       {%Parlora.AdapterInit{adapter_id: id, generation: generation}, _options} ->
@@ -299,14 +338,39 @@ defmodule Parlora.Session do
   defp apply_event(state, %Event{type: :ready, source: role, payload: payload}),
     do: Startup.ready(state, role, payload.capabilities)
 
+  defp apply_event(%{status: :ready} = state, %Event{
+         source: :provider,
+         type: :extension,
+         payload: %{kind: :caller_speech, state: :started}
+       }),
+       do: State.invalidate_policy(put_in(state.policy_status.input_pending?, true))
+
+  defp apply_event(%{status: :ready} = state, %Event{
+         source: :provider,
+         type: :extension,
+         payload: %{kind: :caller_speech, state: :cancelled}
+       }),
+       do: discard_policy_input(state)
+
+  defp apply_event(%{status: :ready} = state, %Event{
+         source: :provider,
+         type: :extension,
+         payload: %{kind: :transcript_discarded, speaker: :user}
+       }),
+       do: discard_policy_input(state)
+
   defp apply_event(%{status: :ready} = state, %Event{type: :transcript_delta, payload: payload}) do
     case Retention.append_transcript(state, payload) do
       {:ok, state} ->
+        caller_text? = payload.speaker == :user and String.trim(payload.delta) != ""
+
         state =
-          if payload.speaker == :user and String.trim(payload.delta) != "" and
-               match?(%{stage: :awaiting_user}, state.output_recovery),
-             do: %{state | output_recovery: nil},
-             else: state
+          if caller_text?, do: put_in(state.policy_status.input_pending?, false), else: state
+
+        state =
+          if caller_text? and match?(%{stage: :awaiting_user}, state.output_recovery),
+            do: %{state | output_recovery: nil},
+            else: state
 
         Interpretation.start(state, %ContextTrigger{kind: :transcript_updated})
 
@@ -376,7 +440,10 @@ defmodule Parlora.Session do
     if state.provider_speech == speech do
       state
     else
-      State.revise(%{state | provider_speech: speech}, %{state.context | provider_speech: speech})
+      State.revise_assistant(%{state | provider_speech: speech}, %{
+        state.context
+        | provider_speech: speech
+      })
     end
   end
 
@@ -540,6 +607,14 @@ defmodule Parlora.Session do
     do: Shutdown.begin(state, :cancel)
 
   defp apply_event(state, _event), do: state
+
+  defp discard_policy_input(
+         %{policy_status: %{input_pending?: true}, policy_trigger: trigger} = state
+       )
+       when not is_nil(trigger),
+       do: Interpretation.start(put_in(state.policy_status.input_pending?, false), trigger)
+
+  defp discard_policy_input(state), do: put_in(state.policy_status.input_pending?, false)
 
   defp add_subscriber(state, pid) do
     if Map.has_key?(state.subscribers, pid),

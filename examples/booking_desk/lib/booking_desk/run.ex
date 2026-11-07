@@ -24,16 +24,12 @@ defmodule BookingDesk.Run do
     {:ok, recorder} = Recorder.start_link(directory: directory)
     observer = Recorder.observer(recorder)
 
-    channel =
-      if mode == :microphone,
-        do: {Parlora.Channels.LocalAudio, audio_observer: observer},
-        else:
-          {ReplayChannel,
-           owner: self(), audio_observer: observer, recorder: recorder, ambience: ambience}
+    provider = System.get_env("PARLORA_PROVIDER", "openai")
+    channel = channel(mode, provider, observer, recorder, ambience)
 
     provider_options =
       BookingDesk.provider_options(
-        System.get_env("PARLORA_PROVIDER", "openai"),
+        provider,
         Keyword.get(opts, :provider_options, [])
       )
 
@@ -97,6 +93,23 @@ defmodule BookingDesk.Run do
       if Process.alive?(session), do: Parlora.close(session)
     end
   end
+
+  defp channel(:microphone, provider, observer, _recorder, _ambience),
+    do:
+      {Parlora.Channels.LocalAudio,
+       audio_observer: observer,
+       echo_cancellation: provider in ["prism", "phonic"],
+       target_buffer_ms: 60,
+       trim_playback_lead_in: true}
+
+  defp channel(:replay, _provider, observer, recorder, ambience),
+    do:
+      {ReplayChannel,
+       owner: self(),
+       audio_observer: observer,
+       recorder: recorder,
+       ambience: ambience,
+       trim_playback_lead_in: true}
 
   defp provider_defaults do
     if System.get_env("PARLORA_PROVIDER", "openai") == "phonic",
@@ -721,7 +734,8 @@ defmodule BookingDesk.Run do
         "openai" => "gpt-live-1",
         "gemini" => "gemini-3.8-live",
         "grok" => "grok-voice-3.0",
-        "phonic" => "phonic-1"
+        "phonic" => "phonic-1",
+        "prism" => "prism"
       }[System.get_env("PARLORA_PROVIDER", "openai")]
 
   defp check_booked_exact_slot(s, appointments) do

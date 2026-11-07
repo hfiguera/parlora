@@ -42,4 +42,18 @@ defmodule Parlora.ProviderClient do
       error -> {:reply, error, state}
     end
   end
+
+  def delegation_tool(name) do
+    %{
+      type: "function",
+      name: name,
+      description: "Ask the application to handle the caller's request or correction.",
+      parameters: %{
+        type: "object",
+        properties: %{request: %{type: "string"}},
+        required: ["request"],
+        additionalProperties: false
+      }
+    }
+  end
 end

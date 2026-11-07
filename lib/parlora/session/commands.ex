@@ -6,7 +6,7 @@ defmodule Parlora.Session.Commands do
   # it to report its own uncertain outcome before declaring a callback stalled.
   @timeout_us 1_100_000
 
-  def new, do: %{records: %{}, running: %{}, queues: %{}, keys: %{}}
+  def new, do: %{records: %{}, running: %{}, queues: %{}, keys: %{}, delivery_check: nil}
 
   def run(state, role, callback, complete, options) do
     case enqueue(state, role, callback, complete, options) do

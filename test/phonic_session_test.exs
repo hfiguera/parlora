@@ -169,6 +169,75 @@ defmodule Parlora.PhonicSessionTest do
     refute_receive {:submitted, _}, 20
   end
 
+  test "application audio replaces held playout while Phonic is still speaking", context do
+    format = %AudioFormat{}
+    {session, server, channel, _backend} = boot(context.port, format, OrderPolicy, :default)
+    assert :ok = Parlora.control(session, {:hold_output, :hold})
+
+    native = :binary.copy(<<1, 0>>, 240)
+    emit(server, %{"type" => "assistant_started_speaking"})
+    emit(server, %{"type" => "audio_chunk", "audio" => Base.encode64(native), "text" => "I can"})
+
+    assert_receive {:parlora_event, %Event{type: :provider_speech, payload: %{state: :speaking}}}
+
+    assert_receive {:parlora_event, %Event{type: :transcript_delta, payload: %{delta: "I can"}}}
+
+    assert :ok = Parlora.control(session, {:input_muted, true})
+    goodbye = :binary.copy(<<2, 0>>, 240)
+    assert :ok = Parlora.control(session, {:replace_output, format, goodbye})
+
+    assert_receive {:audio_written, ^channel, %Parlora.AudioFrame{data: ^goodbye}}
+    emit(server, %{"type" => "audio_chunk", "audio" => Base.encode64(native), "text" => " help."})
+    assert_receive {:parlora_event, %Event{type: :transcript_delta, payload: %{delta: " help."}}}
+    refute_receive {:audio_written, ^channel, _native_audio}, 50
+    refute_received {:phonic_command, %{"type" => "generate_reply"}}
+    assert :ok = Parlora.close(session, :finish)
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}
+  end
+
+  test "the BookingDesk tool boundary plays one acknowledgment and the verified result",
+       context do
+    {_session, server, channel, backend} =
+      boot(context.port, %AudioFormat{}, OrderPolicy, :default,
+        wait_for_speech_before_tool_call: true
+      )
+
+    ack = :binary.copy(<<1, 0>>, 240)
+    duplicate = :binary.copy(<<2, 0>>, 240)
+    verified = :binary.copy(<<3, 0>>, 240)
+    text = "Sure, let me check November 5th with Dr. Lee instead."
+    emit(server, %{"type" => "input_text", "text" => "Actually order 124"})
+    emit(server, %{"type" => "assistant_started_speaking"})
+    emit(server, %{"type" => "audio_chunk", "audio" => Base.encode64(ack), "text" => text})
+    emit(server, %{"type" => "assistant_finished_speaking"})
+    assert_receive {:audio_written, ^channel, %{data: ^ack}}
+
+    emit(server, call("corrected"))
+    emit(server, %{"type" => "assistant_started_speaking"})
+    emit(server, %{"type" => "audio_chunk", "audio" => Base.encode64(duplicate), "text" => text})
+    assert_receive {:submitted, corrected}
+    refute_receive {:audio_written, ^channel, _}, 50
+
+    :ok =
+      FakeBackend.complete(backend, corrected, "Dr. Lee has 10:15 AM or 2 PM on November 5th.")
+
+    assert_receive {:phonic_command,
+                    %{"type" => "tool_call_output", "tool_call_id" => "corrected"}}
+
+    emit(server, %{"type" => "tool_call_output_processed", "tool_call_id" => "corrected"})
+    emit(server, %{"type" => "assistant_started_speaking"})
+
+    emit(server, %{
+      "type" => "audio_chunk",
+      "audio" => Base.encode64(verified),
+      "text" => "10:15 or 2?"
+    })
+
+    emit(server, %{"type" => "assistant_finished_speaking"})
+    assert_receive {:audio_written, ^channel, %{data: ^verified}}
+    refute_received {:audio_written, ^channel, _}
+  end
+
   test "a real session resumes a completed late association without another backend request",
        context do
     {session, server, _channel, backend} = boot(context.port, %AudioFormat{}, AssociationPolicy)
@@ -367,8 +436,14 @@ defmodule Parlora.PhonicSessionTest do
     assert map_size(Parlora.status(session).jobs) == 1
   end
 
-  defp boot(port, format, policy \\ OrderPolicy, native_busy? \\ false) do
-    overrides = if native_busy? == :default, do: [], else: [wait_for_response: native_busy?]
+  defp boot(port, format, policy \\ OrderPolicy, native_busy? \\ false, overrides \\ []) do
+    wait_for_speech? = Keyword.get(overrides, :wait_for_speech_before_tool_call, false)
+
+    overrides =
+      if native_busy? == :default,
+        do: overrides,
+        else: [wait_for_response: native_busy?] ++ overrides
+
     native_busy? = native_busy? != false
 
     caps = %Parlora.Channel.Capabilities{
@@ -402,7 +477,7 @@ defmodule Parlora.PhonicSessionTest do
                           "allow_tool_chaining" => false,
                           "wait_for_response" => ^native_busy?,
                           "require_speech_before_tool_call" => true,
-                          "wait_for_speech_before_tool_call" => false
+                          "wait_for_speech_before_tool_call" => ^wait_for_speech?
                         }
                       ]
                     }}

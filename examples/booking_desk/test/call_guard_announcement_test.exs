@@ -41,4 +41,21 @@ defmodule BookingDesk.CallGuard.AnnouncementTest do
     assert caption(message, spoken).caption
     refute caption(message, "Goodbye.").caption
   end
+
+  test "nonverbal annotations do not change the spoken closing message" do
+    expected = CallGuard.message(:scope_close)
+    message = Announcement.new(:scope_close, expected, 0, 0)
+    partial = caption(message, " [s")
+    assert caption(partial, "igh] [breath] " <> expected).caption
+  end
+
+  test "a brief acknowledgment can precede a scope message" do
+    for reason <- [:scope_redirect, :scope_close] do
+      expected = CallGuard.message(reason)
+      message = Announcement.new(reason, expected, 0, 0)
+      assert caption(message, "Sure. " <> expected).caption
+      assert caption(message, "Mm. Right. " <> expected).caption
+      refute caption(message, "Sure. I will not say " <> expected).caption
+    end
+  end
 end

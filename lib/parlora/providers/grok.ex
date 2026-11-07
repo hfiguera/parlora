@@ -357,14 +357,19 @@ defmodule Parlora.Providers.Grok do
       else: fail(state, :configuration_mismatch)
   end
 
-  defp event(%{"type" => "input_audio_buffer.speech_started"}, state),
-    do: interrupt(%{state | caller_speaking: true, auto_response_pending: true})
+  defp event(%{"type" => "input_audio_buffer.speech_started"} = event, state) do
+    next = interrupt(%{state | caller_speaking: true, auto_response_pending: true})
+    caller_speech(next, :started, event["item_id"])
+    next
+  end
 
   defp event(%{"type" => "input_audio_buffer.timeout_triggered"}, %{response: nil} = state),
     do: await_response(%{state | auto_response_pending: true})
 
-  defp event(%{"type" => "input_audio_buffer.speech_stopped"}, state),
-    do: continue_response(%{state | caller_speaking: false})
+  defp event(%{"type" => "input_audio_buffer.speech_stopped"} = event, state) do
+    caller_speech(state, :finished, event["item_id"])
+    continue_response(%{state | caller_speaking: false})
+  end
 
   defp event(%{"type" => type} = event, state)
        when type in [
@@ -503,6 +508,17 @@ defmodule Parlora.Providers.Grok do
   end
 
   defp output(_event, state), do: fail(state, :invalid_output)
+
+  defp caller_speech(%{status: :ready} = state, value, item) do
+    emit(state, :extension, %{
+      kind: :caller_speech,
+      state: value,
+      segment_id: if(is_binary(item) and byte_size(item) in 1..512, do: item),
+      evidence: :provider_vad
+    })
+  end
+
+  defp caller_speech(_state, _value, _item), do: :ok
 
   defp interrupt(state) do
     state = state |> discard_response(state.response) |> clear_request_timer()

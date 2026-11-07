@@ -13,6 +13,7 @@ use std::sync::{
 };
 use std::time::{Duration, Instant};
 
+mod echo;
 mod synthetic_clock;
 
 mod atoms {
@@ -83,6 +84,7 @@ struct OutputFrame {
 struct Shared {
     input: ArrayQueue<[f32; 2]>,
     output: ArrayQueue<OutputFrame>,
+    reference: Option<ArrayQueue<f32>>,
     epoch: AtomicUsize,
     observed_epoch: AtomicUsize,
     handed_off: AtomicUsize,
@@ -101,10 +103,11 @@ struct Shared {
     errors: AtomicUsize,
 }
 impl Shared {
-    fn new(capacity: usize) -> Self {
+    fn new(capacity: usize, reference: bool) -> Self {
         Self {
             input: ArrayQueue::new(capacity),
             output: ArrayQueue::new(capacity),
+            reference: reference.then(|| ArrayQueue::new(capacity)),
             epoch: AtomicUsize::new(0),
             observed_epoch: AtomicUsize::new(0),
             handed_off: AtomicUsize::new(0),
@@ -159,6 +162,14 @@ impl Shared {
             };
             for (target, source) in frame.iter_mut().zip(value) {
                 *target = T::from_sample(source);
+            }
+            if let Some(reference) = &self.reference {
+                let mono = if channels == 2 {
+                    (value[0] + value[1]) * 0.5
+                } else {
+                    value[0]
+                };
+                let _ = reference.push(mono);
             }
             self.rendered.fetch_add(1, Relaxed);
         }
@@ -288,9 +299,10 @@ fn start(
     output: String,
     capacity: usize,
     synthetic: bool,
+    reference: bool,
 ) -> NifResult<(Atom, ResourceArc<Session>)> {
     check((16..=48000).contains(&capacity))?;
-    let shared = Arc::new(Shared::new(capacity));
+    let shared = Arc::new(Shared::new(capacity, reference));
     let worker = shared.clone();
     let (tx, rx) = mpsc::sync_channel(1);
     std::thread::Builder::new()
@@ -364,11 +376,16 @@ fn open(
     input: String,
     output: String,
     capacity: usize,
+    reference: bool,
 ) -> NifResult<(Atom, ResourceArc<Session>)> {
-    start(env, name, input, output, capacity, false)
+    start(env, name, input, output, capacity, false, reference)
 }
 #[rustler::nif(schedule = "DirtyIo")]
-fn open_test(env: Env, capacity: usize) -> NifResult<(Atom, ResourceArc<Session>)> {
+fn open_test(
+    env: Env,
+    capacity: usize,
+    reference: bool,
+) -> NifResult<(Atom, ResourceArc<Session>)> {
     start(
         env,
         String::new(),
@@ -376,6 +393,7 @@ fn open_test(env: Env, capacity: usize) -> NifResult<(Atom, ResourceArc<Session>
         String::new(),
         capacity,
         true,
+        reference,
     )
 }
 #[derive(NifMap)]
@@ -456,6 +474,25 @@ fn read<'a>(
     binary.realloc_or_copy(copied * channels * 2);
     Ok((atoms::ok(), binary.release(env), copied))
 }
+
+#[rustler::nif(schedule = "DirtyCpu")]
+fn read_reference<'a>(
+    env: Env<'a>,
+    r: ResourceArc<Session>,
+    frames: usize,
+) -> NifResult<(Atom, Binary<'a>)> {
+    let s = &r.shared;
+    active(s)?;
+    let queue = s.reference.as_ref().ok_or(Error::BadArg)?;
+    check(frames > 0 && frames <= queue.capacity())?;
+    let count = frames.min(queue.len());
+    let mut binary = OwnedBinary::new(count * 2).ok_or_else(|| fail("reference allocation"))?;
+    for bytes in binary.as_mut_slice().chunks_exact_mut(2) {
+        let sample = queue.pop().unwrap_or_default();
+        bytes.copy_from_slice(&echo::pcm_sample(sample).to_le_bytes());
+    }
+    Ok((atoms::ok(), binary.release(env)))
+}
 #[rustler::nif(schedule = "DirtyCpu")]
 fn write(r: ResourceArc<Session>, pcm: Binary, epoch: usize) -> NifResult<(Atom, usize)> {
     let s = &r.shared;
@@ -526,7 +563,7 @@ mod tests {
     use super::*;
     #[test]
     fn callback_overflow_and_silence() {
-        let s = Shared::new(2);
+        let s = Shared::new(2, false);
         s.capture(&[0.25f32, 0.5, 0.75], 1);
         assert_eq!(s.input.len(), 2);
         assert_eq!(s.dropped.load(Relaxed), 1);
@@ -544,7 +581,7 @@ mod tests {
     }
     #[test]
     fn callback_frames_keep_channels_together() {
-        let s = Shared::new(2);
+        let s = Shared::new(2, false);
         s.capture(&[1000i16, -1000, 2000, -2000], 2);
         assert_eq!(
             s.input.pop().unwrap(),

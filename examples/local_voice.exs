@@ -8,7 +8,7 @@ defmodule Parlora.Examples.LocalVoice do
   alias Parlora.Backends.Jido, as: Backend
   alias Parlora.Channels.LocalAudio
   alias Parlora.Examples.{OrderAgent, OrderPolicy, Progress}
-  alias Parlora.Providers.{Gemini, Grok}
+  alias Parlora.Providers.{Gemini, Grok, Prism}
 
   def run do
     duration = duration_seconds()
@@ -150,10 +150,12 @@ defmodule Parlora.Examples.LocalVoice do
         loop(session, started_at_us)
 
       {:parlora_event, %Event{source: :session, type: :ready}} ->
+        provider = Application.fetch_env!(:parlora, :example_provider)
+
         Parlora.append_context(session, %ContextUpdate{
           id: ID.new(),
           kind:
-            if(provider in [Gemini, Grok],
+            if(provider in [Gemini, Grok, Prism],
               do: :speakable,
               else: :instruction
             ),

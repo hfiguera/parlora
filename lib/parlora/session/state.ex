@@ -16,7 +16,7 @@ defmodule Parlora.Session.State do
     :health,
     :output_recovery,
     status: :starting,
-    policy_failures: 0,
+    policy_status: %{failures: 0, revision: 0, input_pending?: false},
     context_resolved?: true,
     adapters: %{},
     startup: %{
@@ -113,6 +113,11 @@ defmodule Parlora.Session.State do
   end
 
   def revise(state, context),
+    do: revise_assistant(invalidate_policy(state), context)
+
+  def invalidate_policy(state), do: update_in(state.policy_status.revision, &(&1 + 1))
+
+  def revise_assistant(state, context),
     do: %{state | context: %{context | revision: state.context.revision + 1}}
 
   def delivery_error_stage(state, request, error) do

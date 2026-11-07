@@ -55,6 +55,7 @@ To select another speech provider, also export its key and set `PARLORA_PROVIDER
 | `phonic` | `phonic-1` | `PHONIC_API_KEY` |
 | `grok` | `grok-voice-3.0` | `XAI_API_KEY` |
 | `gemini` | `gemini-3.8-live` | `GEMINI_API_KEY` |
+| `prism` | `prism` | `RIME_API_KEY` |
 
 The example selects Ara for Grok and Sulafat for Gemini. JEV uses `jev-1.13.0`;
 structured extraction uses `openai:gpt-6-luna`. Available API credit is required for
@@ -114,6 +115,21 @@ Use headphones and allow microphone access when prompted:
 PARLORA_PROVIDER=openai BOOKING_DATABASE=:memory: \
 mix run run.exs "runs/microphone-$(date +%Y%m%d-%H%M%S)" clips --microphone
 ```
+
+To try Prism on macOS with the development credentials in Keychain, run this
+from the BookingDesk directory:
+
+```sh
+PARLORA_PROVIDER=prism BOOKING_DATABASE=:memory: \
+python3 ../../scripts/with_keychain.py --booking-desk \
+  mix run run.exs "runs/prism-$(date +%Y%m%d-%H%M%S)" clips --microphone
+```
+
+Prism uses the Astra voice and a 60 ms native playback target. Microphone mode
+enables acoustic echo cancellation for Prism and Phonic-1. The macOS launcher
+defaults to the local voice scheduler settings and loads the selected provider,
+OpenAI extraction, and TypeSafe JEV keys. Explicit environment values take
+precedence.
 
 Wait for Ava's greeting, then ask for an appointment. No ElevenLabs key or caller
 clips are needed in microphone mode; `clips` is an unused positional argument.

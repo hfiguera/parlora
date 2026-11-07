@@ -100,7 +100,7 @@ defmodule BookingDesk.Policy do
       protected_work?(latest, cursor) ->
         {:ok, associate(pending, latest)}
 
-      assistant_speaking?(snapshot, trigger) ->
+      defer_during_speech?(snapshot, trigger, pending, latest) ->
         target =
           wait_target(pending, latest)
 
@@ -167,10 +167,16 @@ defmodule BookingDesk.Policy do
 
   defp caller_consumed?(latest, cursor), do: latest && cursor <= latest.input.cursor
 
-  defp assistant_speaking?(snapshot, trigger),
+  defp defer_during_speech?(snapshot, trigger, pending, latest),
     do:
       trigger.kind in [:transcript_updated, :context_wait_expired] &&
-        snapshot.provider_speech == :speaking && hd(snapshot.transcripts).speaker == :assistant
+        snapshot.provider_speech == :speaking && hd(snapshot.transcripts).speaker == :assistant &&
+        not pending_search?(pending, latest)
+
+  defp pending_search?({_id, _}, %{input: %{operation: operation}}),
+    do: operation in ["insurance", "availability"]
+
+  defp pending_search?(_, _), do: false
 
   defp request_state(snapshot, latest, cursor) do
     turns =
@@ -482,7 +488,7 @@ defmodule BookingDesk.Policy do
             reminder_revision: reminder.request_id
           })
 
-        {:ok, start(pending, latest, input)}
+        start_reminder(pending, latest, input, snapshot, reminder)
 
       {:clarify, message} ->
         clarify_reminder(snapshot, reminder, pending, latest, cursor, message)
@@ -503,6 +509,23 @@ defmodule BookingDesk.Policy do
          ]}
     end
   end
+
+  # A clear yes to the verified offer can start the next question even if the
+  # provider omits its tool call. The write still requires separate number consent.
+  defp start_reminder(
+         nil,
+         %{status: :completed, input: %{operation: "confirm"}, request_ids: [booking | _]} = task,
+         %{operation: "reminder_opt_in", booking_request: booking} = input,
+         snapshot,
+         reminder
+       ) do
+    if BookingDesk.ReminderPolicy.explicit_opt_in?(snapshot, reminder),
+      do: start_followup(nil, task, input),
+      else: {:ok, start(nil, task, input)}
+  end
+
+  defp start_reminder(pending, latest, input, _snapshot, _reminder),
+    do: {:ok, start(pending, latest, input)}
 
   defp activate_reminder(snapshot, {kind, _} = reply, opts, false)
        when kind in [:input, :clarify],
@@ -992,14 +1015,16 @@ defmodule BookingDesk.Policy do
             search_intent: intent
           })
 
-        {:ok,
-         availability_decisions(
-           intent,
-           pending,
-           latest,
-           input,
-           native_read_route?(snapshot, latest, opts)
-         )}
+        decisions =
+          availability_decisions(
+            intent,
+            pending,
+            latest,
+            input,
+            native_read_route?(snapshot, latest, opts)
+          )
+
+        {:ok, allow_search_correction(decisions, intent)}
 
       true ->
         clarify_booking(
@@ -1327,6 +1352,12 @@ defmodule BookingDesk.Policy do
         start(pending, latest, input)
     end
   end
+
+  defp allow_search_correction([%D{kind: kind} = decision], "replace_search")
+       when kind in [:start_task, :supersede_task],
+       do: [%{decision | allow_assistant_updates: true}]
+
+  defp allow_search_correction(decisions, _intent), do: decisions
 
   defp same_search?(latest, input),
     do:

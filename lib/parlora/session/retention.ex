@@ -31,7 +31,11 @@ defmodule Parlora.Session.Retention do
 
         {entries, history} = retain(state, [entry | state.context.transcripts], history)
         context = %{state.context | transcripts: entries, transcript_retention: history}
-        {:ok, State.revise(state, context)}
+
+        if entry.speaker == :assistant and
+             history.dropped == state.context.transcript_retention.dropped,
+           do: {:ok, State.revise_assistant(state, context)},
+           else: {:ok, State.revise(state, context)}
     end
   end
 

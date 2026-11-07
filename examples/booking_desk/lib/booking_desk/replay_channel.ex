@@ -38,7 +38,12 @@ defmodule BookingDesk.ReplayChannel do
        epoch: 0,
        suppressed: false,
        closed: false,
-       playout: Playout.new(120, init.limits.audio_queue_bytes, []),
+       playout:
+         Playout.new(
+           120,
+           init.limits.audio_queue_bytes,
+           Keyword.take(opts, [:trim_playback_lead_in])
+         ),
        due: System.monotonic_time(:millisecond)
      }}
   end
@@ -186,6 +191,10 @@ defmodule BookingDesk.ReplayChannel do
 
   defp fill_output(s, now) do
     {pcm, queue, playout} = Playout.take(s.playout, s.output, s.init.limits.max_frame_bytes, now)
+
+    if playout.starvations > s.playout.starvations do
+      Event.emit(s.init, :channel, :audio_discontinuity, %{cause: :playback_starved})
+    end
 
     fill_output(%{s | output_pcm: s.output_pcm <> pcm, output: queue, playout: playout}, now)
   end

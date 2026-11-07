@@ -170,20 +170,7 @@ defmodule Parlora.Providers.Grok.Protocol do
                 input: %{format: codec, transcription: %{model: "grok-transcribe"}},
                 output: %{format: codec}
               },
-              tools: [
-                %{
-                  type: "function",
-                  name: @function,
-                  description:
-                    "Ask the application to handle the caller's request or correction.",
-                  parameters: %{
-                    type: "object",
-                    properties: %{request: %{type: "string"}},
-                    required: ["request"],
-                    additionalProperties: false
-                  }
-                }
-              ]
+              tools: [Parlora.ProviderClient.delegation_tool(@function)]
             },
             options
           )

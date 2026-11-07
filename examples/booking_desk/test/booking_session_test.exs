@@ -1,6 +1,7 @@
 defmodule BookingDesk.BookingSessionTest do
   use ExUnit.Case, async: false
-  alias Parlora.{BackendResult, Event}
+  alias BookingDesk.CallGuard
+  alias Parlora.{AudioFrame, AudioQueue, BackendResult, Event}
 
   setup do
     db = :sys.get_state(BookingDesk.Store)
@@ -23,6 +24,7 @@ defmodule BookingDesk.BookingSessionTest do
     def update(_pid, _id, _request_id, _request), do: :ok
     def cancel(_pid, _id, _request_id, _reason), do: :ok
     def complete(pid, request), do: GenServer.call(pid, {:complete, request})
+    def audio(pid, sequence), do: GenServer.call(pid, {:audio, sequence})
 
     @impl true
     def init({init, opts}) do
@@ -41,13 +43,24 @@ defmodule BookingDesk.BookingSessionTest do
 
       send(opts[:owner], {role, self()})
       Event.emit(init, role, :ready, %{capabilities: caps, format: init.audio_format})
-      {:ok, %{init: init, role: role, caps: caps, owner: opts[:owner]}}
+      {:ok, %{init: init, role: role, caps: caps, owner: opts[:owner], output: %AudioQueue{}}}
     end
 
     @impl true
     def handle_call(:capabilities, _, s), do: {:reply, {:ok, s.caps}, s}
-    def handle_call({:read, _}, _, s), do: {:reply, {:ok, []}, s}
+
+    def handle_call({:read, budget}, _, s) do
+      {frames, output} = AudioQueue.pop(s.output, budget)
+      {:reply, {:ok, frames}, %{s | output: output}}
+    end
+
     def handle_call({:write, _}, _, s), do: {:reply, :ok, s}
+
+    def handle_call({:audio, sequence}, _, s) do
+      frame = AudioFrame.pcm(:binary.copy(<<1000::signed-little-16>>, 240), "reply", sequence)
+      {:ok, output} = AudioQueue.push(s.output, frame)
+      {:reply, :ok, %{s | output: output}}
+    end
 
     def handle_call({:control, id, _}, _, s) do
       Event.emit(s.init, s.role, :control_completed, %{}, command_id: id)
@@ -114,6 +127,85 @@ defmodule BookingDesk.BookingSessionTest do
       send(state.owner, {:played, label, pcm})
       {:reply, :ok, state}
     end
+  end
+
+  test "the recorded soccer, baseball and hockey turns play two native redirects and then the goodbye" do
+    provider = start_scope_session()
+
+    turns = [
+      {"Hi, Eva. Do you know something about soccer?",
+       "I'm just the scheduling desk here at Cedarwood Family Clinic, so I can't help with soccer questions. But if you need to book an appointment or anything clinic-related, I'm happy to help with that!"},
+      {"Whether about baseball",
+       "I can't help with baseball, but I'd be happy to assist with clinic appointments, registration, insurance, or reminders. What appointment help do you need?"},
+      {"I want to talk about hockey.",
+       "I'm not able to help with hockey, but I can schedule appointments, handle registration, insurance details, and reminders. What would you like to arrange?"}
+    ]
+
+    for {{question, reply}, index} <- Enum.with_index(turns, 1) do
+      scope_turn(provider, question, reply, index)
+
+      if index < 3 do
+        assert_receive {:playout_active, _}, 1_000
+      else
+        assert_receive {:parlora_event, %Event{source: :provider, type: :control_completed}},
+                       1_000
+
+        refute_receive {:playout_active, _}, 150
+      end
+
+      scope_reply_finished(provider)
+
+      if index < 3 do
+        assert_receive {:scope, :scope_redirect, :native}, 1_000
+        refute_received {:context, _}
+      end
+    end
+
+    assert_receive {:scope, :scope_close, nil}, 1_000
+    assert_receive {:context, goodbye}, 1_000
+    assert goodbye.content =~ CallGuard.message(:scope_close)
+    refute_received {:playout_active, _}
+    refute_received {:parlora_event, %Event{source: :session, type: :closed}}
+
+    assistant(provider, CallGuard.message(:scope_close), 8_000)
+    Provider.audio(provider, 4)
+    assert_receive {:playout_active, _}, 1_000
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 1_000
+    refute_received {:scope, :scope_redirect, _}
+    refute_received {:context, _}
+    refute_received {:submitted, _}
+  end
+
+  test "the recorded Phonic turns play the goodbye without waiting for the third native reply" do
+    provider =
+      start_scope_session(scope_close_audio: CallGuard.scope_close_audio(), debounce_ms: 650)
+
+    reply = CallGuard.message(:scope_redirect)
+
+    questions = ["Hi, Eva. Do you know something about baseball?", "I want to talk about boxing."]
+
+    for {question, index} <- Enum.with_index(questions, 1) do
+      scope_turn(provider, question, reply, index)
+      assert_receive {:playout_active, _}, 1_000
+      scope_reply_finished(provider)
+      assert_receive {:scope, :scope_redirect, :native}, 1_500
+    end
+
+    started = System.monotonic_time(:millisecond)
+    scope_turn(provider, "Do you know what is the current president of US?", reply, 3)
+
+    assert_receive {:scope, :scope_close, :recorded}, 1_500
+    assert_receive {:playout_active, first_voice}, 1_000
+    assert first_voice - started < 1_500
+
+    # The third native reply can remain active past the entire goodbye.
+    assistant(provider, "What would you like to arrange?", 7_500)
+    Provider.audio(provider, 4)
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 10_000
+    assert System.monotonic_time(:millisecond) - first_voice >= 7_200
+    refute_received {:scope, :scope_redirect, _}
+    refute_received {:context, _}
+    refute_received {:submitted, _}
   end
 
   test "Dr. Li survives registration as canonical Dr. Lee and insurance resumes the original search" do
@@ -598,6 +690,296 @@ defmodule BookingDesk.BookingSessionTest do
     assert BookingDesk.Store.snapshot() == appointments
   end
 
+  test "the recorded Phonic flow accepts the first number-on-file confirmation and plays one goodbye" do
+    owner = self()
+    attempts = :atomics.new(1, [])
+    correction = "Actually, I want to change the date. I prefer November fifth."
+
+    guard =
+      start_supervised!(
+        {CallGuard,
+         event_sink: self(),
+         evaluator: fn _ -> {:ok, :allowed} end,
+         farewell_audio: CallGuard.farewell_audio(),
+         debounce_ms: 20,
+         quiet_ms: 30}
+      )
+
+    judge = fn state ->
+      {intent, date} =
+        case state.latest_user do
+          "Jamie Rivera, March 12, 1990." ->
+            {"lookup", "2026-11-04"}
+
+          "Yes. That is correct." ->
+            {"insurance_same", "2026-11-04"}
+
+          "Do you know what I need to bring to the appointment?" ->
+            {"none", "2026-11-04"}
+
+          ^correction ->
+            if :atomics.add_get(attempts, 1, 1) <= 2 do
+              send(owner, {:correcting_date, self()})
+              receive do: (:continue -> :ok)
+            end
+
+            {"replace_search", "2026-11-05"}
+
+          "The last option." ->
+            {"choose_slot", "2026-11-05"}
+
+          "Yes, please." ->
+            {"confirm", "2026-11-05"}
+        end
+
+      {:ok, %{"intent" => intent, "date" => date, "clinician" => "lee", "time" => "14:00"}}
+    end
+
+    {_session, provider, backend} =
+      start_session(
+        judge,
+        [
+          call_guard: guard,
+          phonic_busy: true,
+          identity_extractor: fn _ -> {:ok, %{name: "jamie rivera", dob: "1990-03-12"}} end,
+          reminder_judge: fn _ -> flunk("the verified readback and yes should need no judge") end,
+          phone_extractor: fn _ -> flunk("the caller did not supply a replacement number") end
+        ],
+        false
+      )
+
+    caller(provider, "Jamie Rivera, March 12, 1990.", 0, "lookup")
+
+    assert_receive {:submitted, %{input: %{operation: "lookup", date: "2026-11-04"}} = lookup},
+                   2_000
+
+    Provider.complete(backend, lookup)
+    assert_receive {:context, insurance_question}, 2_000
+    assistant(provider, insurance_question.content, 1_000)
+    caller(provider, "Yes. That is correct.", 2_000, "insurance")
+    assert_receive {:submitted, %{input: %{operation: "insurance"}} = insurance}, 2_000
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "Do you know what I need to bring to the appointment?"
+    })
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{delta: "Do you know" <> _}}}
+
+    Provider.complete(backend, insurance)
+    assert_receive {:context, %{content: "The caller confirmed their insurance" <> _}}, 2_000
+
+    assistant(
+      provider,
+      "While I'm checking those times, bring a photo ID and your insurance card.",
+      3_000
+    )
+
+    Provider.inject(provider, :transcript_delta, %{speaker: :user, delta: correction})
+    assert_receive {:correcting_date, first}, 2_000
+    Provider.inject(provider, :delegation_requested, %{id: "change", target: :client})
+
+    assert_receive {:parlora_event,
+                    %Event{type: :delegation_pending, payload: %{delegation_id: "change"}}}
+
+    send(first, :continue)
+    assert_receive {:correcting_date, active}, 2_000
+
+    Provider.inject(provider, :provider_speech, %{state: :speaking})
+    assistant(provider, "Sure, let me check November 5th with Dr. Lee instead.", 4_000)
+
+    assert_receive {:parlora_event,
+                    %Event{type: :transcript_delta, payload: %{delta: "Sure, let me check" <> _}}}
+
+    send(active, :continue)
+
+    assert_receive {:submitted,
+                    %{input: %{operation: "availability", date: "2026-11-05"}} = search},
+                   2_000
+
+    assert search.delegation_id == "change"
+    assert search.task_revision == 1
+    assert :atomics.get(attempts, 1) == 2
+    Provider.inject(provider, :provider_speech, %{state: :idle})
+    Provider.complete(backend, search)
+
+    assert_receive {:context, %{content: "Verified availability for Thursday November 5" <> _}},
+                   2_000
+
+    assistant(
+      provider,
+      "Dr. Lee has 10:15 AM or 2:00 PM on Thursday, November 5th. Which works better?",
+      5_000
+    )
+
+    caller(provider, "The last option.", 6_000, "slot")
+    assert_receive {:submitted, %{input: %{operation: "propose"}} = proposal}, 2_000
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+
+    assistant(provider, readback.content, 7_000)
+    caller(provider, "Yes, please.", 8_000, "booking")
+    assert_receive {:submitted, %{input: %{operation: "confirm"}} = booking}, 4_000
+    Provider.complete(backend, booking)
+    assert_receive {:context, receipt}, 2_000
+
+    assistant(
+      provider,
+      "You're booked. Would you like a text reminder 24 hours before your appointment?",
+      10_000
+    )
+
+    assert receipt.content =~ "Booked: Thursday November 5 at 2:00 PM"
+
+    caller(provider, "Yes, please.", 12_000, "opt-in")
+    assert_receive {:submitted, %{input: %{operation: "reminder_opt_in"}} = opt_in}, 4_000
+    Provider.complete(backend, opt_in)
+    assert_receive {:context, destination}, 2_000
+    assert destination.content =~ "zero one eight eight"
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    readback = "Can we send the reminder to the number on file ending in zero one eight eight?"
+    assistant(provider, readback, 14_000, "first-readback")
+    caller(provider, "Yes. That is my number.", 15_000, "first-consent")
+    assert_receive {:submitted, %{input: %{operation: "reminder_confirm"}} = reminder}, 4_000
+    assert reminder.input.destination == "+12025550188"
+    assert reminder.input.reminder_revision == opt_in.id
+    Provider.complete(backend, reminder)
+
+    assert_receive {:context, %{content: "Your text reminder is scheduled" <> _}}, 2_000
+    assert [[_, "p_1002", "+12025550188", _, "simulated", _]] = BookingDesk.Store.reminder_jobs()
+    refute_received {:parlora_event, %Event{type: :clarification_requested}}
+
+    assistant(
+      provider,
+      "Your text reminder's all set for 24 hours before your appointment.",
+      17_000
+    )
+
+    caller(provider, "Thank you. Bye.", 18_000, "farewell")
+
+    assert_receive {:parlora_event, %Event{source: :channel, type: :control_completed}}, 2_000
+    Provider.inject(provider, :provider_speech, %{state: :speaking})
+    assistant(provider, "The reminder has been confirmed.", 19_000)
+    Provider.audio(provider, 3)
+
+    assert_receive {:playout_active, first_voice}, 1_000
+    assert_receive {:parlora_event, %Event{source: :session, type: :closed}}, 5_000
+    assert System.monotonic_time(:millisecond) - first_voice >= 1_700
+    assert length(BookingDesk.Store.reminder_jobs()) == 1
+    refute_received {:context, _}
+    refute_receive {:submitted, _}, 100
+  end
+
+  test "the GPT-Live replay says the changed date and advances on the first yes after niner" do
+    correction = "Actually, I changed my mind. What about November fifth"
+
+    judge = fn state ->
+      {intent, date} =
+        case state.latest_user do
+          "November fourth with Dr. Lee" -> {"availability", "2026-11-04"}
+          ^correction -> {"replace_search", "2026-11-05"}
+          "The one afternoon" -> {"choose_slot", "2026-11-05"}
+          "Yes, please" -> {"confirm", "2026-11-05"}
+        end
+
+      {:ok, %{"intent" => intent, "date" => date, "clinician" => "lee", "time" => "14:00"}}
+    end
+
+    {_session, provider, backend} =
+      start_session(judge,
+        reminder_judge: fn _ -> flunk("the recorded exact consent needs no reminder judge") end,
+        phone_extractor: fn _ -> flunk("the caller did not supply a new phone number") end
+      )
+
+    caller(provider, "November fourth with Dr. Lee", 0, "original")
+    assert_receive {:submitted, %{input: %{operation: "availability", date: "2026-11-04"}} = old}
+    caller(provider, correction, 2_000, "corrected")
+
+    assert_receive {:submitted,
+                    %{input: %{operation: "availability", date: "2026-11-05"}} = search},
+                   2_000
+
+    Provider.complete(backend, search)
+    assert_receive {:context, availability}, 2_000
+
+    options =
+      "For Thursday November 5, Dr. Lee has 10:15 AM or 2:00 PM. Which time works for you?"
+
+    assert availability.content =~ options
+    Provider.complete(backend, old)
+    assert_receive {:parlora_event, %Event{type: :stale_result}}, 2_000
+    assistant(provider, options, 4_000)
+
+    caller(provider, "The one afternoon", 6_000, "slot")
+
+    assert_receive {:submitted,
+                    %{input: %{operation: "propose", slot: "2026-11-05T14:00:00"}} = proposal},
+                   2_000
+
+    Provider.complete(backend, proposal)
+    assert_receive {:context, proposal_readback}, 2_000
+    assistant(provider, proposal_readback.content, 8_000)
+
+    caller(provider, "Yes, please", 10_000, "booking")
+    assert_receive {:submitted, %{input: %{operation: "confirm"}} = booking}, 4_000
+    Provider.complete(backend, booking)
+    assert_receive {:context, %{content: "Booked: Thursday November 5 at 2:00 PM" <> _}}, 2_000
+
+    # Bind the fake provider's spoken receipt to the same code as the recording.
+    db = :sys.get_state(BookingDesk.Store)
+
+    {:ok, statement} =
+      Exqlite.Sqlite3.prepare(db, "UPDATE appointments SET confirmation = ? WHERE id = ?")
+
+    :ok = Exqlite.Sqlite3.bind(statement, ["BD-94C40748", booking.id])
+    :done = Exqlite.Sqlite3.step(db, statement)
+    :ok = Exqlite.Sqlite3.release(db, statement)
+
+    assistant(
+      provider,
+      "Your confirmation number is B as in Bravo, D as in Delta, dash niner four C as in Charlie, four, zero, seven, four, eight. Would you like a text reminder 24 hours before your appointment?",
+      12_000
+    )
+
+    for {text, at} <- [{" Yes,", 13_000}, {" that will", 13_400}, {" be great", 13_800}] do
+      Provider.inject(provider, :transcript_delta, %{
+        speaker: :user,
+        delta: text,
+        start_ms: at,
+        end_ms: at + 200
+      })
+    end
+
+    # GPT-Live did not open a tool call on this turn in the recording.
+    assert_receive {:submitted, %{input: %{operation: "reminder_opt_in"}} = opt_in}, 4_000
+    assert opt_in.input.booking_request == booking.id
+    assert opt_in.delegation_id == nil
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    Provider.inject(provider, :delegation_requested, %{id: "late-opt-in", target: :client})
+
+    assert_receive {:parlora_event,
+                    %Event{type: :delegation_associated, payload: %{id: "late-opt-in"}}}
+
+    Provider.complete(backend, opt_in)
+    assert_receive {:context, destination}, 2_000
+
+    assert destination.content =~ "Can we send it to the number ending in zero one eight eight?"
+
+    refute_received {:parlora_event, %Event{type: :clarification_requested}}
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    assistant(provider, "Can we send it to the number ending in zero one eight eight?", 16_000)
+    caller(provider, "Yes, that is my number", 18_000, "number")
+    assert_receive {:submitted, %{input: %{operation: "reminder_confirm"}} = reminder}, 4_000
+    Provider.complete(backend, reminder)
+    assert_receive {:context, %{content: "Your text reminder is scheduled" <> _}}, 2_000
+    assert [[_, "p_1002", "+12025550188", _, "simulated", _]] = BookingDesk.Store.reminder_jobs()
+    refute_receive {:submitted, _}, 100
+  end
+
   for code_fault <- [:none, :missing_pair, :streaming] do
     @code_fault code_fault
     if code_fault == :missing_pair, do: @tag(:confirmation_correction)
@@ -930,17 +1312,89 @@ defmodule BookingDesk.BookingSessionTest do
     assert BookingDesk.Store.reminder_jobs() == []
   end
 
+  defp start_scope_session(opts \\ []) do
+    guard =
+      start_supervised!(
+        {CallGuard,
+         Keyword.merge(
+           [
+             event_sink: self(),
+             evaluator: fn _ -> {:ok, :off_topic} end,
+             native_result_replies: true,
+             debounce_ms: 0,
+             quiet_ms: 30
+           ],
+           opts
+         )}
+      )
+
+    {session, provider, _backend} =
+      start_session(
+        fn _ -> flunk("off-topic speech cannot reach scheduling") end,
+        [call_guard: guard],
+        false
+      )
+
+    test_id = make_ref()
+    session_id = Parlora.snapshot(session).session_id
+
+    :ok =
+      :telemetry.attach(
+        test_id,
+        [:booking_desk, :guard, :stop],
+        fn _, _, metadata, {owner, id} ->
+          if metadata.session_id == id,
+            do: send(owner, {:scope, metadata.outcome, metadata[:delivery]})
+        end,
+        {self(), session_id}
+      )
+
+    on_exit(fn -> :telemetry.detach(test_id) end)
+
+    provider
+  end
+
+  defp scope_turn(provider, question, reply, index) do
+    item = "scope-#{index}"
+
+    Provider.inject(provider, :extension, %{
+      kind: :caller_speech,
+      state: :started,
+      segment_id: item
+    })
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: question,
+      segment_id: item,
+      start_ms: index * 2_000,
+      end_ms: index * 2_000 + 500
+    })
+
+    Provider.inject(provider, :provider_speech, %{state: :speaking})
+    Provider.inject(provider, :provider_activity, %{state: :in_progress})
+    assistant(provider, reply, index * 2_000 + 750)
+    Provider.audio(provider, index)
+  end
+
+  defp scope_reply_finished(provider) do
+    Provider.inject(provider, :provider_speech, %{state: :idle})
+    Provider.inject(provider, :provider_activity, %{state: :idle})
+  end
+
   defp start_session(judge, policy_opts \\ [], registered? \\ true) do
     {:ok, memory} = start_supervised(BookingDesk.Conversation)
     policy = Keyword.merge([conversation: memory, judge: judge, coalesce_ms: 0], policy_opts)
+    guard = policy_opts[:call_guard]
+    channel_opts = if guard, do: [audio_observer: CallGuard.observer(guard)], else: []
 
     {:ok, session} =
       Parlora.start_session(
-        channel: {BookingDesk.ReplayChannel, owner: self()},
+        channel: {BookingDesk.ReplayChannel, [owner: self()] ++ channel_opts},
         provider: {Provider, owner: self()},
         backend: {Backend, owner: self()},
         context_policy: {BookingDesk.Policy, policy},
-        event_sink: self()
+        event_sink: guard || self()
       )
 
     on_exit(fn ->
@@ -952,6 +1406,7 @@ defmodule BookingDesk.BookingSessionTest do
     end)
 
     :ok = BookingDesk.Conversation.bind(memory, session)
+    if guard, do: :ok = CallGuard.bind(guard, session)
     assert_receive {:provider, provider}
     assert_receive {:backend, backend}
     assert_receive {:parlora_event, %Event{source: :session, type: :ready}}, 5_000
@@ -978,10 +1433,11 @@ defmodule BookingDesk.BookingSessionTest do
     })
   end
 
-  defp assistant(provider, text, start_ms) do
+  defp assistant(provider, text, start_ms, segment_id \\ nil) do
     Provider.inject(provider, :transcript_delta, %{
       speaker: :assistant,
       delta: text,
+      segment_id: segment_id,
       start_ms: start_ms,
       end_ms: start_ms + 500
     })

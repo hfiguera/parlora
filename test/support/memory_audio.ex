@@ -103,6 +103,11 @@ defmodule Parlora.TestSupport.MemoryAudio do
     {:noreply, %{state | ready: true}}
   end
 
+  def handle_info({:parlora_delivery_current, _ref, _current?} = message, state) do
+    if observer = Keyword.get(state.options, :observer), do: send(observer, message)
+    {:noreply, state}
+  end
+
   @impl true
   def handle_call({:recover_output, token, snapshot}, _from, state) do
     if observer = Keyword.get(state.options, :observer),

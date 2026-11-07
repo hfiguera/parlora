@@ -66,7 +66,8 @@ defmodule BookingDesk.GrokSettingsTest do
 
     assert BookingDesk.provider_options("phonic") == [
              boosted_keywords: ["Cedarwood", "Dr. Lee", "Dr. Patel"],
-             vad_threshold: 0.8
+             vad_threshold: 0.8,
+             wait_for_speech_before_tool_call: true
            ]
   end
 end

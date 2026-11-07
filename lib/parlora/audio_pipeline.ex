@@ -1,12 +1,14 @@
 defmodule Parlora.AudioPipeline do
   @moduledoc false
   use GenServer
-  alias Parlora.{Adapter, CommandLog, Error, Event, Pacer, ProcessTree}
+  alias Parlora.{Adapter, AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, Pacer}
+  alias Parlora.ProcessTree
   alias Parlora.Session.Health
 
   # Channel clocks consume audio independently. Admit a bounded burst per turn
   # instead of adding a timer between each fragment of an already received packet.
   @transfer_burst_frames 20
+  @held_output_ms 20_000
 
   def start_link(options), do: GenServer.start_link(__MODULE__, {:tracked, options})
   def control(pid, id, control), do: Adapter.call(pid, {:control, id, control})
@@ -29,8 +31,11 @@ defmodule Parlora.AudioPipeline do
         tick_timer: nil,
         tick_token: nil,
         blocked_since_us: nil,
+        last_forwarded_sequence: nil,
         epoch: 0,
         suppressed: false,
+        held: nil,
+        replacement: false,
         commands: %CommandLog{limit: Keyword.fetch!(options, :init).limits.max_records},
         deadline: System.monotonic_time(:microsecond)
       })
@@ -118,6 +123,7 @@ defmodule Parlora.AudioPipeline do
   def handle_info(:tick, state) do
     if state.tick_timer, do: Process.cancel_timer(state.tick_timer)
     started = System.monotonic_time(:microsecond)
+    if state.replacement, do: drain_source(state)
     {next, duration_us} = transfer(state)
     finished = System.monotonic_time(:microsecond)
 
@@ -151,28 +157,13 @@ defmodule Parlora.AudioPipeline do
   def handle_info({:backpressure_timeout, _old_epoch, _old_since}, state),
     do: {:noreply, state}
 
-  defp apply_control(state, id, {:provider_interrupted, _token}) do
-    next = state.epoch + 1
-    {module, pid} = state.destination
+  def handle_info(:held_output_overflow, state), do: {:stop, :normal, state}
 
-    case module.control(pid, id, {:clear_output, next}) do
-      :ok ->
-        # The provider already dropped old audio and holds new output until this
-        # barrier completes. Reading/discarding its source here loses new speech.
-        {:reply, :ok,
-         %{
-           state
-           | epoch: next,
-             pending: [],
-             blocked_since_us: nil,
-             ready_ref: nil,
-             space_ref: nil
-         }}
+  defp apply_control(state, id, {:provider_interrupted, _token}),
+    do: clear_interrupted(state, id, false)
 
-      error ->
-        {:reply, error, state}
-    end
-  end
+  defp apply_control(state, id, {:provider_interrupted, _token, :position}),
+    do: clear_interrupted(state, id, true)
 
   defp apply_control(state, id, {:clear_output, _epoch}) do
     next = state.epoch + 1
@@ -180,7 +171,7 @@ defmodule Parlora.AudioPipeline do
     reply = module.control(pid, id, {:clear_output, next})
 
     if reply == :ok do
-      discard_reply(%{state | epoch: next})
+      discard_reply(%{state | epoch: next, replacement: false})
     else
       {:reply, reply, state}
     end
@@ -199,13 +190,154 @@ defmodule Parlora.AudioPipeline do
     end
   end
 
+  defp apply_control(
+         %{direction: :output, held: nil, suppressed: false, replacement: false} = state,
+         _,
+         {:hold_output, :hold}
+       ) do
+    held = %AudioQueue{
+      capacity: AudioFormat.bytes_for_ms(state.init.audio_format, @held_output_ms)
+    }
+
+    {:reply, :ok, %{state | held: held}}
+  end
+
+  defp apply_control(
+         %{direction: :output, held: %AudioQueue{} = held} = state,
+         _,
+         {:hold_output, :play}
+       ) do
+    {frames, _queue} = AudioQueue.pop(held, held.capacity)
+    {:reply, :ok, %{state | held: nil, pending: frames ++ state.pending}}
+  end
+
+  defp apply_control(
+         %{direction: :output, held: %AudioQueue{}} = state,
+         _,
+         {:hold_output, :discard}
+       ) do
+    case discard_reply(state) do
+      {:reply, :ok, next} -> {:reply, :ok, %{next | held: nil}}
+      error -> error
+    end
+  end
+
+  defp apply_control(
+         %{direction: :output, suppressed: false, replacement: false} = state,
+         _,
+         {:hold_output, action}
+       )
+       when action in [:hold, :play, :discard],
+       do: {:reply, :ok, state}
+
+  defp apply_control(state, _, {:hold_output, _}),
+    do: {:reply, Error.tuple(:unsupported, "Output hold is unavailable"), state}
+
+  defp apply_control(
+         %{held: %AudioQueue{capacity: capacity}, suppressed: false} = state,
+         id,
+         {:replace_output, format, data}
+       )
+       when format == state.init.audio_format and is_binary(data) and byte_size(data) > 0 and
+              byte_size(data) <= capacity do
+    if AudioFormat.aligned?(format, data) do
+      case clear_interrupted(state, id, false) do
+        {:reply, :ok, next} ->
+          send(self(), :tick)
+
+          {:reply, :ok,
+           %{next | held: nil, replacement: true, pending: clip_frames(state, id, data)}}
+
+        error ->
+          error
+      end
+    else
+      {:reply, Error.tuple(:invalid_argument, "Unaligned replacement audio"), state}
+    end
+  end
+
+  defp apply_control(state, _, {:replace_output, _, _}),
+    do:
+      {:reply,
+       Error.tuple(:invalid_argument, "Replacement requires held output and matching audio"),
+       state}
+
   defp apply_control(state, id, control) do
     {module, pid} = state.destination
     {:reply, module.control(pid, id, control), state}
   end
 
+  defp clip_frames(%{init: init}, id, data) do
+    format = init.audio_format
+    frame_bytes = AudioFormat.bytes_for_ms(format, 10)
+
+    Stream.unfold(data, fn
+      <<>> ->
+        nil
+
+      rest ->
+        size = min(frame_bytes, byte_size(rest))
+        <<frame::binary-size(^size), tail::binary>> = rest
+        {frame, tail}
+    end)
+    |> Enum.with_index(&AudioFrame.new(&1, format, id, &2, generation: init.generation))
+  end
+
+  # Provider recovery can proceed without flushing the application's audio.
+  defp clear_interrupted(%{replacement: true} = state, _id, report?),
+    do: {:reply, interrupted_reply(report?, nil, nil), state}
+
+  defp clear_interrupted(state, id, report?) do
+    epoch = state.epoch + 1
+    {module, pid} = state.destination
+
+    reply =
+      if report? and function_exported?(module, :clear_output_with_playback, 3) do
+        module.clear_output_with_playback(pid, id, epoch)
+      else
+        case module.control(pid, id, {:clear_output, epoch}) do
+          :ok -> {:ok, nil}
+          other -> other
+        end
+      end
+
+    case reply do
+      {:ok, position} ->
+        {:reply, interrupted_reply(report?, position, state.last_forwarded_sequence),
+         %{
+           state
+           | epoch: epoch,
+             pending: [],
+             held: clear_held(state.held),
+             blocked_since_us: nil,
+             ready_ref: nil,
+             space_ref: nil
+         }}
+
+      {:error, _error} = error ->
+        {:reply, error, state}
+
+      _unexpected ->
+        {:reply, Error.tuple(:adapter_failed, "Invalid playback clear response"), state}
+    end
+  end
+
+  defp interrupted_reply(false, _position, _forwarded), do: :ok
+
+  defp interrupted_reply(true, nil, forwarded),
+    do: {:ok, %{last_forwarded_sequence: forwarded}}
+
+  defp interrupted_reply(true, position, _forwarded), do: {:ok, position}
+
   defp discard_reply(state) do
-    next = %{state | pending: [], blocked_since_us: nil, ready_ref: nil, space_ref: nil}
+    next = %{
+      state
+      | pending: [],
+        held: clear_held(state.held),
+        blocked_since_us: nil,
+        ready_ref: nil,
+        space_ref: nil
+    }
 
     case discard_source(state) do
       {:ok, _frames} -> {:reply, :ok, next}
@@ -213,16 +345,11 @@ defmodule Parlora.AudioPipeline do
     end
   end
 
-  defp refill(%{suppressed: true} = state) do
-    case discard_source(state) do
-      {:ok, _frames} ->
-        state
+  defp clear_held(nil), do: nil
+  defp clear_held(held), do: AudioQueue.clear(held)
 
-      {:error, error} ->
-        report(state, error)
-        state
-    end
-  end
+  defp refill(%{replacement: true} = state), do: state
+  defp refill(%{suppressed: true} = state), do: drain_source(state)
 
   defp refill(%{pending: []} = state) do
     {module, pid} = state.source
@@ -278,6 +405,18 @@ defmodule Parlora.AudioPipeline do
 
   defp forward(%{pending: []} = state), do: {state, state.init.limits.tick_ms * 1_000, false}
 
+  defp forward(%{held: %AudioQueue{} = held, pending: [frame | rest]} = state) do
+    case AudioQueue.push(held, frame) do
+      {:ok, next} ->
+        {%{state | held: next, pending: rest, blocked_since_us: nil, space_ref: nil}, 1_000, true}
+
+      {:error, _} ->
+        report(state, Error.new(:output_overflow, "Held output exceeded capacity"))
+        send(self(), :held_output_overflow)
+        {state, 1_000, false}
+    end
+  end
+
   defp forward(%{pending: [frame | rest]} = state) do
     {module, pid} = state.destination
     frame = if state.direction == :output, do: %{frame | playback_epoch: state.epoch}, else: frame
@@ -296,8 +435,13 @@ defmodule Parlora.AudioPipeline do
           %{direction: state.direction, session_id: state.init.session_id}
         )
 
-        {%{state | pending: rest, blocked_since_us: nil, space_ref: nil},
-         transfer_delay(state, frame), true}
+        {%{
+           state
+           | pending: rest,
+             blocked_since_us: nil,
+             space_ref: nil,
+             last_forwarded_sequence: if(state.replacement, do: nil, else: frame.sequence)
+         }, transfer_delay(state, frame), true}
 
       {:error, %Error{code: :backpressure}} ->
         relieve_pressure(state)
@@ -338,7 +482,9 @@ defmodule Parlora.AudioPipeline do
 
   defp arm_destination(state, _bytes), do: state
 
-  defp relieve_pressure(%{direction: :output, output_pacing: :channel} = state) do
+  defp relieve_pressure(
+         %{direction: :output, output_pacing: :channel, replacement: false} = state
+       ) do
     {source, source_pid} = state.source
     {destination, destination_pid} = state.destination
 
@@ -381,6 +527,15 @@ defmodule Parlora.AudioPipeline do
         else: limits.audio_queue_bytes
 
     module.read_audio(pid, budget)
+  end
+
+  defp drain_source(state) do
+    case discard_source(state) do
+      {:ok, _frames} -> :ok
+      {:error, error} -> report(state, error)
+    end
+
+    state
   end
 
   defp report(state, error) do

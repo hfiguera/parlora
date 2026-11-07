@@ -52,7 +52,8 @@ defmodule Parlora.Session.Recovery do
   def interrupted(state, token) do
     {module, pid} = state.adapters.provider
 
-    if function_exported?(module, :resume_output, 2) do
+    if function_exported?(module, :resume_output, 2) or
+         function_exported?(module, :resume_output, 3) do
       pipeline = state.output_pipeline
 
       telemetry =
@@ -75,8 +76,14 @@ defmodule Parlora.Session.Recovery do
   end
 
   defp resume_after_clear(pipeline, module, pid, token) do
-    with :ok <- AudioPipeline.control(pipeline, ID.new(), {:provider_interrupted, token}),
-         do: module.resume_output(pid, token)
+    if function_exported?(module, :resume_output, 3) do
+      with {:ok, position} <-
+             AudioPipeline.control(pipeline, ID.new(), {:provider_interrupted, token, :position}),
+           do: module.resume_output(pid, token, position)
+    else
+      with :ok <- AudioPipeline.control(pipeline, ID.new(), {:provider_interrupted, token}),
+           do: module.resume_output(pid, token)
+    end
   end
 
   defp queue_recovery(state, callback, telemetry \\ nil) do
