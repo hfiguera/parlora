@@ -1,0 +1,105 @@
+{
+  "source": "https://docs.rime.ai",
+  "model": "prism",
+  "retrieved_at_utc": "2026-11-07T15:20:30+00:00",
+  "sources": [
+    {
+      "path": "llms.txt",
+      "url": "https://docs.rime.ai/llms.txt",
+      "bytes": 25180,
+      "sha256": "dea16d302e550bd01b59c571cb305cf610e8b3fa8415b476bf6498167be31167",
+      "selection_reason": "Official documentation discovery index."
+    },
+    {
+      "path": "api-reference/prism/websocket.md",
+      "url": "https://docs.rime.ai/api-reference/prism/websocket.md",
+      "bytes": 94279,
+      "sha256": "14b3b7b84b98a7257cdcc10b558bedfccf2880a44ffb1d4a3a639c639056a356",
+      "selection_reason": "Wire contract for the Elixir adapter."
+    },
+    {
+      "path": "api-reference/sdk/prism.md",
+      "url": "https://docs.rime.ai/api-reference/sdk/prism.md",
+      "bytes": 91793,
+      "sha256": "be74bad9fb0ca9a15f5d098063f85c8ed62047a744961d72add9ac7bfdf4965d",
+      "selection_reason": "Reference client behavior for asynchronous tools, playback, deadlines, and errors."
+    },
+    {
+      "path": "docs/api-authentication.md",
+      "url": "https://docs.rime.ai/docs/api-authentication.md",
+      "bytes": 4584,
+      "sha256": "fb722da3600245021acdb7d214a8580f4d01d660cfe1d970f5d52c8764cb7186",
+      "selection_reason": "How to create the API token used by the adapter."
+    },
+    {
+      "path": "docs/prism/overview.md",
+      "url": "https://docs.rime.ai/docs/prism/overview.md",
+      "bytes": 11190,
+      "sha256": "08d5c630fb48b91e723d7e40a5e6620b00fd62444907d952e037221b1e20bd59",
+      "selection_reason": "Model capabilities, transport, and language constraints."
+    },
+    {
+      "path": "docs/prism/websocket-quickstart.md",
+      "url": "https://docs.rime.ai/docs/prism/websocket-quickstart.md",
+      "bytes": 17879,
+      "sha256": "49008a6c328576e4f80d3187594a3f879746590740ce2d9aa98f075662afe353",
+      "selection_reason": "Minimal direct WebSocket conversation for a live protocol probe."
+    },
+    {
+      "path": "docs/prism/migrate-from-openai.md",
+      "url": "https://docs.rime.ai/docs/prism/migrate-from-openai.md",
+      "bytes": 7867,
+      "sha256": "f2cc77d5811d7a6a1c9b571283df0dbf93ac873fbf8c5fdffd15538773f5c466",
+      "selection_reason": "Event and configuration differences from OpenAI Realtime."
+    },
+    {
+      "path": "docs/prism/prompting.md",
+      "url": "https://docs.rime.ai/docs/prism/prompting.md",
+      "bytes": 8415,
+      "sha256": "0d25c0728217e0e8d0330391786140f27880f59cd3c6e7421f591c20e9f08953",
+      "selection_reason": "Instructions for eliciting conversation and client delegation."
+    },
+    {
+      "path": "docs/prism/live-conversations.md",
+      "url": "https://docs.rime.ai/docs/prism/live-conversations.md",
+      "bytes": 18606,
+      "sha256": "5a49edc22af911569b04f9f6a5a64204bdb96dc82e1e5259fea207328126039f",
+      "selection_reason": "Audio pacing, caller turn detection, interruptions, and playback reports."
+    },
+    {
+      "path": "docs/prism/sessions.md",
+      "url": "https://docs.rime.ai/docs/prism/sessions.md",
+      "bytes": 17134,
+      "sha256": "8a1b0996bd8cfea12c09dc2f086fd685e35dc26f0840418b4d5640c5dc33f356",
+      "selection_reason": "Readiness, effective configuration, history, and session lifecycle."
+    },
+    {
+      "path": "docs/prism/typed-turns.md",
+      "url": "https://docs.rime.ai/docs/prism/typed-turns.md",
+      "bytes": 6036,
+      "sha256": "32cdf14cb351125bd7734b9b4a9df4911b251b9f982f0b135d0fbb514f9c5093",
+      "selection_reason": "Proactive replies and the conditions for admitting them."
+    },
+    {
+      "path": "docs/prism/tools.md",
+      "url": "https://docs.rime.ai/docs/prism/tools.md",
+      "bytes": 17374,
+      "sha256": "8720038b616f2a953cf85cbcc78ea1b620982f7a30f8d14d35367a23e58f4cbe",
+      "selection_reason": "Tool declarations, result acknowledgment, and continuation."
+    },
+    {
+      "path": "docs/prism/long-running-tasks.md",
+      "url": "https://docs.rime.ai/docs/prism/long-running-tasks.md",
+      "bytes": 11855,
+      "sha256": "5944b4fdf722a9279d11418a7dea7da8962ff18975a247f1cfe38f0f8468f7aa",
+      "selection_reason": "Result deadlines, later caller turns, and delayed results."
+    },
+    {
+      "path": "docs/prism/errors.md",
+      "url": "https://docs.rime.ai/docs/prism/errors.md",
+      "bytes": 21823,
+      "sha256": "d34cb883a89f766d9e965bcd1100ddf1f2d11f5fe334c28ad9ee1eb035f0af7b",
+      "selection_reason": "Refusals, close codes, and protocol limits."
+    }
+  ]
+}
