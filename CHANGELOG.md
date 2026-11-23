@@ -1,9 +1,34 @@
 # Changelog
 
-## Unreleased
+## 0.6.0
 
-- The Phonic provider defaults to Phonic-1.1. Existing integrations can pin
-  `model: "phonic-1"` in the provider options.
+Adds experimental Rime Prism support and promotes Phonic-1.1 to the Phonic
+default. This release also improves local audio playback, session recovery,
+and BookingDesk's appointment and reminder flows.
+
+### Phonic upgrade notes
+
+Sessions that select Phonic and omit `model` now use `"phonic-1.1"`. To keep
+the previous behavior, pass `model: "phonic-1"` in the provider options.
+OrderDesk accepts `PHONIC_MODEL=phonic-1` for the same rollback. See the
+[Phonic provider guide](docs/phonic-provider.md) for configuration.
+
+### Added
+
+- Add `Parlora.Providers.Prism` for experimental Rime Prism PCM sessions,
+  with streaming audio and client-side tool delegation.
+- Add acoustic echo cancellation for supported local microphone sessions.
+  BookingDesk enables it for Phonic and Prism in microphone mode.
+
+### Changed
+
+- Improve local playback progress tracking, recovery after discontinuities,
+  and handling of playback lead-in.
+- Improve session handling of interrupted replies, pending tasks, and
+  caller corrections.
+- Improve BookingDesk's scope handling, booking readback, and consent
+  checks for text reminders. BookingDesk reports record the selected Phonic
+  model.
 
 ## 0.5.0
 
