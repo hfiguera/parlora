@@ -1,0 +1,1433 @@
+{
+  "reports": [
+    {
+      "events": {
+        "closed": 1,
+        "usage_updated": 2,
+        "transcript_delta": 57,
+        "delegation_requested": 2,
+        "context_acknowledged": 3,
+        "output_recovery_requested": 1,
+        "output_recovered": 1,
+        "audio_discontinuity": 2,
+        "usage_final": 1
+      },
+      "usage": {
+        "seconds": 39,
+        "final?": true,
+        "complete?": false
+      },
+      "model": "gpt-live-1",
+      "passed": true,
+      "recovery": true,
+      "audio_bytes": 1972800,
+      "codec": "pcm",
+      "transcripts": [
+        {
+          "text": " Please",
+          "ms": 2198,
+          "speaker": "user"
+        },
+        {
+          "text": " check",
+          "ms": 2374,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 2772,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 3157,
+          "speaker": "user"
+        },
+        {
+          "text": " one",
+          "ms": 3554,
+          "speaker": "user"
+        },
+        {
+          "text": " hundred",
+          "ms": 3945,
+          "speaker": "user"
+        },
+        {
+          "text": " twenty",
+          "ms": 4363,
+          "speaker": "user"
+        },
+        {
+          "text": " three",
+          "ms": 4924,
+          "speaker": "user"
+        },
+        {
+          "text": " Okay,",
+          "ms": 5127,
+          "speaker": "assistant"
+        },
+        {
+          "text": " order",
+          "ms": 5931,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 6297,
+          "speaker": "assistant"
+        },
+        {
+          "text": " twenty",
+          "ms": 6496,
+          "speaker": "assistant"
+        },
+        {
+          "text": " three",
+          "ms": 6669,
+          "speaker": "assistant"
+        },
+        {
+          "text": " is",
+          "ms": 7101,
+          "speaker": "assistant"
+        },
+        {
+          "text": " set",
+          "ms": 7300,
+          "speaker": "assistant"
+        },
+        {
+          "text": " to arrive",
+          "ms": 7471,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday.",
+          "ms": 7865,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Actually",
+          "ms": 11627,
+          "speaker": "user"
+        },
+        {
+          "text": ", I",
+          "ms": 11770,
+          "speaker": "user"
+        },
+        {
+          "text": " meant",
+          "ms": 12132,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 12565,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 13037,
+          "speaker": "user"
+        },
+        {
+          "text": " one",
+          "ms": 13158,
+          "speaker": "user"
+        },
+        {
+          "text": " hundred",
+          "ms": 13572,
+          "speaker": "user"
+        },
+        {
+          "text": " twenty",
+          "ms": 13939,
+          "speaker": "user"
+        },
+        {
+          "text": " four",
+          "ms": 14553,
+          "speaker": "user"
+        },
+        {
+          "text": " Okay,",
+          "ms": 14752,
+          "speaker": "assistant"
+        },
+        {
+          "text": " order",
+          "ms": 15119,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 15490,
+          "speaker": "assistant"
+        },
+        {
+          "text": " twenty-four",
+          "ms": 15633,
+          "speaker": "assistant"
+        },
+        {
+          "text": " is",
+          "ms": 16470,
+          "speaker": "assistant"
+        },
+        {
+          "text": " set",
+          "ms": 16889,
+          "speaker": "assistant"
+        },
+        {
+          "text": " to arrive",
+          "ms": 17050,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday.",
+          "ms": 17464,
+          "speaker": "assistant"
+        },
+        {
+          "text": " ¿Puedes",
+          "ms": 21963,
+          "speaker": "user"
+        },
+        {
+          "text": " repetir",
+          "ms": 22821,
+          "speaker": "user"
+        },
+        {
+          "text": " la",
+          "ms": 22986,
+          "speaker": "user"
+        },
+        {
+          "text": " fecha",
+          "ms": 23440,
+          "speaker": "user"
+        },
+        {
+          "text": " de",
+          "ms": 23552,
+          "speaker": "user"
+        },
+        {
+          "text": " entrega",
+          "ms": 23992,
+          "speaker": "user"
+        },
+        {
+          "text": " en",
+          "ms": 24157,
+          "speaker": "user"
+        },
+        {
+          "text": " español",
+          "ms": 25009,
+          "speaker": "user"
+        },
+        {
+          "text": ", por",
+          "ms": 25352,
+          "speaker": "user"
+        },
+        {
+          "text": " favor",
+          "ms": 26102,
+          "speaker": "user"
+        },
+        {
+          "text": " Claro,",
+          "ms": 26102,
+          "speaker": "assistant"
+        },
+        {
+          "text": " llega",
+          "ms": 26506,
+          "speaker": "assistant"
+        },
+        {
+          "text": " el",
+          "ms": 26737,
+          "speaker": "assistant"
+        },
+        {
+          "text": " viernes.",
+          "ms": 26862,
+          "speaker": "assistant"
+        },
+        {
+          "text": "I had",
+          "ms": 32908,
+          "speaker": "assistant"
+        },
+        {
+          "text": " an",
+          "ms": 33084,
+          "speaker": "assistant"
+        },
+        {
+          "text": " audio",
+          "ms": 33271,
+          "speaker": "assistant"
+        },
+        {
+          "text": " problem.",
+          "ms": 33678,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Could",
+          "ms": 34241,
+          "speaker": "assistant"
+        },
+        {
+          "text": " you",
+          "ms": 34673,
+          "speaker": "assistant"
+        },
+        {
+          "text": " repeat",
+          "ms": 34872,
+          "speaker": "assistant"
+        },
+        {
+          "text": " your last",
+          "ms": 35258,
+          "speaker": "assistant"
+        },
+        {
+          "text": " request?",
+          "ms": 35669,
+          "speaker": "assistant"
+        }
+      ],
+      "backpressure_ticks": 0,
+      "first_audio_ms": 98,
+      "result_commands": [
+        "8REJUSQBHHYZcU_HFFuuB1hF",
+        "jyCXsKULogKG3kEWvJjv2O7A"
+      ],
+      "result_acks": [
+        "8REJUSQBHHYZcU_HFFuuB1hF",
+        "jyCXsKULogKG3kEWvJjv2O7A",
+        "LUodSFbHWsqQLCB3_APXMGwp"
+      ],
+      "delegations": [
+        {
+          "phase": "lookup",
+          "ms": 4924
+        },
+        {
+          "phase": "correction",
+          "ms": 14553
+        }
+      ],
+      "failures": [],
+      "recovery_model": "gpt-live-1",
+      "finalized": false,
+      "close_reason": "close_requested",
+      "checks": {
+        "audio": true,
+        "lookup_delegated": true,
+        "correction_delegated": true,
+        "result_acknowledged": true,
+        "caller_transcribed": true,
+        "assistant_transcribed": true,
+        "recovered_same_model": true,
+        "graceful_close": true,
+        "recovery_usage_honest": true,
+        "no_failures": true
+      }
+    },
+    {
+      "events": {
+        "closed": 1,
+        "usage_updated": 2,
+        "transcript_delta": 68,
+        "delegation_requested": 2,
+        "context_acknowledged": 3,
+        "output_recovery_requested": 1,
+        "output_recovered": 1,
+        "audio_discontinuity": 2,
+        "usage_final": 1
+      },
+      "usage": {
+        "seconds": 39,
+        "final?": true,
+        "complete?": false
+      },
+      "model": "gpt-live-1",
+      "passed": true,
+      "recovery": true,
+      "audio_bytes": 330400,
+      "codec": "pcmu",
+      "transcripts": [
+        {
+          "text": " Please",
+          "ms": 2218,
+          "speaker": "user"
+        },
+        {
+          "text": " check",
+          "ms": 2633,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 2765,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 3168,
+          "speaker": "user"
+        },
+        {
+          "text": " one",
+          "ms": 3561,
+          "speaker": "user"
+        },
+        {
+          "text": " hundred",
+          "ms": 3957,
+          "speaker": "user"
+        },
+        {
+          "text": " twenty",
+          "ms": 4353,
+          "speaker": "user"
+        },
+        {
+          "text": " three.",
+          "ms": 4962,
+          "speaker": "user"
+        },
+        {
+          "text": " Sure—",
+          "ms": 5193,
+          "speaker": "assistant"
+        },
+        {
+          "text": "checking",
+          "ms": 5369,
+          "speaker": "assistant"
+        },
+        {
+          "text": " on",
+          "ms": 5930,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one twenty",
+          "ms": 6087,
+          "speaker": "assistant"
+        },
+        {
+          "text": "-three",
+          "ms": 6285,
+          "speaker": "assistant"
+        },
+        {
+          "text": " now.",
+          "ms": 6670,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Your",
+          "ms": 8115,
+          "speaker": "assistant"
+        },
+        {
+          "text": " order",
+          "ms": 8277,
+          "speaker": "assistant"
+        },
+        {
+          "text": " ",
+          "ms": 8508,
+          "speaker": "assistant"
+        },
+        {
+          "text": "123",
+          "ms": 8673,
+          "speaker": "assistant"
+        },
+        {
+          "text": " is",
+          "ms": 9298,
+          "speaker": "assistant"
+        },
+        {
+          "text": " set",
+          "ms": 9497,
+          "speaker": "assistant"
+        },
+        {
+          "text": " to",
+          "ms": 9685,
+          "speaker": "assistant"
+        },
+        {
+          "text": " arrive",
+          "ms": 9909,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday.",
+          "ms": 10222,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Actually",
+          "ms": 11581,
+          "speaker": "user"
+        },
+        {
+          "text": ", I",
+          "ms": 11990,
+          "speaker": "user"
+        },
+        {
+          "text": " meant",
+          "ms": 12173,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 12588,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 13043,
+          "speaker": "user"
+        },
+        {
+          "text": " one",
+          "ms": 13197,
+          "speaker": "user"
+        },
+        {
+          "text": " hundred",
+          "ms": 13561,
+          "speaker": "user"
+        },
+        {
+          "text": " twenty",
+          "ms": 13981,
+          "speaker": "user"
+        },
+        {
+          "text": " four.",
+          "ms": 14620,
+          "speaker": "user"
+        },
+        {
+          "text": " Okay,",
+          "ms": 14797,
+          "speaker": "assistant"
+        },
+        {
+          "text": " looking",
+          "ms": 14976,
+          "speaker": "assistant"
+        },
+        {
+          "text": " up",
+          "ms": 15292,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 15506,
+          "speaker": "assistant"
+        },
+        {
+          "text": " twenty-four",
+          "ms": 15704,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 15903,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Your order",
+          "ms": 17321,
+          "speaker": "assistant"
+        },
+        {
+          "text": " ",
+          "ms": 17531,
+          "speaker": "assistant"
+        },
+        {
+          "text": "124",
+          "ms": 17718,
+          "speaker": "assistant"
+        },
+        {
+          "text": " is",
+          "ms": 18387,
+          "speaker": "assistant"
+        },
+        {
+          "text": " set",
+          "ms": 18574,
+          "speaker": "assistant"
+        },
+        {
+          "text": " to",
+          "ms": 18750,
+          "speaker": "assistant"
+        },
+        {
+          "text": " arrive",
+          "ms": 18882,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday.",
+          "ms": 19292,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Please",
+          "ms": 22172,
+          "speaker": "user"
+        },
+        {
+          "text": " repeat",
+          "ms": 22571,
+          "speaker": "user"
+        },
+        {
+          "text": " the",
+          "ms": 22964,
+          "speaker": "user"
+        },
+        {
+          "text": " delivery",
+          "ms": 23363,
+          "speaker": "user"
+        },
+        {
+          "text": " date in",
+          "ms": 24125,
+          "speaker": "user"
+        },
+        {
+          "text": " Spanish",
+          "ms": 25089,
+          "speaker": "user"
+        },
+        {
+          "text": ", please",
+          "ms": 25166,
+          "speaker": "user"
+        },
+        {
+          "text": " La fecha",
+          "ms": 25661,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 26091,
+          "speaker": "user"
+        },
+        {
+          "text": " de",
+          "ms": 26091,
+          "speaker": "assistant"
+        },
+        {
+          "text": " entrega",
+          "ms": 26297,
+          "speaker": "assistant"
+        },
+        {
+          "text": " es",
+          "ms": 26719,
+          "speaker": "assistant"
+        },
+        {
+          "text": " el viernes",
+          "ms": 26917,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 27100,
+          "speaker": "assistant"
+        },
+        {
+          "text": " I had",
+          "ms": 32875,
+          "speaker": "assistant"
+        },
+        {
+          "text": " an audio",
+          "ms": 33007,
+          "speaker": "assistant"
+        },
+        {
+          "text": " problem.",
+          "ms": 33447,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Please",
+          "ms": 33988,
+          "speaker": "assistant"
+        },
+        {
+          "text": " repeat",
+          "ms": 34398,
+          "speaker": "assistant"
+        },
+        {
+          "text": " your",
+          "ms": 34596,
+          "speaker": "assistant"
+        },
+        {
+          "text": " last",
+          "ms": 34828,
+          "speaker": "assistant"
+        },
+        {
+          "text": " request.",
+          "ms": 35016,
+          "speaker": "assistant"
+        }
+      ],
+      "backpressure_ticks": 0,
+      "first_audio_ms": 121,
+      "result_commands": [
+        "3lhbXuKNcba571TuVivgiaGd",
+        "i1JO4VGnI5e1-QkO1aSUn3VA"
+      ],
+      "result_acks": [
+        "3lhbXuKNcba571TuVivgiaGd",
+        "i1JO4VGnI5e1-QkO1aSUn3VA",
+        "UKhFYrpRSAYFZwmRhw6xvu0J"
+      ],
+      "delegations": [
+        {
+          "phase": "lookup",
+          "ms": 4962
+        },
+        {
+          "phase": "correction",
+          "ms": 14620
+        }
+      ],
+      "failures": [],
+      "recovery_model": "gpt-live-1",
+      "finalized": false,
+      "close_reason": "close_requested",
+      "checks": {
+        "audio": true,
+        "lookup_delegated": true,
+        "correction_delegated": true,
+        "result_acknowledged": true,
+        "caller_transcribed": true,
+        "assistant_transcribed": true,
+        "recovered_same_model": true,
+        "graceful_close": true,
+        "recovery_usage_honest": true,
+        "no_failures": true
+      }
+    },
+    {
+      "events": {
+        "closed": 1,
+        "usage_updated": 2,
+        "transcript_delta": 57,
+        "delegation_requested": 2,
+        "context_acknowledged": 3,
+        "output_recovery_requested": 1,
+        "output_recovered": 1,
+        "audio_discontinuity": 2,
+        "usage_final": 1
+      },
+      "usage": {
+        "seconds": 39,
+        "final?": true,
+        "complete?": false
+      },
+      "model": "gpt-live-1.1",
+      "passed": true,
+      "recovery": true,
+      "audio_bytes": 1960320,
+      "codec": "pcm",
+      "transcripts": [
+        {
+          "text": " Please",
+          "ms": 2293,
+          "speaker": "user"
+        },
+        {
+          "text": " check",
+          "ms": 2611,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 2794,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 3208,
+          "speaker": "user"
+        },
+        {
+          "text": " one hundred",
+          "ms": 4248,
+          "speaker": "user"
+        },
+        {
+          "text": " twenty",
+          "ms": 4402,
+          "speaker": "user"
+        },
+        {
+          "text": "-three",
+          "ms": 4963,
+          "speaker": "user"
+        },
+        {
+          "text": " Sure,",
+          "ms": 5161,
+          "speaker": "assistant"
+        },
+        {
+          "text": " order",
+          "ms": 5537,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 5925,
+          "speaker": "assistant"
+        },
+        {
+          "text": " twenty",
+          "ms": 6360,
+          "speaker": "assistant"
+        },
+        {
+          "text": " three",
+          "ms": 6522,
+          "speaker": "assistant"
+        },
+        {
+          "text": " arrives",
+          "ms": 6944,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday.",
+          "ms": 7320,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Actually",
+          "ms": 11599,
+          "speaker": "user"
+        },
+        {
+          "text": ", I",
+          "ms": 12043,
+          "speaker": "user"
+        },
+        {
+          "text": " meant",
+          "ms": 12213,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 12578,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 13071,
+          "speaker": "user"
+        },
+        {
+          "text": " one",
+          "ms": 13193,
+          "speaker": "user"
+        },
+        {
+          "text": " hundred",
+          "ms": 13601,
+          "speaker": "user"
+        },
+        {
+          "text": " twenty",
+          "ms": 14021,
+          "speaker": "user"
+        },
+        {
+          "text": "-four",
+          "ms": 14461,
+          "speaker": "user"
+        },
+        {
+          "text": " Okay.",
+          "ms": 14928,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Order",
+          "ms": 16141,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 16749,
+          "speaker": "assistant"
+        },
+        {
+          "text": " twenty",
+          "ms": 17173,
+          "speaker": "assistant"
+        },
+        {
+          "text": " four",
+          "ms": 17383,
+          "speaker": "assistant"
+        },
+        {
+          "text": " arrives",
+          "ms": 17754,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday.",
+          "ms": 18160,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Puedes",
+          "ms": 22201,
+          "speaker": "user"
+        },
+        {
+          "text": " repetir",
+          "ms": 22872,
+          "speaker": "user"
+        },
+        {
+          "text": " la",
+          "ms": 23004,
+          "speaker": "user"
+        },
+        {
+          "text": " fecha",
+          "ms": 23469,
+          "speaker": "user"
+        },
+        {
+          "text": " de",
+          "ms": 23612,
+          "speaker": "user"
+        },
+        {
+          "text": " entrega en",
+          "ms": 24207,
+          "speaker": "user"
+        },
+        {
+          "text": " español",
+          "ms": 25082,
+          "speaker": "user"
+        },
+        {
+          "text": ",",
+          "ms": 25386,
+          "speaker": "user"
+        },
+        {
+          "text": " por",
+          "ms": 25551,
+          "speaker": "user"
+        },
+        {
+          "text": " Claro,",
+          "ms": 25551,
+          "speaker": "assistant"
+        },
+        {
+          "text": " llega",
+          "ms": 25966,
+          "speaker": "assistant"
+        },
+        {
+          "text": " favor",
+          "ms": 26568,
+          "speaker": "user"
+        },
+        {
+          "text": " el viernes",
+          "ms": 26612,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 26645,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Tuve",
+          "ms": 32330,
+          "speaker": "assistant"
+        },
+        {
+          "text": " un",
+          "ms": 32529,
+          "speaker": "assistant"
+        },
+        {
+          "text": " problema",
+          "ms": 32694,
+          "speaker": "assistant"
+        },
+        {
+          "text": " de audio",
+          "ms": 33123,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 33288,
+          "speaker": "assistant"
+        },
+        {
+          "text": " ¿Puedes",
+          "ms": 33684,
+          "speaker": "assistant"
+        },
+        {
+          "text": " repetir",
+          "ms": 33849,
+          "speaker": "assistant"
+        },
+        {
+          "text": " tu",
+          "ms": 34326,
+          "speaker": "assistant"
+        },
+        {
+          "text": " última",
+          "ms": 34493,
+          "speaker": "assistant"
+        },
+        {
+          "text": " solicitud",
+          "ms": 34901,
+          "speaker": "assistant"
+        },
+        {
+          "text": ", por",
+          "ms": 35367,
+          "speaker": "assistant"
+        },
+        {
+          "text": " favor",
+          "ms": 35522,
+          "speaker": "assistant"
+        },
+        {
+          "text": "?",
+          "ms": 35666,
+          "speaker": "assistant"
+        }
+      ],
+      "backpressure_ticks": 0,
+      "first_audio_ms": 88,
+      "result_commands": [
+        "bohH4N3JATdVQS8NDRwyXZuh",
+        "xZGdBIh9tzum9Ar0bmTJmkzw"
+      ],
+      "result_acks": [
+        "bohH4N3JATdVQS8NDRwyXZuh",
+        "xZGdBIh9tzum9Ar0bmTJmkzw",
+        "x8O5Mfkpqnt70ni3UvtvT2Ut"
+      ],
+      "delegations": [
+        {
+          "phase": "lookup",
+          "ms": 4963
+        },
+        {
+          "phase": "correction",
+          "ms": 14776
+        }
+      ],
+      "failures": [],
+      "recovery_model": "gpt-live-1.1",
+      "finalized": false,
+      "close_reason": "close_requested",
+      "checks": {
+        "audio": true,
+        "lookup_delegated": true,
+        "correction_delegated": true,
+        "result_acknowledged": true,
+        "caller_transcribed": true,
+        "assistant_transcribed": true,
+        "recovered_same_model": true,
+        "graceful_close": true,
+        "recovery_usage_honest": true,
+        "no_failures": true
+      }
+    },
+    {
+      "events": {
+        "closed": 1,
+        "usage_updated": 2,
+        "transcript_delta": 54,
+        "delegation_requested": 2,
+        "context_acknowledged": 3,
+        "output_recovery_requested": 1,
+        "output_recovered": 1,
+        "audio_discontinuity": 2,
+        "usage_final": 1
+      },
+      "usage": {
+        "seconds": 39,
+        "final?": true,
+        "complete?": false
+      },
+      "model": "gpt-live-1.1",
+      "passed": true,
+      "recovery": true,
+      "audio_bytes": 323680,
+      "codec": "pcmu",
+      "transcripts": [
+        {
+          "text": " Please",
+          "ms": 2551,
+          "speaker": "user"
+        },
+        {
+          "text": " check",
+          "ms": 2723,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 3114,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 3259,
+          "speaker": "user"
+        },
+        {
+          "text": " 123",
+          "ms": 4662,
+          "speaker": "user"
+        },
+        {
+          "text": " Sure,",
+          "ms": 5757,
+          "speaker": "assistant"
+        },
+        {
+          "text": " let",
+          "ms": 6189,
+          "speaker": "assistant"
+        },
+        {
+          "text": " me check",
+          "ms": 6649,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 7104,
+          "speaker": "assistant"
+        },
+        {
+          "text": " It’s",
+          "ms": 7849,
+          "speaker": "assistant"
+        },
+        {
+          "text": " due",
+          "ms": 7970,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday",
+          "ms": 8356,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 8708,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Actually, I",
+          "ms": 12141,
+          "speaker": "user"
+        },
+        {
+          "text": " meant",
+          "ms": 12273,
+          "speaker": "user"
+        },
+        {
+          "text": " order",
+          "ms": 12699,
+          "speaker": "user"
+        },
+        {
+          "text": " number",
+          "ms": 13079,
+          "speaker": "user"
+        },
+        {
+          "text": " ",
+          "ms": 14368,
+          "speaker": "user"
+        },
+        {
+          "text": "124",
+          "ms": 14533,
+          "speaker": "user"
+        },
+        {
+          "text": " Okay",
+          "ms": 15317,
+          "speaker": "assistant"
+        },
+        {
+          "text": ",",
+          "ms": 15526,
+          "speaker": "assistant"
+        },
+        {
+          "text": " checking",
+          "ms": 15676,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 16235,
+          "speaker": "assistant"
+        },
+        {
+          "text": " twenty",
+          "ms": 16693,
+          "speaker": "assistant"
+        },
+        {
+          "text": "-four",
+          "ms": 16881,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 17256,
+          "speaker": "assistant"
+        },
+        {
+          "text": " That",
+          "ms": 17869,
+          "speaker": "assistant"
+        },
+        {
+          "text": " one",
+          "ms": 18034,
+          "speaker": "assistant"
+        },
+        {
+          "text": " also",
+          "ms": 18465,
+          "speaker": "assistant"
+        },
+        {
+          "text": " arrives",
+          "ms": 18829,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Friday",
+          "ms": 19484,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 19854,
+          "speaker": "assistant"
+        },
+        {
+          "text": " ¿Puedes repetir",
+          "ms": 23156,
+          "speaker": "user"
+        },
+        {
+          "text": " la",
+          "ms": 23354,
+          "speaker": "user"
+        },
+        {
+          "text": " fecha",
+          "ms": 23530,
+          "speaker": "user"
+        },
+        {
+          "text": " de",
+          "ms": 23673,
+          "speaker": "user"
+        },
+        {
+          "text": " entrega",
+          "ms": 24356,
+          "speaker": "user"
+        },
+        {
+          "text": " en",
+          "ms": 24492,
+          "speaker": "user"
+        },
+        {
+          "text": " español",
+          "ms": 25119,
+          "speaker": "user"
+        },
+        {
+          "text": ",",
+          "ms": 25315,
+          "speaker": "user"
+        },
+        {
+          "text": " por",
+          "ms": 25854,
+          "speaker": "user"
+        },
+        {
+          "text": " Llega",
+          "ms": 26027,
+          "speaker": "assistant"
+        },
+        {
+          "text": " favor",
+          "ms": 26225,
+          "speaker": "user"
+        },
+        {
+          "text": " el",
+          "ms": 26494,
+          "speaker": "assistant"
+        },
+        {
+          "text": " viernes",
+          "ms": 26981,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 26981,
+          "speaker": "assistant"
+        },
+        {
+          "text": " I had",
+          "ms": 32627,
+          "speaker": "assistant"
+        },
+        {
+          "text": " an audio",
+          "ms": 32825,
+          "speaker": "assistant"
+        },
+        {
+          "text": " problem.",
+          "ms": 32990,
+          "speaker": "assistant"
+        },
+        {
+          "text": " Please",
+          "ms": 33639,
+          "speaker": "assistant"
+        },
+        {
+          "text": " repeat",
+          "ms": 33980,
+          "speaker": "assistant"
+        },
+        {
+          "text": " your",
+          "ms": 34444,
+          "speaker": "assistant"
+        },
+        {
+          "text": " last request",
+          "ms": 34598,
+          "speaker": "assistant"
+        },
+        {
+          "text": ".",
+          "ms": 34974,
+          "speaker": "assistant"
+        }
+      ],
+      "backpressure_ticks": 0,
+      "first_audio_ms": 122,
+      "result_commands": [
+        "9qUKOE2YgfjQ6uW2PSVMNWEe",
+        "oFDh8-rVy-mua7LbNStqfQA7"
+      ],
+      "result_acks": [
+        "9qUKOE2YgfjQ6uW2PSVMNWEe",
+        "oFDh8-rVy-mua7LbNStqfQA7",
+        "z02GpSBYPw99aulBoHNdf4gy"
+      ],
+      "delegations": [
+        {
+          "phase": "lookup",
+          "ms": 5085
+        },
+        {
+          "phase": "correction",
+          "ms": 14705
+        }
+      ],
+      "failures": [],
+      "recovery_model": "gpt-live-1.1",
+      "finalized": false,
+      "close_reason": "close_requested",
+      "checks": {
+        "audio": true,
+        "lookup_delegated": true,
+        "correction_delegated": true,
+        "result_acknowledged": true,
+        "caller_transcribed": true,
+        "assistant_transcribed": true,
+        "recovered_same_model": true,
+        "graceful_close": true,
+        "recovery_usage_honest": true,
+        "no_failures": true
+      }
+    }
+  ],
+  "validation_date": "2026-11-23"
+}

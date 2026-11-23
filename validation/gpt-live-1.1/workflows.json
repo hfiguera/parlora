@@ -1,0 +1,141 @@
+{
+  "date": "2026-11-23",
+  "branch": "gpt-live-1-1-default",
+  "base": "73c15da739cef38fa832860baba7798c37bcaadb",
+  "test_suites": {
+    "parlora": {
+      "passed": 773,
+      "excluded": 3
+    },
+    "booking_desk": {
+      "passed": 305
+    },
+    "booking_desk_python": {
+      "passed": 28
+    },
+    "order_desk_current_library": {
+      "passed": 249
+    }
+  },
+  "live_workflows": [
+    {
+      "scenario": "doctor-lee-1.1",
+      "capture_directory": "/tmp/parlora-live11-booking-20261123",
+      "model": "gpt-live-1.1",
+      "provider": "openai",
+      "provider_options": {},
+      "outcome": "completed",
+      "passed": true,
+      "checks": {
+        "assistant_greeted_first": true,
+        "conversation_during_lookup": true,
+        "announced_verified_confirmation": true,
+        "readback_before_confirmation": true,
+        "booked_exact_slot": true,
+        "no_duplicate_availability": true,
+        "single_proposal": true,
+        "single_booking_submission": true,
+        "correction_revision": true,
+        "stale_result_filtered": true,
+        "no_adapter_failure": true,
+        "simulated_reminder_saved": true,
+        "single_reminder_submission": true,
+        "scenario_completed": true
+      },
+      "duration_ms": 146724.405,
+      "stale_results": 1,
+      "operations": {
+        "lookup": 1,
+        "insurance": 1,
+        "availability": 2,
+        "propose": 1,
+        "confirm": 1,
+        "reminder_opt_in": 1,
+        "reminder_confirm": 1
+      },
+      "simulated_reminder_count": 1,
+      "prompt_source_sha256": "51fe72536d7c6ac0c1f6663a158459642f6ab82cbd34983a1526a74d8ca62863",
+      "openai_protocol_sha256": "359ca2b1c2e5973dfffd115f9d7801102690d9f279093468867024e48b984b9e"
+    },
+    {
+      "scenario": "any-doctor-1.1",
+      "capture_directory": "/tmp/parlora-live11-booking-anydoctor-20261123",
+      "model": "gpt-live-1.1",
+      "provider": "openai",
+      "provider_options": {},
+      "outcome": "completed",
+      "passed": true,
+      "checks": {
+        "assistant_greeted_first": true,
+        "announced_verified_confirmation": true,
+        "booked_exact_slot": true,
+        "conversation_during_lookup": true,
+        "correction_revision": true,
+        "no_adapter_failure": true,
+        "no_duplicate_availability": true,
+        "readback_before_confirmation": true,
+        "scenario_completed": true,
+        "simulated_reminder_saved": true,
+        "single_booking_submission": true,
+        "single_proposal": true,
+        "single_reminder_submission": true,
+        "stale_result_filtered": true
+      },
+      "duration_ms": 149667.109,
+      "stale_results": 1,
+      "operations": {
+        "lookup": 1,
+        "insurance": 1,
+        "availability": 2,
+        "propose": 1,
+        "confirm": 1,
+        "reminder_opt_in": 1,
+        "reminder_confirm": 1
+      },
+      "simulated_reminder_count": 1,
+      "prompt_source_sha256": "51fe72536d7c6ac0c1f6663a158459642f6ab82cbd34983a1526a74d8ca62863",
+      "openai_protocol_sha256": "359ca2b1c2e5973dfffd115f9d7801102690d9f279093468867024e48b984b9e"
+    },
+    {
+      "scenario": "doctor-lee-1.0-rollback",
+      "capture_directory": "/tmp/parlora-live11-booking-rollback-20261123",
+      "model": "gpt-live-1",
+      "provider": "openai",
+      "provider_options": {
+        "model": "gpt-live-1"
+      },
+      "outcome": "completed",
+      "passed": true,
+      "checks": {
+        "assistant_greeted_first": true,
+        "announced_verified_confirmation": true,
+        "booked_exact_slot": true,
+        "conversation_during_lookup": true,
+        "correction_revision": true,
+        "no_adapter_failure": true,
+        "no_duplicate_availability": true,
+        "readback_before_confirmation": true,
+        "scenario_completed": true,
+        "simulated_reminder_saved": true,
+        "single_booking_submission": true,
+        "single_proposal": true,
+        "single_reminder_submission": true,
+        "stale_result_filtered": true
+      },
+      "duration_ms": 137001.971,
+      "stale_results": 1,
+      "operations": {
+        "lookup": 1,
+        "insurance": 1,
+        "availability": 2,
+        "propose": 1,
+        "confirm": 1,
+        "reminder_opt_in": 1,
+        "reminder_confirm": 1
+      },
+      "simulated_reminder_count": 1,
+      "prompt_source_sha256": "51fe72536d7c6ac0c1f6663a158459642f6ab82cbd34983a1526a74d8ca62863",
+      "openai_protocol_sha256": "359ca2b1c2e5973dfffd115f9d7801102690d9f279093468867024e48b984b9e"
+    }
+  ]
+}

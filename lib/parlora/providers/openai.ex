@@ -1,11 +1,14 @@
 defmodule Parlora.Providers.OpenAI do
-  @moduledoc "GPT-Live-1 client delegation over Mint.WebSocket, with explicit application-owned credentials."
+  @moduledoc "GPT-Live client delegation over Mint.WebSocket, with explicit application-owned credentials."
   use GenServer
   use Parlora.ProviderClient, protocol: Parlora.Providers.OpenAI.Protocol
   alias Mint.{HTTP, WebSocket}
   alias Parlora.{AudioFormat, AudioFrame, AudioQueue, CommandLog, Error, Event, ID, Pacer}
   alias Parlora.Provider.OutputBuffer
   alias Parlora.Providers.OpenAI.{AudioTrace, Diagnostics, Protocol, Recovery}
+
+  @doc "The default GPT-Live model; pass model: to select a supported alternative."
+  defdelegate default_model(), to: Protocol
 
   @impl true
   def audio_limits(format \\ %AudioFormat{}), do: OutputBuffer.burst_limits(format, 2_000)

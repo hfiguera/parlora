@@ -2,6 +2,7 @@ defmodule BookingDesk.Run do
   @moduledoc "Bounded live scenarios driven by task and speech milestones, never injected transcripts."
   alias BookingDesk.{Recorder, ReplayChannel}
   alias Parlora.Event
+  alias Parlora.Providers.OpenAI
   alias Parlora.Providers.Phonic
 
   def run(directory, clips, opts \\ []) do
@@ -729,10 +730,12 @@ defmodule BookingDesk.Run do
   defp model(%{provider: "phonic"} = s),
     do: Map.get(s.provider_options, :model, s.provider_defaults.model)
 
+  defp model(%{provider: "openai"} = s),
+    do: Map.get(s.provider_options, :model, OpenAI.default_model())
+
   defp model(%{provider: provider}),
     do:
       %{
-        "openai" => "gpt-live-1",
         "gemini" => "gemini-3.8-live",
         "grok" => "grok-voice-3.0",
         "prism" => "prism"

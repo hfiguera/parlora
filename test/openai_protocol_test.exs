@@ -8,7 +8,8 @@ defmodule Parlora.OpenAIProtocolTest do
     assert {:ok, %{type: "session.start", session: session}} =
              Protocol.start([api_key: "test"], %AudioFormat{})
 
-    assert session.model == "gpt-live-1"
+    assert session.model == "gpt-live-1.1"
+    assert OpenAI.default_model() == session.model
     assert session.delegation == %{type: "client"}
     assert session.store == false
     assert session.audio.format == %{type: "audio/pcm", rate: 24_000}
@@ -18,6 +19,37 @@ defmodule Parlora.OpenAIProtocolTest do
 
     assert {:error, %{code: :unsupported}} =
              Protocol.start([api_key: "test", model: "wrong"], %AudioFormat{})
+  end
+
+  test "both Live models support the same wire contract without rewriting application prompts" do
+    instructions = "Delegate to the backend when the caller asks to change a booking."
+
+    for model <- ["gpt-live-1", "gpt-live-1.1"],
+        format <- [%AudioFormat{}, AudioFormat.pcmu()] do
+      assert {:ok, startup} =
+               Protocol.start(
+                 [api_key: "test", model: model, instructions: instructions],
+                 format
+               )
+
+      session = startup |> JSON.encode!() |> JSON.decode!() |> Map.fetch!("session")
+      assert session["model"] == model
+      assert session["instructions"] == instructions
+      assert session["delegation"] == %{"type" => "client"}
+      assert session["store"] == false
+      assert session["audio"]["format"]["rate"] == format.sample_rate_hz
+
+      assert session["audio"]["format"]["type"] ==
+               if(format.codec == :pcmu, do: "audio/pcmu", else: "audio/pcm")
+
+      assert {:error, %{code: :unsupported}} =
+               Protocol.start([api_key: "test", model: model, delegation: :responses], format)
+    end
+
+    for model <- [nil, "", "gpt-live-1.1-preview", "gpt-realtime", :"gpt-live-1.1"] do
+      assert {:error, %{code: :unsupported}} =
+               Protocol.start([api_key: "test", model: model], %AudioFormat{})
+    end
   end
 
   test "named and custom voices serialize in both supported audio formats" do
