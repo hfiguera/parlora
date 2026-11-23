@@ -3,7 +3,7 @@ defmodule Parlora.Providers.Phonic.Options do
   alias Parlora.Error
 
   @defaults [
-    model: "phonic-1",
+    model: "phonic-1.1",
     voice: "sabrina",
     instructions: "Keep replies brief.",
     tool_timeout_ms: 60_000,

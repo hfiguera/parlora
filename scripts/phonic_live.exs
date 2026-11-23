@@ -4,6 +4,7 @@ defmodule Parlora.PhonicLiveProbe do
   alias Parlora.Providers.Phonic
 
   def run(path, codec, output) do
+    model = System.get_env("PHONIC_MODEL", Keyword.fetch!(Phonic.default_options(), :model))
     format = if codec == "pcmu", do: AudioFormat.pcmu(), else: %AudioFormat{}
     {:ok, limits} = Limits.new(Phonic.audio_limits(format), format)
 
@@ -19,6 +20,7 @@ defmodule Parlora.PhonicLiveProbe do
     {:ok, provider} =
       Phonic.start_link(init,
         api_key: System.fetch_env!("PHONIC_API_KEY"),
+        model: model,
         instructions:
           "This is a synthetic protocol test. For order lookups call delegate_to_backend. Announce only verified results. Keep replies brief and speak English."
       )
@@ -26,7 +28,7 @@ defmodule Parlora.PhonicLiveProbe do
     Process.send_after(self(), :deadline, 45_000)
 
     report = %{
-      model: "phonic-1",
+      model: model,
       codec: codec,
       synthetic_speech: true,
       wire_format: "pcm_24000",

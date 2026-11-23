@@ -3,10 +3,10 @@ defmodule Parlora.Providers.Phonic.Protocol do
   alias Parlora.{AudioFormat, ContextUpdate, Error}
   alias Parlora.Provider.Capabilities
   alias Parlora.Providers.Phonic.Options
-  @model "phonic-1"
+  @models ["phonic-1", "phonic-1.1"]
   @function "delegate_to_backend"
 
-  def model, do: @model
+  def model, do: Keyword.fetch!(Options.defaults(), :model)
   def function, do: @function
   def path, do: "/v1/sts/ws"
 
@@ -43,8 +43,8 @@ defmodule Parlora.Providers.Phonic.Protocol do
       not text?(Keyword.get(options, :api_key), 1, 16_384) ->
         Error.tuple(:invalid_argument, "An explicit nonempty api_key is required")
 
-      Keyword.get(options, :model, @model) != @model ->
-        Error.tuple(:unsupported, "Only phonic-1 is implemented")
+      Keyword.fetch!(options, :model) not in @models ->
+        Error.tuple(:unsupported, "Phonic requires phonic-1 or phonic-1.1")
 
       not AudioFormat.supported?(format) ->
         Error.tuple(:unsupported, "Phonic requires mono PCM16LE/24 kHz or mu-law/8 kHz")
@@ -151,7 +151,7 @@ defmodule Parlora.Providers.Phonic.Protocol do
 
     config = %{
       type: "config",
-      model: @model,
+      model: Keyword.fetch!(options, :model),
       system_prompt: instructions <> "\n" <> delegation_instruction(),
       voice_id: voice,
       input_format: codec,

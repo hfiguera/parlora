@@ -51,7 +51,8 @@ defmodule BookingDesk.Run do
       clips: clips,
       mode: mode,
       provider_options: BookingDesk.RunReport.provider_options(provider_options),
-      provider_defaults: provider_defaults(),
+      provider: provider,
+      provider_defaults: provider_defaults(provider),
       any_doctor: Keyword.get(opts, :any_doctor, false),
       clinician_replies: MapSet.new(),
       ambience: ambience != nil,
@@ -111,11 +112,8 @@ defmodule BookingDesk.Run do
        ambience: ambience,
        trim_playback_lead_in: true}
 
-  defp provider_defaults do
-    if System.get_env("PARLORA_PROVIDER", "openai") == "phonic",
-      do: Map.new(Phonic.default_options()),
-      else: %{}
-  end
+  defp provider_defaults("phonic"), do: Map.new(Phonic.default_options())
+  defp provider_defaults(_provider), do: %{}
 
   defp start_microphone(:microphone) do
     IO.puts("Demo records: Jamie Rivera — March 12, 1990; Alex Morgan — July 24, 1985.")
@@ -638,13 +636,13 @@ defmodule BookingDesk.Run do
         s.recorder,
         Map.merge(
           %{
-            provider: System.get_env("PARLORA_PROVIDER", "openai"),
-            model: model(),
+            provider: s.provider,
+            model: model(s),
             assistant_voice:
               Map.get(
                 s.provider_options,
                 :voice,
-                BookingDesk.assistant_voice(System.get_env("PARLORA_PROVIDER", "openai"))
+                BookingDesk.assistant_voice(s.provider)
               ),
             jev_model: Application.fetch_env!(:booking_desk, :jev_model),
             opening: %{
@@ -728,15 +726,17 @@ defmodule BookingDesk.Run do
     end
   end
 
-  defp model,
+  defp model(%{provider: "phonic"} = s),
+    do: Map.get(s.provider_options, :model, s.provider_defaults.model)
+
+  defp model(%{provider: provider}),
     do:
       %{
         "openai" => "gpt-live-1",
         "gemini" => "gemini-3.8-live",
         "grok" => "grok-voice-3.0",
-        "phonic" => "phonic-1",
         "prism" => "prism"
-      }[System.get_env("PARLORA_PROVIDER", "openai")]
+      }[provider]
 
   defp check_booked_exact_slot(s, appointments) do
     Enum.count(appointments, fn [id, _, slot, status, _] ->

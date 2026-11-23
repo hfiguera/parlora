@@ -5,12 +5,18 @@ defmodule Parlora.PhonicShutdownLive do
 
   def run do
     path = System.argv() |> List.first() || "/tmp/parlora-phonic-shutdown-live.json"
-    rows = for _repeat <- 1..3, format <- [%AudioFormat{}, AudioFormat.pcmu()], do: probe(format)
+    model = System.get_env("PHONIC_MODEL", Keyword.fetch!(Phonic.default_options(), :model))
+
+    rows =
+      for _repeat <- 1..3,
+          format <- [%AudioFormat{}, AudioFormat.pcmu()],
+          do: probe(format, model)
+
     File.write!(path, JSON.encode!(rows))
     IO.puts(JSON.encode!(%{probes: rows, report: path}))
   end
 
-  defp probe(format) do
+  defp probe(format, model) do
     session_id = Parlora.ID.new()
 
     init = %AdapterInit{
@@ -22,7 +28,8 @@ defmodule Parlora.PhonicShutdownLive do
       limits: %Limits{}
     }
 
-    {:ok, pid} = Phonic.start_link(init, api_key: System.fetch_env!("PHONIC_API_KEY"))
+    {:ok, pid} =
+      Phonic.start_link(init, api_key: System.fetch_env!("PHONIC_API_KEY"), model: model)
 
     try do
       deadline = System.monotonic_time(:millisecond) + 15_000
@@ -36,6 +43,7 @@ defmodule Parlora.PhonicShutdownLive do
 
       %{
         codec: format.codec,
+        model: model,
         conversation_id: conversation_id,
         client_closed_at_ms: closed_at,
         close_call_ms: close_ms

@@ -1,4 +1,4 @@
-# Phonic-1 validation
+# Phonic validation
 
 These probes use generated speech and synthetic backend facts. They establish
 wire and adapter behavior, not human conversation quality, physical playback,
@@ -44,6 +44,66 @@ Support covers the documented adapter capabilities and tested workflows.
 Reliability under sustained production load and varied network conditions
 remains unqualified. Automatic reconnect, initial history, and usage reporting
 remain unsupported; see the [provider guide](../../docs/phonic-provider.md).
+
+## Phonic 1.1 comparison
+
+Live results on November 23, 2026 (America/Denver):
+
+| Check | `phonic-1` | `phonic-1.1` |
+| --- | --- | --- |
+| Native mu-law correction | No delegation in three valid attempts | Two delegations and only the corrected fact spoken |
+| Native mu-law request with 700 ms pause | No delegation in two valid attempts | One delegation for order 123 and one result announcement |
+| Native mu-law interruption | Passed | Passed |
+| Adapter lookup with PCM and mu-law input | Mu-law passed, PCM timed out | Both passed |
+| Adapter shutdown and REST model confirmation | 6/6 passed | 6/6 passed |
+| Clean BookingDesk replay | 14/14 checks passed | 14/14 checks passed |
+| BookingDesk café-noise retry | Timed out after the correction clip | 14/14 checks passed |
+| Final OrderDesk replay | 8/8 checks passed | 8/8 checks passed |
+
+For the timed interruption run, the first assistant audio arrived 132 ms and
+134 ms after the service reported that the caller finished, respectively. These
+single-run timings are scenario observations. Parlora’s adapter uses PCM24 on
+the wire for both models.
+
+Both initial café-noise runs reported an unavailable BookingDesk identity
+extractor. Phonic-1 stalled after identity and Phonic-1.1 later reported a tool
+timeout. The retry used the same clips, 20 dB café track, and provider settings
+for both models. Phonic-1.1 completed the corrected booking and simulated
+reminder with one submission each.
+
+The first OrderDesk 1.1 run stopped after a clarification. The second reached
+the correct delivery-instructions result but used wording the harness did not
+recognize. The final pair ran with the matcher accepting the observed wording
+and completed all three backend operations with exactly one call each. Both
+created one review draft without saving the change.
+
+After promotion, a mu-law adapter lookup passed with the model override omitted.
+Six more clean closes passed, and Phonic’s REST record reported `phonic-1.1`
+for all six sessions.
+
+Run the same synthetic wire probe with each model ID. This example inserts a
+700 ms pause before the order number on Phonic’s native mu-law path.
+
+```sh
+for model in phonic-1 phonic-1.1; do
+  PARLORA_PROVIDER=phonic python3 scripts/with_keychain.py \
+    uv run --with websockets==15.0.1 python scripts/phonic_protocol_pilot.py \
+    --model "$model" --codec pcmu --mid-request-pause-ms 700 --vad-threshold 0.5 \
+    --output "validation/phonic/results/$model-pause.json"
+done
+```
+
+Use `--scenario correction` or `--scenario interruption` in place of
+`--mid-request-pause-ms` for those cases. The standalone wire script defaults
+to `phonic-1` for the historical probes below. The wire report measures the time from
+the provider’s caller-finished event to the first audio chunk during assistant
+speech. This measures WebSocket event timing, with playback and the caller’s
+actual speech endpoint outside the measurement.
+
+Set `PHONIC_MODEL` for the Elixir adapter smoke, shutdown probe, and OrderDesk
+workflow below. For BookingDesk, pass
+`provider_options: [model: "phonic-1.1"]` to `BookingDesk.Run.run/3`.
+The BookingDesk report records the resolved model.
 
 ## Wire probes
 

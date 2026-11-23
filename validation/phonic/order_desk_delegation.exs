@@ -5,12 +5,18 @@ end
 
 defmodule Parlora.PhonicOrderDeskDelegation do
   alias Parlora.{AudioFormat, AudioFrame, Event}
+  alias Parlora.Providers.Phonic
   alias Parlora.TestSupport.{MemoryAudio, MemoryChannel}
 
   def run(directory, output) do
     :phonic = Application.fetch_env!(:order_desk, :voice_provider)
     ":memory:" = Application.fetch_env!(:order_desk, :database)
-    {Parlora.Providers.Phonic, _options} = OrderDesk.Provider.selected()
+    {Phonic, options} = OrderDesk.Provider.selected()
+
+    model =
+      Keyword.get_lazy(options, :model, fn ->
+        Keyword.fetch!(Phonic.default_options(), :model)
+      end)
 
     {:ok, session} =
       OrderDesk.BrowserGate.start_session(
@@ -25,6 +31,7 @@ defmodule Parlora.PhonicOrderDeskDelegation do
       session: session,
       channel: nil,
       ready?: false,
+      model: model,
       directory: directory,
       output: output,
       stage: :greeting,
@@ -131,7 +138,7 @@ defmodule Parlora.PhonicOrderDeskDelegation do
   end
 
   defp answered?(state) do
-    text = String.downcase(state.text)
+    text = state.text |> String.downcase() |> String.replace("’", "'")
 
     case state.stage do
       :greeting ->
@@ -142,7 +149,10 @@ defmodule Parlora.PhonicOrderDeskDelegation do
 
       :instructions ->
         String.contains?(text, "instructions") and
-          Enum.any?(["no ", "none", "empty", "not "], &String.contains?(text, &1))
+          Enum.any?(
+            ["no ", "none", "empty", "not ", "aren't any", "nothing on file"],
+            &String.contains?(text, &1)
+          )
 
       :draft ->
         String.contains?(text, "draft") and String.contains?(text, "confirm")
@@ -167,7 +177,7 @@ defmodule Parlora.PhonicOrderDeskDelegation do
     }
 
     report = %{
-      model: "phonic-1",
+      model: state.model,
       synthetic_speech: true,
       channel: "in-memory PCM through actual OrderDesk/Parlora pipeline",
       result: reason,
