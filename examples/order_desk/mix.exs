@@ -14,7 +14,7 @@ defmodule OrderDesk.MixProject do
           {:exqlite, "== 0.40.0"},
           {:parlora, path: "vendor/parlora"},
           {:jido, "== 2.4.0"},
-          {:bandit, "== 1.14.1"},
+          {:bandit, "== 1.15.0"},
           {:plug, "== 1.20.4"}
         ] ++
           case System.get_env("PARLORA_BACKEND") do
