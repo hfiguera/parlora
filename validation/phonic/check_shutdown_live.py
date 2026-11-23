@@ -30,11 +30,12 @@ def verify(rows):
         )
         delay = round(ended_ms - row["client_closed_at_ms"]) if ended_ms else None
         results.append({
-            **row, "ended_at": ended, "ended_by": conversation.get("ended_by"),
+            **row, "reported_model": conversation.get("model"), "ended_at": ended, "ended_by": conversation.get("ended_by"),
             "server_end_delay_ms": delay,
             "passed": conversation.get("ended_by") == "user"
             and delay is not None and -1000 <= delay < 5000
-            and row["close_call_ms"] < 1000,
+            and row["close_call_ms"] < 1000
+            and ("model" not in row or row["model"] == conversation.get("model")),
         })
     # Both supported codecs must be exercised three times; incomplete evidence fails.
     complete = len(rows) == 6 and all(

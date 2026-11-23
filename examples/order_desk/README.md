@@ -39,6 +39,9 @@ one API key for the voice provider and, for browser/phone workflows, a TypeSafe 
 | `SAGENTS_API_KEY` | Backend model when `PARLORA_BACKEND=sagents` |
 | `LEGION_API_KEY` | Backend model when `PARLORA_BACKEND=legion` |
 
+When using Phonic, set `PHONIC_MODEL` to `phonic-1` or `phonic-1.1` to override
+Parlora’s default for OrderDesk sessions.
+
 Use your normal secret management. The macOS launchers can use existing development
 Keychain entries when an environment value is absent; supplying values explicitly
 works across platforms. Parlora itself receives explicit provider options.

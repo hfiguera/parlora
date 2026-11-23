@@ -12,7 +12,15 @@ defmodule OrderDesk.Provider do
          reasoning_effort: Application.get_env(:order_desk, :grok_reasoning_effort, :high)}
 
       :phonic ->
-        {Parlora.Providers.Phonic, api_key: credential()}
+        options = [api_key: credential()]
+
+        options =
+          case Application.get_env(:order_desk, :phonic_model) do
+            nil -> options
+            model -> Keyword.put(options, :model, model)
+          end
+
+        {Parlora.Providers.Phonic, options}
 
       :openai ->
         {Parlora.Providers.OpenAI,

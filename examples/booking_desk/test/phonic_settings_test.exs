@@ -51,7 +51,7 @@ defmodule BookingDesk.PhonicSettingsTest do
 
     assert {:ok, config} = Protocol.start(options, %AudioFormat{})
 
-    assert config.model == "phonic-1"
+    assert config.model == "phonic-1.1"
     assert config.voice_id == "sabrina"
     assert config.enable_assistant_backchannel
     assert config.assistant_backchannel_aggressiveness == 0.3

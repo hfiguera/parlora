@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The Phonic provider defaults to Phonic-1.1. Existing integrations can pin
+  `model: "phonic-1"` in the provider options.
+
 ## 0.5.0
 
 Adds rolling transcript retention and more controls for Phonic, Gemini and Grok.

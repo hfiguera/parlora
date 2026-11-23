@@ -468,7 +468,7 @@ defmodule Parlora.PhonicSessionTest do
     assert_receive {:phonic_command,
                     %{
                       "type" => "config",
-                      "model" => "phonic-1",
+                      "model" => "phonic-1.1",
                       "input_format" => "pcm_24000",
                       "enable_assistant_backchannel" => true,
                       "assistant_backchannel_aggressiveness" => 0.3,

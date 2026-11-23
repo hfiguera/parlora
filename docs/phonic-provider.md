@@ -1,13 +1,26 @@
 # Phonic provider
 
-`Parlora.Providers.Phonic` is a supported Phonic-1 speech-to-speech adapter.
+`Parlora.Providers.Phonic` is a speech-to-speech adapter for Phonic-1 and Phonic-1.1.
 It connects directly to `wss://api.phonic.ai/v1/sts/ws`; applications continue
 to own their channels, context policies, backend execution, and task revisions.
 No Phonic SDK or persistent hosted agent is required.
 
+Phonic reports better turn-taking, instruction following, and speech pacing in
+[Phonic-1.1](https://phonic.ai/blog/phonic-1-1). It is the default. Both versions
+use the same audio and tool settings. Pin Phonic-1 with the `model` option.
+
+```elixir
+{Parlora.Providers.Phonic,
+ api_key: System.fetch_env!("PHONIC_API_KEY"), model: "phonic-1"}
+```
+
+Early delegation is a separate, opt-in setting that requires account enablement.
+The [live comparison](../validation/phonic/README.md#phonic-11-comparison) covers
+both models through the existing integration.
+
 ## Integration status
 
-Phonic-1 is a **supported speech-to-speech provider** in Parlora.
+Phonic is a **supported speech-to-speech provider** in Parlora.
 The adapter has offline regression coverage, successful live-service probes,
 and successful manual OrderDesk calls through the browser, Twilio, and Telnyx.
 OrderDesk is a separate example application used to exercise the integration.
@@ -61,11 +74,11 @@ VAD threshold. The conversion path was subsequently verified using the actual
 Elixir adapter. This is evidence about these probes, not a claim that every
 Phonic mu-law connection fails.
 
-Startup explicitly requests `model: "phonic-1"`, defines an inline strict
-`delegate_to_backend` function, and waits for `ready_to_start_conversation` before
-announcing readiness. This event confirms accepted configuration; Phonic does not
-echo a model identifier for independent verification. `conversation_created`
-may arrive after readiness.
+Startup sends the selected `model` in the WebSocket config, defines an inline
+strict `delegate_to_backend` function, and waits for
+`ready_to_start_conversation` before announcing readiness. This event confirms
+accepted configuration. The selected model can be verified via the REST
+conversation record once `conversation_created` provides the ID.
 
 Generated speech has a separate 20-second receive capacity and a 21-second
 maximum local residence, scaled to the pipeline codec. Channel playback storage
@@ -189,7 +202,7 @@ audio messages, so boundary ordering remains part of the upstream wire contract.
 | Option | Default | Behavior |
 | --- | --- | --- |
 | `api_key` | required | Explicit nonempty credential. |
-| `model` | `"phonic-1"` | Other models are rejected. |
+| `model` | `"phonic-1.1"` | Accepts `"phonic-1"` and `"phonic-1.1"`. |
 | `voice` | `"sabrina"` | A Phonic voice ID. |
 | `instructions` | `"Keep replies brief."` | Application instructions plus delegation guidance. |
 | `tool_timeout_ms` | `60_000` | Between 1,000 and 180,000 ms. Align with backend deadlines; this does not extend the backend job deadline. |

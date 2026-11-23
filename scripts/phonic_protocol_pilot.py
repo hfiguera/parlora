@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded synthetic Phonic-1 wire probes; never save credentials or audio.
+"""Bounded synthetic Phonic wire probes; never save credentials or audio.
 
 Run with websockets==15.0.1, macOS say, and ffmpeg. This is protocol evidence,
 not a human-call qualification or an assertion of physical playback.
@@ -45,7 +45,7 @@ async def probe(args, clips):
         raise RuntimeError("PHONIC_API_KEY is required; use scripts/with_keychain.py")
     origin = time.monotonic()
     report = {"schema": 1, "started_at": datetime.now(timezone.utc).isoformat(),
-              "model": "phonic-1", "codec": args.codec, "scenario": args.scenario,
+              "model": args.model, "codec": args.codec, "scenario": args.scenario,
               "retention": args.retention,
               "synthetic_speech": True, "timeout_seconds": args.timeout,
               "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -124,7 +124,7 @@ async def probe(args, clips):
 
             if not reconnect:
                 fmt = "mulaw_8000" if args.codec == "pcmu" else "pcm_24000"
-                config = {"type": "config", "model": "phonic-1", "system_prompt": PROMPT,
+                config = {"type": "config", "model": args.model, "system_prompt": PROMPT,
                             "input_format": fmt, "output_format": fmt,
                             "stream_ahead_of_real_time": False,
                             "tools": [{"type": "custom_websocket", "execution_mode": "async",
@@ -142,12 +142,17 @@ async def probe(args, clips):
                 if args.vad_threshold is not None:
                     config["vad_threshold"] = args.vad_threshold
                 await send(config)
+            user_finished_at = None
             async for raw in ws:
                 event = json.loads(raw)
                 kind = event.get("type", "unknown")
                 fields = {}
                 if kind == "audio_chunk":
                     report["audio_bytes"] += len(base64.b64decode(event["audio"]))
+                    if assistant_speaking and user_finished_at is not None:
+                        record("first_audio_after_user_finished",
+                               delay_ms=round((time.monotonic() - user_finished_at) * 1000))
+                        user_finished_at = None
                     if assistant_speaking:
                         first_audio.set()
                     text = event.get("text", "")
@@ -177,8 +182,10 @@ async def probe(args, clips):
                                                   "speaker": "user", "text": event.get("text", "")})
                 elif kind == "user_started_speaking":
                     caller_speaking = True
+                    user_finished_at = None
                 elif kind == "user_finished_speaking":
                     caller_speaking = False
+                    user_finished_at = time.monotonic()
                 elif kind == "assistant_started_speaking":
                     assistant_speaking = True
                 elif kind in {"assistant_finished_speaking", "interrupted_response", "assistant_chose_not_to_respond"}:
@@ -239,7 +246,9 @@ async def probe(args, clips):
         report["checks"]["tool_called"] = bool(calls)
         expected_calls = 2 if args.scenario == "correction" else 1
         report["checks"]["one_delegation_per_request"] = len(report["calls"]) == expected_calls
-        report["checks"]["result_announced"] = ("out for delivery" if args.scenario == "correction" else "friday") in spoken
+        expected_fact = "out for delivery" if args.scenario == "correction" else "friday"
+        report["checks"]["result_announced"] = expected_fact in spoken
+        report["checks"]["result_announced_once"] = spoken.count(expected_fact) == 1
     if args.scenario == "correction":
         report["checks"]["correction_delegated"] = any("124" in c["request"] for c in report["calls"])
         report["checks"]["no_obsolete_fact"] = "friday" not in spoken
@@ -255,21 +264,39 @@ async def probe(args, clips):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--scenario", choices=["baseline", "pending", "correction", "interruption", "reconnect"], default="baseline")
+    parser.add_argument("--model", choices=["phonic-1", "phonic-1.1"], default="phonic-1")
     parser.add_argument("--codec", choices=["pcm", "pcmu"], default="pcm")
     parser.add_argument("--timeout", type=int, default=45)
     parser.add_argument("--retention", choices=["provider-default", "zero"], default="provider-default")
     parser.add_argument("--vad-threshold", type=float)
+    parser.add_argument("--mid-request-pause-ms", type=int, default=0,
+                        help="insert a pause before the order number in the baseline scenario")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.timeout <= 60:
         parser.error("--timeout must be between 1 and 60 seconds")
+    if not 0 <= args.mid_request_pause_ms <= 3000:
+        parser.error("--mid-request-pause-ms must be between 0 and 3000")
+    if args.mid_request_pause_ms and args.scenario != "baseline":
+        parser.error("--mid-request-pause-ms requires the baseline scenario")
     with tempfile.TemporaryDirectory(prefix="phonic-synthetic-") as directory:
         clips = {name: synthesize(text, Path(directory), args.codec) for name, text in {
             "lookup": "Please check order one two three.",
             "correction": "Actually, check order one two four instead.",
             "question": "What is the capital of France?",
             "stop": "Stop counting. Say hello instead."}.items()}
+        if args.mid_request_pause_ms:
+            directory = Path(directory)
+            start = synthesize("Please check order", directory, args.codec)
+            end = synthesize("one two three.", directory, args.codec)
+            silence_per_ms = b"\xff" * 8 if args.codec == "pcmu" else b"\x00" * 48
+            clips["lookup"] = start + silence_per_ms * args.mid_request_pause_ms + end
         report = asyncio.run(probe(args, clips))
+        if args.mid_request_pause_ms:
+            report["mid_request_pause_ms"] = args.mid_request_pause_ms
+            report["checks"]["correct_order_delegated"] = any(
+                "123" in call["request"] for call in report["calls"]
+            )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"scenario": args.scenario, "codec": args.codec, "checks": report["checks"],

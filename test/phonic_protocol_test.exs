@@ -46,7 +46,7 @@ defmodule Parlora.PhonicProtocolTest do
     assert tool.execution_mode == "async" and tool.forbid_speech_after_tool_call
     assert tool.tool_schema.function.name == Protocol.function()
     assert tool.tool_schema.function.strict
-    assert config.model == "phonic-1" and config.input_format == "pcm_24000"
+    assert config.model == "phonic-1.1" and config.input_format == "pcm_24000"
   end
 
   test "invalid native settings and misspellings return errors instead of being silently ignored" do
@@ -181,10 +181,21 @@ defmodule Parlora.PhonicProtocolTest do
     refute hd(config.tools).forbid_speech_after_tool_call
   end
 
+  test "explicit Phonic models reach the wire without changing other settings" do
+    for format <- [%AudioFormat{}, AudioFormat.pcmu()] do
+      assert {:ok, default} = Protocol.start([api_key: "test"], format)
+
+      for model <- ["phonic-1", "phonic-1.1"] do
+        assert {:ok, config} = Protocol.start([api_key: "test", model: model], format)
+        assert config == %{default | model: model}
+      end
+    end
+  end
+
   test "configuration pins the model and codecs with strict asynchronous client delegation" do
     for format <- [%AudioFormat{}, AudioFormat.pcmu()] do
       assert {:ok, config} = Protocol.start([api_key: "test"], format)
-      assert config.model == "phonic-1"
+      assert config.model == "phonic-1.1"
       assert config.input_format == "pcm_24000" and config.output_format == "pcm_24000"
       refute config.push_to_talk
       refute config.stream_ahead_of_real_time

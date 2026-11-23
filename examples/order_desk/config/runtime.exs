@@ -6,6 +6,7 @@ config :order_desk, :openai_api_key, System.get_env("OPENAI_API_KEY")
 config :order_desk, :gemini_api_key, System.get_env("GEMINI_API_KEY")
 config :order_desk, :grok_api_key, System.get_env("XAI_API_KEY")
 config :order_desk, :phonic_api_key, System.get_env("PHONIC_API_KEY")
+config :order_desk, :phonic_model, System.get_env("PHONIC_MODEL")
 
 backend =
   case System.get_env("PARLORA_BACKEND", "jido") do
