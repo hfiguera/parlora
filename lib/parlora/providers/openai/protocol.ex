@@ -5,6 +5,9 @@ defmodule Parlora.Providers.OpenAI.Protocol do
   alias Parlora.Provider.History
 
   @append_types %{quiet: "thinking", speakable: "commentary", instruction: "instructions"}
+  @models ["gpt-live-1", "gpt-live-1.1"]
+
+  def default_model, do: "gpt-live-1.1"
 
   def capabilities do
     %Capabilities{
@@ -21,7 +24,7 @@ defmodule Parlora.Providers.OpenAI.Protocol do
 
   def start(options, format) do
     key = Keyword.get(options, :api_key)
-    model = Keyword.get(options, :model, "gpt-live-1")
+    model = Keyword.get(options, :model, default_model())
     mode = Keyword.get(options, :delegation, :client)
     instructions = Keyword.get(options, :instructions, "Keep replies brief.")
     history = Keyword.get(options, :history, [])
@@ -35,8 +38,11 @@ defmodule Parlora.Providers.OpenAI.Protocol do
       not positive_integer?(command_timeout) ->
         Error.tuple(:invalid_argument, "command_ack_timeout_ms must be a positive integer")
 
-      model != "gpt-live-1" or mode != :client ->
-        Error.tuple(:unsupported, "Only gpt-live-1 with client delegation is implemented")
+      model not in @models or mode != :client ->
+        Error.tuple(
+          :unsupported,
+          "Only gpt-live-1 and gpt-live-1.1 with client delegation are implemented"
+        )
 
       not AudioFormat.supported?(format) ->
         Error.tuple(:unsupported, "OpenAI audio requires mono PCM16LE/24 kHz or μ-law/8 kHz")

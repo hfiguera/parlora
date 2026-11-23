@@ -2,6 +2,7 @@ defmodule BookingDesk.Run do
   @moduledoc "Bounded live scenarios driven by task and speech milestones, never injected transcripts."
   alias BookingDesk.{Recorder, ReplayChannel}
   alias Parlora.Event
+  alias Parlora.Providers.OpenAI
   alias Parlora.Providers.Phonic
 
   def run(directory, clips, opts \\ []) do
@@ -382,7 +383,7 @@ defmodule BookingDesk.Run do
   defp advance_stage(%{stage: :reminder} = s, settled, _age) do
     if settled && s.reminder != nil &&
          Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "verify_existing" &&
-         reminder_readback_verified?(s.session) &&
+         reminder_readback_verified?(s.session, s.provider) &&
          s.channel != nil && ReplayChannel.output_drained?(s.channel) do
       play(s, "phone_confirm", %{
         last_four: Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four)),
@@ -456,12 +457,13 @@ defmodule BookingDesk.Run do
 
   defp clinician_question(_), do: nil
 
-  defp reminder_readback_verified?(session) do
+  defp reminder_readback_verified?(session, provider) do
     snapshot = Parlora.snapshot(session)
 
     BookingDesk.ReminderReadback.verified?(
       snapshot,
-      BookingDesk.ReminderPolicy.state(snapshot)
+      BookingDesk.ReminderPolicy.state(snapshot),
+      reminder_recovery: provider == "openai"
     )
   end
 
@@ -729,10 +731,12 @@ defmodule BookingDesk.Run do
   defp model(%{provider: "phonic"} = s),
     do: Map.get(s.provider_options, :model, s.provider_defaults.model)
 
+  defp model(%{provider: "openai"} = s),
+    do: Map.get(s.provider_options, :model, OpenAI.default_model())
+
   defp model(%{provider: provider}),
     do:
       %{
-        "openai" => "gpt-live-1",
         "gemini" => "gemini-3.8-live",
         "grok" => "grok-voice-3.0",
         "prism" => "prism"

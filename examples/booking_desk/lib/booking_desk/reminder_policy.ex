@@ -101,13 +101,15 @@ defmodule BookingDesk.ReminderPolicy do
       }
     }
 
+    state = prepare_echo(snapshot, current, state, turns, opts)
+
     classify = Keyword.get(opts, :reminder_judge, &classify/1)
 
     result =
       cond do
         BookingDesk.Recovery.command(latest_user) -> {:ok, "appointment"}
         literal_opt_in?(current, state) -> {:ok, "opt_in"}
-        literal_confirmation?(current, state) -> {:ok, "confirm_number"}
+        literal_confirmation?(current, state, opts) -> {:ok, "confirm_number"}
         true -> classify.(state)
       end
 
@@ -153,27 +155,74 @@ defmodule BookingDesk.ReminderPolicy do
 
   defp literal_opt_in?(_, _), do: false
 
-  defp literal_confirmation?(%{status: status, destination: destination}, state)
+  defp literal_confirmation?(%{status: status, destination: destination}, state, opts)
        when status in ["verify_existing", "verify_new"] do
     text = normalized_reply(state.latest_user)
-
-    accept =
-      BookingDesk.Reply.simple(text) == :accept or
-        Regex.match?(
-          ~r/\A(?:yes|yep|yeah)\s+that(?:'s|\s+is)\s+(?:my\s+(?:number|(?:cell(?:\s+phone)?|mobile(?:\s+phone)?|phone)(?:\s+number)?)|the\s+right\s+number)\z/u,
-          text
-        ) or repeated_yes?(text)
 
     question = confirmation_question(state.dialogue)
 
     expected =
       if status == "verify_existing", do: String.slice(destination, -4, 4), else: destination
 
-    accept and question != nil and
-      BookingDesk.Reminders.destination_question?(question.text, expected)
+    number_approval?(text, opts) and question != nil and
+      BookingDesk.ReminderReadback.destination_question?(question.text, expected, opts)
   end
 
-  defp literal_confirmation?(_, _), do: false
+  defp literal_confirmation?(_, _, _), do: false
+
+  defp number_approval?(text, opts) do
+    BookingDesk.Reply.simple(text) == :accept or
+      Regex.match?(
+        ~r/\A(?:yes|yep|yeah)\s+that(?:'s|\s+is)\s+(?:my\s+(?:number|(?:cell(?:\s+phone)?|mobile(?:\s+phone)?|phone)(?:\s+number)?)|the\s+right\s+number)\z/u,
+        text
+      ) or repeated_yes?(text) or
+      (Keyword.get(opts, :reminder_recovery, false) and
+         Regex.match?(
+           ~r/\A(?:yes|yep|yeah)\s+(?:this is my (?:phone )?number|i confirm that is my (?:phone )?number|do it)\z/u,
+           text
+         ))
+  end
+
+  defp prepare_echo(snapshot, current, state, turns, opts) do
+    question = confirmation_question(turns)
+
+    echo =
+      if Keyword.get(opts, :reminder_recovery, false) and
+           current_question?(snapshot, current, question, state.interpretation_binding) do
+        BookingDesk.ReminderReadback.echo(
+          state.latest_user,
+          current,
+          question.text,
+          opts
+        )
+      end
+
+    if echo do
+      state = Map.put(state, :destination_echo, echo.original)
+
+      if number_approval?(normalized_reply(echo.reply), opts) and
+           BookingDesk.Consent.unconditional?(echo.reply) and
+           state.conversation.phone_evidence == [] and state.conversation.phone == nil,
+         do: %{state | latest_user: echo.reply},
+         else: state
+    else
+      state
+    end
+  end
+
+  defp current_question?(snapshot, %{request_id: request}, %{first_cursor: question}, binding) do
+    Enum.any?(Map.get(snapshot, :tasks, %{}), fn {_, task} ->
+      match?(%{status: :completed, request_ids: [^request | _]}, task) and
+        task.input.operation in ["reminder_opt_in", "reminder_number"] and
+        question > task.input.cursor and binding.caller_turn > question
+    end) and
+      Enum.all?(snapshot.transcripts, fn part ->
+        part.speaker != :user or part.arrival_order < binding.caller_turn or
+          Map.get(part, :provider_generation) == snapshot.provider_generation
+      end)
+  end
+
+  defp current_question?(_, _, _, _), do: false
 
   # A restatement adds no destination or condition to the explicit yes.
   defp repeated_yes?(text) do
@@ -192,7 +241,7 @@ defmodule BookingDesk.ReminderPolicy do
         :appointment
 
       {:ok, "number"} when current.status in ["need_number", "verify_existing", "verify_new"] ->
-        extract_number(snapshot, state, opts)
+        select_number(snapshot, current, state, opts)
 
       {:ok, "opt_in"} when current.status == "offered" ->
         accept_offer(dialogue, latest_user)
@@ -205,7 +254,7 @@ defmodule BookingDesk.ReminderPolicy do
         {:input, %{operation: "reminder_change"}}
 
       {:ok, "confirm_number"} when current.status in ["verify_existing", "verify_new"] ->
-        confirm_number(current, dialogue, state.conversation, latest_user)
+        confirm_reply(current, state, opts)
 
       {:ok, "none"} ->
         :associate
@@ -214,6 +263,18 @@ defmodule BookingDesk.ReminderPolicy do
         clarify_uncertain(snapshot, current, state, opts)
     end
   end
+
+  defp select_number(_snapshot, current, %{destination_echo: _}, _opts),
+    do: {:clarify, question(current)}
+
+  defp select_number(snapshot, _current, state, opts), do: extract_number(snapshot, state, opts)
+
+  defp confirm_reply(current, %{destination_echo: echo, latest_user: reply}, _opts)
+       when echo == reply,
+       do: {:clarify, question(current)}
+
+  defp confirm_reply(current, state, opts),
+    do: confirm_number(current, state.dialogue, state.conversation, state.latest_user, opts)
 
   defp accept_offer(dialogue, text) do
     question = dialogue |> Enum.filter(&(&1.speaker == :assistant)) |> List.last()
@@ -264,14 +325,19 @@ defmodule BookingDesk.ReminderPolicy do
   end
 
   defp clarify_uncertain(snapshot, current, state, opts) do
-    if current.status in ["verify_existing", "verify_new"] and
-         BookingDesk.Reminders.readback_digits(state.latest_user) == "" do
-      case state.conversation do
-        %{phone_evidence: [_ | _]} -> {:clarify, partial_number_question()}
-        %{phone: phone} -> {:clarify, uncertainty_question(current, phone)}
-      end
-    else
-      retain_number(snapshot, current, state, opts)
+    cond do
+      Map.has_key?(state, :destination_echo) ->
+        {:clarify, question(current)}
+
+      current.status in ["verify_existing", "verify_new"] and
+          BookingDesk.Reminders.readback_digits(state.latest_user) == "" ->
+        case state.conversation do
+          %{phone_evidence: [_ | _]} -> {:clarify, partial_number_question()}
+          %{phone: phone} -> {:clarify, uncertainty_question(current, phone)}
+        end
+
+      true ->
+        retain_number(snapshot, current, state, opts)
     end
   end
 
@@ -322,17 +388,17 @@ defmodule BookingDesk.ReminderPolicy do
     do:
       "I've kept the digits you supplied. Please finish the phone number. Nothing will be sent until you confirm its complete readback."
 
-  defp confirm_number(_, _, %{phone_evidence: [_ | _]}, _),
+  defp confirm_number(_, _, %{phone_evidence: [_ | _]}, _, _),
     do: {:clarify, partial_number_question()}
 
-  defp confirm_number(current, dialogue, conversation, text),
-    do: confirm_destination(current, dialogue, conversation.phone, text)
+  defp confirm_number(current, dialogue, conversation, text, opts),
+    do: confirm_destination(current, dialogue, conversation.phone, text, opts)
 
-  defp confirm_destination(current, _, phone, _)
+  defp confirm_destination(current, _, phone, _, _)
        when is_binary(phone) and phone != current.destination,
        do: {:clarify, pending_number_question(phone)}
 
-  defp confirm_destination(current, dialogue, _, text) do
+  defp confirm_destination(current, dialogue, _, text, opts) do
     question = confirmation_question(dialogue)
 
     expected =
@@ -343,7 +409,7 @@ defmodule BookingDesk.ReminderPolicy do
     # The literal path or confident semantic judgment has established positive
     # intent. Keep deterministic destination and refusal/condition checks without
     # requiring a second lexical "yes" in a naturally phrased confirmation.
-    if question && BookingDesk.Reminders.readback?(question.text, expected) &&
+    if question && BookingDesk.ReminderReadback.readback?(question.text, expected, opts) &&
          BookingDesk.Consent.unconditional?(text),
        do:
          {:input,

@@ -40,7 +40,7 @@ explains these terms in more detail.
 
 | Audio channels | Voice providers | Backend integrations |
 | --- | --- | --- |
-| Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0, Phonic-1, Phonic-1.1 | Jido, Sagents, Legion, or your own `Parlora.Backend` |
+| Browser WebRTC, local microphone/speakers, Twilio, Telnyx | OpenAI GPT-Live-1.1 (default) and GPT-Live-1, Gemini 3.8 Live, Grok Voice 3.0, Phonic-1, Phonic-1.1 | Jido, Sagents, Legion, or your own `Parlora.Backend` |
 
 Rime Prism is available for experimental PCM sessions through `Parlora.Providers.Prism`.
 

@@ -96,7 +96,7 @@ PARLORA_PROVIDER=grok GROK_REASONING_EFFORT=high scripts/browser.sh
 PARLORA_PROVIDER=phonic scripts/browser.sh
 ```
 
-OpenAI uses `gpt-live-1`; Gemini uses `gemini-3.8-live`; Grok uses `grok-voice-3.0`.
+OpenAI uses `gpt-live-1.1`; Gemini uses `gemini-3.8-live`; Grok uses `grok-voice-3.0`.
 Grok reasoning accepts `high` (default) or `none`.
 Phonic uses the supported `phonic-1` provider. On macOS, the launcher reads
 `parlora-phonic-development` from Keychain when `PHONIC_API_KEY` is absent.

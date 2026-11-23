@@ -104,6 +104,57 @@ defmodule BookingDesk.Confirmation do
 
   def current(_, _, _), do: nil
 
+  # A context acknowledgment is not evidence that the caller heard the receipt.
+  # Status/repeat recovery only reads a completed, identity-bound database result.
+  def pending_receipt?(snapshot, %{status: :completed} = task) do
+    case current(snapshot, task) do
+      nil -> false
+      current -> not complete_receipt?(snapshot, current, task)
+    end
+  end
+
+  def pending_receipt?(_, _), do: false
+
+  def recover(snapshot, task, cursor, repeat? \\ false)
+
+  def recover(
+        snapshot,
+        %{status: :completed, input: %{operation: "confirm"}, request_ids: [request | _]} = task,
+        cursor,
+        repeat?
+      ) do
+    current = current(snapshot, task)
+
+    caller =
+      snapshot.transcripts
+      |> BookingDesk.Dialogue.build(with_cursor: true, after_cursor: task.input.cursor)
+      |> List.last()
+
+    scope = ReadbackScope.current(snapshot, request, :confirmation_recovery)
+
+    if current && match?(%{speaker: :user}, caller) && cursor > task.input.cursor &&
+         caller.first_cursor != scope[:caller_turn] &&
+         (repeat? or not complete_receipt?(snapshot, current, task)) do
+      input = ReadbackScope.input(snapshot, task, :confirmation_recovery, 1)
+      input = put_in(input.confirmation_recovery[:caller_turn], caller.first_cursor)
+      {correction_message(current, ""), input}
+    end
+  end
+
+  def recover(_, _, _, _), do: nil
+
+  defp complete_receipt?(snapshot, current, task) do
+    snapshot
+    |> ReadbackScope.turns(current.request_id, :confirmation_recovery,
+      include_assistant_reply: true,
+      limit: 20
+    )
+    |> Enum.any?(fn turn ->
+      turn.speaker == :assistant and turn.first_cursor > task.input.cursor and
+        complete?(turn.text, current.confirmation)
+    end)
+  end
+
   def correction(
         snapshot,
         %{request_id: request} = current,

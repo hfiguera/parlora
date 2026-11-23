@@ -4,17 +4,20 @@ defmodule Parlora.OpenAIRecoveryHistoryTest do
   alias Parlora.Provider.History
   alias Parlora.Providers.OpenAI.{Protocol, Recovery}
 
-  test "replacement sessions preserve the selected voice and application voice instructions" do
-    for voice <- ["marin", %{id: "voice_test"}, %{"id" => "voice_test"}] do
+  test "replacement sessions preserve the selected model, voice and application voice instructions" do
+    for model <- ["gpt-live-1", "gpt-live-1.1"],
+        format <- [%AudioFormat{}, AudioFormat.pcmu()],
+        voice <- ["marin", %{id: "voice_test"}, %{"id" => "voice_test"}] do
       instructions = "A warm adult voice. Speak American English. Keep replies brief."
 
       assert {:ok, startup} =
                Protocol.start(
-                 [api_key: "test", voice: voice, instructions: instructions],
-                 %AudioFormat{}
+                 [api_key: "test", model: model, voice: voice, instructions: instructions],
+                 format
                )
 
       restored = Recovery.startup(startup, %ContextSnapshot{})
+      assert restored.session.model == model
       assert restored.session.audio == startup.session.audio
       assert restored.session.instructions == instructions
       assert restored.event_id != startup.event_id

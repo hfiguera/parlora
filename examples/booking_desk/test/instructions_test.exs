@@ -1,15 +1,45 @@
 defmodule BookingDesk.InstructionsTest do
   use ExUnit.Case, async: true
 
-  test "GPT-Live receives native client-handoff guidance without leaking its token to tool providers" do
+  test "GPT-Live-1.1 uses plain-language handoffs while rollback retains the 1.0 token" do
     openai = BookingDesk.instructions("openai")
     assert String.starts_with?(openai, BookingDesk.instructions())
-    assert openai =~ "Generate <|SpawnThinking|> when:"
-    assert openai =~ "Do not generate <|SpawnThinking|> when:"
+    assert openai =~ "Delegate to the backend when:"
+    assert openai =~ "Do not delegate when:"
+    assert openai =~ "Backchannel policy:"
+    assert openai =~ "Interruption policy:"
 
-    for provider <- ["gemini", "phonic"] do
+    assert openai =~
+             "Do not say a booking is processing or submitted unless the application reports that state."
+
+    assert openai =~
+             "Do not say you are scheduling or saving a reminder until the application confirms that action."
+
+    refute openai =~ "<|SpawnThinking|>"
+
+    assert BookingDesk.instructions("openai", model: "gpt-live-1.1") == openai
+    legacy = BookingDesk.instructions("openai", model: "gpt-live-1")
+    assert legacy =~ "Generate <|SpawnThinking|> when:"
+    assert legacy =~ "Do not generate <|SpawnThinking|> when:"
+
+    for prompt <- [openai, legacy],
+        rule <- [
+          "explicitly approves the current proposal",
+          "Do not guess results while waiting",
+          "Never retry a booking automatically",
+          "A stored number is not consent"
+        ] do
+      assert prompt =~ rule
+    end
+
+    for provider <- ["gemini", "phonic", "prism"] do
       assert BookingDesk.instructions(provider) == BookingDesk.instructions()
       refute BookingDesk.instructions(provider) =~ "<|SpawnThinking|>"
+    end
+
+    for provider <- ~w(gemini grok phonic prism), model <- ["gpt-live-1", "gpt-live-1.1"] do
+      assert BookingDesk.instructions(provider, model: model) ==
+               BookingDesk.instructions(provider)
     end
   end
 

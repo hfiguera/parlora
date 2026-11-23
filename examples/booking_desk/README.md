@@ -51,7 +51,7 @@ To select another speech provider, also export its key and set `PARLORA_PROVIDER
 
 | Provider | Speech model | Additional key |
 | --- | --- | --- |
-| `openai` (default) | `gpt-live-1` | None |
+| `openai` (default) | `gpt-live-1.1` | None |
 | `phonic` | `phonic-1` | `PHONIC_API_KEY` |
 | `grok` | `grok-voice-3.0` | `XAI_API_KEY` |
 | `gemini` | `gemini-3.8-live` | `GEMINI_API_KEY` |
@@ -60,6 +60,29 @@ To select another speech provider, also export its key and set `PARLORA_PROVIDER
 The example selects Ara for Grok and Sulafat for Gemini. JEV uses `jev-1.13.0`;
 structured extraction uses `openai:gpt-6-luna`. Available API credit is required for
 live calls. Keep keys out of source files and recordings.
+
+OpenAI uses plain-language delegation instructions for GPT-Live-1.1. To select
+the previous model and its token-based handoff instructions together:
+
+```elixir
+BookingDesk.start(channel,
+  provider: "openai",
+  provider_options: [model: "gpt-live-1"]
+)
+```
+
+The same override is accepted by `BookingDesk.Run.run/3`. Recorded runs identify
+the selected OpenAI model. Gemini, Grok, Phonic and Prism retain their existing
+prompts and settings.
+
+If an OpenAI confirmation is interrupted, asking for its status or asking to repeat
+it recovers the saved receipt. The application does not book again. A text reminder
+still requires separate opt-in and phone-number confirmation.
+
+For OpenAI, a short acknowledgment after an explicit approval does not erase that
+approval while it is being validated. The original reply and exact proposal are
+rechecked; conditions, refusals, corrections and bare acknowledgments cannot supply
+consent. Other providers retain their existing approval behavior.
 
 Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with

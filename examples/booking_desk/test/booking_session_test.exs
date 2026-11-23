@@ -980,6 +980,413 @@ defmodule BookingDesk.BookingSessionTest do
     refute_receive {:submitted, _}, 100
   end
 
+  @tag :approval_acknowledgment
+  test "the recorded Yes please then Kay submits one booking without asking again" do
+    owner = self()
+
+    judge = fn state ->
+      send(owner, {:approval_judged, state.latest_user})
+
+      case state.latest_user do
+        "November fifth with Dr. Lee" ->
+          approval_result("availability")
+
+        "Ten fifteen" ->
+          approval_result("choose_slot")
+
+        "Yes, please" ->
+          if Map.has_key?(state, :approval_continuation) do
+            assert state.approval_continuation.approval == "Yes, please"
+            assert state.approval_continuation.acknowledgments == ["'Kay"]
+          end
+
+          approval_result("confirm")
+
+        "'Kay" ->
+          {:error, :uncertain}
+      end
+    end
+
+    {session, provider, backend, proposal} = proposal_for_acknowledgment(judge)
+    caller(provider, "Yes, please", 76_070, "original-approval")
+    assert_receive {:approval_judged, "Yes, please"}, 2_000
+    task_id = proposal.task_id
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :context_wait_started,
+                      payload: %{target: {:task, ^task_id, 1}, recheck_after_ms: 1_500}
+                    }},
+                   2_000
+
+    assistant(provider, "Okay. Processing that now.", 77_160)
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "'Kay",
+      start_ms: 78_912,
+      end_ms: 79_112
+    })
+
+    # The acknowledgment supplies no new delegation and no independent authorization.
+    assert_receive {:submitted, booking}, 4_000
+    assert booking.input.operation == "confirm"
+    assert booking.input.proposal == proposal.id
+    assert booking.input.revision == proposal.input.revision
+    refute_receive {:context, _}, 100
+
+    caller(provider, "Yes, I already told you", 90_000, "repeated-approval")
+    refute_receive {:approval_judged, "Yes, I already told you"}, 200
+    refute_receive {:submitted, _}, 100
+    Provider.complete(backend, booking)
+    assert_receive {:context, receipt}, 2_000
+    assert receipt.content =~ "Booked: Thursday November 5 at 10:15 AM"
+
+    assert Enum.count(BookingDesk.Store.snapshot(), fn [id, _, _, status, _] ->
+             id == booking.id and status == "booked"
+           end) == 1
+
+    assert Enum.count(Parlora.snapshot(session).tasks, fn {_, task} ->
+             task.input.operation == "confirm"
+           end) == 1
+
+    assert BookingDesk.Store.reminder_jobs() == []
+    refute_receive {:submitted, _}, 200
+  end
+
+  @tag :approval_acknowledgment
+  test "a refusal arriving during the approval wait still blocks the booking" do
+    owner = self()
+
+    judge = fn state ->
+      send(owner, {:approval_judged, state.latest_user})
+
+      case state.latest_user do
+        "November fifth with Dr. Lee" -> approval_result("availability")
+        "Ten fifteen" -> approval_result("choose_slot")
+        # Even an incorrect high-confidence model answer cannot override the refusal.
+        _ -> approval_result("confirm")
+      end
+    end
+
+    {session, provider, _backend, proposal} = proposal_for_acknowledgment(judge)
+    before = BookingDesk.Store.snapshot()
+    caller(provider, "Yes, please", 76_070, "approval-before-refusal")
+    assert_receive {:approval_judged, "Yes, please"}, 2_000
+    task_id = proposal.task_id
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :context_wait_started,
+                      payload: %{target: {:task, ^task_id, 1}, recheck_after_ms: 1_500}
+                    }},
+                   2_000
+
+    assistant(provider, "Okay. Processing that now.", 77_160)
+    caller(provider, "No, don't book it", 78_912, "refusal")
+    assert_receive {:context, _clarification}, 4_000
+    refute_receive {:submitted, _}, 200
+    assert BookingDesk.Store.snapshot() == before
+
+    refute Enum.any?(Parlora.snapshot(session).tasks, fn {_, task} ->
+             task.input.operation == "confirm"
+           end)
+  end
+
+  defp approval_result(intent),
+    do:
+      {:ok,
+       %{"intent" => intent, "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
+
+  defp proposal_for_acknowledgment(judge) do
+    {session, provider, backend} =
+      start_session(judge,
+        approval_continuity: true,
+        approval_readback_judge: fn _ -> {:ok, :ready} end,
+        reminder_judge: fn _ -> {:ok, "none"} end
+      )
+
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, availability}, 2_000
+    assistant(provider, availability.content, 2_000)
+    caller(provider, "Ten fifteen", 3_000, "choose")
+    assert_receive {:submitted, proposal}, 2_000
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+    assistant(provider, readback.content, 70_000)
+    {session, provider, backend, proposal}
+  end
+
+  @tag :interrupted_confirmation
+  test "the recorded OpenAI interruption resumes the saved receipt without repeating a booking" do
+    guard =
+      start_supervised!(
+        {CallGuard,
+         event_sink: self(),
+         evaluator: fn state ->
+           if state.latest_user == "Q-restirichekin",
+             do: {:error, :uncertain},
+             else: {:ok, :allowed}
+         end,
+         debounce_ms: 0,
+         delivery_ms: 100,
+         quiet_ms: 10}
+      )
+
+    {session, provider, backend, booking} =
+      booked_for_recovery(confirmation_recovery: true, call_guard: guard)
+
+    current = BookingDesk.ReminderPolicy.appointment(Parlora.snapshot(session))
+    appointments = BookingDesk.Store.snapshot()
+    jobs = map_size(Parlora.status(session).jobs)
+    assistant(provider, "You're booked for", 92_420)
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "Q-restirichekin",
+      start_ms: 93_750,
+      end_ms: 93_970
+    })
+
+    assert_receive {:context, boundary}, 2_000
+    assert boundary.content =~ CallGuard.message(:clarify_scope)
+    assert_receive {:parlora_event, %Event{source: :channel, type: :control_completed}}, 2_000
+
+    assistant(
+      provider,
+      "Nope, you're all set. I can help with clinic scheduling and registration. Could you tell me what you need help arranging?",
+      94_530
+    )
+
+    caller(provider, "I was waiting for the confirmation from you", 105_250, "receipt-request")
+    assert_receive {:context, receipt}, 4_000
+    assert receipt.content =~ "Your appointment is already booked."
+    assert BookingDesk.Confirmation.complete?(receipt.content, current.confirmation)
+    assert receipt.content =~ "Would you like a text reminder"
+
+    scope =
+      Parlora.snapshot(session).tasks[booking.task_id].clarification.input.confirmation_recovery
+
+    assert scope.request_id == booking.id
+    assert scope.provider_generation == 0
+    assert scope.task_revision == booking.task_revision
+
+    # Another acknowledgment without the receipt must not consume the confirmation.
+    assistant(provider, "Oh. Right, thanks for your patience.", 107_770)
+    refute_receive {:context, _}, 1_800
+    caller(provider, "Is booked it", 120_950, "receipt-request-again")
+    assert_receive {:context, repeated}, 4_000
+    assert BookingDesk.Confirmation.complete?(repeated.content, current.confirmation)
+    assert BookingDesk.Store.snapshot() == appointments
+    assert map_size(Parlora.status(session).jobs) == jobs
+    assert BookingDesk.Store.reminder_jobs() == []
+    refute_receive {:submitted, _}, 200
+
+    assistant(provider, repeated.content, 124_000)
+    caller(provider, "Is it booked yet?", 130_000, "already-read")
+    refute_receive {:context, _}, 1_800
+    refute_receive {:submitted, _}, 100
+
+    # Complete captions do not prove hearing: an explicit repeat remains read-only.
+    assistant(provider, "Your appointment remains booked.", 131_000)
+    caller(provider, "Repeat that", 132_000, "repeat-receipt")
+    assert_receive {:context, explicit_repeat}, 4_000
+    assert BookingDesk.Confirmation.complete?(explicit_repeat.content, current.confirmation)
+    assert BookingDesk.Store.snapshot() == appointments
+    refute_receive {:submitted, _}, 100
+
+    # A fresh opt-in still needs a separate verified phone question and consent.
+    assistant(
+      provider,
+      explicit_repeat.content,
+      135_000
+    )
+
+    caller(provider, "Yeah, that'd be helpful", 140_000, "opt-in")
+    assert_receive {:submitted, optin}, 4_000
+    assert optin.input.operation == "reminder_opt_in"
+    Provider.complete(backend, optin)
+    assert_receive {:context, destination}, 2_000
+    assert destination.content =~ "zero one eight eight"
+    assert BookingDesk.Store.reminder_jobs() == []
+    assert BookingDesk.Store.snapshot() == appointments
+    refute_receive {:submitted, _}, 100
+  end
+
+  test "providers without OpenAI receipt recovery keep their existing post-booking behavior" do
+    {_session, provider, _backend, _booking} = booked_for_recovery([])
+    assistant(provider, "You're booked for", 92_420)
+    caller(provider, "I was waiting for the confirmation from you", 105_250, "receipt-request")
+    refute_receive {:context, _}, 1_800
+    refute_receive {:submitted, _}, 100
+  end
+
+  @tag :reminder_echo
+  test "the recorded one moment and suffix echo schedule one reminder without repeating the booking" do
+    {session, provider, backend, booking} =
+      booked_for_recovery(
+        reminder_recovery: true,
+        phone_extractor: fn _ -> flunk("the recorded suffix echo is not a replacement number") end
+      )
+
+    code = BookingDesk.ReminderPolicy.appointment(Parlora.snapshot(session)).confirmation
+
+    assistant(
+      provider,
+      "Your confirmation is #{BookingDesk.Confirmation.spoken(code)}. Would you like a text reminder 24 hours before your appointment?",
+      111_000
+    )
+
+    caller(provider, "Yes, please", 136_200, "opt-in")
+    assert_receive {:submitted, %{input: %{operation: "reminder_opt_in"}} = optin}, 4_000
+    assert optin.input.booking_request == booking.id
+    Provider.complete(backend, optin)
+    assert_receive {:context, %{content: "The caller opted in" <> _}}, 2_000
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    assistant(
+      provider,
+      "Great, one moment. Can we send it to the number ending in zero one eight eight?",
+      137_200
+    )
+
+    refute_receive {:parlora_event, %Event{type: :clarification_requested}}, 100
+
+    for {text, at} <- [{"188", 143_000}, {"? Yes, that is my number", 144_400}] do
+      Provider.inject(provider, :transcript_delta, %{
+        speaker: :user,
+        delta: text,
+        start_ms: at,
+        end_ms: at + 200
+      })
+    end
+
+    Provider.inject(provider, :delegation_requested, %{id: "number", target: :client})
+
+    # The voice handoff still needs independently verified, unconditional consent.
+    assert_receive {:submitted, %{input: %{operation: "reminder_confirm"}} = confirmation}, 4_000
+    assert confirmation.input.booking_request == booking.id
+    assert confirmation.input.reminder_revision == optin.id
+    assert confirmation.input.destination == "+12025550188"
+    refute_receive {:parlora_event, %Event{type: :clarification_requested}}, 100
+
+    assistant(provider, "Thanks, one moment.", 147_000)
+    caller(provider, "Yes, I confirm that is my phone number", 169_000, "repeat-number")
+    refute_receive {:submitted, _}, 200
+    Provider.complete(backend, confirmation)
+    assert_receive {:context, %{content: "Your text reminder is scheduled" <> _}}, 2_000
+    assert [[_, "p_1002", "+12025550188", _, "simulated", _]] = BookingDesk.Store.reminder_jobs()
+
+    assert Enum.count(BookingDesk.Store.snapshot(), fn [id, _, _, status, _] ->
+             id != "appt_existing" and status == "booked"
+           end) == 1
+
+    refute_receive {:submitted, _}, 150
+  end
+
+  @tag :reminder_echo
+  test "an echo followed by a refusal during the reminder settling window never schedules" do
+    {session, provider, backend, _booking} =
+      booked_for_recovery(
+        reminder_recovery: true,
+        reminder_judge: fn _ -> {:ok, "confirm_number"} end,
+        phone_extractor: fn _ -> flunk("a conditional suffix echo cannot become a new number") end
+      )
+
+    code = BookingDesk.ReminderPolicy.appointment(Parlora.snapshot(session)).confirmation
+
+    assistant(
+      provider,
+      "Your confirmation is #{BookingDesk.Confirmation.spoken(code)}. Would you like a text reminder?",
+      10_000
+    )
+
+    caller(provider, "Yes, please", 12_000, "opt-in")
+    assert_receive {:submitted, %{input: %{operation: "reminder_opt_in"}} = optin}, 4_000
+    Provider.complete(backend, optin)
+    assert_receive {:context, %{content: "The caller opted in" <> _}}, 2_000
+
+    assistant(
+      provider,
+      "Great, one moment. Can we send it to the number ending in zero one eight eight?",
+      14_000
+    )
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "188? Yes",
+      start_ms: 16_000,
+      end_ms: 16_200
+    })
+
+    assert_receive {:parlora_event, %Event{type: :context_wait_started}}, 1_000
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: ", but don't send it",
+      start_ms: 16_400,
+      end_ms: 16_600
+    })
+
+    assert_receive {:context, question}, 4_000
+    assert question.content =~ "Can we send"
+    refute_receive {:submitted, _}, 150
+    assert BookingDesk.Store.reminder_jobs() == []
+    assert BookingDesk.ReminderPolicy.state(Parlora.snapshot(session)).status == "verify_existing"
+  end
+
+  defp booked_for_recovery(options) do
+    judge = fn state ->
+      intent =
+        case state.latest_user do
+          "November fifth with Dr. Lee" ->
+            "availability"
+
+          "Ten fifteen" ->
+            "choose_slot"
+
+          "Yes, please book it" ->
+            "confirm"
+
+          text
+          when text in [
+                 "I was waiting for the confirmation from you",
+                 "Is booked it",
+                 "Is it booked yet?"
+               ] ->
+            "progress"
+        end
+
+      {:ok,
+       %{"intent" => intent, "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
+    end
+
+    {session, provider, backend} =
+      start_session(
+        judge,
+        Keyword.merge([settle_confirm_ms: 0, reminder_judge: fn _ -> {:ok, "none"} end], options)
+      )
+
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, available}, 2_000
+    assistant(provider, available.content, 2_000)
+    caller(provider, "Ten fifteen", 3_000, "choose")
+    assert_receive {:submitted, proposal}, 2_000
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+    assistant(provider, readback.content, 5_000)
+    caller(provider, "Yes, please book it", 6_000, "book")
+    assert_receive {:submitted, booking}, 2_000
+    Provider.complete(backend, booking)
+    assert_receive {:context, receipt}, 2_000
+    assert receipt.content =~ "Booked:"
+    {session, provider, backend, booking}
+  end
+
   for code_fault <- [:none, :missing_pair, :streaming] do
     @code_fault code_fault
     if code_fault == :missing_pair, do: @tag(:confirmation_correction)

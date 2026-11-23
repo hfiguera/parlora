@@ -2,7 +2,7 @@
 
 This tutorial creates a complete local voice application. Its only business
 operation is a read-only lookup of a demo shop's opening hours. You need a working
-microphone/speakers and an OpenAI key with access to `gpt-live-1`. No TypeSafe key,
+microphone/speakers and an OpenAI key with access to `gpt-live-1.1`. No TypeSafe key,
 backend language model, database, or custom application modules are needed.
 
 ## 1. Create the host application

@@ -1,0 +1,34 @@
+[
+  {
+    "provider": "gemini",
+    "prompt_unchanged": true,
+    "options_unchanged": true,
+    "voice_unchanged": true,
+    "limits_unchanged": true,
+    "prompt_sha256": "56c794446754c4cb97a787f8df7daa7dce76f54c68a3cb5c15238908cbfc3771"
+  },
+  {
+    "provider": "grok",
+    "prompt_unchanged": true,
+    "options_unchanged": true,
+    "voice_unchanged": true,
+    "limits_unchanged": true,
+    "prompt_sha256": "0e88594919f3c4ac002b221baaafc7b5dbc2ab2d3eefe7b62d2ec9b5c32e4e4d"
+  },
+  {
+    "provider": "phonic",
+    "prompt_unchanged": true,
+    "options_unchanged": true,
+    "voice_unchanged": true,
+    "limits_unchanged": true,
+    "prompt_sha256": "56c794446754c4cb97a787f8df7daa7dce76f54c68a3cb5c15238908cbfc3771"
+  },
+  {
+    "provider": "prism",
+    "prompt_unchanged": true,
+    "options_unchanged": true,
+    "voice_unchanged": true,
+    "limits_unchanged": true,
+    "prompt_sha256": "56c794446754c4cb97a787f8df7daa7dce76f54c68a3cb5c15238908cbfc3771"
+  }
+]

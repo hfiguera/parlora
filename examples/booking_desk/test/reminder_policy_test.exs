@@ -82,6 +82,226 @@ defmodule BookingDesk.ReminderPolicyTest do
     }
   end
 
+  defp echo_snapshot(question, answer) do
+    snapshot(question, answer)
+    |> Map.put(:tasks, %{
+      "opt-in" => %{
+        status: :completed,
+        request_ids: ["opt-in"],
+        input: %{operation: "reminder_opt_in", cursor: 0}
+      }
+    })
+    |> Map.update!(:transcripts, fn parts ->
+      Enum.map(parts, &Map.put(&1, :provider_generation, 1))
+    end)
+  end
+
+  @tag :reminder_echo
+  test "the recorded suffix echoes confirm the stored destination without extracting a new number" do
+    current = %{
+      status: "verify_existing",
+      request_id: "opt-in",
+      destination: "+12025550188",
+      patient: "p_1002",
+      original_phone: "2025550188"
+    }
+
+    opts = [
+      reminder_recovery: true,
+      reminder_judge: fn _ ->
+        flunk("an exact destination and unconditional approval need no model")
+      end,
+      phone_extractor: fn _ -> flunk("a suffix echo must not become a replacement number") end
+    ]
+
+    for question <- [
+          "Great, one moment. Can we send it to the number ending in zero one eight eight?",
+          "Okay. Can we send the reminder to zero one eight eight?"
+        ],
+        answer <- [
+          "188? Yes, that is my number",
+          "eight? Yes, this is my number",
+          "188? Yes, do it",
+          "One-eight-eight, yes, that is my number",
+          "188 yes, that is my number",
+          "Yes, I confirm that is my phone number"
+        ] do
+      assert {:input, %{operation: "reminder_confirm", destination: "+12025550188"}} =
+               ReminderPolicy.interpret(echo_snapshot(question, answer), current, opts)
+    end
+  end
+
+  @tag :reminder_echo
+  test "an uncertain suffix echo cannot poison replacement number evidence or grant consent" do
+    memory = start_supervised!(BookingDesk.Conversation)
+
+    current = %{
+      request_id: "opt-in",
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p"
+    }
+
+    question = "Can we send it to the number ending in zero one eight eight?"
+
+    opts = [
+      conversation: memory,
+      reminder_recovery: true,
+      reminder_judge: fn _ -> {:error, :uncertain} end,
+      phone_extractor: fn _ -> flunk("an echoed suffix is not evidence of a new number") end
+    ]
+
+    for answer <- [
+          "188",
+          "eight?",
+          "188? Yes, if it is free",
+          "188? Maybe",
+          "188?",
+          "One-eight-eight, yes, if it is free"
+        ],
+        judgment <- [{:error, :uncertain}, {:ok, "number"}, {:ok, "confirm_number"}] do
+      s = struct(Parlora.ContextSnapshot, echo_snapshot(question, answer))
+      opts = Keyword.put(opts, :reminder_judge, fn _ -> judgment end)
+
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(BookingDesk.Conversation.attach(s, opts), current, opts)
+
+      assert BookingDesk.Conversation.context(BookingDesk.Conversation.attach(s, opts)).phone_evidence ==
+               []
+    end
+  end
+
+  @tag :reminder_echo
+  test "a real replacement still requires all ten caller digits and a separate full readback approval" do
+    memory = start_supervised!(BookingDesk.Conversation)
+    current = %{request_id: "opt-in", status: "verify_existing", destination: "+12025550188"}
+
+    opts = [
+      conversation: memory,
+      reminder_recovery: true,
+      reminder_judge: fn _ -> {:ok, "number"} end,
+      phone_extractor: fn state ->
+        BookingDesk.Phone.validate(
+          %{"phone" => "+12025550199", "evidence" => "2025550199"},
+          state.latest_user
+        )
+      end
+    ]
+
+    s =
+      struct(
+        Parlora.ContextSnapshot,
+        echo_snapshot("Can we send it to 0188?", "My new number is 2025550199")
+      )
+
+    assert {:input, %{operation: "reminder_number", phone: "+12025550199"}} =
+             ReminderPolicy.interpret(BookingDesk.Conversation.attach(s, opts), current, opts)
+
+    current = %{current | status: "verify_new", destination: "+12025550199"}
+
+    for {question, permitted?} <- [
+          {"Can we send the reminder to zero one nine nine?", false},
+          {"Great, one moment. Can we send the reminder to two zero two five five five zero one nine nine?",
+           true}
+        ] do
+      s = struct(Parlora.ContextSnapshot, echo_snapshot(question, "Yes, please"))
+      opts = Keyword.put(opts, :reminder_judge, fn _ -> {:ok, "confirm_number"} end)
+      result = ReminderPolicy.interpret(BookingDesk.Conversation.attach(s, opts), current, opts)
+      assert match?({:input, %{operation: "reminder_confirm"}}, result) == permitted?
+    end
+  end
+
+  @tag :reminder_echo
+  test "echo handling preserves refusal, conditional consent, full new-number checks and provider scope" do
+    current = %{
+      request_id: "opt-in",
+      status: "verify_existing",
+      destination: "+12025550188",
+      patient: "p"
+    }
+
+    question = "Can we send it to the number ending in zero one eight eight?"
+
+    opts = [
+      reminder_recovery: true,
+      reminder_judge: fn _ -> {:ok, "confirm_number"} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for answer <- [
+          "188",
+          "188?",
+          "188? Maybe",
+          "188? Yes, if it is free",
+          "188? Yes, but don't send it",
+          "188? No",
+          "188? Yes?",
+          "188? Yes, use a different number",
+          "4289? Yes, do it"
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(echo_snapshot(question, answer), current, opts)
+    end
+
+    for {stage, readback, answer} <- [
+          {%{current | status: "offered"}, question, "188? Yes, do it"},
+          {%{current | status: "verify_new"}, question, "188? Yes, do it"},
+          {current, "Can we send it to 4289?", "188? Yes, do it"},
+          {current, "Can we send it to zero one eight?", "188? Yes, do it"},
+          {current, "Would you like a text reminder?", "188? Yes, do it"}
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(echo_snapshot(readback, answer), stage, opts)
+    end
+
+    for evidence <- [%{phone_evidence: ["202555"]}, %{phone: "+12025550199"}] do
+      s = struct(Parlora.ContextSnapshot, echo_snapshot(question, "188? Yes, do it"))
+      context = Map.merge(BookingDesk.Conversation.context(s), evidence)
+      s = %{s | application_context: %{booking_conversation: context}}
+      assert {:clarify, _} = ReminderPolicy.interpret(s, current, opts)
+    end
+
+    for scoped_opts <- [
+          Keyword.delete(opts, :reminder_recovery),
+          Keyword.put(opts, :reminder_recovery, false)
+        ] do
+      assert {:clarify, _} =
+               ReminderPolicy.interpret(
+                 echo_snapshot(question, "188? Yes, do it"),
+                 current,
+                 scoped_opts
+               )
+    end
+  end
+
+  @tag :reminder_echo
+  test "echo approval requires the current opt-in question and provider generation" do
+    current = %{request_id: "opt-in", status: "verify_existing", destination: "+12025550188"}
+    s = echo_snapshot("Can we send it to the number ending in 0188?", "188? Yes, do it")
+
+    opts = [
+      reminder_recovery: true,
+      reminder_judge: fn _ -> {:ok, "confirm_number"} end,
+      phone_extractor: fn _ -> {:incomplete, [:phone]} end
+    ]
+
+    for stale <- [
+          %{s | tasks: %{}},
+          put_in(s.tasks["opt-in"].request_ids, ["old-request"]),
+          put_in(s.tasks["opt-in"].input.cursor, 2),
+          put_in(s.tasks["opt-in"].status, :submitted),
+          %{s | provider_generation: 2},
+          %{
+            s
+            | transcripts: [
+                Map.put(hd(s.transcripts), :provider_generation, 0) | tl(s.transcripts)
+              ]
+          }
+        ] do
+      assert {:clarify, _} = ReminderPolicy.interpret(stale, current, opts)
+    end
+  end
+
   test "simple consent to an exact reminder offer opts in without inventing number consent" do
     state = %{status: "offered", patient: "p", original_phone: "2025550188"}
 

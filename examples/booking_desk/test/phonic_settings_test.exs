@@ -181,6 +181,16 @@ defmodule BookingDesk.PhonicSettingsTest do
     assert :sys.get_state(policy[:call_guard]).native_result_replies
   end
 
+  test "interrupted confirmation recovery is enabled only for OpenAI sessions" do
+    for provider <- ~w(openai gemini grok phonic prism) do
+      state = start_booking(provider: provider)
+      assert {BookingDesk.Policy, policy} = state.policy
+      assert policy[:confirmation_recovery] == (provider == "openai")
+      assert policy[:approval_continuity] == (provider == "openai")
+      assert policy[:reminder_recovery] == (provider == "openai")
+    end
+  end
+
   test "session startup derives busy mode only from the explicit setting and library default" do
     for {overrides, busy?} <- [
           {[wait_for_response: false], false},
@@ -227,7 +237,10 @@ defmodule BookingDesk.PhonicSettingsTest do
 
   defp start_booking(opts) do
     {:ok, session} =
-      BookingDesk.start({StartupChannel, owner: self()}, Keyword.put(opts, :provider, "phonic"))
+      BookingDesk.start(
+        {StartupChannel, owner: self()},
+        Keyword.put_new(opts, :provider, "phonic")
+      )
 
     on_exit(fn ->
       monitor = Process.monitor(session)

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- Preserve a BookingDesk OpenAI approval across a short neutral acknowledgment,
+  revalidating the original reply and exact proposal without relaxing consent checks.
+- Recover interrupted BookingDesk OpenAI confirmations from verified saved receipts
+  without retrying booking operations or changing other providers' behavior.
+- Make `gpt-live-1.1` the OpenAI provider's default. Pass `model: "gpt-live-1"`
+  to retain 1.0; output recovery preserves either selection. Other providers and
+  backend models retain their existing defaults.
+- Update BookingDesk's OpenAI handoff instructions for 1.1, automatically retaining
+  token-based handoffs for explicit 1.0 sessions. Recorded runs report the selected
+  OpenAI model. See the [OpenAI guide](docs/openai-provider.md) for upgrade details.
+
 ## 0.6.0
 
 Adds experimental Rime Prism support and promotes Phonic-1.1 to the Phonic
