@@ -46,12 +46,14 @@ defmodule Parlora.MixProject do
     [
       {:ex_webrtc, "~> 0.18.0"},
       {:bandit, "~> 1.14 and >= 1.14.1"},
-      {:plug, "~> 1.20 and >= 1.20.3"},
+      {:plug, "~> 1.20 and >= 1.20.4"},
       {:websock_adapter, "~> 0.7.0"},
       {:websock, "~> 0.5.3"},
       {:mint, "~> 1.11"},
       {:mint_web_socket, "~> 1.0 and >= 1.0.6"},
       {:rustler, "~> 0.38.0", runtime: false},
+      # Enforce the patched IDNA line when an optional backend brings it in.
+      {:idna, "~> 8.0", optional: true},
       {:jido, "~> 2.4.0", optional: true},
       {:sagents, "~> 0.19.2 or ~> 0.20.0", optional: true},
       {:legion, "~> 0.6.0", optional: true},
