@@ -45,7 +45,7 @@ defmodule Parlora.MixProject do
   defp deps do
     [
       {:ex_webrtc, "~> 0.18.0"},
-      {:bandit, "~> 1.14 and >= 1.14.1"},
+      {:bandit, "~> 1.15"},
       {:plug, "~> 1.20 and >= 1.20.4"},
       {:websock_adapter, "~> 0.7.0"},
       {:websock, "~> 0.5.3"},
