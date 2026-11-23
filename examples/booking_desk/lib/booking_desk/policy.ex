@@ -259,6 +259,7 @@ defmodule BookingDesk.Policy do
     Process.sleep(Keyword.get(opts, :coalesce_ms, 180))
     state = request_state(snapshot, latest, cursor)
     {snapshot, state} = prepare_registration(snapshot, state, opts)
+    state = BookingDesk.Approval.prepare(snapshot, latest, state, opts)
 
     state =
       if Keyword.get(opts, :confirmation_recovery, false) and

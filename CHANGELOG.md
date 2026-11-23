@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Preserve a BookingDesk OpenAI approval across a short neutral acknowledgment,
+  revalidating the original reply and exact proposal without relaxing consent checks.
 - Recover interrupted BookingDesk OpenAI confirmations from verified saved receipts
   without retrying booking operations or changing other providers' behavior.
 - Make `gpt-live-1.1` the OpenAI provider's default. Pass `model: "gpt-live-1"`

@@ -186,6 +186,7 @@ defmodule BookingDesk.PhonicSettingsTest do
       state = start_booking(provider: provider)
       assert {BookingDesk.Policy, policy} = state.policy
       assert policy[:confirmation_recovery] == (provider == "openai")
+      assert policy[:approval_continuity] == (provider == "openai")
     end
   end
 

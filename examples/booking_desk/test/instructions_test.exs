@@ -8,6 +8,10 @@ defmodule BookingDesk.InstructionsTest do
     assert openai =~ "Do not delegate when:"
     assert openai =~ "Backchannel policy:"
     assert openai =~ "Interruption policy:"
+
+    assert openai =~
+             "Do not say a booking is processing or submitted unless the application reports that state."
+
     refute openai =~ "<|SpawnThinking|>"
 
     assert BookingDesk.instructions("openai", model: "gpt-live-1.1") == openai

@@ -69,7 +69,8 @@ defmodule BookingDesk do
                call_guard: guard,
                conversation: conversation,
                phonic_busy: native_result_replies?(provider_adapter),
-               confirmation_recovery: provider == "openai"
+               confirmation_recovery: provider == "openai",
+               approval_continuity: provider == "openai"
              )},
           context: %{},
           instructions: instructions(provider, elem(provider_adapter, 1)),
@@ -172,6 +173,9 @@ defmodule BookingDesk do
 
       Backchannel policy: Use brief natural acknowledgments without talking over patient details or approval.
       Interruption policy: Stop speaking and listen when the caller interrupts or corrects a request.
+      After approval, acknowledge briefly while the application validates the request.
+      Do not say a booking is processing or submitted unless the application reports that state.
+      A backend handoff alone does not establish booking submission.
       Delegation policy:
       Backend tools:
       - Appointments: match the patient, confirm or update insurance information on file, check available times, create an exact proposal, and confirm, cancel or reschedule a booking.

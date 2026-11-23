@@ -980,6 +980,145 @@ defmodule BookingDesk.BookingSessionTest do
     refute_receive {:submitted, _}, 100
   end
 
+  @tag :approval_acknowledgment
+  test "the recorded Yes please then Kay submits one booking without asking again" do
+    owner = self()
+
+    judge = fn state ->
+      send(owner, {:approval_judged, state.latest_user})
+
+      case state.latest_user do
+        "November fifth with Dr. Lee" ->
+          approval_result("availability")
+
+        "Ten fifteen" ->
+          approval_result("choose_slot")
+
+        "Yes, please" ->
+          if Map.has_key?(state, :approval_continuation) do
+            assert state.approval_continuation.approval == "Yes, please"
+            assert state.approval_continuation.acknowledgments == ["'Kay"]
+          end
+
+          approval_result("confirm")
+
+        "'Kay" ->
+          {:error, :uncertain}
+      end
+    end
+
+    {session, provider, backend, proposal} = proposal_for_acknowledgment(judge)
+    caller(provider, "Yes, please", 76_070, "original-approval")
+    assert_receive {:approval_judged, "Yes, please"}, 2_000
+    task_id = proposal.task_id
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :context_wait_started,
+                      payload: %{target: {:task, ^task_id, 1}, recheck_after_ms: 1_500}
+                    }},
+                   2_000
+
+    assistant(provider, "Okay. Processing that now.", 77_160)
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "'Kay",
+      start_ms: 78_912,
+      end_ms: 79_112
+    })
+
+    # The acknowledgment supplies no new delegation and no independent authorization.
+    assert_receive {:submitted, booking}, 4_000
+    assert booking.input.operation == "confirm"
+    assert booking.input.proposal == proposal.id
+    assert booking.input.revision == proposal.input.revision
+    refute_receive {:context, _}, 100
+
+    caller(provider, "Yes, I already told you", 90_000, "repeated-approval")
+    refute_receive {:approval_judged, "Yes, I already told you"}, 200
+    refute_receive {:submitted, _}, 100
+    Provider.complete(backend, booking)
+    assert_receive {:context, receipt}, 2_000
+    assert receipt.content =~ "Booked: Thursday November 5 at 10:15 AM"
+
+    assert Enum.count(BookingDesk.Store.snapshot(), fn [id, _, _, status, _] ->
+             id == booking.id and status == "booked"
+           end) == 1
+
+    assert Enum.count(Parlora.snapshot(session).tasks, fn {_, task} ->
+             task.input.operation == "confirm"
+           end) == 1
+
+    assert BookingDesk.Store.reminder_jobs() == []
+    refute_receive {:submitted, _}, 200
+  end
+
+  @tag :approval_acknowledgment
+  test "a refusal arriving during the approval wait still blocks the booking" do
+    owner = self()
+
+    judge = fn state ->
+      send(owner, {:approval_judged, state.latest_user})
+
+      case state.latest_user do
+        "November fifth with Dr. Lee" -> approval_result("availability")
+        "Ten fifteen" -> approval_result("choose_slot")
+        # Even an incorrect high-confidence model answer cannot override the refusal.
+        _ -> approval_result("confirm")
+      end
+    end
+
+    {session, provider, _backend, proposal} = proposal_for_acknowledgment(judge)
+    before = BookingDesk.Store.snapshot()
+    caller(provider, "Yes, please", 76_070, "approval-before-refusal")
+    assert_receive {:approval_judged, "Yes, please"}, 2_000
+    task_id = proposal.task_id
+
+    assert_receive {:parlora_event,
+                    %Event{
+                      type: :context_wait_started,
+                      payload: %{target: {:task, ^task_id, 1}, recheck_after_ms: 1_500}
+                    }},
+                   2_000
+
+    assistant(provider, "Okay. Processing that now.", 77_160)
+    caller(provider, "No, don't book it", 78_912, "refusal")
+    assert_receive {:context, _clarification}, 4_000
+    refute_receive {:submitted, _}, 200
+    assert BookingDesk.Store.snapshot() == before
+
+    refute Enum.any?(Parlora.snapshot(session).tasks, fn {_, task} ->
+             task.input.operation == "confirm"
+           end)
+  end
+
+  defp approval_result(intent),
+    do:
+      {:ok,
+       %{"intent" => intent, "date" => "2026-11-05", "time" => "10:15", "clinician" => "lee"}}
+
+  defp proposal_for_acknowledgment(judge) do
+    {session, provider, backend} =
+      start_session(judge,
+        approval_continuity: true,
+        approval_readback_judge: fn _ -> {:ok, :ready} end,
+        reminder_judge: fn _ -> {:ok, "none"} end
+      )
+
+    caller(provider, "November fifth with Dr. Lee", 0, "search")
+    assert_receive {:submitted, search}, 2_000
+    Provider.complete(backend, search)
+    assert_receive {:context, availability}, 2_000
+    assistant(provider, availability.content, 2_000)
+    caller(provider, "Ten fifteen", 3_000, "choose")
+    assert_receive {:submitted, proposal}, 2_000
+    Provider.complete(backend, proposal)
+    assert_receive {:context, readback}, 2_000
+    assistant(provider, readback.content, 70_000)
+    {session, provider, backend, proposal}
+  end
+
   @tag :interrupted_confirmation
   test "the recorded OpenAI interruption resumes the saved receipt without repeating a booking" do
     guard =

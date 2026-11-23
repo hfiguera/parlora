@@ -79,6 +79,11 @@ If an OpenAI confirmation is interrupted, asking for its status or asking to rep
 it recovers the saved receipt. The application does not book again. A text reminder
 still requires separate opt-in and phone-number confirmation.
 
+For OpenAI, a short acknowledgment after an explicit approval does not erase that
+approval while it is being validated. The original reply and exact proposal are
+rechecked; conditions, refusals, corrections and bare acknowledgments cannot supply
+consent. Other providers retain their existing approval behavior.
+
 Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second

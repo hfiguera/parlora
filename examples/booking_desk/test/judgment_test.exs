@@ -15,6 +15,34 @@ defmodule BookingDesk.JudgmentTest do
     refute baseline["intent"].instructions =~ "confirmation readback is unfinished"
   end
 
+  test "approval guidance is scoped and does not change confidence thresholds or other questions" do
+    baseline = Judgment.questions()
+    assert Judgment.questions(%{approval_context: false}) == baseline
+    scoped = Judgment.questions(%{approval_context: true})
+    assert Map.delete(scoped, "intent") == Map.delete(baseline, "intent")
+    assert scoped["intent"].criteria == baseline["intent"].criteria
+
+    assert scoped["intent"].instructions =~
+             "A bare acknowledgment without an explicit approval is not confirm"
+
+    assert scoped["intent"].instructions =~ "Any condition, refusal, uncertainty"
+    refute Judgment.confident?(answer("confirm", 0.84))
+
+    continued =
+      Judgment.questions(%{
+        approval_context: true,
+        approval_continuation: %{approval: "Yes, please", acknowledgments: ["'Kay"]}
+      })
+
+    assert continued["intent"].criteria == baseline["intent"].criteria
+    assert Map.delete(continued, "intent") == Map.delete(baseline, "intent")
+
+    assert continued["intent"].instructions =~
+             "Choose confirm only if the original caller explicitly and unconditionally approves"
+
+    assert continued["intent"].instructions =~ "Consider ALL caller speech"
+  end
+
   test "approved speech spellings become canonical doctors only after the confidence gate" do
     fields = %{"intent" => answer("availability"), "date" => answer("2026-11-04")}
 
