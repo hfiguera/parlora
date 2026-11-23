@@ -116,7 +116,7 @@ defmodule BookingDesk.Judgment do
           repeat asks to hear the current question or verified options again. restart explicitly abandons unconfirmed
           conversation details and starts a new request; it never undoes completed bookings. retry explicitly requests
           another attempt after a failed read. Never retry an uncertain booking or reminder write.
-          """,
+          """ <> confirmation_guidance(state),
           %{
             "lookup" => "Look up the caller using their supplied full name and date of birth",
             "insurance_same" =>
@@ -177,6 +177,18 @@ defmodule BookingDesk.Judgment do
     end)
     |> date_change_question(state)
   end
+
+  defp confirmation_guidance(%{confirmation_recovery: true}) do
+    """
+    The application has a verified completed booking whose confirmation readback is unfinished.
+    A caller asking whether it is booked, waiting for its confirmation, or asking to hear the
+    receipt again requests progress or repeat, not confirm or none. Recovering this receipt is
+    read-only and never authorizes another booking. Social replies are still none; cancellation,
+    rescheduling, reminder choices, and a new request keep their own intent.
+    """
+  end
+
+  defp confirmation_guidance(_), do: ""
 
   defp date_change_question(questions, state) do
     if active_search(state) do

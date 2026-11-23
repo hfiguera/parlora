@@ -68,7 +68,8 @@ defmodule BookingDesk do
              Keyword.merge(Keyword.get(opts, :policy, []),
                call_guard: guard,
                conversation: conversation,
-               phonic_busy: native_result_replies?(provider_adapter)
+               phonic_busy: native_result_replies?(provider_adapter),
+               confirmation_recovery: provider == "openai"
              )},
           context: %{},
           instructions: instructions(provider, elem(provider_adapter, 1)),

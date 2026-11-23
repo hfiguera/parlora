@@ -316,6 +316,7 @@ defmodule BookingDesk.PolicyTest do
       assert {:ok, [decision]} =
                BookingDesk.Policy.interpret(s, %ContextTrigger{kind: :delegation},
                  coalesce_ms: 0,
+                 confirmation_recovery: true,
                  judge: fn _ -> raise "must await the admitted write" end
                )
 

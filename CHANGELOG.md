@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Recover interrupted BookingDesk OpenAI confirmations from verified saved receipts
+  without retrying booking operations or changing other providers' behavior.
 - Make `gpt-live-1.1` the OpenAI provider's default. Pass `model: "gpt-live-1"`
   to retain 1.0; output recovery preserves either selection. Other providers and
   backend models retain their existing defaults.

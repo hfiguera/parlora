@@ -75,6 +75,10 @@ The same override is accepted by `BookingDesk.Run.run/3`. Recorded runs identify
 the selected OpenAI model. Gemini, Grok, Phonic and Prism retain their existing
 prompts and settings.
 
+If an OpenAI confirmation is interrupted, asking for its status or asking to repeat
+it recovers the saved receipt. The application does not book again. A text reminder
+still requires separate opt-in and phone-number confirmation.
+
 Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with
 backend work allowed to overlap it, native busy-mode result delivery, a 60-second

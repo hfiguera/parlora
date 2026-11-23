@@ -259,6 +259,13 @@ defmodule BookingDesk.Policy do
     Process.sleep(Keyword.get(opts, :coalesce_ms, 180))
     state = request_state(snapshot, latest, cursor)
     {snapshot, state} = prepare_registration(snapshot, state, opts)
+
+    state =
+      if Keyword.get(opts, :confirmation_recovery, false) and
+           BookingDesk.Confirmation.pending_receipt?(snapshot, latest),
+         do: Map.put(state, :confirmation_recovery, true),
+         else: state
+
     result = classify_request(state, opts)
     snapshot = remember_request(snapshot, state, result, latest, cursor, opts)
     state = %{state | conversation: Conversation.decision_context(snapshot)}
@@ -494,7 +501,7 @@ defmodule BookingDesk.Policy do
         clarify_reminder(snapshot, reminder, pending, latest, cursor, message)
 
       :associate ->
-        {:ok, associate(pending, latest)}
+        continue_after_reminder(snapshot, pending, latest, cursor, opts)
 
       :wait ->
         {:ok,
@@ -508,6 +515,13 @@ defmodule BookingDesk.Policy do
            }
          ]}
     end
+  end
+
+  defp continue_after_reminder(snapshot, pending, latest, cursor, opts) do
+    if Keyword.get(opts, :confirmation_recovery, false) and
+         BookingDesk.Confirmation.pending_receipt?(snapshot, latest),
+       do: interpret_request(snapshot, pending, latest, cursor, opts),
+       else: {:ok, associate(pending, latest)}
   end
 
   # A clear yes to the verified offer can start the next question even if the
@@ -670,13 +684,30 @@ defmodule BookingDesk.Policy do
         demographics \\ :not_requested,
         opts \\ []
       ) do
-    if Recovery.pending_write?(latest) do
-      {:ok, associate(pending, latest)}
-    else
-      {snapshot, result} = search_reply(snapshot, latest, cursor, text, result, opts)
-      dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics, opts)
+    recovery = confirmation_recovery(snapshot, result, latest, cursor, opts)
+
+    cond do
+      Recovery.pending_write?(latest) ->
+        {:ok, associate(pending, latest)}
+
+      recovery != nil ->
+        {message, scope} = recovery
+        clarify(cursor, pending, latest, message, scope)
+
+      true ->
+        {snapshot, result} = search_reply(snapshot, latest, cursor, text, result, opts)
+        dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics, opts)
     end
   end
+
+  defp confirmation_recovery(snapshot, {:ok, %{"intent" => intent}}, latest, cursor, opts)
+       when intent in ["progress", "repeat", "retry"] do
+    if Keyword.get(opts, :confirmation_recovery, false),
+      do:
+        BookingDesk.Confirmation.recover(snapshot, latest, cursor, intent in ["repeat", "retry"])
+  end
+
+  defp confirmation_recovery(_, _, _, _, _), do: nil
 
   defp dispatch_decision(snapshot, result, pending, latest, cursor, text, demographics, opts) do
     case result do

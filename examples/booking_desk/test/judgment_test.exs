@@ -4,6 +4,17 @@ defmodule BookingDesk.JudgmentTest do
 
   defp answer(value, p \\ 0.99), do: %{choice: value, probabilities: %{value => p}}
 
+  test "unfinished receipt guidance is added only to an explicitly scoped interpretation" do
+    baseline = Judgment.questions()
+    assert Judgment.questions(%{confirmation_recovery: false}) == baseline
+    scoped = Judgment.questions(%{confirmation_recovery: true})
+    assert Map.delete(scoped, "intent") == Map.delete(baseline, "intent")
+    assert scoped["intent"].criteria == baseline["intent"].criteria
+    assert String.starts_with?(scoped["intent"].instructions, baseline["intent"].instructions)
+    assert scoped["intent"].instructions =~ "read-only and never authorizes another booking"
+    refute baseline["intent"].instructions =~ "confirmation readback is unfinished"
+  end
+
   test "approved speech spellings become canonical doctors only after the confidence gate" do
     fields = %{"intent" => answer("availability"), "date" => answer("2026-11-04")}
 
