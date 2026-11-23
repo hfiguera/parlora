@@ -38,6 +38,28 @@ defmodule BookingDesk.ReminderReadbackTest do
   defp remember(snapshot, scope),
     do: put_in(snapshot.tasks["reminder"][:clarification], %{input: scope})
 
+  test "OpenAI ignores a neutral one moment preamble without ignoring destination errors" do
+    opts = [reminder_recovery: true]
+    text = "Great, one moment. Can we send it to the number ending in zero one eight eight?"
+    s = snapshot(text)
+
+    # The recorded preamble used to contribute an extra 1 to the phone readback.
+    assert Reminders.readback_digits(text) == "10188"
+    assert {_, _} = correction(s)
+    assert ReminderReadback.correction(s, current(), s.tasks["reminder"], 10, opts) == nil
+    assert ReminderReadback.verified?(s, current(), opts)
+
+    for wrong <- [
+          "Great, one moment. Can we send it to the number ending in 4289?",
+          "Great, one moment. Can we send it to 0188 or 4289?",
+          "Great, one moment. Can we send it to zero one eight?",
+          "One digit might be wrong. Can we send it to 0188?",
+          "Only if it is free. Can we send it to 0188?"
+        ] do
+      refute ReminderReadback.verified?(snapshot(wrong), current(), opts), wrong
+    end
+  end
+
   test "repeated correct questions are not concatenated into a wrong destination" do
     question = "Can we send the reminder to your cell number ending in zero one eight eight?"
     s = snapshot(question)

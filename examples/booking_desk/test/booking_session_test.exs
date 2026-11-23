@@ -1223,6 +1223,120 @@ defmodule BookingDesk.BookingSessionTest do
     refute_receive {:submitted, _}, 100
   end
 
+  @tag :reminder_echo
+  test "the recorded one moment and suffix echo schedule one reminder without repeating the booking" do
+    {session, provider, backend, booking} =
+      booked_for_recovery(
+        reminder_recovery: true,
+        phone_extractor: fn _ -> flunk("the recorded suffix echo is not a replacement number") end
+      )
+
+    code = BookingDesk.ReminderPolicy.appointment(Parlora.snapshot(session)).confirmation
+
+    assistant(
+      provider,
+      "Your confirmation is #{BookingDesk.Confirmation.spoken(code)}. Would you like a text reminder 24 hours before your appointment?",
+      111_000
+    )
+
+    caller(provider, "Yes, please", 136_200, "opt-in")
+    assert_receive {:submitted, %{input: %{operation: "reminder_opt_in"}} = optin}, 4_000
+    assert optin.input.booking_request == booking.id
+    Provider.complete(backend, optin)
+    assert_receive {:context, %{content: "The caller opted in" <> _}}, 2_000
+    assert BookingDesk.Store.reminder_jobs() == []
+
+    assistant(
+      provider,
+      "Great, one moment. Can we send it to the number ending in zero one eight eight?",
+      137_200
+    )
+
+    refute_receive {:parlora_event, %Event{type: :clarification_requested}}, 100
+
+    for {text, at} <- [{"188", 143_000}, {"? Yes, that is my number", 144_400}] do
+      Provider.inject(provider, :transcript_delta, %{
+        speaker: :user,
+        delta: text,
+        start_ms: at,
+        end_ms: at + 200
+      })
+    end
+
+    Provider.inject(provider, :delegation_requested, %{id: "number", target: :client})
+
+    # The voice handoff still needs independently verified, unconditional consent.
+    assert_receive {:submitted, %{input: %{operation: "reminder_confirm"}} = confirmation}, 4_000
+    assert confirmation.input.booking_request == booking.id
+    assert confirmation.input.reminder_revision == optin.id
+    assert confirmation.input.destination == "+12025550188"
+    refute_receive {:parlora_event, %Event{type: :clarification_requested}}, 100
+
+    assistant(provider, "Thanks, one moment.", 147_000)
+    caller(provider, "Yes, I confirm that is my phone number", 169_000, "repeat-number")
+    refute_receive {:submitted, _}, 200
+    Provider.complete(backend, confirmation)
+    assert_receive {:context, %{content: "Your text reminder is scheduled" <> _}}, 2_000
+    assert [[_, "p_1002", "+12025550188", _, "simulated", _]] = BookingDesk.Store.reminder_jobs()
+
+    assert Enum.count(BookingDesk.Store.snapshot(), fn [id, _, _, status, _] ->
+             id != "appt_existing" and status == "booked"
+           end) == 1
+
+    refute_receive {:submitted, _}, 150
+  end
+
+  @tag :reminder_echo
+  test "an echo followed by a refusal during the reminder settling window never schedules" do
+    {session, provider, backend, _booking} =
+      booked_for_recovery(
+        reminder_recovery: true,
+        reminder_judge: fn _ -> {:ok, "confirm_number"} end,
+        phone_extractor: fn _ -> flunk("a conditional suffix echo cannot become a new number") end
+      )
+
+    code = BookingDesk.ReminderPolicy.appointment(Parlora.snapshot(session)).confirmation
+
+    assistant(
+      provider,
+      "Your confirmation is #{BookingDesk.Confirmation.spoken(code)}. Would you like a text reminder?",
+      10_000
+    )
+
+    caller(provider, "Yes, please", 12_000, "opt-in")
+    assert_receive {:submitted, %{input: %{operation: "reminder_opt_in"}} = optin}, 4_000
+    Provider.complete(backend, optin)
+    assert_receive {:context, %{content: "The caller opted in" <> _}}, 2_000
+
+    assistant(
+      provider,
+      "Great, one moment. Can we send it to the number ending in zero one eight eight?",
+      14_000
+    )
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: "188? Yes",
+      start_ms: 16_000,
+      end_ms: 16_200
+    })
+
+    assert_receive {:parlora_event, %Event{type: :context_wait_started}}, 1_000
+
+    Provider.inject(provider, :transcript_delta, %{
+      speaker: :user,
+      delta: ", but don't send it",
+      start_ms: 16_400,
+      end_ms: 16_600
+    })
+
+    assert_receive {:context, question}, 4_000
+    assert question.content =~ "Can we send"
+    refute_receive {:submitted, _}, 150
+    assert BookingDesk.Store.reminder_jobs() == []
+    assert BookingDesk.ReminderPolicy.state(Parlora.snapshot(session)).status == "verify_existing"
+  end
+
   defp booked_for_recovery(options) do
     judge = fn state ->
       intent =

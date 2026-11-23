@@ -70,7 +70,8 @@ defmodule BookingDesk do
                conversation: conversation,
                phonic_busy: native_result_replies?(provider_adapter),
                confirmation_recovery: provider == "openai",
-               approval_continuity: provider == "openai"
+               approval_continuity: provider == "openai",
+               reminder_recovery: provider == "openai"
              )},
           context: %{},
           instructions: instructions(provider, elem(provider_adapter, 1)),
@@ -175,6 +176,8 @@ defmodule BookingDesk do
       Interruption policy: Stop speaking and listen when the caller interrupts or corrects a request.
       After approval, acknowledge briefly while the application validates the request.
       Do not say a booking is processing or submitted unless the application reports that state.
+      After reminder number approval, acknowledge briefly and wait for the application result.
+      Do not say you are scheduling or saving a reminder until the application confirms that action.
       A backend handoff alone does not establish booking submission.
       Delegation policy:
       Backend tools:

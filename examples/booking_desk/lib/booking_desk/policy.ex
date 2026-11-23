@@ -62,7 +62,7 @@ defmodule BookingDesk.Policy do
       |> Enum.sort_by(fn {_, d} -> d.received_at_us end)
       |> List.first()
 
-    case {user, readback_correction(snapshot, latest, cursor, pending)} do
+    case {user, readback_correction(snapshot, latest, cursor, pending, opts)} do
       {[], _} ->
         {:ok, []}
 
@@ -125,7 +125,8 @@ defmodule BookingDesk.Policy do
          snapshot,
          %{input: %{operation: "confirm"}} = task,
          cursor,
-         nil
+         nil,
+         _opts
        ) do
     current = BookingDesk.Confirmation.current(snapshot, task)
 
@@ -147,15 +148,16 @@ defmodule BookingDesk.Policy do
          snapshot,
          %{status: status, input: %{operation: operation, cursor: cursor}} = task,
          cursor,
-         _pending
+         _pending,
+         opts
        )
        when status in [:submitted, :completed] and
               operation in ["reminder_opt_in", "reminder_number"] do
     current = BookingDesk.ReminderPolicy.state(snapshot)
-    BookingDesk.ReminderReadback.correction(snapshot, current, task, cursor)
+    BookingDesk.ReminderReadback.correction(snapshot, current, task, cursor, opts)
   end
 
-  defp readback_correction(_, _, _, _), do: nil
+  defp readback_correction(_, _, _, _, _), do: nil
 
   defp registration_ready?(latest, cursor, snapshot),
     do:

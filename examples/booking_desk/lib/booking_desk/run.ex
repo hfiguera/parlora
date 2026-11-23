@@ -383,7 +383,7 @@ defmodule BookingDesk.Run do
   defp advance_stage(%{stage: :reminder} = s, settled, _age) do
     if settled && s.reminder != nil &&
          Map.get(s.reminder, "status", Map.get(s.reminder, :status)) == "verify_existing" &&
-         reminder_readback_verified?(s.session) &&
+         reminder_readback_verified?(s.session, s.provider) &&
          s.channel != nil && ReplayChannel.output_drained?(s.channel) do
       play(s, "phone_confirm", %{
         last_four: Map.get(s.reminder, "last_four", Map.get(s.reminder, :last_four)),
@@ -457,12 +457,13 @@ defmodule BookingDesk.Run do
 
   defp clinician_question(_), do: nil
 
-  defp reminder_readback_verified?(session) do
+  defp reminder_readback_verified?(session, provider) do
     snapshot = Parlora.snapshot(session)
 
     BookingDesk.ReminderReadback.verified?(
       snapshot,
-      BookingDesk.ReminderPolicy.state(snapshot)
+      BookingDesk.ReminderPolicy.state(snapshot),
+      reminder_recovery: provider == "openai"
     )
   end
 

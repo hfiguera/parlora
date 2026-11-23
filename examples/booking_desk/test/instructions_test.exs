@@ -12,6 +12,9 @@ defmodule BookingDesk.InstructionsTest do
     assert openai =~
              "Do not say a booking is processing or submitted unless the application reports that state."
 
+    assert openai =~
+             "Do not say you are scheduling or saving a reminder until the application confirms that action."
+
     refute openai =~ "<|SpawnThinking|>"
 
     assert BookingDesk.instructions("openai", model: "gpt-live-1.1") == openai
