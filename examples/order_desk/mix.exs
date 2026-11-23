@@ -15,7 +15,7 @@ defmodule OrderDesk.MixProject do
           {:parlora, path: "vendor/parlora"},
           {:jido, "== 2.4.0"},
           {:bandit, "== 1.14.1"},
-          {:plug, "== 1.20.3"}
+          {:plug, "== 1.20.4"}
         ] ++
           case System.get_env("PARLORA_BACKEND") do
             "sagents" -> [{:sagents, "== 0.20.1"}]
