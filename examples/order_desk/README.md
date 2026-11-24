@@ -96,8 +96,8 @@ PARLORA_PROVIDER=grok GROK_REASONING_EFFORT=high scripts/browser.sh
 PARLORA_PROVIDER=phonic scripts/browser.sh
 ```
 
-OrderDesk uses the OpenAI default from its vendored Parlora package. That is
-`gpt-live-1.1` when you build the package from this checkout. Gemini uses
+OrderDesk uses the OpenAI default from its vendored Parlora package. With
+Parlora 0.7.0, that is `gpt-live-1.1`. Gemini uses
 `gemini-3.8-live` and Grok uses `grok-voice-3.0`. Set `GROK_REASONING_EFFORT` to
 `high` (the default) or `none`.
 

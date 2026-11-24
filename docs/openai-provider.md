@@ -14,9 +14,10 @@ The adapter supports mono PCM16LE at 24 kHz and G.711 μ-law at 8 kHz.
 
 ## Upgrade from GPT-Live-1
 
-If you omit `model`, OpenAI sessions now use `gpt-live-1.1`. Parlora 0.6.x
-defaulted to `gpt-live-1`. Confirm that your OpenAI project can use 1.1 and check
-its session capacity before switching traffic. OpenAI applies separate
+Starting in Parlora 0.7.0, OpenAI sessions use `gpt-live-1.1` when you omit
+`model`. Parlora 0.6.x defaulted to `gpt-live-1`. Before switching traffic, check
+that your OpenAI project has access to 1.1 and enough capacity for your calls.
+OpenAI applies separate
 concurrent-session limits to the two models. See the [GPT-Live-1.1 model page](https://developers.openai.com/api/docs/models/gpt-live-1.1#rate-limits).
 
 To keep using GPT-Live-1, pass `model: "gpt-live-1"` in the provider tuple and

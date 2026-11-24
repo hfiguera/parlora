@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.7.0
+
+Parlora now defaults to GPT-Live-1.1 for OpenAI voice sessions. This release
+also improves BookingDesk's handling of interrupted confirmations and text
+reminder consent, and updates dependencies to address security advisories.
 
 ### OpenAI upgrade notes
 

@@ -9,7 +9,7 @@ defmodule Parlora.MixProject do
     [
       app: :parlora,
       name: "Parlora",
-      version: "0.6.0",
+      version: "0.7.0",
       source_url: "https://github.com/hfiguera/parlora",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
@@ -71,7 +71,7 @@ defmodule Parlora.MixProject do
   defp docs do
     [
       main: "readme",
-      source_ref: "v0.6.0",
+      source_ref: "v0.7.0",
       filter_modules: ~r/^Elixir\.Parlora(?:\.|$)/,
       extras: [
         "README.md",

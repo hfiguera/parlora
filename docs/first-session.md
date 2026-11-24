@@ -1,8 +1,8 @@
 # Your first working session
 
 Build a small voice app that tells callers when a demo shop is open. You'll need
-a microphone, speakers or headphones, and an OpenAI API key. A Jido action
-returns the shop's hours from a fixed demo record.
+a microphone, speakers or headphones, and an OpenAI API key with access to
+`gpt-live-1.1`. A Jido action returns the shop's hours from a fixed demo record.
 
 ## 1. Create the host application
 
@@ -19,17 +19,13 @@ In the new application's `mix.exs`, replace `deps/0` with:
 ```elixir
 defp deps do
   [
-    {:parlora, "~> 0.6.0"},
+    {:parlora, "~> 0.7.0"},
     {:jido, "~> 2.4.0"}
   ]
 end
 ```
 
 Use a compatible Elixir/OTP pair from the [requirements guide](beam-compatibility.md).
-With the published Parlora 0.6.x dependency above, your key needs access to
-`gpt-live-1`. If you're running the newer adapter from this checkout, your key
-needs access to its default, `gpt-live-1.1`. See the [OpenAI provider guide](openai-provider.md#upgrade-from-gpt-live-1)
-for model selection and handoff instructions.
 
 ## 2. Configure the build before compiling
 
@@ -229,8 +225,9 @@ as described in the [provider guides](openai-provider.md).
   and confirm `native_opus: false` is in the **host** configuration read at compile time.
 - If microphone access or device opening fails, check OS permissions and device
   discovery. Local audio on Linux needs a service compatible with PulseAudio.
-- If the provider rejects startup, check model access and the credential. The
-  example handles failure/closure; do not treat a returned session PID as Ready.
+- If the provider rejects startup, check that your OpenAI key can start a
+  `gpt-live-1.1` session. See the [OpenAI provider guide](openai-provider.md#upgrade-from-gpt-live-1)
+  for model selection and prompt changes.
 
 Once this works, use [Getting started](using-parlora.md) for session controls,
 application context, browser/phone channels, and session ownership in applications that stay running.
