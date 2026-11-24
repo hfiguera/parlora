@@ -1,79 +1,65 @@
 # OpenAI voice provider
 
-`Parlora.Providers.OpenAI` connects to **GPT-Live** over WebSocket with client
-backend delegation. The application supplies credentials explicitly:
+`Parlora.Providers.OpenAI` connects to GPT-Live over WebSocket. When a caller asks
+for something that needs backend work, GPT-Live can hand the request off to your
+application. Your policy decides whether to start the work.
+
+Pass the provider tuple to `Parlora.start_session/1` as the `provider` option.
 
 ```elixir
-provider: {Parlora.Providers.OpenAI,
-  api_key: key,
-  voice: "marin"}
+{Parlora.Providers.OpenAI, api_key: System.fetch_env!("OPENAI_API_KEY")}
 ```
 
-The adapter supports mono PCM16LE at 24 kHz and G.711 μ-law at 8 kHz. Session
-instructions and history are supplied through `Parlora.start_session/1`.
-The supported models are `gpt-live-1.1` (the default) and `gpt-live-1`; other
-OpenAI model IDs are rejected. `Parlora.Providers.OpenAI.default_model/0` returns
-the current default. To retain 1.0 explicitly:
+The adapter supports mono PCM16LE at 24 kHz and G.711 μ-law at 8 kHz.
+
+## Upgrade from GPT-Live-1
+
+Starting in Parlora 0.7.0, OpenAI sessions use `gpt-live-1.1` when you omit
+`model`. Parlora 0.6.x defaulted to `gpt-live-1`. Before switching traffic, check
+that your OpenAI project has access to 1.1 and enough capacity for your calls.
+OpenAI applies separate
+concurrent-session limits to the two models. See the [GPT-Live-1.1 model page](https://developers.openai.com/api/docs/models/gpt-live-1.1#rate-limits).
+
+To keep using GPT-Live-1, pass `model: "gpt-live-1"` in the provider tuple and
+keep your GPT-Live-1 prompt.
 
 ```elixir
-provider: {Parlora.Providers.OpenAI,
-  api_key: key,
-  model: "gpt-live-1",
-  voice: "marin"}
+{Parlora.Providers.OpenAI,
+ api_key: System.fetch_env!("OPENAI_API_KEY"), model: "gpt-live-1"}
 ```
 
-## GPT-Live-1.1 assessment
+These are the two model IDs supported by this adapter.
+`Parlora.Providers.OpenAI.default_model/0` returns the default. If Parlora replaces
+the OpenAI connection during output recovery, it keeps the selected model.
 
-OpenAI [released GPT-Live-1.1 on November 19, 2026](https://developers.openai.com/api/docs/changelog).
-Its documented improvements are more accurate speech
-transcription, better pronunciation, and more consistent accents and voices across
-languages. Better transcription could improve the caller context used by Parlora's
-application policies; measure names, dates, numbers, corrections, and language
-switching on your own calls before relying on that benefit.
+### Update your handoff instructions
 
-Both models accept audio/text and produce audio/text through the same Live endpoint.
-Parlora retains client delegation, both supported audio formats, context
-acknowledgments, and output recovery. Replacement sessions preserve the selected
-model. This selection is local to the OpenAI adapter; it does not change other
-providers or select a different backend model.
-
-The [prompting guide](https://developers.openai.com/api/docs/guides/live-prompting#recommended-prompt-structure)
-recommends plain-language handoffs for 1.1, for example:
+For GPT-Live-1.1, describe when to hand off in plain language. List the work your
+backend can do and give examples of when to call it. This example assumes the
+backend can look up opening hours. Follow [OpenAI's GPT-Live prompting guide](https://developers.openai.com/api/docs/guides/live-prompting#recommended-prompt-structure)
+for the full prompt structure.
 
 ```text
 Delegation policy:
 Backend tools:
-- Appointments: check availability and create, change, or cancel bookings.
-Delegate to the backend when the caller requests an appointment change.
-Do not delegate when asking for missing information or repeating a current result.
-Delegate before giving an answer that depends on backend work. Do not guess results.
+- Look up the shop's opening hours.
+Delegate to the backend when the caller asks when the shop is open.
+Do not delegate for greetings or thanks.
+Wait for the lookup result before answering with the shop's hours.
 ```
 
-For `gpt-live-1`, the guide instead uses `Generate <|SpawnThinking|>` and
-`Do not generate <|SpawnThinking|>`. Supply the model-appropriate instructions
-through `Parlora.start_session/1`; the adapter preserves application prompts exactly.
-BookingDesk selects the matching OpenAI policy from its provider options. Its
-default uses plain language; `provider_options: [model: "gpt-live-1"]` restores
-the 1.0 handoff wording. Other providers keep their existing prompts. Applications
-with their own 1.0 prompts should update their handoff wording when adopting 1.1.
+For GPT-Live-1, use `Generate <|SpawnThinking|>` and
+`Do not generate <|SpawnThinking|>` to describe when to hand off. Pass your prompt
+as `instructions` to `Parlora.start_session/1`. If you supply your own prompt,
+update it when switching models. BookingDesk chooses its handoff wording from
+the selected model.
 
-As of November 23, 2026, both models cost **$0.05 per active minute**, plus separate
-backend/tool usage. They have separate concurrent-session limits; verify 1.1 access
-and capacity in your organization before rollout. The new **$0.02 per standby
-minute** feature applies to provider-side WebRTC sessions and is also available on
-1.0. Parlora's browser channel uses WebRTC with the caller, but its OpenAI provider
-connection uses WebSocket, so that feature requires a new provider transport and
-lifecycle integration. Muting input does not enable standby. See
-[session management](https://developers.openai.com/api/docs/guides/live-conversations#managing-idle-sessions).
+### Session billing
 
-**Default validation:** the November 23, 2026 live comparison passed for both
-models over PCM and PCMU, including delegation, order corrections, English/Spanish
-transcripts, output recovery, and graceful close. BookingDesk's full recorded-caller
-workflow also passed with 1.1, including explicit approval, exactly one booking,
-and a simulated reminder. These results support adopting 1.1 as the OpenAI default;
-they do not establish a measured voice-quality or latency advantage. Continue to
-evaluate pronunciation, noisy calls, and concurrency on your workload, and retain
-`model: "gpt-live-1"` as a rollback. Provider selection and backend models are unchanged.
+OpenAI bills voice sessions by duration and bills backend model and tool usage
+separately. Standby pricing requires a WebRTC connection to OpenAI. Parlora's
+OpenAI adapter uses WebSocket even when the caller connects through the browser
+channel over WebRTC. See [OpenAI's GPT-Live pricing](https://developers.openai.com/api/docs/models/gpt-live-1.1#pricing).
 
 ## Voice selection
 

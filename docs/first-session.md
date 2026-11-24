@@ -1,9 +1,8 @@
 # Your first working session
 
-This tutorial creates a complete local voice application. Its only business
-operation is a read-only lookup of a demo shop's opening hours. You need a working
-microphone/speakers and an OpenAI key with access to `gpt-live-1.1`. No TypeSafe key,
-backend language model, database, or custom application modules are needed.
+Build a small voice app that tells callers when a demo shop is open. You'll need
+a microphone, speakers or headphones, and an OpenAI API key with access to
+`gpt-live-1.1`. A Jido action returns the shop's hours from a fixed demo record.
 
 ## 1. Create the host application
 
@@ -20,14 +19,13 @@ In the new application's `mix.exs`, replace `deps/0` with:
 ```elixir
 defp deps do
   [
-    {:parlora, "~> 0.6.0"},
+    {:parlora, "~> 0.7.0"},
     {:jido, "~> 2.4.0"}
   ]
 end
 ```
 
 Use a compatible Elixir/OTP pair from the [requirements guide](beam-compatibility.md).
-This new host uses the runtime you select for it.
 
 ## 2. Configure the build before compiling
 
@@ -194,17 +192,16 @@ Jido completion data into verified Parlora facts and a spoken summary.
 
 ## 4. Start talking
 
-Supply `OPENAI_API_KEY` in this shell using your secret management, then run:
+Set `OPENAI_API_KEY` in the shell where you'll run the demo. Then run the app.
 
 ```sh
 mix run -r first_voice.exs -e 'FirstVoice.run()'
 ```
 
 Allow microphone access if prompted. When the terminal prints **Ready**, ask
-“What are the shop's opening hours?” You should hear that the demo shop is open
-Monday to Friday, 09:00 to 17:00. There is no automatic greeting; speak after
-Ready. The session closes automatically after two minutes. Interrupt the Mix
-process to exit sooner; normal application shutdown releases its supervised sessions.
+“What are the shop's opening hours?” The demo shop is open Monday to Friday,
+09:00 to 17:00. The session closes after two minutes. To stop sooner, interrupt
+the Mix process.
 
 Use headphones to reduce feedback. LocalAudio uses your default input/output
 devices. For device selection, call `Parlora.Channels.LocalAudio.devices/0`, then
@@ -228,8 +225,9 @@ as described in the [provider guides](openai-provider.md).
   and confirm `native_opus: false` is in the **host** configuration read at compile time.
 - If microphone access or device opening fails, check OS permissions and device
   discovery. Local audio on Linux needs a service compatible with PulseAudio.
-- If the provider rejects startup, check model access and the credential. The
-  example handles failure/closure; do not treat a returned session PID as Ready.
+- If the provider rejects startup, check that your OpenAI key can start a
+  `gpt-live-1.1` session. See the [OpenAI provider guide](openai-provider.md#upgrade-from-gpt-live-1)
+  for model selection and prompt changes.
 
 Once this works, use [Getting started](using-parlora.md) for session controls,
 application context, browser/phone channels, and session ownership in applications that stay running.

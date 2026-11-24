@@ -60,13 +60,16 @@ Jido action.
 Install Parlora from [Hex](https://hex.pm/packages/parlora):
 
 ```elixir
-{:parlora, "~> 0.6.0"}
+{:parlora, "~> 0.7.0"}
 ```
 
 You need **Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the
 [native prerequisites](docs/beam-compatibility.md). The tutorial uses your local
 microphone and speakers, builds only the native bindings needed for local audio,
 and includes the context policy, event loop, and session cleanup.
+
+Upgrading from 0.6.x? See the [OpenAI upgrade notes](CHANGELOG.md#openai-upgrade-notes)
+for model access, prompt changes, and how to keep GPT-Live-1.
 
 Upgrading from 0.5.x? See the [0.6.0 upgrade notes](CHANGELOG.md#phonic-upgrade-notes)
 for the Phonic default and rollback option.
@@ -98,7 +101,7 @@ phone calls. Use it to explore these workflows after your first working session.
 
 ## Explore the BookingDesk example
 
-[BookingDesk](https://github.com/hfiguera/parlora/tree/v0.6.0/examples/booking_desk)
+[BookingDesk](https://github.com/hfiguera/parlora/tree/v0.7.0/examples/booking_desk)
 is a fictional clinic receptionist with microphone and scripted replay modes.
 It demonstrates conversation during Jido work, date corrections, patient record
 matching, insurance review, explicit booking approval, and simulated text reminders.

@@ -1,17 +1,35 @@
 # Changelog
 
-## Unreleased
+## 0.7.0
 
-- Preserve a BookingDesk OpenAI approval across a short neutral acknowledgment,
-  revalidating the original reply and exact proposal without relaxing consent checks.
-- Recover interrupted BookingDesk OpenAI confirmations from verified saved receipts
-  without retrying booking operations or changing other providers' behavior.
-- Make `gpt-live-1.1` the OpenAI provider's default. Pass `model: "gpt-live-1"`
-  to retain 1.0; output recovery preserves either selection. Other providers and
-  backend models retain their existing defaults.
-- Update BookingDesk's OpenAI handoff instructions for 1.1, automatically retaining
-  token-based handoffs for explicit 1.0 sessions. Recorded runs report the selected
-  OpenAI model. See the [OpenAI guide](docs/openai-provider.md) for upgrade details.
+Parlora now defaults to GPT-Live-1.1 for OpenAI voice sessions. This release
+also improves BookingDesk's handling of interrupted confirmations and text
+reminder consent, and updates dependencies to address security advisories.
+
+### OpenAI upgrade notes
+
+If you omit `model` when starting an OpenAI session, Parlora now selects
+`gpt-live-1.1`. If you supply your own prompt, use plain language to describe when
+the model should hand work to your backend. To keep GPT-Live-1 and its prompt,
+pass `model: "gpt-live-1"` in your provider options. See the
+[OpenAI provider guide](docs/openai-provider.md#upgrade-from-gpt-live-1).
+
+### Fixed
+
+- In BookingDesk's OpenAI calls, a short acknowledgment can follow explicit
+  booking approval while the app checks the original reply and proposal.
+- If the booking confirmation is interrupted, BookingDesk can read the saved
+  receipt again without creating a second booking.
+- When a caller repeats the last digits of the phone number on file and then
+  explicitly approves it, BookingDesk can confirm that destination. Text reminders
+  still require a separate opt-in and phone confirmation.
+
+### Security
+
+- Raise the minimum versions of Bandit and Plug to 1.15.0 and 1.20.4. Require
+  idna 8.x when an optional backend brings it in. See the
+  [Plug and idna updates](https://github.com/hfiguera/parlora/pull/35) and the
+  [Bandit update](https://github.com/hfiguera/parlora/pull/36).
 
 ## 0.6.0
 
