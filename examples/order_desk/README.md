@@ -96,9 +96,12 @@ PARLORA_PROVIDER=grok GROK_REASONING_EFFORT=high scripts/browser.sh
 PARLORA_PROVIDER=phonic scripts/browser.sh
 ```
 
-OpenAI uses `gpt-live-1.1`; Gemini uses `gemini-3.8-live`; Grok uses `grok-voice-3.0`.
-Grok reasoning accepts `high` (default) or `none`.
-Phonic uses the supported `phonic-1` provider. On macOS, the launcher reads
+OrderDesk uses the OpenAI default from its vendored Parlora package. That is
+`gpt-live-1.1` when you build the package from this checkout. Gemini uses
+`gemini-3.8-live` and Grok uses `grok-voice-3.0`. Set `GROK_REASONING_EFFORT` to
+`high` (the default) or `none`.
+
+Phonic defaults to `phonic-1.1`. On macOS, the launcher reads
 `parlora-phonic-development` from Keychain when `PHONIC_API_KEY` is absent.
 Refresh the vendored Parlora package first if it predates Phonic support.
 Phonic uses PCM24 internally, including conversion for phone audio. A lost

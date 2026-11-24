@@ -52,7 +52,7 @@ To select another speech provider, also export its key and set `PARLORA_PROVIDER
 | Provider | Speech model | Additional key |
 | --- | --- | --- |
 | `openai` (default) | `gpt-live-1.1` | None |
-| `phonic` | `phonic-1` | `PHONIC_API_KEY` |
+| `phonic` | `phonic-1.1` | `PHONIC_API_KEY` |
 | `grok` | `grok-voice-3.0` | `XAI_API_KEY` |
 | `gemini` | `gemini-3.8-live` | `GEMINI_API_KEY` |
 | `prism` | `prism` | `RIME_API_KEY` |
@@ -75,14 +75,16 @@ The same override is accepted by `BookingDesk.Run.run/3`. Recorded runs identify
 the selected OpenAI model. Gemini, Grok, Phonic and Prism retain their existing
 prompts and settings.
 
-If an OpenAI confirmation is interrupted, asking for its status or asking to repeat
-it recovers the saved receipt. The application does not book again. A text reminder
-still requires separate opt-in and phone-number confirmation.
+On an OpenAI call, a brief “okay” after “yes, please” can carry the original
+approval through while the app checks it against the current proposal. If you
+miss the booking confirmation, ask Ava to repeat it. Ava can read the saved
+receipt again without making another booking.
 
-For OpenAI, a short acknowledgment after an explicit approval does not erase that
-approval while it is being validated. The original reply and exact proposal are
-rechecked; conditions, refusals, corrections and bare acknowledgments cannot supply
-consent. Other providers retain their existing approval behavior.
+Text reminders in this demo are simulated. After you opt in, Ava asks whether
+the number on file is the right destination. On OpenAI calls, you can repeat
+the ending as part of an explicit answer, such as “188? Yes, that's my number”
+after Ava reads `0188`. A replacement number still needs a full readback and
+separate confirmation.
 
 Phonic sessions inherit Parlora's native conversation defaults:
 listening acknowledgments at aggressiveness `0.3`, speech before tool calls with

@@ -1,9 +1,8 @@
 # Your first working session
 
-This tutorial creates a complete local voice application. Its only business
-operation is a read-only lookup of a demo shop's opening hours. You need a working
-microphone/speakers and an OpenAI key with access to `gpt-live-1.1`. No TypeSafe key,
-backend language model, database, or custom application modules are needed.
+Build a small voice app that tells callers when a demo shop is open. You'll need
+a microphone, speakers or headphones, and an OpenAI API key. A Jido action
+returns the shop's hours from a fixed demo record.
 
 ## 1. Create the host application
 
@@ -27,7 +26,10 @@ end
 ```
 
 Use a compatible Elixir/OTP pair from the [requirements guide](beam-compatibility.md).
-This new host uses the runtime you select for it.
+With the published Parlora 0.6.x dependency above, your key needs access to
+`gpt-live-1`. If you're running the newer adapter from this checkout, your key
+needs access to its default, `gpt-live-1.1`. See the [OpenAI provider guide](openai-provider.md#upgrade-from-gpt-live-1)
+for model selection and handoff instructions.
 
 ## 2. Configure the build before compiling
 
@@ -194,17 +196,16 @@ Jido completion data into verified Parlora facts and a spoken summary.
 
 ## 4. Start talking
 
-Supply `OPENAI_API_KEY` in this shell using your secret management, then run:
+Set `OPENAI_API_KEY` in the shell where you'll run the demo. Then run the app.
 
 ```sh
 mix run -r first_voice.exs -e 'FirstVoice.run()'
 ```
 
 Allow microphone access if prompted. When the terminal prints **Ready**, ask
-“What are the shop's opening hours?” You should hear that the demo shop is open
-Monday to Friday, 09:00 to 17:00. There is no automatic greeting; speak after
-Ready. The session closes automatically after two minutes. Interrupt the Mix
-process to exit sooner; normal application shutdown releases its supervised sessions.
+“What are the shop's opening hours?” The demo shop is open Monday to Friday,
+09:00 to 17:00. The session closes after two minutes. To stop sooner, interrupt
+the Mix process.
 
 Use headphones to reduce feedback. LocalAudio uses your default input/output
 devices. For device selection, call `Parlora.Channels.LocalAudio.devices/0`, then

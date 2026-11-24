@@ -68,6 +68,10 @@ You need **Elixir 1.18+ (1.x)**, **Erlang/OTP 27+**, and the
 microphone and speakers, builds only the native bindings needed for local audio,
 and includes the context policy, event loop, and session cleanup.
 
+Using the OpenAI provider from this checkout? See the
+[GPT-Live-1.1 upgrade notes](docs/openai-provider.md#upgrade-from-gpt-live-1)
+for model access, prompt changes, and how to keep GPT-Live-1.
+
 Upgrading from 0.5.x? See the [0.6.0 upgrade notes](CHANGELOG.md#phonic-upgrade-notes)
 for the Phonic default and rollback option.
 
